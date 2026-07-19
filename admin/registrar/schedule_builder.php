@@ -149,6 +149,7 @@ foreach ($subjects as $s) {
     $sem = $s['semester'] ?: '1';
     $jsSubjects[] = [
         'id' => $s['id'],
+        'subject_id' => $s['subject_id'],
         'subject_code' => $s['subject_code'],
         'subject_name' => $s['subject_name'],
         'day' => $s['day'],
@@ -427,13 +428,14 @@ if (empty($semesters)) $semesters = ['1'];
                         <select class="form-select" id="edit_mode">
                             <option value="Face-to-Face">Face-to-Face</option>
                             <option value="Online">Online</option>
-                            <option value="Hybrid">Hybrid</option>
                         </select>
                     </div>
                 </form>
             </div>
             <div class="modal-footer border-top-0 pt-0">
                 <button type="button" class="btn btn-danger me-auto" onclick="unassignSubject()">Unassign</button>
+                <button type="button" class="btn btn-outline-danger me-2 d-none" id="btnDeleteSession" onclick="deleteSession()">Delete Split</button>
+                <button type="button" class="btn btn-secondary me-2" onclick="splitSession()">Split / Duplicate</button>
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary px-4" onclick="saveEdit()">Apply</button>
             </div>
@@ -445,10 +447,12 @@ if (empty($semesters)) $semesters = ['1'];
 const type = '<?= $type ?>';
 const sectionId = <?= $sectionId ?>;
 let subjects = <?= json_encode($jsSubjects) ?>;
+const CAL_START_HOUR = 7;
 let currentSemester = '<?= $semesters[0] ?? "1" ?>';
+let deleted_ids = [];
+let newIdCounter = -1;
 
 // Config
-const CAL_START_HOUR = 7; 
 const CAL_PIXELS_PER_HOUR = 60;
 
 let editModal = null;
@@ -581,7 +585,53 @@ function openEdit(id) {
     document.getElementById('edit_instructor').value = sub.instructor || '';
     document.getElementById('edit_mode').value = sub.delivery_mode || 'Face-to-Face';
     
+    const count = subjects.filter(s => s.subject_code === sub.subject_code).length;
+    const delBtn = document.getElementById('btnDeleteSession');
+    if (delBtn) {
+        delBtn.classList.toggle('d-none', count <= 1);
+    }
+    
     editModal.show();
+}
+
+function splitSession() {
+    const id = parseInt(document.getElementById('edit_id').value);
+    const sub = subjects.find(s => s.id === id);
+    if (!sub) return;
+    
+    // Create a duplicate with a new negative ID
+    let newSub = JSON.parse(JSON.stringify(sub));
+    newSub.id = newIdCounter--;
+    newSub.day = 'TBA';
+    newSub.start_time = '00:00:00';
+    newSub.end_time = '00:00:00';
+    newSub.conflict = false;
+    
+    subjects.push(newSub);
+    detectLocalConflicts();
+    render();
+    editModal.hide();
+}
+
+function deleteSession() {
+    const id = parseInt(document.getElementById('edit_id').value);
+    
+    const sub = subjects.find(s => s.id === id);
+    if (!sub) return;
+    
+    const count = subjects.filter(s => s.subject_code === sub.subject_code).length;
+    if (count <= 1) {
+        alert("You cannot delete the only session for this subject. Use 'Unassign' instead.");
+        return;
+    }
+    
+    if (confirm("Are you sure you want to permanently delete this split session?")) {
+        if (id > 0) deleted_ids.push(id);
+        subjects = subjects.filter(s => s.id !== id);
+        detectLocalConflicts();
+        render();
+        editModal.hide();
+    }
 }
 
 function saveEdit() {
@@ -710,6 +760,7 @@ function saveSchedule() {
     payload.append('type', type);
     payload.append('section_id', sectionId);
     payload.append('schedules', JSON.stringify(subjects));
+    payload.append('deleted_ids', JSON.stringify(deleted_ids));
     
     fetch('schedule_builder_process.php', {
         method: 'POST',

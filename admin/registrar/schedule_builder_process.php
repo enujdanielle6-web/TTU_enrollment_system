@@ -15,6 +15,7 @@ if ($action === 'save_schedule') {
     $type = $_POST['type'] ?? 'college';
     $sectionId = (int)($_POST['section_id'] ?? 0);
     $schedules = json_decode($_POST['schedules'] ?? '[]', true);
+    $deletedIds = json_decode($_POST['deleted_ids'] ?? '[]', true);
     
     if ($sectionId <= 0 || !is_array($schedules)) {
         echo json_encode(['success' => false, 'message' => 'Invalid payload.']);
@@ -60,8 +61,22 @@ if ($action === 'save_schedule') {
             WHERE id = ? AND ' . $secIdCol . ' = ?
         ');
         
+        $insertStmt = $pdo->prepare('
+            INSERT INTO ' . $table . ' (' . $secIdCol . ', subject_id, day, start_time, end_time, room, instructor, delivery_mode)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ');
+        
+        if (is_array($deletedIds) && !empty($deletedIds)) {
+            $delIn = str_repeat('?,', count($deletedIds) - 1) . '?';
+            $delStmt = $pdo->prepare('DELETE FROM ' . $table . ' WHERE id IN (' . $delIn . ') AND ' . $secIdCol . ' = ?');
+            $delParams = array_values($deletedIds);
+            $delParams[] = $sectionId;
+            $delStmt->execute($delParams);
+        }
+        
         foreach ($schedules as $sched) {
             $id = (int)$sched['id'];
+            $subjectId = (int)($sched['subject_id'] ?? 0);
             $day = !empty(trim($sched['day'] ?? '')) ? trim($sched['day']) : null;
             $start = !empty(trim($sched['start_time'] ?? '')) ? trim($sched['start_time']) : null;
             $end = !empty(trim($sched['end_time'] ?? '')) ? trim($sched['end_time']) : null;
@@ -89,7 +104,14 @@ if ($action === 'save_schedule') {
                 }
             }
             
-            $updateStmt->execute([$day, $start, $end, $room, $instructor, $mode, $id, $sectionId]);
+            if ($id <= 0) {
+                if ($subjectId <= 0) {
+                    throw new Exception("Invalid subject ID for new schedule session.");
+                }
+                $insertStmt->execute([$sectionId, $subjectId, $day, $start, $end, $room, $instructor, $mode]);
+            } else {
+                $updateStmt->execute([$day, $start, $end, $room, $instructor, $mode, $id, $sectionId]);
+            }
         }
         
         $pdo->commit();
