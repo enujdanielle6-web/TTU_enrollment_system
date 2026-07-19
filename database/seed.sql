@@ -18,16 +18,16 @@ INSERT INTO `system_settings` (`setting_key`, `setting_value`, `description`) VA
 -- --------------------------------------------------------
 -- 2. USERS (Admin & Staff Accounts)
 -- Password for all accounts: password123
--- Hash: $2y$10$X8C5O.Nn48R.hZtFfD6nO.ZJ/a69tD.D90n4y67t20K5H6K5rG3S6
+-- Hash: $2y$10$6S0PPYgyk.V.8z46rpQwLevBWrklaAUhDzSzZAJU56dwA9Q2MMvni
 -- --------------------------------------------------------
 TRUNCATE TABLE `users`;
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `password`, `role`, `department`, `is_active`) VALUES
-(1, 'System', 'Admin', 'admin@ttu.edu.ph', '$2y$10$X8C5O.Nn48R.hZtFfD6nO.ZJ/a69tD.D90n4y67t20K5H6K5rG3S6', 'superadmin', 'IT', 1),
-(2, 'Admissions', 'Officer', 'admissions@ttu.edu.ph', '$2y$10$X8C5O.Nn48R.hZtFfD6nO.ZJ/a69tD.D90n4y67t20K5H6K5rG3S6', 'admissions', 'Admissions', 1),
-(3, 'Registrar', 'Head', 'registrar@ttu.edu.ph', '$2y$10$X8C5O.Nn48R.hZtFfD6nO.ZJ/a69tD.D90n4y67t20K5H6K5rG3S6', 'admin', 'Registrar', 1),
-(4, 'Finance', 'Cashier', 'cashier@ttu.edu.ph', '$2y$10$X8C5O.Nn48R.hZtFfD6nO.ZJ/a69tD.D90n4y67t20K5H6K5rG3S6', 'cashier', 'Finance', 1),
-(5, 'Scholarship', 'Coordinator', 'scholarship@ttu.edu.ph', '$2y$10$X8C5O.Nn48R.hZtFfD6nO.ZJ/a69tD.D90n4y67t20K5H6K5rG3S6', 'scholarship', 'Student Affairs', 1),
-(6, 'Jane', 'Doe', 'jane.doe@example.com', '$2y$10$X8C5O.Nn48R.hZtFfD6nO.ZJ/a69tD.D90n4y67t20K5H6K5rG3S6', 'applicant', NULL, 1);
+(1, 'System', 'Admin', 'admin@ttu.edu.ph', '$2y$10$6S0PPYgyk.V.8z46rpQwLevBWrklaAUhDzSzZAJU56dwA9Q2MMvni', 'superadmin', 'IT', 1),
+(2, 'Admissions', 'Officer', 'admissions@ttu.edu.ph', '$2y$10$6S0PPYgyk.V.8z46rpQwLevBWrklaAUhDzSzZAJU56dwA9Q2MMvni', 'admissions', 'Admissions', 1),
+(3, 'Registrar', 'Head', 'registrar@ttu.edu.ph', '$2y$10$6S0PPYgyk.V.8z46rpQwLevBWrklaAUhDzSzZAJU56dwA9Q2MMvni', 'admin', 'Registrar', 1),
+(4, 'Finance', 'Cashier', 'cashier@ttu.edu.ph', '$2y$10$6S0PPYgyk.V.8z46rpQwLevBWrklaAUhDzSzZAJU56dwA9Q2MMvni', 'cashier', 'Finance', 1),
+(5, 'Scholarship', 'Coordinator', 'scholarship@ttu.edu.ph', '$2y$10$6S0PPYgyk.V.8z46rpQwLevBWrklaAUhDzSzZAJU56dwA9Q2MMvni', 'scholarship', 'Student Affairs', 1),
+(6, 'Jane', 'Doe', 'jane.doe@example.com', '$2y$10$6S0PPYgyk.V.8z46rpQwLevBWrklaAUhDzSzZAJU56dwA9Q2MMvni', 'applicant', NULL, 1);
 
 -- --------------------------------------------------------
 -- 3. SUBJECTS
