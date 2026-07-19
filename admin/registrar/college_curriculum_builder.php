@@ -296,8 +296,8 @@ require_once __DIR__ . '/../../components/header.php';
                 <div class="col-6">
                     <label class="form-label small fw-semibold text-dark">Semester <span class="text-danger">*</span></label>
                     <select class="form-select bg-light" name="semester" required>
-                        <option value="First Semester">First Semester</option>
-                        <option value="Second Semester">Second Semester</option>
+                        <option value="First">First Semester</option>
+                        <option value="Second">Second Semester</option>
                         <option value="Summer">Summer</option>
                     </select>
                 </div>
@@ -340,8 +340,8 @@ require_once __DIR__ . '/../../components/header.php';
             <div class="mb-3">
                 <label class="form-label small fw-semibold text-dark">Semester</label>
                 <select class="form-select bg-light" name="semester" id="edit_sub_sem" required>
-                    <option value="First Semester">First Semester</option>
-                    <option value="Second Semester">Second Semester</option>
+                    <option value="First">First Semester</option>
+                    <option value="Second">Second Semester</option>
                     <option value="Summer">Summer</option>
                 </select>
             </div>
