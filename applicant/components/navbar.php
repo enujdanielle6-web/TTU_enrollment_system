@@ -148,8 +148,8 @@ $isApprovedOrEnrolled = $hasApplication && in_array($navAppStatus, ['approved', 
 
         <?php if ($isApprovedOrEnrolled): ?>
             <li class="nav-item">
-                <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-dark hover-bg-light" href="print_slip.php" target="_blank">
-                    <i class="bi bi-printer me-3 text-muted"></i> Admission Slip
+                <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-dark hover-bg-light" href="print_slip.php">
+                  <i class="bi bi-printer me-2 text-primary"></i> Admission Slip
                 </a>
             </li>
         <?php endif; ?>

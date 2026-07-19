@@ -196,8 +196,8 @@ require_once __DIR__ . '/../components/header.php';
                     </div>
                   <?php elseif (in_array($application['status'], ['approved', 'enrolled'], true)): ?>
                     <div class="mt-4">
-                      <a href="print_slip.php" target="_blank" class="btn btn-success fw-medium shadow-sm w-100">
-                        <i class="bi bi-printer-fill me-2"></i> Print Admission Slip
+                      <a href="print_slip.php" class="btn btn-success fw-medium shadow-sm w-100">
+                        <i class="bi bi-printer me-2"></i> View Admission Slip
                       </a>
                     </div>
                   <?php endif; ?>
