@@ -26,7 +26,7 @@ require_once __DIR__ . '/../components/header.php';
             <div class="school-logo mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem; border-radius: 16px; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%); box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);">
               <i class="bi bi-box-arrow-in-right"></i>
             </div>
-            <h1 class="h4 mb-2 fw-bold text-dark">Welcome Back</h1>
+            <h1 class="h4 mb-2 fw-bold text-dark">TRIPLE T UNIVERSITY</h1>
             <p class="text-muted mb-0 small">Login to continue your enrollment account.</p>
           </div>
 
@@ -74,7 +74,7 @@ require_once __DIR__ . '/../components/header.php';
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('cashier@ttu.edu.ph', 'password123')">Cashier</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admissions@ttu.edu.ph', 'password123')">Admissions</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scholarship@ttu.edu.ph', 'password123')">Scholarship</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('applicant@example.com', 'password123')">Applicant</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('jane.doe@example.com', 'password123')">Applicant</button>
                 </div>
             </div>
             
