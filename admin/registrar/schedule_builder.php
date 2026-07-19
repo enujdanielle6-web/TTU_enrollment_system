@@ -451,7 +451,7 @@ let currentSemester = '<?= $semesters[0] ?? "1" ?>';
 const CAL_START_HOUR = 7; 
 const CAL_PIXELS_PER_HOUR = 60;
 
-const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+let editModal = null;
 
 function render() {
     // Clear all
@@ -735,6 +735,7 @@ function saveSchedule() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    editModal = new bootstrap.Modal(document.getElementById('editModal'));
     detectLocalConflicts();
     render();
 });
