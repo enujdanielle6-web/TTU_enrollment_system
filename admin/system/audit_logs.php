@@ -80,7 +80,7 @@ $totalPages = ceil($totalLogs / $limit);
         <p class="text-muted mb-0">Monitor applicant activities, form submissions, and administrative changes.</p>
       </div>
       <div>
-        <a href="dashboard.php" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+        <a href="../dashboard.php" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
           <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
         </a>
       </div>

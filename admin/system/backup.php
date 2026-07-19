@@ -27,7 +27,7 @@ require_once __DIR__ . '/../components/navbar.php';
         <p class="text-muted mb-0">Securely export the enrollment database or restore from a previous state.</p>
       </div>
       <div>
-        <a href="dashboard.php" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
+        <a href="../dashboard.php" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
           <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
         </a>
       </div>
