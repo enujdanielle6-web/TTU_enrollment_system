@@ -651,7 +651,7 @@ require_once __DIR__ . '/../components/navbar.php';
 
 <?php if (($app['student_type'] ?? '') === 'Irregular'): 
     // Fetch all active subjects to show in the dropdown
-    $stmtAllSubs = $pdo->query("SELECT id, subject_code, subject_name, units FROM subjects WHERE is_active = 1 ORDER BY subject_code ASC");
+    $stmtAllSubs = $pdo->query("SELECT id, subject_code, subject_name, units FROM subjects WHERE status = 1 ORDER BY subject_code ASC");
     $allSubjects = $stmtAllSubs->fetchAll(PDO::FETCH_ASSOC);
     
     // Get currently enrolled subject IDs
