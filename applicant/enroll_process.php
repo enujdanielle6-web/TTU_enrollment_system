@@ -57,10 +57,10 @@ $lastSchoolAttended = trim((string) ($_POST['last_school_attended'] ?? ''));
 $lastSchoolAddress = trim((string) ($_POST['last_school_address'] ?? ''));
 $previousSchoolLevel = trim((string) ($_POST['previous_school_level'] ?? ''));
 $previousStrandCourse = trim((string) ($_POST['previous_strand_course'] ?? ''));
-$academicYearFrom = trim((string) ($_POST['academic_year_from'] ?? ''));
-$academicYearTo = trim((string) ($_POST['academic_year_to'] ?? ''));
+$lastSchoolYear = trim((string) ($_POST['last_school_year'] ?? ''));
 $previousSchoolStatus = trim((string) ($_POST['previous_school_status'] ?? ''));
-$lastSchoolYear = $academicYearTo; // Automatically inferred from academicYearTo
+$academicYearFrom = null;
+$academicYearTo = null;
 $lrn = trim((string) ($_POST['lrn'] ?? ''));
 
 $academicLevel = trim((string) ($_POST['academic_level'] ?? ''));
@@ -80,6 +80,8 @@ $specialNeeds = trim((string) ($_POST['special_needs'] ?? ''));
 $medicalConditions = trim((string) ($_POST['medical_conditions'] ?? ''));
 $allergies = trim((string) ($_POST['allergies'] ?? ''));
 $selectedSubjects = $_POST['selected_subjects'] ?? [];
+
+$scholarshipId = (int)($_POST['scholarship_id'] ?? 0);
 
 $errors = [];
 $validGenders = ['male', 'female', 'other'];
@@ -390,6 +392,7 @@ $oldData = [
     'medical_conditions' => $medicalConditions,
     'allergies' => $allergies,
     'section_id' => $sectionId,
+    'scholarship_id' => $scholarshipId,
     'selected_subjects' => []
 ];
 
@@ -416,7 +419,7 @@ if (!empty($errors)) {
 
 try {
     if ($isUpdate) {
-        $newStatus = $existing['status'] === 'correction_required' ? 'under_review' : 'pending';
+        $newStatus = 'under_review';
         
         $updateQuery = '
             UPDATE applications SET 
@@ -600,6 +603,31 @@ try {
 
     // Note: Curriculum-based subject generation has been moved to the Registrar's application_process.php.
     // The applicant simply registers their intent to enroll here.
+
+    // Handle Scholarship Application Processing
+    if ($scholarshipId > 0) {
+        $scholCheck = $pdo->prepare('SELECT name FROM scholarships WHERE id = :id AND is_active = 1');
+        $scholCheck->execute(['id' => $scholarshipId]);
+        $scholarship = $scholCheck->fetch();
+        
+        if ($scholarship) {
+            $appCheck = $pdo->prepare('SELECT id, status FROM scholarship_applications WHERE user_id = :user_id AND scholarship_id = :schol_id LIMIT 1');
+            $appCheck->execute(['user_id' => $userId, 'schol_id' => $scholarshipId]);
+            $existingScholApp = $appCheck->fetch();
+            
+            if (!$existingScholApp) {
+                $insSchol = $pdo->prepare('INSERT INTO scholarship_applications (user_id, scholarship_id, status) VALUES (:user_id, :schol_id, "pending")');
+                $insSchol->execute(['user_id' => $userId, 'schol_id' => $scholarshipId]);
+                
+                $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, :icon, :title, :description)')->execute([
+                    'user_id' => $userId,
+                    'icon' => 'bi-award text-warning',
+                    'title' => 'Scholarship Application Submitted',
+                    'description' => 'You applied for the ' . $scholarship['name'] . ' scholarship alongside your enrollment.'
+                ]);
+            }
+        }
+    }
 
     header('Location: status.php');
     exit;

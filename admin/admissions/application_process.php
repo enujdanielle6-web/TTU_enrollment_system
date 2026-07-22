@@ -118,9 +118,60 @@ try {
     }
 
     // Fetch old application state
-    $oldAppStmt = $pdo->prepare('SELECT academic_level, status, admin_feedback, internal_notes FROM applications WHERE id = :id');
+    $oldAppStmt = $pdo->prepare('SELECT document_submission_method, academic_level, status, admin_feedback, internal_notes FROM applications WHERE id = :id');
     $oldAppStmt->execute(['id' => $appId]);
     $oldApp = $oldAppStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Enforce Business Rules (Tasks 2 & 5)
+    
+    // Task 5: Lock workflow after assessment
+    if (in_array($status, ['pending', 'correction_required'], true)) {
+        $assCheckStmt = $pdo->prepare('SELECT id FROM student_assessments WHERE application_id = :app_id LIMIT 1');
+        $assCheckStmt->execute(['app_id' => $appId]);
+        if ($assCheckStmt->fetch()) {
+            $_SESSION['admin_error'] = 'Cannot change status to ' . formatApplicationStatus($status) . ': An assessment has already been generated.';
+            header('Location: application_detail.php?id=' . $appId);
+            exit;
+        }
+    }
+
+    // Task 2: Prevent approval if there are outstanding document corrections
+    if ($status === 'approved' && $oldApp['document_submission_method'] !== 'on_campus') {
+        $docCheckStmt = $pdo->prepare('SELECT id, status FROM application_documents WHERE application_id = :app_id');
+        $docCheckStmt->execute(['app_id' => $appId]);
+        $docs = $docCheckStmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $hasUnverified = false;
+        foreach ($docs as $doc) {
+            $docId = $doc['id'];
+            $newDocStatus = $_POST['doc_status'][$docId] ?? $doc['status'];
+            if ($newDocStatus !== 'verified') {
+                $hasUnverified = true;
+                break;
+            }
+        }
+        
+        if (empty($docs) || $hasUnverified) {
+            $_SESSION['admin_error'] = 'Cannot approve application: All documents must be uploaded and verified first.';
+            header('Location: application_detail.php?id=' . $appId);
+            exit;
+        }
+
+        // Scholarship Integration: Prevent approval if scholarship is pending
+        $scholCheckStmt = $pdo->prepare('
+            SELECT status FROM scholarship_applications 
+            WHERE user_id = :user_id 
+            ORDER BY created_at DESC LIMIT 1
+        ');
+        $scholCheckStmt->execute(['user_id' => $userId]);
+        $latestScholarship = $scholCheckStmt->fetch();
+        
+        if ($latestScholarship && in_array($latestScholarship['status'], ['pending', 'under_review'])) {
+            $_SESSION['admin_error'] = 'Cannot approve application: The applicant has a pending scholarship application that must be processed first.';
+            header('Location: application_detail.php?id=' . $appId);
+            exit;
+        }
+    }
 
     // 0. Process Section Assignment
     $assignSectionId = (int)($_POST['assign_section'] ?? 0);
@@ -274,6 +325,16 @@ try {
         }
     }
 
+    // 1.3 Auto-create Health Record if Approved
+    if ($status === 'approved') {
+        $healthCheckStmt = $pdo->prepare('SELECT id FROM health_records WHERE application_id = :app_id LIMIT 1');
+        $healthCheckStmt->execute(['app_id' => $appId]);
+        if (!$healthCheckStmt->fetch()) {
+            $healthInsertStmt = $pdo->prepare('INSERT INTO health_records (user_id, application_id, status) VALUES (:user_id, :app_id, "pending")');
+            $healthInsertStmt->execute(['user_id' => $userId, 'app_id' => $appId]);
+        }
+    }
+
     // 1.5. Update Individual Document verification statuses and comments
     $docStatuses = $_POST['doc_status'] ?? [];
     $docFeedbacks = $_POST['doc_feedback'] ?? [];
@@ -318,7 +379,8 @@ try {
     }
 
     // 2. Process Assessment Generation
-    $generateAssessment = (bool)($_POST['generate_assessment'] ?? false);
+    // Automatically generate assessment if status is 'approved'
+    $generateAssessment = ($status === 'approved');
     
     if ($generateAssessment) {
         // Check if an assessment already exists
@@ -376,24 +438,58 @@ try {
                 
                 $totalAmount = $tuitionFee + $miscFee + $regFee + $labFee + $otherFees;
 
+                // Check for approved scholarship
+                $discountAmount = 0.00;
+                $scholarshipId = null;
+                $scholCheck = $pdo->prepare('
+                    SELECT sa.scholarship_id, s.discount_type, s.discount_value 
+                    FROM scholarship_applications sa 
+                    JOIN scholarships s ON sa.scholarship_id = s.id 
+                    WHERE sa.user_id = :user_id AND sa.status = "approved" 
+                    ORDER BY sa.created_at DESC LIMIT 1
+                ');
+                $scholCheck->execute(['user_id' => $userId]);
+                $approvedSchol = $scholCheck->fetch();
+                
+                if ($approvedSchol) {
+                    $scholarshipId = $approvedSchol['scholarship_id'];
+                    $discountValue = (float)$approvedSchol['discount_value'];
+                    if ($approvedSchol['discount_type'] === 'percentage') {
+                        $discountAmount = $totalAmount * ($discountValue / 100);
+                    } else {
+                        $discountAmount = $discountValue;
+                    }
+                }
+
+                $netAmount = max(0, $totalAmount - $discountAmount);
+
                 $insertAssStmt = $pdo->prepare('
                     INSERT INTO student_assessments 
-                    (user_id, application_id, fee_template_id, tuition_fee, miscellaneous_fee, registration_fee, laboratory_fee, other_fees, total_amount, discount_amount, net_amount)
+                    (user_id, application_id, fee_template_id, scholarship_id, tuition_fee, miscellaneous_fee, registration_fee, laboratory_fee, other_fees, total_amount, discount_amount, net_amount)
                     VALUES 
-                    (:user_id, :app_id, :fee_id, :tuition, :misc, :reg, :lab, :other, :total_amount, 0, :net_amount)
+                    (:user_id, :app_id, :fee_id, :scholarship_id, :tuition, :misc, :reg, :lab, :other, :total_amount, :discount_amount, :net_amount)
                 ');
                 $insertAssStmt->execute([
                     'user_id' => $userId,
                     'app_id' => $appId,
                     'fee_id' => $feeTemplateId,
+                    'scholarship_id' => $scholarshipId,
                     'tuition' => $tuitionFee,
                     'misc' => $miscFee,
                     'reg' => $regFee,
                     'lab' => $labFee,
                     'other' => $otherFees,
                     'total_amount' => $totalAmount,
-                    'net_amount' => $totalAmount
+                    'discount_amount' => $discountAmount,
+                    'net_amount' => $netAmount
                 ]);
+                
+                // If there's an approved scholarship, add it to student_scholarships if not exists
+                if ($scholarshipId) {
+                    $assessmentId = $pdo->lastInsertId();
+                    $insertStuSchol = $pdo->prepare('INSERT INTO student_scholarships (assessment_id, scholarship_id) VALUES (:assessment_id, :scholarship_id)');
+                    $insertStuSchol->execute(['assessment_id' => $assessmentId, 'scholarship_id' => $scholarshipId]);
+                }
                 
                 // Log Assessment Generation
                 $logDocStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, :icon, :title, :description)');

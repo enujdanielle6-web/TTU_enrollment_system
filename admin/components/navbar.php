@@ -24,13 +24,19 @@ $baseAdminUrl = substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'
     <nav class="flex-grow-1 p-3 overflow-y-auto">
       <?php if (hasPermission(['applications.view_queue', 'medical.review'])): ?>
       <div class="small fw-bold text-muted text-uppercase mb-2 px-3">Admissions</div>
+      <?php endif; ?>
+      
+      <?php if (hasPermission('applications.view_queue')): ?>
       <a class="nav-link d-flex align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'admissions_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>admissions/admissions_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> Dashboard
       </a>
       <a class="nav-link d-flex align-items-center gap-3 <?= $current_page === 'review.php' || $current_page === 'application_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>admissions/review.php">
         <i class="bi bi-inbox fs-5"></i> Applications
       </a>
-      <a class="nav-link d-flex align-items-center gap-3 <?= $current_page === 'medical_clearance.php' || $current_page === 'medical_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>admissions/medical_clearance.php">
+      <?php endif; ?>
+      
+      <?php if (hasPermission('medical.review')): ?>
+      <a class="nav-link d-flex align-items-center gap-3 <?= $current_page === 'medical_clearance.php' || $current_page === 'medical_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>health_officer/medical_clearance.php">
         <i class="bi bi-heart-pulse fs-5"></i> Medical Clearance
       </a>
       <?php endif; ?>
@@ -142,6 +148,7 @@ $baseAdminUrl = substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'
                       'admissions' => 'Admissions Officer',
                       'scholarship' => 'Scholarship Officer',
                       'cashier' => 'Finance Officer',
+                      'health_officer' => 'Health Officer',
                       default => 'Administrator'
                   };
               }

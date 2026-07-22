@@ -16,7 +16,7 @@ $documents = [];
 
 try {
     $statement = $pdo->prepare(
-        'SELECT id, reference_number, document_submission_method, status 
+        'SELECT id, reference_number, document_submission_method, status, academic_level, student_type
          FROM applications 
          WHERE user_id = :user_id 
          ORDER BY created_at DESC 
@@ -37,16 +37,45 @@ try {
     error_log('Documents fetch failed: ' . $exception->getMessage());
 }
 
-$requiredDocs = [
-    'PSA Birth Certificate' => 'Clear scanned copy of PSA Birth Certificate',
-    'Form 138' => 'Report Card / Form 138 from previous school year',
-    'Good Moral Certificate' => 'Certificate of Good Moral Character',
-    '2x2 Picture' => 'Recent 2x2 ID picture with white background'
-];
+$requiredDocs = [];
+
+if ($application) {
+    $level = $application['academic_level'];
+    $type = strtolower($application['student_type'] ?? '');
+    
+    if ($level === 'Senior High School') {
+        $requiredDocs = [
+            'Form 138' => 'Report Card (Form 138) from Grade 10',
+            'Good Moral Certificate' => 'Certificate of Good Moral Character',
+            'PSA Birth Certificate' => 'Clear scanned copy of PSA Birth Certificate',
+            '2x2 Picture' => 'Recent 2x2 ID picture with white background',
+            'NCAE Results' => 'NCAE Results (if applicable)'
+        ];
+    } else {
+        // College
+        if (strpos($type, 'transferee') !== false || strpos($type, 'irregular') !== false) {
+            $requiredDocs = [
+                'Transcript of Records' => 'Official Transcript of Records from previous institution',
+                'Honorable Dismissal' => 'Certificate of Honorable Dismissal / Transfer Credential',
+                'Good Moral Certificate' => 'Certificate of Good Moral Character',
+                'PSA Birth Certificate' => 'Clear scanned copy of PSA Birth Certificate',
+                '2x2 Picture' => 'Recent 2x2 ID picture with white background'
+            ];
+        } else {
+            // Freshmen / Regular
+            $requiredDocs = [
+                'Form 138' => 'Report Card (Form 138) from Grade 12',
+                'Good Moral Certificate' => 'Certificate of Good Moral Character',
+                'PSA Birth Certificate' => 'Clear scanned copy of PSA Birth Certificate',
+                '2x2 Picture' => 'Recent 2x2 ID picture with white background'
+            ];
+        }
+    }
+}
 
 $method = $application['document_submission_method'] ?? 'online';
 $appStatus = $application['status'] ?? 'pending';
-$isLocked = in_array($appStatus, ['approved', 'rejected', 'enrolled'], true);
+$isGloballyLocked = in_array($appStatus, ['approved', 'rejected', 'enrolled'], true);
 
 $successMsg = $_SESSION['doc_success'] ?? '';
 $errorMsg = $_SESSION['doc_error'] ?? '';
@@ -96,16 +125,18 @@ require_once __DIR__ . '/../components/header.php';
                 <?= getCsrfInput() ?>
                 <div>
                   <p class="mb-2 text-dark small fw-medium">How would you like to submit your documents?</p>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="submission_method" id="methodOnline" value="online" <?= $method === 'online' ? 'checked' : ''; ?> <?= $isLocked ? 'disabled' : ''; ?>>
-                    <label class="form-check-label" for="methodOnline">Online Upload</label>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="radio" name="submission_method" id="methodOnline" value="online" <?= $method === 'online' ? 'checked' : ''; ?> <?= $isGloballyLocked ? 'disabled' : ''; ?>>
+                    <label class="form-check-label fw-bold text-dark" for="methodOnline">Online Upload (Recommended)</label>
+                    <div class="small text-muted">Upload scanned copies of your documents right now. Faster processing.</div>
                   </div>
-                  <div class="form-check form-check-inline">
-                    <input class="form-check-input" type="radio" name="submission_method" id="methodOnCampus" value="on_campus" <?= $method === 'on_campus' ? 'checked' : ''; ?> <?= $isLocked ? 'disabled' : ''; ?>>
-                    <label class="form-check-label" for="methodOnCampus">On-Campus Submission</label>
+                  <div class="form-check">
+                    <input class="form-check-input" type="radio" name="submission_method" id="methodOnCampus" value="on_campus" <?= $method === 'on_campus' ? 'checked' : ''; ?> <?= $isGloballyLocked ? 'disabled' : ''; ?>>
+                    <label class="form-check-label fw-bold text-dark" for="methodOnCampus">On-Campus Submission</label>
+                    <div class="small text-muted">Bring the physical copies to the admissions office for verification.</div>
                   </div>
                 </div>
-                <?php if (!$isLocked): ?>
+                <?php if (!$isGloballyLocked): ?>
                   <button type="submit" class="btn btn-primary btn-sm px-4 rounded-pill">Save Preference</button>
                 <?php endif; ?>
               </form>
@@ -129,6 +160,13 @@ require_once __DIR__ . '/../components/header.php';
                   $hasDoc = isset($documents[$docName]);
                   $docStatus = $hasDoc ? $documents[$docName]['status'] : null;
                   $docId = $hasDoc ? $documents[$docName]['id'] : null;
+                  
+                  $canUpload = false;
+                  if (!$hasDoc) {
+                      $canUpload = !$isGloballyLocked;
+                  } else {
+                      $canUpload = in_array($appStatus, ['pending', 'correction_required'], true) && $docStatus !== 'verified';
+                  }
                 ?>
                 <div class="col-12">
                   <div class="island border <?= $hasDoc ? 'border-success' : 'border-light' ?>">
@@ -166,14 +204,16 @@ require_once __DIR__ . '/../components/header.php';
                           <a href="document_view.php?id=<?= $docId ?>" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
                             <i class="bi bi-eye"></i> View File
                           </a>
-                        <?php elseif (!$isLocked): ?>
-                          <form action="document_upload.php" method="POST" enctype="multipart/form-data" class="d-flex gap-2">
+                        <?php elseif ($canUpload): ?>
+                          <form action="document_upload.php" method="POST" enctype="multipart/form-data" class="upload-form">
                             <?= getCsrfInput() ?>
                             <input type="hidden" name="document_name" value="<?= htmlspecialchars($docName, ENT_QUOTES, 'UTF-8'); ?>">
-                            <input type="file" name="document_file" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png" required>
-                            <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 flex-shrink-0">Upload</button>
+                            <label class="btn btn-primary btn-sm rounded-pill px-3 mb-0 upload-btn w-100">
+                                <i class="bi bi-cloud-arrow-up me-1"></i> Select File
+                                <input type="file" name="document_file" class="d-none" accept=".pdf,.jpg,.jpeg,.png" required onchange="this.closest('form').submit(); this.closest('label').innerHTML = '<i class=\'bi bi-arrow-repeat spin\'></i> Uploading...';">
+                            </label>
                           </form>
-                          <small class="text-muted d-block mt-1" style="font-size: 0.7rem;">PDF, JPG, PNG up to 5MB</small>
+                          <small class="text-muted d-block mt-1 text-center" style="font-size: 0.7rem;">PDF, JPG, PNG (Max 5MB)</small>
                         <?php else: ?>
                           <span class="text-muted small"><i class="bi bi-lock-fill"></i> Locked</span>
                         <?php endif; ?>
@@ -191,5 +231,24 @@ require_once __DIR__ . '/../components/header.php';
     </div>
   </div>
 </main>
+
+<style>
+.spin {
+    display: inline-block;
+    animation: spin 1s infinite linear;
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+.upload-btn {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.upload-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13,110,253,0.15);
+}
+</style>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

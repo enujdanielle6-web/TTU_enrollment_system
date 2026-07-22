@@ -79,6 +79,28 @@ try {
     }
     
     $appId = (int) $app['id'];
+    $appStatus = $app['status'];
+
+    // Check if document already exists
+    $checkStmt = $pdo->prepare('SELECT id, file_path, status FROM application_documents WHERE application_id = :app_id AND document_name = :doc_name LIMIT 1');
+    $checkStmt->execute(['app_id' => $appId, 'doc_name' => $documentName]);
+    $existing = $checkStmt->fetch();
+
+    $isGloballyLocked = in_array($appStatus, ['approved', 'rejected', 'enrolled'], true);
+    
+    if (!$existing) {
+        if ($isGloballyLocked) {
+            $_SESSION['doc_error'] = 'Document upload is locked for your current application status.';
+            header('Location: documents.php');
+            exit;
+        }
+    } else {
+        if (!in_array($appStatus, ['pending', 'correction_required'], true) || $existing['status'] === 'verified') {
+            $_SESSION['doc_error'] = 'Replacing documents is locked for your current application status.';
+            header('Location: documents.php');
+            exit;
+        }
+    }
 
     // Generate secure filename
     $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
@@ -94,11 +116,7 @@ try {
     $targetPath = $uploadDir . $newFilename;
 
     if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-        // Check if document already exists to either update or insert
-        $checkStmt = $pdo->prepare('SELECT id, file_path FROM application_documents WHERE application_id = :app_id AND document_name = :doc_name LIMIT 1');
-        $checkStmt->execute(['app_id' => $appId, 'doc_name' => $documentName]);
-        $existing = $checkStmt->fetch();
-
+        // Use the $existing record we fetched earlier
         if ($existing) {
             // Remove old file if it exists
             if (!empty($existing['file_path'])) {

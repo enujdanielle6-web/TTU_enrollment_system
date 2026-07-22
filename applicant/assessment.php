@@ -144,53 +144,72 @@ require_once __DIR__ . '/../components/header.php';
               </div>
               <?php endif; ?>
 
-              <div class="island minimal-card mb-4">
-                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3">
-                  <h2 class="mb-0 fs-5 fw-bold text-dark"><i class="bi bi-receipt me-2 text-primary"></i>Fee Breakdown</h2>
+              <div class="island minimal-card mb-4 border border-secondary border-opacity-25 shadow-sm">
+                <div class="island-header bg-white border-bottom border-secondary border-opacity-25 px-4 pt-4 pb-3">
+                  <div class="d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0 fs-5 fw-bold text-dark"><i class="bi bi-receipt me-2 text-primary"></i>Official Assessment</h2>
+                    <span class="badge bg-light text-secondary border">INV-<?= str_pad((string)$assessment['id'], 6, '0', STR_PAD_LEFT) ?></span>
+                  </div>
                 </div>
-                <div class="island-body p-0">
-                  <ul class="list-group list-group-flush border-0">
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom-dashed">
-                      <div>
-                        <span class="text-muted fw-medium">Tuition Fee</span>
-                        <?php if ($assessment['academic_level'] === 'College' && isset($totalUnits) && $totalUnits > 0): ?>
-                          <?php $inferredCost = (float)$assessment['tuition_fee'] / $totalUnits; ?>
-                          <small class="text-secondary d-block mt-1"><?= $totalUnits ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
+                <div class="island-body p-4 bg-white">
+                  <div class="table-responsive">
+                    <table class="table table-borderless mb-0">
+                      <thead class="border-bottom border-dark border-2">
+                        <tr>
+                          <th class="text-uppercase small text-muted fw-bold pb-2">Description</th>
+                          <th class="text-uppercase small text-muted fw-bold text-end pb-2">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody class="border-bottom">
+                        <tr>
+                          <td class="py-3">
+                            <span class="fw-semibold text-dark">Tuition Fee</span>
+                            <?php if ($assessment['academic_level'] === 'College' && isset($totalUnits) && $totalUnits > 0): ?>
+                              <?php $inferredCost = (float)$assessment['tuition_fee'] / $totalUnits; ?>
+                              <br><small class="text-muted"><?= $totalUnits ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
+                            <?php endif; ?>
+                          </td>
+                          <td class="text-end py-3 fw-medium">₱<?= number_format((float)$assessment['tuition_fee'], 2) ?></td>
+                        </tr>
+                        <tr>
+                          <td class="py-2 text-secondary">Miscellaneous Fee</td>
+                          <td class="text-end py-2">₱<?= number_format((float)$assessment['miscellaneous_fee'], 2) ?></td>
+                        </tr>
+                        <tr>
+                          <td class="py-2 text-secondary">Registration Fee</td>
+                          <td class="text-end py-2">₱<?= number_format((float)$assessment['registration_fee'], 2) ?></td>
+                        </tr>
+                        <tr>
+                          <td class="py-2 text-secondary">Laboratory Fee</td>
+                          <td class="text-end py-2">₱<?= number_format((float)$assessment['laboratory_fee'], 2) ?></td>
+                        </tr>
+                        <tr>
+                          <td class="py-3 text-secondary border-bottom">Other Fees</td>
+                          <td class="text-end py-3 border-bottom">₱<?= number_format((float)$assessment['other_fees'], 2) ?></td>
+                        </tr>
+                        <tr>
+                          <td class="py-3 fw-bold text-dark text-uppercase small">Gross Amount</td>
+                          <td class="text-end py-3 fw-bold text-dark">₱<?= number_format((float)$assessment['total_amount'], 2) ?></td>
+                        </tr>
+                        <?php if ((float)$assessment['discount_amount'] > 0): ?>
+                        <tr>
+                          <td class="py-2 text-success fw-medium"><i class="bi bi-tag-fill me-2"></i><?= htmlspecialchars($assessment['scholarship_name'] ?? 'Scholarship', ENT_QUOTES, 'UTF-8') ?></td>
+                          <td class="text-end py-2 text-success fw-bold">- ₱<?= number_format((float)$assessment['discount_amount'], 2) ?></td>
+                        </tr>
                         <?php endif; ?>
-                      </div>
-                      <span class="fw-semibold text-dark">₱<?= number_format((float)$assessment['tuition_fee'], 2) ?></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom-dashed">
-                      <span class="text-muted fw-medium">Miscellaneous Fee</span>
-                      <span class="fw-semibold text-dark">₱<?= number_format((float)$assessment['miscellaneous_fee'], 2) ?></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom-dashed">
-                      <span class="text-muted fw-medium">Registration Fee</span>
-                      <span class="fw-semibold text-dark">₱<?= number_format((float)$assessment['registration_fee'], 2) ?></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom-dashed">
-                      <span class="text-muted fw-medium">Laboratory Fee</span>
-                      <span class="fw-semibold text-dark">₱<?= number_format((float)$assessment['laboratory_fee'], 2) ?></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom">
-                      <span class="text-muted fw-medium">Other Fees</span>
-                      <span class="fw-semibold text-dark">₱<?= number_format((float)$assessment['other_fees'], 2) ?></span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 bg-light border-bottom">
-                      <span class="fw-bold text-dark text-uppercase small tracking-wide">Gross Amount</span>
-                      <span class="fw-bold text-dark">₱<?= number_format((float)$assessment['total_amount'], 2) ?></span>
-                    </li>
-                    <?php if ((float)$assessment['discount_amount'] > 0): ?>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 text-success border-bottom">
-                      <span class="fw-medium"><i class="bi bi-tag-fill me-2"></i><?= htmlspecialchars($assessment['scholarship_name'] ?? 'Scholarship', ENT_QUOTES, 'UTF-8') ?></span>
-                      <span class="fw-bold">- ₱<?= number_format((float)$assessment['discount_amount'], 2) ?></span>
-                    </li>
-                    <?php endif; ?>
-                    <li class="list-group-item d-flex justify-content-between align-items-center py-4 px-4 bg-primary text-white border-0 rounded-bottom">
-                      <span class="fw-bold fs-5 text-uppercase tracking-wide">Net Payable</span>
-                      <span class="fw-bold fs-4">₱<?= number_format((float)$assessment['net_amount'], 2) ?></span>
-                    </li>
-                  </ul>
+                      </tbody>
+                      <tfoot>
+                        <tr>
+                          <td class="py-4">
+                            <span class="fw-bold fs-5 text-uppercase tracking-wide text-primary">Net Payable</span>
+                          </td>
+                          <td class="text-end py-4">
+                            <span class="fw-bold fs-4 text-primary">₱<?= number_format((float)$assessment['net_amount'], 2) ?></span>
+                          </td>
+                        </tr>
+                      </tfoot>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
@@ -203,55 +222,94 @@ require_once __DIR__ . '/../components/header.php';
                 $totalPaid = (float)$assessment['total_paid'];
                 $paidPercent = $netPayable > 0 ? min(100, round(($totalPaid / $netPayable) * 100)) : 0;
               ?>
-              <div class="island minimal-card mb-4 border-0">
-                <div class="island-body p-4 p-md-5">
-                  <div class="d-flex justify-content-between align-items-center mb-4">
-                    <span class="text-muted small text-uppercase fw-bold tracking-wide">Financial Status</span>
-                    <span class="badge <?= $statusBadge ?> px-3 py-1.5 rounded-pill fs-7 fw-semibold tracking-wide text-uppercase shadow-sm"><?= $statusLabel ?></span>
-                  </div>
-                  
-                  <div class="text-center my-4">
-                    <p class="text-muted small mb-1 text-uppercase fw-bold tracking-wide">Remaining Balance</p>
-                    <h2 class="display-5 fw-bolder text-dark mb-1" style="letter-spacing: -1.5px;">₱<?= number_format($balance, 2) ?></h2>
-                  </div>
-
-                  <!-- Progress Bar -->
-                  <div class="mb-4">
-                    <div class="d-flex justify-content-between text-muted small fw-semibold mb-1">
-                      <span>Payment Progress</span>
-                      <span><?= $paidPercent ?>% Paid</span>
+              <?php if (!(bool)($assessment['preview_accepted'] ?? false)): ?>
+                <!-- Assessment Preview Actions -->
+                <div class="island minimal-card mb-4 border-warning border-2 border-opacity-50">
+                  <div class="island-body p-4 p-md-5 text-center">
+                    <div class="mb-4">
+                      <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning-emphasis rounded-circle mb-3" style="width: 80px; height: 80px;">
+                        <i class="bi bi-exclamation-circle fs-1"></i>
+                      </div>
+                      <h3 class="fw-bold text-dark mb-2">Assessment Requires Action</h3>
+                      <p class="text-muted small">Please review your financial assessment carefully. You must accept these fees to continue your enrollment process.</p>
                     </div>
-                    <div class="progress rounded-pill" style="height: 8px; background-color: #e9ecef;">
-                      <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: <?= $paidPercent ?>%;" aria-valuenow="<?= $paidPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                  </div>
-
-                  <div class="row g-3 text-start border-top pt-4">
-                    <div class="col-6">
-                      <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-wallet2 text-primary me-1"></i> Total Assessed</p>
-                      <p class="fw-bold text-dark mb-0 fs-5">₱<?= number_format($netPayable, 2) ?></p>
-                    </div>
-                    <div class="col-6 border-start ps-3 border-secondary border-opacity-10">
-                      <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-check-circle-fill text-success me-1"></i> Total Paid</p>
-                      <p class="fw-bold text-success mb-0 fs-5">₱<?= number_format($totalPaid, 2) ?></p>
-                    </div>
-                  </div>
-
-                  <!-- Quick Action Note -->
-                  <div class="mt-4 p-3 bg-light rounded-3 text-center">
-                    <?php if ($balance > 0): ?>
-                      <p class="text-muted small mb-0 fw-medium">
-                        <i class="bi bi-info-circle-fill text-primary me-1"></i> Settle your outstanding balance at the campus cashier to complete your enrollment.
-                      </p>
-                    <?php else: ?>
-                      <p class="text-success small mb-0 fw-bold">
-                        <i class="bi bi-patch-check-fill me-1"></i> Your account is fully settled. You are now officially enrolled!
-                      </p>
-                    <?php endif; ?>
+                    
+                    <form action="assessment_action.php" method="POST" class="d-grid gap-3">
+                      <input type="hidden" name="assessment_id" value="<?= $assessment['id'] ?>">
+                      <input type="hidden" name="csrf_token" value="<?= getCsrfToken() ?>">
+                      
+                      <button type="submit" name="action" value="accept" class="btn btn-primary py-3 rounded-pill fw-bold shadow-sm">
+                        <i class="bi bi-check-circle me-2"></i> Continue Enrollment (Accept Fees)
+                      </button>
+                      
+                      <div class="d-flex gap-2">
+                        <button type="submit" name="action" value="cancel" class="btn btn-outline-danger py-2 rounded-pill fw-medium flex-grow-1" onclick="return confirm('Are you sure you want to cancel your enrollment application? This cannot be undone.')">
+                          <i class="bi bi-x-circle me-1"></i> Cancel Enrollment
+                        </button>
+                        
+                        <a href="mailto:finance@ttu.edu.ph?subject=Assessment Inquiry - <?= htmlspecialchars($assessment['reference_number']) ?>" class="btn btn-outline-secondary py-2 rounded-pill fw-medium flex-grow-1">
+                          <i class="bi bi-envelope me-1"></i> Submit Inquiry
+                        </a>
+                      </div>
+                    </form>
                   </div>
                 </div>
-              </div>
+              <?php else: ?>
+                <!-- Financial Status & Payments (Visible after acceptance) -->
+                <div class="island minimal-card mb-4 border-0">
+                  <div class="island-body p-4 p-md-5">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                      <span class="text-muted small text-uppercase fw-bold tracking-wide">Financial Status</span>
+                      <span class="badge <?= $statusBadge ?> px-3 py-1.5 rounded-pill fs-7 fw-semibold tracking-wide text-uppercase shadow-sm"><?= $statusLabel ?></span>
+                    </div>
+                    
+                    <div class="text-center my-4">
+                      <p class="text-muted small mb-1 text-uppercase fw-bold tracking-wide">Remaining Balance</p>
+                      <h2 class="display-5 fw-bolder text-dark mb-1" style="letter-spacing: -1.5px;">₱<?= number_format($balance, 2) ?></h2>
+                    </div>
 
+                    <!-- Progress Bar -->
+                    <div class="mb-4">
+                      <div class="d-flex justify-content-between text-muted small fw-semibold mb-1">
+                        <span>Payment Progress</span>
+                        <span><?= $paidPercent ?>% Paid</span>
+                      </div>
+                      <div class="progress rounded-pill" style="height: 8px; background-color: #e9ecef;">
+                        <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: <?= $paidPercent ?>%;" aria-valuenow="<?= $paidPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                      </div>
+                    </div>
+
+                    <div class="row g-3 text-start border-top pt-4">
+                      <div class="col-6">
+                        <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-wallet2 text-primary me-1"></i> Total Assessed</p>
+                        <p class="fw-bold text-dark mb-0 fs-5">₱<?= number_format($netPayable, 2) ?></p>
+                      </div>
+                      <div class="col-6 border-start ps-3 border-secondary border-opacity-10">
+                        <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-check-circle-fill text-success me-1"></i> Total Paid</p>
+                        <p class="fw-bold text-success mb-0 fs-5">₱<?= number_format($totalPaid, 2) ?></p>
+                      </div>
+                    </div>
+
+                    <!-- Quick Action Note -->
+                    <div class="mt-4 p-3 bg-light rounded-3 text-center">
+                      <?php if ($balance > 0): ?>
+                        <p class="text-muted small mb-3 fw-medium">
+                          <i class="bi bi-info-circle-fill text-primary me-1"></i> Settle your outstanding balance to complete your enrollment.
+                        </p>
+                        <div class="d-grid gap-2">
+                          <a href="payment_online.php?assessment_id=<?= $assessment['id'] ?>" class="btn btn-primary rounded-pill fw-bold">
+                            <i class="bi bi-credit-card me-2"></i> Pay Online Now
+                          </a>
+                          <span class="text-muted small">or pay manually at the campus cashier.</span>
+                        </div>
+                      <?php else: ?>
+                        <p class="text-success small mb-0 fw-bold">
+                          <i class="bi bi-patch-check-fill me-1"></i> Your account is fully settled. You are now officially enrolled!
+                        </p>
+                      <?php endif; ?>
+                    </div>
+                  </div>
+                </div>
               <!-- Payment History -->
               <div class="island minimal-card">
                 <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3">
@@ -281,6 +339,7 @@ require_once __DIR__ . '/../components/header.php';
                   </div>
                 </div>
               </div>
+              <?php endif; // End check for preview_accepted ?>
 
             </div>
           </div>

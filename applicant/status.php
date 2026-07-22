@@ -172,7 +172,7 @@ require_once __DIR__ . '/../components/header.php';
                   <h2>Status Details</h2>
                 </div>
                 <div class="island-body mt-2">
-                  <p class="text-muted small mb-1">Application Reference Number</p>
+                  <p class="text-muted small mb-1">Application Reference No.</p>
                   <p class="mb-4 fw-bold text-dark" style="font-size: 1.1rem;"><?= htmlspecialchars($application['reference_number'], ENT_QUOTES, 'UTF-8'); ?></p>
 
                   <p class="text-muted small mb-1">Current Status</p>
@@ -183,6 +183,12 @@ require_once __DIR__ . '/../components/header.php';
                   <p class="text-muted mt-4 mb-0 small">
                     <?= htmlspecialchars($statusMessage, ENT_QUOTES, 'UTF-8'); ?>
                   </p>
+
+                  <?php if ($application['status'] === 'under_review'): ?>
+                    <div class="mt-3 text-primary small fw-medium">
+                      <i class="bi bi-clock-history me-1"></i> Estimated approval time: 1-2 business days
+                    </div>
+                  <?php endif; ?>
 
                   <?php if ($application['status'] === 'correction_required'): ?>
                     <div class="mt-4 p-3 bg-warning-light border border-warning rounded-3">
@@ -264,7 +270,7 @@ require_once __DIR__ . '/../components/header.php';
                     </div>
 
                     <div class="col-md-6 col-lg-4">
-                      <p class="text-muted small mb-1">Reference Number</p>
+                      <p class="text-muted small mb-1">Application Reference No.</p>
                       <p class="mb-0 fw-semibold text-dark"><?= htmlspecialchars($application['reference_number'], ENT_QUOTES, 'UTF-8'); ?></p>
                     </div>
 

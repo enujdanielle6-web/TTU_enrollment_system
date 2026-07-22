@@ -103,14 +103,16 @@ try {
     $updateLoginStmt->execute(['id' => $user['id']]);
 
     // Admin Roles Activity Logging
-    $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier'];
+    $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'health_officer'];
     if (in_array($user['role'], $adminRoles, true)) {
         $logStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, title, description, icon) VALUES (:uid, "Logged In", "Administrator logged into the system.", "bi-box-arrow-in-right")');
         $logStmt->execute(['uid' => $user['id']]);
     }
 
     // 4. Route to appropriate dashboard
-    if (in_array($user['role'], $adminRoles, true)) {
+    if ($user['role'] === 'health_officer') {
+        header('Location: ../admin/health_officer/medical_clearance.php');
+    } elseif (in_array($user['role'], $adminRoles, true)) {
         header('Location: ../admin/dashboard.php');
     } else {
         header('Location: ../applicant/dashboard.php');

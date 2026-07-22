@@ -120,14 +120,14 @@ if ($application && ($application['document_submission_method'] ?? 'online') ===
 $timelineSteps = getApplicationTimelineSteps($application ? $application['status'] : 'not_started', $application['document_submission_method'] ?? 'online', $timestamps, $hasUploadedDocs);
 
 // Calculate overall completion percentage
-// Step 1: Account Created -> 15%
-// Step 2: Application Form Submitted -> +35% (Total 50%)
-// Step 3: Document Requirements -> Up to +50% (+12.5% per verified/uploaded document, or flat +50% if method is 'on_campus')
-$completionPercentage = 15;
+// Step 1: Application Form Submitted -> 25% (Total 25%)
+// Step 2: Document Requirements -> Up to +50% (Max 75%)
+// Step 3: Officially Enrolled -> +25% (Max 100%)
+$completionPercentage = 0;
 $detailedChecklist = [];
 
 if ($application) {
-    $completionPercentage += 35;
+    $completionPercentage += 25;
     $detailedChecklist = getDetailedChecklist((int)$application['id']);
     
     if ($application['document_submission_method'] === 'on_campus') {
@@ -139,7 +139,14 @@ if ($application) {
                 $uploadedCount++;
             }
         }
-        $completionPercentage += (int) ($uploadedCount * 12.5);
+        $totalRequired = count($detailedChecklist);
+        if ($totalRequired > 0) {
+            $completionPercentage += (int) (($uploadedCount / $totalRequired) * 50);
+        }
+    }
+    
+    if ($application['status'] === 'enrolled') {
+        $completionPercentage += 25;
     }
 }
 
@@ -236,7 +243,7 @@ require_once __DIR__ . '/../components/header.php';
                 <i class="bi bi-mortarboard-fill me-1"></i> Academic Year <?= htmlspecialchars($application['school_year'], ENT_QUOTES, 'UTF-8'); ?>
               </span>
             <?php endif; ?>
-            <h1 class="h3 mb-1 text-dark fw-bold">Welcome back, <?= htmlspecialchars($user_first_name . ' ' . $user_last_name, ENT_QUOTES, 'UTF-8'); ?>!</h1>
+            <h1 class="h3 mb-1 text-dark fw-bold">Welcome, <?= htmlspecialchars($user_first_name . ' ' . $user_last_name, ENT_QUOTES, 'UTF-8'); ?>!</h1>
             <p class="text-muted mb-0">
               <?php if ($application === null): ?>
                 Your account is ready. Get started by submitting your enrollment application today.
@@ -396,6 +403,56 @@ require_once __DIR__ . '/../components/header.php';
         </div>
       </div>
 
+      <!-- Application Progress Tracker (Full Width Top) -->
+      <div class="island mb-4 overflow-hidden">
+        <div class="island-header">
+          <i class="bi bi-geo-alt-fill"></i>
+          <h2>Application Progress</h2>
+        </div>
+        <div class="island-body p-4">
+          <div class="position-relative d-flex justify-content-between align-items-start w-100">
+            <!-- Progress Line -->
+            <div class="progress position-absolute start-0 w-100" style="height: 4px; z-index: 1; top: 18px; left: 7% !important; width: 86% !important;">
+              <?php
+                // Calculate how many steps are completed to set progress width
+                $completedSteps = 0;
+                foreach($timelineSteps as $s) {
+                    if($s['state'] === 'completed') $completedSteps++;
+                }
+                $progressWidth = (count($timelineSteps) > 1) ? ($completedSteps / (count($timelineSteps) - 1)) * 100 : 0;
+              ?>
+              <div class="progress-bar bg-primary" role="progressbar" style="width: <?= $progressWidth ?>%"></div>
+            </div>
+            
+            <?php foreach ($timelineSteps as $index => $step): ?>
+              <?php
+              $stepState = $step['state'];
+              $iconClass = match ($stepState) {
+                  'completed' => 'bg-primary text-white border-primary',
+                  'active' => 'bg-warning text-dark border-warning shadow',
+                  'rejected' => 'bg-danger text-white border-danger',
+                  default => 'bg-white text-muted border-secondary'
+              };
+              $icon = match ($stepState) {
+                  'completed' => 'bi-check-lg',
+                  'active' => 'bi-hourglass-split',
+                  'rejected' => 'bi-x-lg',
+                  default => 'bi-circle-fill'
+              };
+              ?>
+              <div class="text-center position-relative" style="z-index: 2; width: 14%;">
+                <div class="rounded-circle border border-2 mx-auto d-flex align-items-center justify-content-center <?= $iconClass ?>" style="width: 40px; height: 40px; transition: all 0.3s;">
+                  <i class="bi <?= $icon ?>"></i>
+                </div>
+                <div class="mt-2">
+                  <p class="mb-0 fw-bold small lh-sm <?= $stepState === 'active' ? 'text-primary' : ($stepState === 'pending' ? 'text-muted' : 'text-dark') ?>"><?= htmlspecialchars($step['label'], ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
+              </div>
+            <?php endforeach; ?>
+          </div>
+        </div>
+      </div>
+
       <!-- Status Overview Island -->
       <div class="island mb-4">
         <div class="island-header">
@@ -424,7 +481,7 @@ require_once __DIR__ . '/../components/header.php';
                   <i class="bi bi-upc-scan fs-5"></i>
                 </div>
                 <div>
-                  <p class="text-muted small mb-0 lh-sm">Reference No.</p>
+                  <p class="text-muted small mb-0 lh-sm">Application Reference No.</p>
                   <p class="mb-0 fw-bold text-dark small mt-1"><?= $application ? htmlspecialchars($application['reference_number'], ENT_QUOTES, 'UTF-8') : '<span class="text-muted">N/A</span>'; ?></p>
                 </div>
               </div>
@@ -478,42 +535,9 @@ require_once __DIR__ . '/../components/header.php';
         <!-- Left Side Column -->
         <div class="col-lg-8">
           
-          <!-- Application Progress Timeline -->
-          <div class="island">
-            <div class="island-header">
-              <i class="bi bi-clock-history"></i>
-              <h2>Application Progress</h2>
-            </div>
-            <div class="island-body">
-              <div class="status-timeline mt-2">
-                <?php foreach ($timelineSteps as $step): ?>
-                  <?php
-                  $stepState = $step['state'];
-                  $stepIcon = match ($stepState) {
-                      'completed' => 'bi-check-circle-fill',
-                      'active' => 'bi-hourglass-split',
-                      'rejected' => 'bi-x-circle-fill',
-                      default => 'bi-circle',
-                  };
-                  ?>
-                  <div class="status-step status-step-<?= htmlspecialchars($stepState, ENT_QUOTES, 'UTF-8'); ?>">
-                    <div class="status-step-marker shadow-sm">
-                      <i class="bi <?= htmlspecialchars($stepIcon, ENT_QUOTES, 'UTF-8'); ?>"></i>
-                    </div>
-                    <div class="status-step-content py-2 px-3">
-                      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                        <h3 class="h6 mb-1 fw-bold"><?= htmlspecialchars($step['label'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                        <?php if (!empty($step['timestamp'])): ?>
-                          <span class="text-muted small"><i class="bi bi-clock me-1"></i><?= formatDisplayDate($step['timestamp']); ?></span>
-                        <?php endif; ?>
-                      </div>
-                      <p class="text-muted small mb-0"><?= htmlspecialchars($step['description'], ENT_QUOTES, 'UTF-8'); ?></p>
-                    </div>
-                  </div>
-                <?php endforeach; ?>
-              </div>
-            </div>
-          </div>
+
+          
+
 
           <!-- Applicant Information Summary -->
           <div class="island">
@@ -550,6 +574,10 @@ require_once __DIR__ . '/../components/header.php';
                   <div class="col-md-6 col-lg-4">
                     <p class="text-muted small mb-1">Contact Number</p>
                     <p class="mb-0 fw-semibold text-dark"><?= htmlspecialchars($application['contact_number'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></p>
+                  </div>
+                  <div class="col-md-6 col-lg-4">
+                    <p class="text-muted small mb-1">Application Reference No.</p>
+                    <p class="mb-0 fw-semibold text-dark"><?= htmlspecialchars($application['reference_number'] ?? '—', ENT_QUOTES, 'UTF-8'); ?></p>
                   </div>
                   <div class="col-md-6 col-lg-4">
                     <p class="text-muted small mb-1">Grade Level</p>

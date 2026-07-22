@@ -41,17 +41,17 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php endif; ?>
 
-          <form action="login_process.php" method="post" novalidate>
+          <form action="login_process.php" method="post" autocomplete="off" novalidate>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
             <div class="mb-3">
               <label class="form-label text-muted small fw-semibold" for="email">Email Address</label>
-              <input class="form-control" style="padding: 0.75rem 1rem; border-radius: 10px;" type="email" id="email" name="email" value="<?= htmlspecialchars($old['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required placeholder="name@example.com">
+              <input class="form-control" style="padding: 0.75rem 1rem; border-radius: 10px;" type="email" id="email" name="email" value="<?= htmlspecialchars($old['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" autocomplete="off" required placeholder="name@example.com">
             </div>
 
             <div class="mb-4">
               <label class="form-label text-muted small fw-semibold" for="password">Password</label>
               <div class="input-group" style="border-radius: 10px; overflow: hidden; border: 1px solid #dee2e6;">
-                <input class="form-control border-0" style="padding: 0.75rem 1rem;" type="password" id="password" name="password" required placeholder="••••••••">
+                <input class="form-control border-0" style="padding: 0.75rem 1rem;" type="password" id="password" name="password" autocomplete="new-password" required placeholder="••••••••">
                 <button class="btn btn-light border-0 px-3 text-muted" type="button" id="togglePassword" tabindex="-1">
                   <i class="bi bi-eye"></i>
                 </button>
@@ -74,6 +74,7 @@ require_once __DIR__ . '/../components/header.php';
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('cashier@ttu.edu.ph', 'password123')">Cashier</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admissions@ttu.edu.ph', 'password123')">Admissions</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scholarship@ttu.edu.ph', 'password123')">Scholarship</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('health_officer@ttu.edu.ph', 'password123')">Health Officer</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('jane.doe@example.com', 'password123')">Applicant</button>
                 </div>
             </div>
@@ -91,6 +92,9 @@ require_once __DIR__ . '/../components/header.php';
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
+    // Clear any cached enrollment form data when the user is on the login page (logged out/session ended)
+    sessionStorage.removeItem('enrollmentFormData');
+
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
 

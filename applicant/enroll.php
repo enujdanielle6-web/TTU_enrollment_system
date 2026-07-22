@@ -34,6 +34,15 @@ try {
     error_log('Strands fetch failed: ' . $e->getMessage());
 }
 
+// Fetch active scholarships
+$activeScholarships = [];
+try {
+    $scholStmt = $pdo->query('SELECT id, name FROM scholarships WHERE is_active = 1 ORDER BY discount_value DESC');
+    $activeScholarships = $scholStmt->fetchAll();
+} catch (PDOException $e) {
+    error_log('Scholarships fetch failed: ' . $e->getMessage());
+}
+
 // Fetch active user details
 $user = null;
 try {
@@ -100,6 +109,8 @@ require_once __DIR__ . '/../components/header.php';
 <?php require_once __DIR__ . '/components/navbar.php'; ?>
 
 <main class="status-page py-5 bg-light min-vh-100">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10 col-xl-9">
@@ -122,6 +133,39 @@ require_once __DIR__ . '/../components/header.php';
             </ul>
           </div>
         <?php endif; ?>
+
+        <style>
+          .wizard-step { display: none; }
+          .wizard-step.active { display: block; animation: fadeIn 0.4s ease-in-out; }
+          .wizard-tab { transition: all 0.3s; position: relative; }
+          .wizard-tab.active { border-bottom-color: var(--bs-primary) !important; color: var(--bs-primary) !important; font-weight: 700 !important; background-color: rgba(13, 110, 253, 0.03); }
+          .wizard-tab.completed { color: var(--bs-success) !important; }
+          @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        </style>
+
+        <!-- Wizard Header -->
+        <div class="island mb-4 overflow-hidden border-0 shadow-sm" id="wizardHeader">
+          <div class="island-body p-0">
+            <div class="d-flex text-nowrap overflow-auto" id="wizardTabs">
+              <div class="flex-fill text-center py-3 border-bottom border-light fw-medium text-muted wizard-tab active px-3" data-step="1">
+                <i class="bi bi-person-lines-fill d-block fs-4 mb-1"></i>
+                <span class="small text-uppercase tracking-wide">1. Personal Info</span>
+              </div>
+              <div class="flex-fill text-center py-3 border-bottom border-light fw-medium text-muted wizard-tab px-3" data-step="2">
+                <i class="bi bi-mortarboard d-block fs-4 mb-1"></i>
+                <span class="small text-uppercase tracking-wide">2. Background</span>
+              </div>
+              <div class="flex-fill text-center py-3 border-bottom border-light fw-medium text-muted wizard-tab px-3" data-step="3">
+                <i class="bi bi-journal-bookmark d-block fs-4 mb-1"></i>
+                <span class="small text-uppercase tracking-wide">3. Academics</span>
+              </div>
+              <div class="flex-fill text-center py-3 border-bottom border-light fw-medium text-muted wizard-tab px-3" data-step="4">
+                <i class="bi bi-file-earmark-check d-block fs-4 mb-1"></i>
+                <span class="small text-uppercase tracking-wide">4. Review</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <form action="enroll_process.php" method="post" id="enrollmentForm" novalidate>
           <?= getCsrfInput() ?>
@@ -323,7 +367,58 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           </div>
 
-          <!-- 5. Previous School Island -->
+          <!-- 5. Emergency Contact Island -->
+          <div class="island">
+            <div class="island-header">
+              <i class="bi bi-heart-pulse"></i>
+              <h2>Emergency Contact</h2>
+            </div>
+            <div class="island-body mt-2">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label text-muted small fw-semibold" for="emergencyContactPerson">Contact Person</label>
+                  <input class="form-control" type="text" id="emergencyContactPerson" name="emergency_contact_person" value="<?= htmlspecialchars($old['emergency_contact_person'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
+                  <div class="invalid-feedback">Contact person is required.</div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-muted small fw-semibold" for="emergencyContactRelationship">Relationship</label>
+                  <input class="form-control" type="text" id="emergencyContactRelationship" name="emergency_contact_relationship" value="<?= htmlspecialchars($old['emergency_contact_relationship'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
+                  <div class="invalid-feedback">Relationship is required.</div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-muted small fw-semibold" for="emergencyContactNumber">Contact Number</label>
+                  <input class="form-control" type="tel" id="emergencyContactNumber" name="emergency_contact_number" value="<?= htmlspecialchars($old['emergency_contact_number'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required pattern="^09\d{9}$" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                  <div class="invalid-feedback">Must be a valid 11-digit mobile number.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Additional Information Island -->
+          <div class="island">
+            <div class="island-header">
+              <i class="bi bi-info-circle"></i>
+              <h2>Additional Information</h2>
+            </div>
+            <div class="island-body mt-2">
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label text-muted small fw-semibold" for="specialNeeds">Special Needs (Optional)</label>
+                  <textarea class="form-control" id="specialNeeds" name="special_needs" rows="2"><?= htmlspecialchars($old['special_needs'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-muted small fw-semibold" for="medicalConditions">Medical Conditions (Optional)</label>
+                  <textarea class="form-control" id="medicalConditions" name="medical_conditions" rows="2"><?= htmlspecialchars($old['medical_conditions'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label text-muted small fw-semibold" for="allergies">Allergies (Optional)</label>
+                  <textarea class="form-control" id="allergies" name="allergies" rows="2"><?= htmlspecialchars($old['allergies'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. Previous School Island -->
           <div class="island">
             <div class="island-header">
               <i class="bi bi-building"></i>
@@ -370,17 +465,9 @@ require_once __DIR__ . '/../components/header.php';
                 </div>
 
                 <div class="col-md-6">
-                  <label class="form-label text-muted small fw-semibold">Academic Year Attended / Graduated</label>
-                  <div class="d-flex align-items-center gap-2">
-                    <select class="form-select" id="academicYearFrom" name="academic_year_from" required>
-                      <option value="" disabled selected>From</option>
-                    </select>
-                    <span class="text-muted fw-medium">-</span>
-                    <select class="form-select" id="academicYearTo" name="academic_year_to" required>
-                      <option value="" disabled selected>To</option>
-                    </select>
-                  </div>
-                  <div class="invalid-feedback d-none" id="academicYearError">"To" year cannot be earlier than "From" year.</div>
+                  <label class="form-label text-muted small fw-semibold" for="lastSchoolYear">Academic Year Attended / Graduated</label>
+                  <input class="form-control" type="text" id="lastSchoolYear" name="last_school_year" value="<?= htmlspecialchars($old['last_school_year'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" placeholder="e.g. 2023-2024 or Expected 2026" required>
+                  <div class="invalid-feedback">Please specify the academic year.</div>
                 </div>
                 
                 <div class="col-md-6">
@@ -446,7 +533,7 @@ require_once __DIR__ . '/../components/header.php';
                   </select>
                   <div class="invalid-feedback">Student type is required.</div>
                 </div>
-                <div class="col-md-4" id="nstpContainer" style="display: none;">
+                  <div class="col-md-4" id="nstpContainer" style="display: none;">
                   <label class="form-label text-muted small fw-semibold" for="nstp">NSTP Choice</label>
                   <select class="form-select" id="nstp" name="nstp">
                     <option value="" disabled selected>Select NSTP</option>
@@ -456,12 +543,24 @@ require_once __DIR__ . '/../components/header.php';
                   </select>
                   <div class="invalid-feedback">NSTP choice is required for First Year College.</div>
                 </div>
+                <div class="col-md-12">
+                  <label class="form-label text-muted small fw-semibold" for="scholarshipId"><i class="bi bi-award me-1"></i>Apply for a Scholarship (Optional)</label>
+                  <select class="form-select" id="scholarshipId" name="scholarship_id">
+                    <option value="">None (I do not wish to apply for a scholarship)</option>
+                    <?php foreach ($activeScholarships as $schol): ?>
+                        <option value="<?= $schol['id'] ?>" <?= (isset($old['scholarship_id']) && (int)$old['scholarship_id'] === (int)$schol['id']) ? 'selected' : ''; ?>>
+                            <?= htmlspecialchars($schol['name'], ENT_QUOTES, 'UTF-8') ?>
+                        </option>
+                    <?php endforeach; ?>
+                  </select>
+                  <div class="form-text text-muted small"><i class="bi bi-info-circle me-1"></i>Selecting a scholarship will require a separate review process before your enrollment assessment can be generated.</div>
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Curriculum Subjects Island -->
-          <div class="island mb-4" id="curriculumContainer" style="display: none;">
+          <div class="island mb-4 d-none" id="curriculumContainer">
             <div class="island-header">
               <i class="bi bi-journal-text"></i>
               <h2>Curriculum Subjects</h2>
@@ -494,7 +593,7 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Section Selection Island -->
-          <div class="island mb-4" id="sectionContainer" style="display: none;">
+          <div class="island mb-4 d-none" id="sectionContainer">
             <div class="island-header">
               <i class="bi bi-diagram-3"></i>
               <h2>Available Sections</h2>
@@ -509,20 +608,51 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           </div>
 
+          <!-- Schedule Timetable Island -->
+          <div class="island mb-4 d-none" id="timetableContainer">
+            <div class="island-header">
+              <i class="bi bi-calendar-week"></i>
+              <h2>Weekly Schedule</h2>
+            </div>
+            <div class="island-body mt-3">
+              <div class="table-responsive">
+                <table class="table table-bordered text-center align-middle" id="weeklyScheduleTable" style="min-width: 800px; table-layout: fixed;">
+                  <thead class="table-light">
+                    <tr>
+                      <th style="width: 10%;">Time</th>
+                      <th style="width: 15%;">Monday</th>
+                      <th style="width: 15%;">Tuesday</th>
+                      <th style="width: 15%;">Wednesday</th>
+                      <th style="width: 15%;">Thursday</th>
+                      <th style="width: 15%;">Friday</th>
+                      <th style="width: 15%;">Saturday</th>
+                    </tr>
+                  </thead>
+                  <tbody id="weeklyScheduleBody">
+                    <!-- Javascript will populate time rows and subjects here -->
+                  </tbody>
+                </table>
+              </div>
+              <div id="scheduleConflictsAlert" class="alert alert-danger d-none mt-3">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <strong>Schedule Conflict Detected!</strong> You have overlapping subjects. Please adjust your schedule.
+              </div>
+            </div>
+          </div>
+
           <!-- Irregular Info Island -->
-          <div class="island mb-4 border border-warning border-2 rounded-4 text-center overflow-hidden" id="irregularContainer" style="display: none; padding: 0;">
-            <div class="bg-warning bg-opacity-10 p-4 border-bottom border-warning border-opacity-25">
-              <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2.5rem; line-height: 1;"></i>
-              <h2 class="text-warning-emphasis mt-2 mb-0 fw-bold fs-4">Irregular Student Enrollment</h2>
+          <div class="island mb-4 border border-primary border-2 rounded-4 text-center overflow-hidden d-none" id="irregularContainer" style="padding: 0;">
+            <div class="bg-primary bg-opacity-10 p-4 border-bottom border-primary border-opacity-25">
+              <i class="bi bi-info-circle-fill text-primary" style="font-size: 2.5rem; line-height: 1;"></i>
+              <h2 class="text-primary-emphasis mt-2 mb-0 fw-bold fs-4">Irregular Student Enrollment</h2>
             </div>
             <div class="p-4 bg-white">
-              <p class="text-dark mb-2" style="font-size: 1.05rem;">You are classified as an <strong>Irregular Student</strong>. Irregular students cannot complete section and subject scheduling online.</p>
-              <p class="text-muted small mb-0">Please select your intended subjects from the curriculum below. You still need to proceed to the Registrar's Office to finalize your enrollment and schedule.</p>
+              <p class="text-dark mb-2" style="font-size: 1.05rem;">You are classified as an <strong>Irregular Student</strong>. You can customize your schedule by picking specific subjects and available time slots.</p>
+              <p class="text-muted small mb-0">Select your intended subjects from the curriculum below. For each subject, click to choose an available schedule.</p>
             </div>
           </div>
 
           <!-- Irregular Curriculum Selection Island -->
-          <div class="island mb-4" id="irregularCurriculumContainer" style="display: none;">
+          <div class="island mb-4 d-none" id="irregularCurriculumContainer">
             <div class="island-header">
               <i class="bi bi-card-checklist"></i>
               <h2>Curriculum & Subject Selection</h2>
@@ -564,65 +694,35 @@ require_once __DIR__ . '/../components/header.php';
             <div id="hiddenSubjectsContainer"></div>
           </div>
 
-          <!-- 7. Emergency Contact Island -->
+          <!-- Application Summary Island -->
           <div class="island">
             <div class="island-header">
-              <i class="bi bi-heart-pulse"></i>
-              <h2>Emergency Contact</h2>
+              <i class="bi bi-card-checklist"></i>
+              <h2>Review Information</h2>
             </div>
             <div class="island-body mt-2">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-semibold" for="emergencyContactPerson">Contact Person</label>
-                  <input class="form-control" type="text" id="emergencyContactPerson" name="emergency_contact_person" value="<?= htmlspecialchars($old['emergency_contact_person'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
-                  <div class="invalid-feedback">Contact person is required.</div>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-semibold" for="emergencyContactRelationship">Relationship</label>
-                  <input class="form-control" type="text" id="emergencyContactRelationship" name="emergency_contact_relationship" value="<?= htmlspecialchars($old['emergency_contact_relationship'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required>
-                  <div class="invalid-feedback">Relationship is required.</div>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-semibold" for="emergencyContactNumber">Contact Number</label>
-                  <input class="form-control" type="tel" id="emergencyContactNumber" name="emergency_contact_number" value="<?= htmlspecialchars($old['emergency_contact_number'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required pattern="^09\d{9}$" maxlength="11" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                  <div class="invalid-feedback">Must be a valid 11-digit mobile number.</div>
-                </div>
+              <div class="alert alert-info border-0 shadow-sm d-flex align-items-center gap-3 mb-4">
+                <i class="bi bi-info-circle-fill fs-3 text-info"></i>
+                <div class="small text-dark">Please review your application details carefully before submitting. You cannot edit this information once submitted.</div>
               </div>
-            </div>
-          </div>
-
-          <!-- 8. Additional Information Island -->
-          <div class="island">
-            <div class="island-header">
-              <i class="bi bi-info-circle"></i>
-              <h2>Additional Information</h2>
-            </div>
-            <div class="island-body mt-2">
-              <div class="row g-3">
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-semibold" for="specialNeeds">Special Needs (Optional)</label>
-                  <textarea class="form-control" id="specialNeeds" name="special_needs" rows="2"><?= htmlspecialchars($old['special_needs'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-semibold" for="medicalConditions">Medical Conditions (Optional)</label>
-                  <textarea class="form-control" id="medicalConditions" name="medical_conditions" rows="2"><?= htmlspecialchars($old['medical_conditions'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted small fw-semibold" for="allergies">Allergies (Optional)</label>
-                  <textarea class="form-control" id="allergies" name="allergies" rows="2"><?= htmlspecialchars($old['allergies'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                </div>
+              
+              <div id="applicationSummaryContent" class="mt-2 row g-4">
+                <!-- Javascript will render summary here -->
               </div>
             </div>
           </div>
 
           <!-- Action Buttons -->
-          <div class="d-flex flex-wrap gap-3 justify-content-end mt-4 mb-5">
-            <a class="btn btn-outline-secondary px-4 py-2" style="border-radius: 12px; font-weight: 600;" href="dashboard.php">
-              Cancel
-            </a>
-            <button class="btn btn-primary px-4 py-2" style="border-radius: 12px; font-weight: 600;" type="submit">
-              <i class="bi bi-send-check"></i> <?= (!empty($existingApp) && $existingApp['status'] === 'correction_required') ? 'Resubmit Application' : 'Submit Application' ?>
-            </button>
+          <!-- Wizard Navigation -->
+          <div class="d-flex flex-wrap gap-3 justify-content-between mt-4 mb-5">
+            <button type="button" class="btn btn-outline-secondary px-4 py-2" id="prevBtn" disabled>Back</button>
+            <div class="d-flex gap-3">
+              <a class="btn btn-outline-secondary px-4 py-2" href="dashboard.php">Cancel</a>
+              <button type="button" class="btn btn-primary px-4 py-2" id="nextBtn">Next</button>
+              <button class="btn btn-success px-4 py-2 d-none" id="submitBtn" type="submit">
+                <i class="bi bi-send-check"></i> <?= (!empty($existingApp) && $existingApp['status'] === 'correction_required') ? 'Resubmit Application' : 'Submit Application' ?>
+              </button>
+            </div>
           </div>
         </form>
 
@@ -630,6 +730,7 @@ require_once __DIR__ . '/../components/header.php';
     </div>
   </div>
 </main>
+
 
 <!-- Schedule Preview Modal -->
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
@@ -674,7 +775,6 @@ require_once __DIR__ . '/../components/header.php';
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
   $(function () {
-
 
     $('#enrollmentForm').on('submit', function (event) {
       var form = this;
@@ -762,7 +862,10 @@ require_once __DIR__ . '/../components/header.php';
         filteredPrograms.forEach(prog => {
            const option = document.createElement('option');
            option.value = prog.code;
-           option.textContent = prog.code.toUpperCase();
+           option.textContent = prog.name;
+           option.dataset.career = prog.career_opportunities || 'No data available.';
+           option.dataset.professions = prog.possible_professions || 'No data available.';
+           option.dataset.industry = prog.industry_information || 'No data available.';
            if (oldStrand === prog.code) {
              option.selected = true;
            }
@@ -793,11 +896,11 @@ require_once __DIR__ . '/../components/header.php';
 
       // Only fetch if Program and Year are selected. Semester is only required for College.
       if (!prog || !yr || (level === 'College' && !sem)) {
-        container.style.display = 'none';
+        container.classList.add('d-none');
         return;
       }
 
-      container.style.display = 'block';
+      container.classList.remove('d-none');
       tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading curriculum...</td></tr>';
       ttotal.textContent = '0';
 
@@ -841,22 +944,22 @@ require_once __DIR__ . '/../components/header.php';
       const irregularCurriculumContainer = document.getElementById('irregularCurriculumContainer');
       
       if (level === 'College') {
-        sectionContainer.style.display = 'block';
+        sectionContainer.classList.remove('d-none');
         if (type === 'Irregular') {
-           irregularContainer.style.display = 'block';
-           irregularCurriculumContainer.style.display = 'block';
+           irregularContainer.classList.remove('d-none');
+           irregularCurriculumContainer.classList.remove('d-none');
            sectionIdInput.removeAttribute('required');
            fetchIrregularCurriculum();
         } else {
-           irregularContainer.style.display = 'none';
-           irregularCurriculumContainer.style.display = 'none';
+           irregularContainer.classList.add('d-none');
+           irregularCurriculumContainer.classList.add('d-none');
            sectionIdInput.setAttribute('required', 'required');
         }
         fetchSections();
       } else {
-        sectionContainer.style.display = 'none';
-        irregularContainer.style.display = 'none';
-        irregularCurriculumContainer.style.display = 'none';
+        sectionContainer.classList.add('d-none');
+        irregularContainer.classList.add('d-none');
+        irregularCurriculumContainer.classList.add('d-none');
         sectionIdInput.removeAttribute('required');
         sectionIdInput.value = '';
       }
@@ -865,30 +968,52 @@ require_once __DIR__ . '/../components/header.php';
     // When an irregular student picks a section, auto-load its subjects into the cart
     sectionIdInput.addEventListener('change', function() {
         if (studentTypeSelect.value === 'Irregular' && this.value) {
+            const sectionVal = this.value;
             if (selectedIrregularSubjects.length > 0) {
-                if (!confirm('This will clear your current cart and load the subjects for this section. Proceed?')) {
-                    this.value = '';
-                    return;
-                }
-            }
-            
-            selectedIrregularSubjects = [];
-            renderCart();
-            
-            fetch(`api_get_section_subjects.php?section_id=${this.value}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.subjects) {
-                        data.subjects.forEach(sub => {
-                            selectedIrregularSubjects.push(sub);
-                        });
-                        renderCart();
-                        alert(`Successfully imported ${data.subjects.length} subjects from the selected section.`);
+                Swal.fire({
+                    title: 'Clear Cart?',
+                    text: 'This will clear your current cart and load the subjects for this section. Proceed?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, proceed',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        loadSectionSubjects(sectionVal);
+                    } else {
+                        sectionIdInput.value = '';
                     }
-                })
-                .catch(err => console.error(err));
+                });
+            } else {
+                loadSectionSubjects(sectionVal);
+            }
         }
     });
+
+    function loadSectionSubjects(secId) {
+        selectedIrregularSubjects = [];
+        renderCart();
+        
+        fetch(`api_get_section_subjects.php?section_id=${secId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.subjects) {
+                    data.subjects.forEach(sub => {
+                        selectedIrregularSubjects.push(sub);
+                    });
+                    renderCart();
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: `Successfully imported ${data.subjects.length} subjects.`,
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                }
+            })
+            .catch(err => console.error(err));
+    }
 
     function renderCart() {
       const list = document.getElementById('selectedSubjectsList');
@@ -933,6 +1058,24 @@ require_once __DIR__ . '/../components/header.php';
         list.innerHTML = html;
         badge.textContent = `${totalUnits} Units`;
         hiddenContainer.innerHTML = hiddenHtml;
+        
+        // Render Timetable for Irregular
+        let items = [];
+        selectedIrregularSubjects.forEach(sub => {
+            if (sub.schedules) {
+                sub.schedules.forEach(s => {
+                    items.push({
+                        day: s.day,
+                        start: s.start_time || s.start_time_raw,
+                        end: s.end_time || s.end_time_raw,
+                        label: sub.code,
+                        room: s.room
+                    });
+                });
+            }
+        });
+        plotWeeklySchedule(items);
+        document.getElementById('timetableContainer').classList.remove('d-none');
       }
       
       // Update Add buttons state
@@ -1261,6 +1404,26 @@ require_once __DIR__ . '/../components/header.php';
               radio.addEventListener('change', function() {
                 sectionIdInput.value = this.value;
                 sectionFeedback.style.setProperty('display', 'none', 'important');
+                
+                // Plot regular schedule on Timetable Island
+                fetch('api_get_schedule.php?section_id=' + this.value)
+                  .then(r => r.json())
+                  .then(sData => {
+                     let items = [];
+                     if (sData.success && sData.schedules) {
+                         sData.schedules.forEach(s => {
+                             items.push({
+                                 day: s.day,
+                                 start: s.start_time,
+                                 end: s.end_time,
+                                 label: s.subject_code,
+                                 room: s.room
+                             });
+                         });
+                     }
+                     plotWeeklySchedule(items);
+                     document.getElementById('timetableContainer').style.display = 'block';
+                  });
               });
             });
             
@@ -1329,7 +1492,15 @@ require_once __DIR__ . '/../components/header.php';
 
     academicLevelSelect.addEventListener('change', () => { updateOptions(); updateSectionVisibility(); });
     gradeLevelSelect.addEventListener('change', () => { checkVisibility(); updateCurriculum(); updateSectionVisibility(); });
-    strandSelect.addEventListener('change', () => { updateCurriculum(); updateSectionVisibility(); });
+    strandSelect.addEventListener('change', () => { 
+        updateCurriculum(); 
+        updateSectionVisibility(); 
+    });
+    
+    // Trigger change event to set up initial state
+    if (oldStrand) {
+      strandSelect.dispatchEvent(new Event('change'));
+    }
     semesterSelect.addEventListener('change', () => { updateCurriculum(); updateSectionVisibility(); });
     studentTypeSelect.addEventListener('change', updateSectionVisibility);
 
@@ -1348,27 +1519,6 @@ require_once __DIR__ . '/../components/header.php';
     const strandCourseContainer = document.getElementById('strandCourseContainer');
     const prevStrandCourse = document.getElementById('previousStrandCourse');
     const strandCourseLabel = document.getElementById('strandCourseLabel');
-    
-    const yearFrom = document.getElementById('academicYearFrom');
-    const yearTo = document.getElementById('academicYearTo');
-    const yearError = document.getElementById('academicYearError');
-
-    const currentYear = new Date().getFullYear();
-    const oldYearFrom = <?= json_encode($old['academic_year_from'] ?? '') ?>;
-    const oldYearTo = <?= json_encode($old['academic_year_to'] ?? '') ?>;
-
-    // Populate Year Dropdowns
-    for (let y = currentYear; y >= 1990; y--) {
-      [yearFrom, yearTo].forEach(select => {
-        const option = document.createElement('option');
-        option.value = y;
-        option.textContent = y;
-        select.appendChild(option);
-      });
-    }
-
-    if (oldYearFrom) yearFrom.value = oldYearFrom;
-    if (oldYearTo) yearTo.value = oldYearTo;
 
     function checkPrevSchoolLevel() {
       const level = prevSchoolLevel.value;
@@ -1387,26 +1537,11 @@ require_once __DIR__ . '/../components/header.php';
       }
     }
 
-    function validateYears() {
-      if (yearFrom.value && yearTo.value && parseInt(yearTo.value) < parseInt(yearFrom.value)) {
-        yearTo.setCustomValidity('Invalid');
-        yearError.style.display = 'block';
-        yearError.classList.remove('d-none');
-      } else {
-        yearTo.setCustomValidity('');
-        yearError.style.display = 'none';
-        yearError.classList.add('d-none');
-      }
-    }
-
     prevSchoolLevel.addEventListener('change', checkPrevSchoolLevel);
-    yearFrom.addEventListener('change', validateYears);
-    yearTo.addEventListener('change', validateYears);
 
     if (prevSchoolLevel.value) {
       checkPrevSchoolLevel();
     }
-    validateYears();
 
     // Custom form validation for sections
     const form = document.getElementById('enrollmentForm');
@@ -1481,7 +1616,287 @@ require_once __DIR__ . '/../components/header.php';
       enrollForm.addEventListener('input', saveFormData);
       enrollForm.addEventListener('change', saveFormData);
     }
+    
+    // --- Timetable Rendering Logic ---
+    function plotWeeklySchedule(items) {
+       const tbody = document.getElementById('weeklyScheduleBody');
+       const alertBox = document.getElementById('scheduleConflictsAlert');
+       tbody.innerHTML = '';
+       alertBox.classList.add('d-none');
+       
+       if (!items || items.length === 0) {
+           tbody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No schedule to display.</td></tr>';
+           return;
+       }
+       
+       // Detect conflicts
+       let hasConflict = false;
+       for (let i = 0; i < items.length; i++) {
+           for (let j = i + 1; j < items.length; j++) {
+               if (items[i].day === items[j].day) {
+                   const startA = parseTime(items[i].start);
+                   const endA = parseTime(items[i].end);
+                   const startB = parseTime(items[j].start);
+                   const endB = parseTime(items[j].end);
+                   if (startA < endB && endA > startB) {
+                       hasConflict = true;
+                       items[i].conflict = true;
+                       items[j].conflict = true;
+                   }
+               }
+           }
+       }
+       
+       if (hasConflict) alertBox.classList.remove('d-none');
+       
+       // Sort items by start time
+       items.sort((a, b) => parseTime(a.start) - parseTime(b.start));
+       
+       // Create rows from 07:00 to 20:00 (13 rows)
+       const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+       for (let hour = 7; hour <= 20; hour++) {
+           const tr = document.createElement('tr');
+           
+           // Time column
+           const tdTime = document.createElement('td');
+           const hourFmt = hour > 12 ? hour - 12 : hour;
+           const ampm = hour >= 12 ? 'PM' : 'AM';
+           tdTime.innerHTML = `<span class="fw-bold text-muted small">${hourFmt}:00 ${ampm}</span>`;
+           tr.appendChild(tdTime);
+           
+           days.forEach(day => {
+               const td = document.createElement('td');
+               // Find any items that start in this hour
+               const hourStart = hour * 60;
+               const hourEnd = (hour + 1) * 60;
+               
+               let cellHtml = '';
+               items.forEach(item => {
+                   if (item.day === day) {
+                       const iStart = parseTime(item.start);
+                       if (iStart >= hourStart && iStart < hourEnd) {
+                           const bg = item.conflict ? 'bg-danger text-white' : 'bg-primary bg-opacity-10 text-primary';
+                           cellHtml += `
+                             <div class="rounded-3 p-1 mb-1 shadow-sm small fw-semibold ${bg}">
+                               ${item.label}<br>
+                               <span class="fw-normal" style="font-size: 0.7rem;">${formatTime(item.start)} - ${formatTime(item.end)}</span><br>
+                               <span class="fw-normal" style="font-size: 0.7rem;">${item.room}</span>
+                             </div>
+                           `;
+                       }
+                   }
+               });
+               td.innerHTML = cellHtml;
+               tr.appendChild(td);
+           });
+           
+           tbody.appendChild(tr);
+       }
+    }
+    
+    function formatTime(timeStr) {
+        if(!timeStr) return '';
+        const parts = timeStr.split(':');
+        let h = parseInt(parts[0]);
+        const m = parts[1];
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        if (h > 12) h -= 12;
+        if (h === 0) h = 12;
+        return `${h}:${m} ${ampm}`;
+    }
 
+    // --- Wizard UI Logic ---
+    const formIslands = Array.from(document.querySelectorAll('#enrollmentForm > .island'));
+    // Group them: Step 1 (idx 0..5), Step 2 (idx 6..7), Step 3 (idx 8..12), Step 4 (idx 13+)
+    formIslands.forEach((island, index) => {
+        island.classList.add('wizard-step');
+        if (index <= 5) {
+            island.setAttribute('data-wizard-step', '1');
+        } else if (index <= 7) {
+            island.setAttribute('data-wizard-step', '2');
+        } else if (index <= 12) {
+            island.setAttribute('data-wizard-step', '3');
+        } else {
+            island.setAttribute('data-wizard-step', '4');
+        }
+    });
+
+    let currentStep = 1;
+    const maxSteps = 4;
+    
+    function showStep(step) {
+        // Hide all
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+        // Show current
+        document.querySelectorAll(`.wizard-step[data-wizard-step="${step}"]`).forEach(el => el.classList.add('active'));
+        
+        // Update Tabs
+        document.querySelectorAll('.wizard-tab').forEach(tab => {
+            const tStep = parseInt(tab.getAttribute('data-step'));
+            tab.classList.remove('active', 'completed');
+            if (tStep === step) tab.classList.add('active');
+            else if (tStep < step) tab.classList.add('completed');
+        });
+        
+        // Update Buttons
+        document.getElementById('prevBtn').disabled = (step === 1);
+        if (step === maxSteps) {
+            document.getElementById('nextBtn').classList.add('d-none');
+            document.getElementById('submitBtn').classList.remove('d-none');
+            updateReviewSummary();
+        } else {
+            document.getElementById('nextBtn').classList.remove('d-none');
+            document.getElementById('submitBtn').classList.add('d-none');
+        }
+        
+        window.scrollTo({ top: document.getElementById('wizardHeader').offsetTop - 20, behavior: 'smooth' });
+    }
+    
+    function updateReviewSummary() {
+        const summaryContent = document.getElementById('applicationSummaryContent');
+        if (!summaryContent) return;
+        
+        const val = id => {
+            const el = document.getElementById(id);
+            if (!el) return '';
+            if (el.tagName === 'SELECT') return el.options[el.selectedIndex]?.text || '';
+            return el.value || '';
+        };
+
+        summaryContent.innerHTML = `
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-primary">
+                    <div class="card-header bg-white border-0 pt-3 pb-0 fw-bold text-dark"><i class="bi bi-person text-primary me-2"></i>Personal Details</div>
+                    <div class="card-body small">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr><td class="text-muted w-25">Name:</td><td class="fw-medium">${val('firstName')} ${val('middleName')} ${val('lastName')} ${val('suffix')}</td></tr>
+                            <tr><td class="text-muted">Gender:</td><td class="fw-medium">${val('gender')}</td></tr>
+                            <tr><td class="text-muted">Birth:</td><td class="fw-medium">${val('birthDate')}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-primary">
+                    <div class="card-header bg-white border-0 pt-3 pb-0 fw-bold text-dark"><i class="bi bi-telephone text-primary me-2"></i>Contact Details</div>
+                    <div class="card-body small">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr><td class="text-muted w-25">Email:</td><td class="fw-medium">${val('email')}</td></tr>
+                            <tr><td class="text-muted">Mobile:</td><td class="fw-medium">${val('contactNumber')}</td></tr>
+                            <tr><td class="text-muted">Address:</td><td class="fw-medium">${val('addressHouseNumber')} ${val('addressStreet')}, ${val('addressBarangay')}, ${val('addressCity')}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-primary">
+                    <div class="card-header bg-white border-0 pt-3 pb-0 fw-bold text-dark"><i class="bi bi-mortarboard text-primary me-2"></i>Academic Profile</div>
+                    <div class="card-body small">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr><td class="text-muted w-25">Program:</td><td class="fw-medium">${val('strand')}</td></tr>
+                            <tr><td class="text-muted">Year:</td><td class="fw-medium">${val('gradeLevel')}</td></tr>
+                            <tr><td class="text-muted">Type:</td><td class="fw-medium">${val('studentType')}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm border-top border-4 border-primary">
+                    <div class="card-header bg-white border-0 pt-3 pb-0 fw-bold text-dark"><i class="bi bi-building text-primary me-2"></i>Previous School</div>
+                    <div class="card-body small">
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr><td class="text-muted w-25">School:</td><td class="fw-medium">${val('lastSchoolAttended')}</td></tr>
+                            <tr><td class="text-muted">Level:</td><td class="fw-medium">${val('previousSchoolLevel')}</td></tr>
+                            <tr><td class="text-muted">Status:</td><td class="fw-medium">${val('previousSchoolStatus')}</td></tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;    
+        window.scrollTo({ top: document.getElementById('wizardHeader').offsetTop - 20, behavior: 'smooth' });
+    }
+    
+    function validateCurrentStep() {
+        // Collect required inputs visible in current step
+        const currentElements = document.querySelectorAll(`.wizard-step[data-wizard-step="${currentStep}"] input, .wizard-step[data-wizard-step="${currentStep}"] select, .wizard-step[data-wizard-step="${currentStep}"] textarea`);
+        let valid = true;
+        let firstInvalid = null;
+        
+        currentElements.forEach(el => {
+            // Ignore disabled or readonly or those inside a hidden container (like sectionContainer when not applicable)
+            if (el.disabled || el.readOnly) return;
+            if (el.closest('.island') && window.getComputedStyle(el.closest('.island')).display === 'none') return;
+            
+            if (!el.checkValidity()) {
+                valid = false;
+                el.classList.add('is-invalid');
+                if (!firstInvalid) firstInvalid = el;
+            } else {
+                el.classList.remove('is-invalid');
+            }
+        });
+        
+        // Custom validations for Step 3
+        if (currentStep === 3) {
+            if (document.getElementById('sectionContainer').style.display === 'block' && !document.getElementById('section_id').value) {
+                document.getElementById('sectionFeedback').style.setProperty('display', 'block', 'important');
+                valid = false;
+                if (!firstInvalid) firstInvalid = document.getElementById('sectionContainer');
+            }
+            if (document.getElementById('irregularCurriculumContainer').style.display === 'block' && selectedIrregularSubjects.length === 0) {
+                document.getElementById('irregularFeedback').style.setProperty('display', 'block', 'important');
+                valid = false;
+                if (!firstInvalid) firstInvalid = document.getElementById('irregularCurriculumContainer');
+            }
+        }
+        
+        if (firstInvalid) {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            Swal.fire({ 
+                icon: 'warning', 
+                title: 'Incomplete Fields', 
+                text: 'Please fill out all required fields before proceeding.',
+                returnFocus: false,
+                willClose: () => {
+                    if (typeof firstInvalid.focus === 'function') {
+                        firstInvalid.focus({ preventScroll: true });
+                    }
+                }
+            });
+        }
+        return valid;
+    }
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+        if (validateCurrentStep()) {
+            currentStep++;
+            showStep(currentStep);
+        }
+    });
+    
+    document.getElementById('prevBtn').addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            showStep(currentStep);
+        }
+    });
+    
+    // Initialize
+    showStep(1);
+
+    // Override generic confirms with SweetAlert
+    // Check for Irregular clearing cart
+    const sectionInputHtml = document.getElementById('section_id');
+    if(sectionInputHtml) {
+        // We override the original event listener by replacing the clone or just overriding confirm
+        window.originalConfirm = window.confirm;
+        window.confirm = function(message) {
+            return originalConfirm(message); 
+            // Note: Since SweetAlert is async, overriding confirm is tricky. 
+            // In enroll.php, confirm was used in `if(!confirm(...)) return;` 
+            // We will fix the specific irregular section import code below.
+        };
+    }
   });
 </script>
 

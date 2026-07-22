@@ -128,8 +128,7 @@ const ROLE_PERMISSIONS = [
     
     'admissions' => [
         'applications.view_queue', 'applications.view_details',
-        'applications.review', 'documents.verify', 
-        'medical.review'
+        'applications.review', 'documents.verify'
     ],
     
     'cashier' => [
@@ -140,6 +139,10 @@ const ROLE_PERMISSIONS = [
     'scholarship' => [
         'scholarships.manage', 
         'scholarship_applications.review' 
+    ],
+
+    'health_officer' => [
+        'medical.review'
     ]
 ];
 
@@ -191,6 +194,8 @@ function requirePermission(string|array $permission): void
                 header('Location: /sia/admin/scholarship_review.php');
             } elseif ($userRole === 'cashier') {
                 header('Location: /sia/admin/cashier_dashboard.php');
+            } elseif ($userRole === 'health_officer') {
+                header('Location: /sia/admin/health_officer/medical_clearance.php');
             } else {
                 header('Location: /sia/admin/dashboard.php');
             }
@@ -232,6 +237,8 @@ function requireRole(array $allowedRoles): void
                 header('Location: /sia/admin/scholarship_review.php');
             } elseif ($userRole === 'cashier') {
                 header('Location: /sia/admin/cashier_dashboard.php');
+            } elseif ($userRole === 'health_officer') {
+                header('Location: /sia/admin/health_officer/medical_clearance.php');
             } else {
                 header('Location: /sia/admin/dashboard.php');
             }
@@ -243,7 +250,7 @@ function requireRole(array $allowedRoles): void
 function requireAdminLogin(): void
 {
     // Backwards compatibility or generic admin check
-    requireRole(['superadmin', 'admin', 'admissions', 'scholarship', 'cashier']);
+    requireRole(['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'health_officer']);
 }
 
 function isPasswordStrong(string $password, array &$errors = []): bool

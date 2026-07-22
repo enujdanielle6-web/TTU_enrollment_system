@@ -94,8 +94,8 @@ try {
       </div>
       
       <?php if (hasPermission('medical.review')): ?>
-      <div class="col-md-4">
-        <a href="medical_clearance.php" class="text-decoration-none">
+      <div class="col-md-6 col-lg-3">
+        <a href="../health_officer/medical_clearance.php" class="text-decoration-none">
             <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
               <div class="position-absolute top-0 start-0 w-100 bg-danger" style="height: 4px;"></div>
               <div class="mb-3 d-flex justify-content-center">

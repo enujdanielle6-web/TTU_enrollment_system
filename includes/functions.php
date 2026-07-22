@@ -51,106 +51,70 @@ function getApplicationTimelineSteps(string $status, string $docMethod = 'online
 {
     $steps = [
         [
-            'key' => 'created',
-            'label' => 'Account Created',
-            'description' => 'Your portal account was successfully created.',
+            'key' => 'account',
+            'label' => 'Creating Account',
+            'description' => 'User account successfully created and verified.',
             'state' => 'completed',
-            'timestamp' => $timestamps['created'] ?? null,
+            'timestamp' => null,
         ],
         [
-            'key' => 'submitted',
-            'label' => 'Application Submitted',
-            'description' => 'Your enrollment form was submitted and received.',
+            'key' => 'preparing',
+            'label' => 'Preparing Application',
+            'description' => 'Fill out your enrollment form and personal details.',
             'state' => 'pending',
             'timestamp' => $timestamps['submitted'] ?? null,
         ],
         [
             'key' => 'documents',
-            'label' => $docMethod === 'on_campus' ? 'On-Campus Verification' : 'Documents Uploaded',
-            'description' => $docMethod === 'on_campus' ? 'Physical verification scheduled at the admissions office.' : 'Required academic documents uploaded (Verification pending).',
+            'label' => 'Uploading Documents',
+            'description' => 'Upload required academic documents for verification.',
             'state' => 'pending',
             'timestamp' => $timestamps['documents'] ?? null,
         ],
         [
             'key' => 'review',
             'label' => 'Under Review',
-            'description' => 'The admissions office is verifying your details.',
+            'description' => 'The admissions office is verifying your application.',
             'state' => 'pending',
             'timestamp' => $timestamps['review'] ?? null,
         ],
+        [
+            'key' => 'assessment',
+            'label' => 'Assessment',
+            'description' => 'View your fee breakdown and financial assessment.',
+            'state' => 'pending',
+            'timestamp' => null,
+        ],
+        [
+            'key' => 'payment',
+            'label' => 'Payment',
+            'description' => 'Settle your enrollment fees.',
+            'state' => 'pending',
+            'timestamp' => null,
+        ],
+        [
+            'key' => 'enrolled',
+            'label' => 'Enrolled',
+            'description' => 'You are officially enrolled as a student.',
+            'state' => 'pending',
+            'timestamp' => $timestamps['enrolled'] ?? null,
+        ]
     ];
 
-    if ($status === 'correction_required' || !empty($timestamps['correction'])) {
-        $steps[] = [
-            'key' => 'correction',
-            'label' => 'Correction Required',
-            'description' => 'Please update your details according to admin feedback.',
-            'state' => 'active',
-            'timestamp' => $timestamps['correction'] ?? null,
-        ];
-    }
-
-    $steps[] = [
-        'key' => 'approved',
-        'label' => 'Application Approved',
-        'description' => 'Your enrollment application has been verified and approved.',
-        'state' => 'pending',
-        'timestamp' => $timestamps['approved'] ?? null,
-    ];
-
-    $steps[] = [
-        'key' => 'health_info',
-        'label' => 'Health Information',
-        'description' => 'Submit your health information.',
-        'state' => 'pending',
-        'timestamp' => null,
-    ];
-
-    $steps[] = [
-        'key' => 'medical_clearance',
-        'label' => 'Medical Clearance',
-        'description' => 'Clinic verification of your medical clearance.',
-        'state' => 'pending',
-        'timestamp' => null,
-    ];
-
-    $steps[] = [
-        'key' => 'scholarship',
-        'label' => 'Scholarship (Optional)',
-        'description' => 'Apply for academic or financial scholarships.',
-        'state' => 'pending',
-        'timestamp' => null,
-    ];
-
-    $steps[] = [
-        'key' => 'cashier',
-        'label' => 'Cashier / Assessment',
-        'description' => 'Settle your enrollment fees.',
-        'state' => 'pending',
-        'timestamp' => null,
-    ];
-
-    $steps[] = [
-        'key' => 'enrolled',
-        'label' => 'Enrollment Complete',
-        'description' => 'You are officially enrolled as a student.',
-        'state' => 'pending',
-        'timestamp' => $timestamps['enrolled'] ?? null,
-    ];
-
-    // Map database application status to timeline step states
-    if ($status === 'pending') {
-        $steps[1]['state'] = 'completed'; // Submitted
+    if ($status === 'not_started') {
+        $steps[1]['state'] = 'active'; // Preparing Application
+    } elseif ($status === 'pending') {
+        $steps[1]['state'] = 'completed';
         if ($docMethod === 'on_campus') {
-            $steps[2]['state'] = 'active'; // Waiting for on-campus verification
+            $steps[2]['state'] = 'active'; 
+            $steps[2]['description'] = 'Physical verification scheduled at the admissions office.';
             $steps[3]['state'] = 'pending';
         } else {
             if ($hasUploadedDocs) {
-                $steps[2]['state'] = 'completed'; // Documents uploaded
-                $steps[3]['state'] = 'active';    // Under review is active
+                $steps[2]['state'] = 'completed';
+                $steps[3]['state'] = 'active';
             } else {
-                $steps[2]['state'] = 'active';    // Waiting for documents
-                $steps[3]['state'] = 'pending';   // Under review pending
+                $steps[2]['state'] = 'active';
             }
         }
     } elseif ($status === 'under_review') {
@@ -160,40 +124,24 @@ function getApplicationTimelineSteps(string $status, string $docMethod = 'online
     } elseif ($status === 'correction_required') {
         $steps[1]['state'] = 'completed';
         $steps[2]['state'] = 'completed';
-        $steps[3]['state'] = 'completed';
-        // 'correction' is active by default
+        $steps[3]['state'] = 'active'; 
+        $steps[3]['label'] = 'Correction Required';
+        $steps[3]['description'] = 'Please update your details according to admin feedback.';
+        $steps[3]['timestamp'] = $timestamps['correction'] ?? null;
     } elseif ($status === 'approved') {
         $steps[1]['state'] = 'completed';
         $steps[2]['state'] = 'completed';
         $steps[3]['state'] = 'completed';
-        foreach ($steps as &$step) {
-            if ($step['key'] === 'approved') {
-                $step['state'] = 'completed';
-            }
-            // Logic for health/medical could be refined based on DB if we pass health status here,
-            // but since we only have application status here, we'll mark the next logical step active.
-            if ($step['key'] === 'health_info') {
-                $step['state'] = 'active'; // Or we let applicant/dashboard.php refine this based on health_records
-            }
-        }
-        unset($step);
+        $steps[4]['state'] = 'active'; // Assessment
     } elseif ($status === 'rejected') {
         $steps[1]['state'] = 'completed';
         $steps[2]['state'] = 'completed';
-        $steps[3]['state'] = 'completed';
-        foreach ($steps as &$step) {
-            if ($step['key'] === 'approved') {
-                $step['label'] = 'Application Rejected';
-                $step['description'] = 'Your enrollment application was not approved.';
-                $step['state'] = 'rejected';
-            }
-        }
-        unset($step);
+        $steps[3]['state'] = 'rejected';
+        $steps[3]['label'] = 'Application Rejected';
+        $steps[3]['description'] = 'Your enrollment application was not approved.';
     } elseif ($status === 'enrolled') {
         foreach ($steps as &$step) {
-            if ($step['key'] !== 'correction') {
-                $step['state'] = 'completed';
-            }
+            $step['state'] = 'completed';
         }
         unset($step);
     }

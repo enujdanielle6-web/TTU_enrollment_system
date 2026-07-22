@@ -504,6 +504,7 @@ CREATE TABLE `student_assessments` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `application_id` int(10) unsigned NOT NULL,
+  `preview_accepted` tinyint(1) NOT NULL DEFAULT 0,
   `fee_template_id` int(10) unsigned NOT NULL,
   `scholarship_id` int(10) unsigned DEFAULT NULL,
   `tuition_fee` decimal(10,2) NOT NULL DEFAULT 0.00,

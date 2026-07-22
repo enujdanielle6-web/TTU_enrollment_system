@@ -131,6 +131,17 @@ try {
         $availableSections = $secStmt->fetchAll();
     }
 
+    // Check for pending scholarships
+    $scholStmt = $pdo->prepare('
+        SELECT sa.status, s.name as scholarship_name 
+        FROM scholarship_applications sa 
+        JOIN scholarships s ON sa.scholarship_id = s.id 
+        WHERE sa.user_id = :user_id 
+        ORDER BY sa.created_at DESC LIMIT 1
+    ');
+    $scholStmt->execute(['user_id' => $app['user_id']]);
+    $latestScholarship = $scholStmt->fetch();
+
 } catch (PDOException $e) {
     error_log('Admin detail fetch failed: ' . $e->getMessage());
     showErrorPage('Database Error', 'A database error occurred while querying details for this application.');
@@ -185,100 +196,85 @@ require_once __DIR__ . '/../components/navbar.php';
         <!-- Left Column: Application Details -->
         <div class="col-lg-8">
         
-        <!-- Personal Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-person-vcard-fill"></i>
-            <h2>Personal Information</h2>
-          </div>
-          <div class="island-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Full Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8') ?></div>
+        <div class="row g-4 mb-4">
+          <!-- Personal Information -->
+          <div class="col-md-6">
+            <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+              <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+              <div class="island-header border-bottom border-light">
+                <i class="bi bi-person-vcard-fill text-primary"></i>
+                <h2 class="fs-6">Personal Information</h2>
               </div>
-              <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Email Address</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['email'], ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Student Number</label>
-                <div class="fw-medium text-dark"><?= $app['student_number'] ? htmlspecialchars($app['student_number'], ENT_QUOTES, 'UTF-8') : '<span class="text-muted">Not Assigned</span>' ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Date of Birth</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['birth_date'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Gender</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars(ucfirst($app['gender'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Contact No.</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['contact_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-12">
-                <label class="text-muted small fw-semibold text-uppercase">Address</label>
-                <div class="fw-medium text-dark">
-                  <?php 
-                    $fullAddress = trim(($app['address_house_number'] ?? '') . ' ' . ($app['address'] ?? ''));
-                    echo htmlspecialchars($fullAddress !== '' ? $fullAddress : 'N/A', ENT_QUOTES, 'UTF-8');
-                  ?>
-                </div>
+              <div class="island-body py-3">
+                <dl class="row mb-0 g-2">
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Full Name</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Email</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2 text-truncate" title="<?= htmlspecialchars($app['email'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($app['email'], ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Student No.</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= $app['student_number'] ? htmlspecialchars($app['student_number'], ENT_QUOTES, 'UTF-8') : '<span class="text-muted">Not Assigned</span>' ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Date of Birth</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['birth_date'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Gender</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars(ucfirst($app['gender'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Contact No.</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['contact_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-12 text-muted small fw-semibold text-uppercase mt-2">Address</dt>
+                  <dd class="col-sm-12 fw-medium text-dark mb-0 bg-light p-2 rounded">
+                    <?php 
+                      $fullAddress = trim(($app['address_house_number'] ?? '') . ' ' . ($app['address'] ?? ''));
+                      echo htmlspecialchars($fullAddress !== '' ? $fullAddress : 'N/A', ENT_QUOTES, 'UTF-8');
+                    ?>
+                  </dd>
+                </dl>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Academic Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-mortarboard-fill"></i>
-            <h2>Enrollment Details</h2>
-          </div>
-          <div class="island-body">
-            <div class="row g-3">
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Academic Level</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['academic_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+          <!-- Academic Information -->
+          <div class="col-md-6">
+            <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+              <div class="position-absolute top-0 start-0 w-100 bg-info" style="height: 4px;"></div>
+              <div class="island-header border-bottom border-light">
+                <i class="bi bi-mortarboard-fill text-info"></i>
+                <h2 class="fs-6">Enrollment Details</h2>
               </div>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Student Type</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars(ucfirst(str_replace('_', ' ', $app['student_type'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Grade/Year Level</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['grade_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">School Year</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['school_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Semester</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['semester'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <?php if (($app['academic_level'] ?? '') === 'College' && ($app['grade_level'] ?? '') === '1st Year'): ?>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">NSTP Choice</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['nstp'] ?? 'Not Selected', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <?php endif; ?>
-              <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Selected Program</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars(getStrandLabel($app['strand']), ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Application Curriculum</label>
-                <div class="fw-medium text-dark"><?= $app['assigned_curriculum_version'] ? htmlspecialchars($app['assigned_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic">Pending Assignment</span>' ?></div>
-              </div>
-              <div class="col-12 mt-2">
-                <div class="p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
-                  <label class="text-success small fw-semibold text-uppercase"><i class="bi bi-file-earmark-lock2-fill"></i> Official Student Curriculum</label>
-                  <div class="fw-bold text-success-emphasis"><?= $app['user_curriculum_version'] ? htmlspecialchars($app['user_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic">Pending First Enrollment</span>' ?></div>
-                </div>
+              <div class="island-body py-3">
+                <dl class="row mb-0 g-2">
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Academic Level</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['academic_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Student Type</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars(ucfirst(str_replace('_', ' ', $app['student_type'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Grade/Year</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['grade_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">School Year</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['school_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Semester</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['semester'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <?php if (($app['academic_level'] ?? '') === 'College' && ($app['grade_level'] ?? '') === '1st Year'): ?>
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">NSTP Choice</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['nstp'] ?? 'Not Selected', ENT_QUOTES, 'UTF-8') ?></dd>
+                  <?php endif; ?>
+                  
+                  <dt class="col-sm-12 text-muted small fw-semibold text-uppercase mt-2">Selected Program</dt>
+                  <dd class="col-sm-12 fw-medium text-dark mb-2 bg-light p-2 rounded"><?= htmlspecialchars(getStrandLabel($app['strand']), ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-12 text-muted small fw-semibold text-uppercase mt-1">Application Curriculum</dt>
+                  <dd class="col-sm-12 fw-medium text-dark mb-0">
+                    <?= $app['assigned_curriculum_version'] ? htmlspecialchars($app['assigned_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="badge bg-warning text-dark">Pending Assignment</span>' ?>
+                  </dd>
+                </dl>
               </div>
             </div>
           </div>
@@ -395,96 +391,59 @@ require_once __DIR__ . '/../components/navbar.php';
           </div>
         </div>
 
-        <!-- Family Background -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-people-fill"></i>
-            <h2>Family Background</h2>
-          </div>
-          <div class="island-body">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Father's Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['father_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+        <div class="row g-4 mb-4">
+          <!-- Family Background -->
+          <div class="col-md-6">
+            <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+              <div class="position-absolute top-0 start-0 w-100 bg-success" style="height: 4px;"></div>
+              <div class="island-header border-bottom border-light">
+                <i class="bi bi-people-fill text-success"></i>
+                <h2 class="fs-6">Family Background</h2>
               </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Father's Occupation</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['father_occupation'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Father's Contact</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['father_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              
-              <div class="col-12"><hr class="my-1 border-light"></div>
-
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Mother's Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['mother_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Mother's Occupation</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['mother_occupation'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Mother's Contact</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['mother_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-
-              <div class="col-12"><hr class="my-1 border-light"></div>
-
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Guardian's Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['guardian_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Relationship</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['guardian_relationship'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Guardian's Contact</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['guardian_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="island-body py-3">
+                <div class="mb-3">
+                  <div class="fw-bold text-dark mb-1">Father</div>
+                  <div class="small text-muted"><?= htmlspecialchars($app['father_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                  <div class="small text-muted"><i class="bi bi-telephone me-1"></i><?= htmlspecialchars($app['father_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
+                <div class="mb-3">
+                  <div class="fw-bold text-dark mb-1">Mother</div>
+                  <div class="small text-muted"><?= htmlspecialchars($app['mother_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                  <div class="small text-muted"><i class="bi bi-telephone me-1"></i><?= htmlspecialchars($app['mother_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
+                <div>
+                  <div class="fw-bold text-dark mb-1">Guardian</div>
+                  <div class="small text-muted"><?= htmlspecialchars($app['guardian_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($app['guardian_relationship'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?>)</div>
+                  <div class="small text-muted"><i class="bi bi-telephone me-1"></i><?= htmlspecialchars($app['guardian_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- Emergency & Medical Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-heart-pulse-fill"></i>
-            <h2>Emergency & Medical Info</h2>
-          </div>
-          <div class="island-body">
-            <div class="row g-3">
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Emergency Contact</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['emergency_contact_person'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+          <!-- Emergency & Medical Information -->
+          <div class="col-md-6">
+            <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+              <div class="position-absolute top-0 start-0 w-100 bg-danger" style="height: 4px;"></div>
+              <div class="island-header border-bottom border-light">
+                <i class="bi bi-heart-pulse-fill text-danger"></i>
+                <h2 class="fs-6">Emergency & Medical Info</h2>
               </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Relationship</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['emergency_contact_relationship'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Contact Number</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['emergency_contact_number'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              
-              <div class="col-12"><hr class="my-1 border-light"></div>
-
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Medical Conditions</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['medical_conditions'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Allergies</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['allergies'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Special Needs</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['special_needs'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="island-body py-3">
+                <div class="mb-3 bg-danger bg-opacity-10 p-2 rounded">
+                  <div class="fw-bold text-danger mb-1"><i class="bi bi-exclamation-circle-fill me-1"></i>Emergency Contact</div>
+                  <div class="small text-dark fw-medium"><?= htmlspecialchars($app['emergency_contact_person'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?> (<?= htmlspecialchars($app['emergency_contact_relationship'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?>)</div>
+                  <div class="small text-dark fw-bold"><i class="bi bi-telephone me-1"></i><?= htmlspecialchars($app['emergency_contact_number'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
+                <dl class="row mb-0 g-2">
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Medical Cond.</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['medical_conditions'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Allergies</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-2"><?= htmlspecialchars($app['allergies'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></dd>
+                  
+                  <dt class="col-sm-5 text-muted small fw-semibold text-uppercase">Special Needs</dt>
+                  <dd class="col-sm-7 fw-medium text-dark mb-0"><?= htmlspecialchars($app['special_needs'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></dd>
+                </dl>
               </div>
             </div>
           </div>
@@ -593,7 +552,6 @@ require_once __DIR__ . '/../components/navbar.php';
                 <label for="status" class="form-label fw-semibold small text-dark">Update Status</label>
                 <select name="status" id="status" class="form-select form-select-sm" required>
                   <option value="pending" <?= $app['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
-                  <option value="under_review" <?= $app['status'] === 'under_review' ? 'selected' : '' ?>>Under Review</option>
                   <option value="correction_required" <?= $app['status'] === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
                   <option value="approved" <?= $app['status'] === 'approved' ? 'selected' : '' ?>>Approved</option>
                   <option value="rejected" <?= $app['status'] === 'rejected' ? 'selected' : '' ?>>Rejected</option>
@@ -616,13 +574,17 @@ require_once __DIR__ . '/../components/navbar.php';
               </div>
 
               <?php if (!$assessment): ?>
-              <div class="mb-4 p-3 bg-white rounded border border-warning">
-                <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" role="switch" id="generate_assessment" name="generate_assessment" value="1" <?= $app['status'] === 'approved' ? 'checked' : '' ?>>
-                  <label class="form-check-label fw-semibold small text-dark" for="generate_assessment"><i class="bi bi-cash-stack text-warning"></i> Auto-Generate Assessment</label>
-                </div>
-                <div class="form-text" style="font-size: 0.7rem;">The system will automatically assign the correct fee template for <strong><?= htmlspecialchars($app['grade_level'] ?? '', ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($app['strand'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong>. This is required before they can apply for scholarships.</div>
-              </div>
+                  <?php if ($latestScholarship && in_array($latestScholarship['status'], ['pending', 'under_review'])): ?>
+                      <div class="mb-4 p-3 bg-white rounded border border-danger">
+                        <div class="fw-semibold small text-danger"><i class="bi bi-exclamation-triangle-fill"></i> Pending Scholarship Review</div>
+                        <div class="small text-muted mt-1">This applicant has a pending application for <strong><?= htmlspecialchars($latestScholarship['scholarship_name'], ENT_QUOTES, 'UTF-8') ?></strong>. The enrollment cannot be approved until the scholarship is finalized.</div>
+                      </div>
+                  <?php else: ?>
+                      <div class="mb-4 p-3 bg-white rounded border border-warning">
+                        <div class="fw-semibold small text-dark"><i class="bi bi-cash-stack text-warning"></i> Auto-Generate Assessment</div>
+                        <div class="form-text mt-1" style="font-size: 0.7rem;">The system will automatically generate the financial assessment and apply any approved scholarships immediately upon <strong>Approval</strong> of this application.</div>
+                      </div>
+                  <?php endif; ?>
               <?php else: ?>
               <div class="mb-4 p-3 bg-white rounded border border-success">
                 <div class="fw-semibold small text-dark"><i class="bi bi-check-circle-fill text-success"></i> Assessment Generated</div>
