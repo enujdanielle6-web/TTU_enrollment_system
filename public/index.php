@@ -32,10 +32,10 @@ require_once __DIR__ . '/../components/navbar.php';
             <div class="illustration-building">
               <i class="bi bi-building"></i>
             </div>
-            <div class="illustration-card illustration-card-primary">
+            <div class="illustration-card illustration-card-primary fade-in-up" style="animation-delay: 0.1s;">
               <i class="bi bi-mortarboard-fill"></i>
             </div>
-            <div class="illustration-card illustration-card-secondary">
+            <div class="illustration-card illustration-card-secondary fade-in-up" style="animation-delay: 0.2s;">
               <i class="bi bi-journal-check"></i>
             </div>
           </div>
@@ -59,8 +59,8 @@ require_once __DIR__ . '/../components/navbar.php';
 
       <div class="admission-timeline">
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 0.3s;">
+            <div class="card-body fade-in-up" style="animation-delay: 0.4s;">
               <div class="admission-icon">
                 <i class="bi bi-person-plus"></i>
               </div>
@@ -72,8 +72,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 0.5s;">
+            <div class="card-body fade-in-up" style="animation-delay: 0.6s;">
               <div class="admission-icon">
                 <i class="bi bi-box-arrow-in-right"></i>
               </div>
@@ -85,8 +85,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 0.7s;">
+            <div class="card-body fade-in-up" style="animation-delay: 0.8s;">
               <div class="admission-icon">
                 <i class="bi bi-ui-checks"></i>
               </div>
@@ -98,8 +98,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 0.9s;">
+            <div class="card-body fade-in-up" style="animation-delay: 1s;">
               <div class="admission-icon">
                 <i class="bi bi-send-check"></i>
               </div>
@@ -111,8 +111,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 1.1s;">
+            <div class="card-body fade-in-up" style="animation-delay: 1.2s;">
               <div class="admission-icon">
                 <i class="bi bi-heart-pulse"></i>
               </div>
@@ -124,8 +124,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 1.3s;">
+            <div class="card-body fade-in-up" style="animation-delay: 1.4s;">
               <div class="admission-icon">
                 <i class="bi bi-award"></i>
               </div>
@@ -137,8 +137,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 1.5s;">
+            <div class="card-body fade-in-up" style="animation-delay: 1.6s;">
               <div class="admission-icon">
                 <i class="bi bi-hourglass-split"></i>
               </div>
@@ -150,8 +150,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 1.7s;">
+            <div class="card-body fade-in-up" style="animation-delay: 1.8s;">
               <div class="admission-icon">
                 <i class="bi bi-building"></i>
               </div>
@@ -163,8 +163,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 1.9s;">
+            <div class="card-body fade-in-up" style="animation-delay: 2s;">
               <div class="admission-icon">
                 <i class="bi bi-file-earmark-check"></i>
               </div>
@@ -176,8 +176,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 2.1s;">
+            <div class="card-body fade-in-up" style="animation-delay: 2.2s;">
               <div class="admission-icon">
                 <i class="bi bi-credit-card"></i>
               </div>
@@ -189,8 +189,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card">
-            <div class="card-body">
+          <div class="card admission-card fade-in-up" style="animation-delay: 2.3s;">
+            <div class="card-body fade-in-up" style="animation-delay: 2.4s;">
               <div class="admission-icon">
                 <i class="bi bi-patch-check"></i>
               </div>
@@ -211,81 +211,129 @@ require_once __DIR__ . '/../components/navbar.php';
         <p>Prepare the following documents before enrollment.</p>
       </div>
 
-      <div class="row g-4">
-        <div class="col-lg-4 col-md-6">
-          <div class="card requirement-card">
-            <div class="card-body">
-              <div class="requirement-icon">
-                <i class="bi bi-file-earmark-person"></i>
+      <ul class="nav nav-pills justify-content-center mb-4" id="reqsTab" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active rounded-pill px-4" id="shs-req-tab" data-bs-toggle="tab" data-bs-target="#shs-req" type="button" role="tab" aria-controls="shs-req" aria-selected="true">Senior High School</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link rounded-pill px-4" id="college-req-tab" data-bs-toggle="tab" data-bs-target="#college-req" type="button" role="tab" aria-controls="college-req" aria-selected="false">College</button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="reqsTabContent">
+        <!-- SHS Requirements Tab -->
+        <div class="tab-pane fade show active" id="shs-req" role="tabpanel" aria-labelledby="shs-req-tab">
+          <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 2.5s;">
+                <div class="card-body fade-in-up" style="animation-delay: 2.6s;">
+                  <div class="requirement-icon"><i class="bi bi-file-earmark-person"></i></div>
+                  <h3>Birth Certificate</h3>
+                  <p>Submit a clear copy issued by the civil registrar.</p>
+                </div>
               </div>
-              <h3>Birth Certificate</h3>
-              <p>Submit a clear copy issued by the civil registrar.</p>
+            </div>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 2.7s;">
+                <div class="card-body fade-in-up" style="animation-delay: 2.8s;">
+                  <div class="requirement-icon"><i class="bi bi-card-checklist"></i></div>
+                  <h3>Form 138 (Report Card)</h3>
+                  <p>Provide your latest Grade 10 report card.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 2.9s;">
+                <div class="card-body fade-in-up" style="animation-delay: 3s;">
+                  <div class="requirement-icon"><i class="bi bi-shield-check"></i></div>
+                  <h3>Good Moral Certificate</h3>
+                  <p>Include a certificate from your previous school.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 3.1s;">
+                <div class="card-body fade-in-up" style="animation-delay: 3.2s;">
+                  <div class="requirement-icon"><i class="bi bi-person-bounding-box"></i></div>
+                  <h3>2x2 ID Picture</h3>
+                  <p>Prepare a recent photo with a clean background.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 3.3s;">
+                <div class="card-body fade-in-up" style="animation-delay: 3.4s;">
+                  <div class="requirement-icon"><i class="bi bi-person-vcard"></i></div>
+                  <h3>Parent/Guardian ID</h3>
+                  <p>Submit a valid ID of your parent or guardian.</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 3.5s;">
+                <div class="card-body fade-in-up" style="animation-delay: 3.6s;">
+                  <div class="requirement-icon"><i class="bi bi-file-earmark-text"></i></div>
+                  <h3>NCAE Results</h3>
+                  <p>Photocopy of NCAE results (if available).</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="col-lg-4 col-md-6">
-          <div class="card requirement-card">
-            <div class="card-body">
-              <div class="requirement-icon">
-                <i class="bi bi-card-checklist"></i>
+        <!-- College Requirements Tab -->
+        <div class="tab-pane fade" id="college-req" role="tabpanel" aria-labelledby="college-req-tab">
+          <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 3.7s;">
+                <div class="card-body fade-in-up" style="animation-delay: 3.8s;">
+                  <div class="requirement-icon"><i class="bi bi-file-earmark-person"></i></div>
+                  <h3>Birth Certificate</h3>
+                  <p>Submit a clear copy issued by the civil registrar.</p>
+                </div>
               </div>
-              <h3>Form 138 (Report Card)</h3>
-              <p>Provide your latest completed school report card.</p>
             </div>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6">
-          <div class="card requirement-card">
-            <div class="card-body">
-              <div class="requirement-icon">
-                <i class="bi bi-shield-check"></i>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 3.9s;">
+                <div class="card-body fade-in-up" style="animation-delay: 4s;">
+                  <div class="requirement-icon"><i class="bi bi-card-checklist"></i></div>
+                  <h3>Form 138 / Transcript of Records</h3>
+                  <p>Provide your Grade 12 report card or official TOR for transferees.</p>
+                </div>
               </div>
-              <h3>Good Moral Certificate</h3>
-              <p>Include a certificate from your previous school.</p>
             </div>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6">
-          <div class="card requirement-card">
-            <div class="card-body">
-              <div class="requirement-icon">
-                <i class="bi bi-person-bounding-box"></i>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 4.1s;">
+                <div class="card-body fade-in-up" style="animation-delay: 4.2s;">
+                  <div class="requirement-icon"><i class="bi bi-shield-check"></i></div>
+                  <h3>Good Moral Certificate</h3>
+                  <p>Include a certificate from your senior high school.</p>
+                </div>
               </div>
-              <h3>2x2 ID Picture</h3>
-              <p>Prepare a recent photo with a clean background.</p>
             </div>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6">
-          <div class="card requirement-card">
-            <div class="card-body">
-              <div class="requirement-icon">
-                <i class="bi bi-file-earmark-text"></i>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 4.3s;">
+                <div class="card-body fade-in-up" style="animation-delay: 4.4s;">
+                  <div class="requirement-icon"><i class="bi bi-person-bounding-box"></i></div>
+                  <h3>2x2 ID Picture</h3>
+                  <p>Prepare a recent photo with a clean background.</p>
+                </div>
               </div>
-              <h3>Certificate of Enrollment</h3>
-              <p>Required only for transferee applicants.</p>
             </div>
-          </div>
-        </div>
-
-        <div class="col-lg-4 col-md-6">
-          <div class="card requirement-card">
-            <div class="card-body">
-              <div class="requirement-icon">
-                <i class="bi bi-person-vcard"></i>
+            <div class="col-lg-4 col-md-6">
+              <div class="card requirement-card fade-in-up" style="animation-delay: 4.5s;">
+                <div class="card-body fade-in-up" style="animation-delay: 4.6s;">
+                  <div class="requirement-icon"><i class="bi bi-file-earmark-text"></i></div>
+                  <h3>Certificate of Enrollment</h3>
+                  <p>Required only for transferee applicants.</p>
+                </div>
               </div>
-              <h3>Parent/Guardian ID</h3>
-              <p>Submit a valid ID of your parent or guardian.</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div class="requirements-note">
+      <div class="requirements-note mt-4">
         <i class="bi bi-info-circle"></i>
         <span>All original documents must be presented during on-site verification.</span>
       </div>
@@ -313,57 +361,67 @@ require_once __DIR__ . '/../components/navbar.php';
         <div class="tab-pane fade show active" id="shs" role="tabpanel" aria-labelledby="shs-tab">
           <div class="row g-4">
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 4.7s;">
+                <div class="card-body fade-in-up" style="animation-delay: 4.8s;">
                   <div class="program-icon">
                     <i class="bi bi-calculator"></i>
                   </div>
                   <h3>STEM</h3>
                   <p>Science, Technology, Engineering, and Mathematics for future innovators.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Engineer, Programmer, Architect</p>
                 </div>
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 4.9s;">
+                <div class="card-body fade-in-up" style="animation-delay: 5s;">
                   <div class="program-icon">
                     <i class="bi bi-briefcase"></i>
                   </div>
                   <h3>ABM</h3>
                   <p>Accountancy, Business, and Management for aspiring business leaders.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Accountant, Entrepreneur, Manager</p>
                 </div>
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.1s;">
+                <div class="card-body fade-in-up" style="animation-delay: 5.2s;">
                   <div class="program-icon">
                     <i class="bi bi-chat-square-quote"></i>
                   </div>
                   <h3>HUMSS</h3>
                   <p>Humanities and Social Sciences for communication and public service paths.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Lawyer, Teacher, Psychologist</p>
                 </div>
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.3s;">
+                <div class="card-body fade-in-up" style="animation-delay: 5.4s;">
                   <div class="program-icon">
                     <i class="bi bi-tools"></i>
                   </div>
                   <h3>TVL</h3>
                   <p>Technical Vocational Livelihood for practical career-ready training.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Technician, Chef, IT Support</p>
                 </div>
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.5s;">
+                <div class="card-body fade-in-up" style="animation-delay: 5.6s;">
                   <div class="program-icon">
                     <i class="bi bi-journal-bookmark"></i>
                   </div>
                   <h3>GAS</h3>
                   <p>General Academic Strand for flexible preparation across college programs.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Educator, Administrator, Various</p>
                 </div>
               </div>
             </div>
@@ -374,57 +432,67 @@ require_once __DIR__ . '/../components/navbar.php';
         <div class="tab-pane fade" id="college" role="tabpanel" aria-labelledby="college-tab">
           <div class="row g-4">
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.7s;">
+                <div class="card-body fade-in-up" style="animation-delay: 5.8s;">
                   <div class="program-icon">
                     <i class="bi bi-pc-display"></i>
                   </div>
                   <h3>BSIT</h3>
                   <p>Bachelor of Science in Information Technology for future software developers and IT professionals.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Software Engineer, IT Analyst, System Admin</p>
                 </div>
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.9s;">
+                <div class="card-body fade-in-up" style="animation-delay: 6s;">
                   <div class="program-icon">
                     <i class="bi bi-laptop"></i>
                   </div>
                   <h3>BSCS</h3>
                   <p>Bachelor of Science in Computer Science focusing on computing theory and advanced software systems.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Data Scientist, Systems Architect, AI Researcher</p>
                 </div>
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 6.1s;">
+                <div class="card-body fade-in-up" style="animation-delay: 6.2s;">
                   <div class="program-icon">
                     <i class="bi bi-calculator-fill"></i>
                   </div>
                   <h3>BSA</h3>
                   <p>Bachelor of Science in Accountancy for future certified public accountants and financial experts.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: CPA, Financial Advisor, Auditor</p>
                 </div>
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 6.3s;">
+                <div class="card-body fade-in-up" style="animation-delay: 6.4s;">
                   <div class="program-icon">
                     <i class="bi bi-book-half"></i>
                   </div>
                   <h3>BSED</h3>
                   <p>Bachelor of Secondary Education for aspiring high school teachers and educators.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: High School Teacher, Educator, Principal</p>
                 </div>
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100">
-                <div class="card-body">
+              <div class="card program-card h-100 fade-in-up" style="animation-delay: 6.5s;">
+                <div class="card-body fade-in-up" style="animation-delay: 6.6s;">
                   <div class="program-icon">
                     <i class="bi bi-bar-chart-line"></i>
                   </div>
                   <h3>BSBA</h3>
                   <p>Bachelor of Science in Business Administration for future corporate leaders and entrepreneurs.</p>
+                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
+                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Corporate Manager, HR Director, Marketer</p>
                 </div>
               </div>
             </div>
@@ -580,8 +648,8 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <div class="col-lg-7">
-          <div class="card contact-form-card">
-            <div class="card-body">
+          <div class="card contact-form-card fade-in-up" style="animation-delay: 6.7s;">
+            <div class="card-body fade-in-up" style="animation-delay: 6.8s;">
               <form action="#" method="post">
                 <div class="row g-3">
                   <div class="col-md-6">

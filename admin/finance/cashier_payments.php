@@ -36,7 +36,7 @@ try {
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">Payment History</h1>
         <p class="text-muted mb-0">Global ledger of all recorded student payments.</p>
@@ -49,14 +49,14 @@ try {
       </div>
     </div>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light">
+      <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.3s;">
         <i class="bi bi-receipt text-primary"></i>
         <h2 class="mb-0 text-dark">All Transactions</h2>
       </div>
       
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light">
@@ -82,7 +82,11 @@ try {
                 <?php foreach ($payments as $payment): ?>
                   <tr>
                     <td class="ps-4 fw-bold text-primary">
-                      <?= htmlspecialchars($payment['receipt_number'], ENT_QUOTES, 'UTF-8') ?>
+                      <?php if ($payment['status'] === 'pending'): ?>
+                        <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Pending Verification</span>
+                      <?php else: ?>
+                        <?= htmlspecialchars($payment['receipt_number'], ENT_QUOTES, 'UTF-8') ?>
+                      <?php endif; ?>
                     </td>
                     <td>
                       <?= date('M d, Y g:i A', strtotime($payment['created_at'])) ?>
@@ -98,12 +102,25 @@ try {
                       ₱<?= number_format((float)$payment['amount'], 2) ?>
                     </td>
                     <td class="small text-muted">
-                      <?= htmlspecialchars($payment['cashier_last'] ?? 'System', ENT_QUOTES, 'UTF-8') ?>
+                      <?= $payment['status'] === 'pending' ? '<span class="text-warning fw-medium">Needs Review</span>' : htmlspecialchars($payment['cashier_last'] ?? 'System', ENT_QUOTES, 'UTF-8') ?>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="cashier_receipt.php?id=<?= $payment['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
-                        <i class="bi bi-printer"></i> View
-                      </a>
+                      <?php if ($payment['status'] === 'pending'): ?>
+                        <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 fw-semibold verify-btn shadow-sm"
+                                data-id="<?= $payment['id'] ?>"
+                                data-name="<?= htmlspecialchars($payment['student_first'] . ' ' . $payment['student_last'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-amount="<?= number_format((float)$payment['amount'], 2) ?>"
+                                data-method="<?= htmlspecialchars($payment['payment_method'], ENT_QUOTES, 'UTF-8') ?>"
+                                data-ref="<?= htmlspecialchars($payment['reference_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>"
+                                data-img="../../uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                data-bs-toggle="modal" data-bs-target="#verifyModal">
+                          <i class="bi bi-shield-check"></i> Verify
+                        </button>
+                      <?php else: ?>
+                        <a href="cashier_receipt.php?id=<?= $payment['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
+                          <i class="bi bi-printer"></i> View
+                        </a>
+                      <?php endif; ?>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -121,6 +138,51 @@ try {
     </div>
   </div>
 </main>
+
+<!-- Verify Payment Modal -->
+<div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-warning border-0 py-3">
+        <h5 class="modal-title fw-bold text-dark" id="verifyModalLabel"><i class="bi bi-shield-check me-2"></i> Verify Proof of Payment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="cashier_process.php" method="POST">
+        <div class="modal-body p-4 bg-light">
+          <input type="hidden" name="action" value="verify_online_payment">
+          <input type="hidden" name="payment_id" id="verifyPaymentId" value="">
+          <?= getCsrfInput() ?>
+
+          <div class="row g-4">
+            <div class="col-md-5">
+              <div class="p-3 bg-white rounded-3 shadow-sm mb-3">
+                <p class="text-muted small fw-bold text-uppercase mb-1">Student</p>
+                <p class="fw-semibold text-dark mb-0 fs-5" id="verifyStudentName"></p>
+              </div>
+              <div class="p-3 bg-white rounded-3 shadow-sm mb-3">
+                <p class="text-muted small fw-bold text-uppercase mb-1">Amount Declared</p>
+                <p class="fw-bold text-success mb-0 fs-3">₱<span id="verifyAmount"></span></p>
+              </div>
+              <div class="p-3 bg-white rounded-3 shadow-sm mb-3">
+                <p class="text-muted small fw-bold text-uppercase mb-1">Method & Reference</p>
+                <p class="fw-semibold text-dark mb-0"><span id="verifyMethod"></span> - <span id="verifyRef"></span></p>
+              </div>
+            </div>
+            <div class="col-md-7 text-center">
+              <div class="bg-white p-2 rounded-3 shadow-sm h-100 d-flex align-items-center justify-content-center">
+                <img id="verifyImage" src="" alt="Proof of Payment" class="img-fluid rounded" style="max-height: 400px; object-fit: contain;">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top-0 pt-0 bg-light">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm fw-semibold">Approve Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -151,6 +213,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    const verifyButtons = document.querySelectorAll('.verify-btn');
+    verifyButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.getElementById('verifyPaymentId').value = this.getAttribute('data-id');
+            document.getElementById('verifyStudentName').textContent = this.getAttribute('data-name');
+            document.getElementById('verifyAmount').textContent = this.getAttribute('data-amount');
+            document.getElementById('verifyMethod').textContent = this.getAttribute('data-method');
+            document.getElementById('verifyRef').textContent = this.getAttribute('data-ref');
+            document.getElementById('verifyImage').src = this.getAttribute('data-img');
+        });
+    });
 });
 </script>
 

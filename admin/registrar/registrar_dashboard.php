@@ -50,7 +50,7 @@ try {
 
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="h3 fw-bold text-dark mb-1">Registrar Dashboard</h1>
@@ -62,7 +62,7 @@ try {
     <!-- Academic Statistics -->
     <div class="row g-4 mb-4">
       <div class="col-md-3">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 56px; height: 56px;">
@@ -75,7 +75,7 @@ try {
       </div>
       
       <div class="col-md-3">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.3s;">
           <div class="position-absolute top-0 start-0 w-100 bg-warning" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle" style="width: 56px; height: 56px;">
@@ -88,7 +88,7 @@ try {
       </div>
 
       <div class="col-md-3">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.4s;">
           <div class="position-absolute top-0 start-0 w-100 bg-info" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-circle" style="width: 56px; height: 56px;">
@@ -102,7 +102,7 @@ try {
 
       <div class="col-md-3">
         <a href="students.php" class="text-decoration-none">
-            <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+            <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.5s;">
               <div class="position-absolute top-0 start-0 w-100 bg-success" style="height: 4px;"></div>
               <div class="mb-3 d-flex justify-content-center">
                 <div class="d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 56px; height: 56px;">
@@ -119,12 +119,12 @@ try {
     <!-- Quick Navigation Links -->
     <div class="row g-4">
       <div class="col-md-6">
-        <div class="island h-100">
-          <div class="island-header border-bottom pb-2">
+        <div class="island h-100 fade-in-up" style="animation-delay: 0.6s;">
+          <div class="island-header border-bottom pb-2 fade-in-up" style="animation-delay: 0.7s;">
             <i class="bi bi-mortarboard-fill text-primary"></i>
             <h2>College Shortcuts</h2>
           </div>
-          <div class="island-body p-4">
+          <div class="island-body p-4 fade-in-up" style="animation-delay: 0.8s;">
             <div class="d-flex flex-column gap-3">
                 <a href="college_programs.php" class="btn btn-outline-primary text-start p-3 rounded-12 d-flex align-items-center gap-3">
                   <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2"><i class="bi bi-journal-bookmark fs-5"></i></div>
@@ -160,12 +160,12 @@ try {
       </div>
       
       <div class="col-md-6">
-        <div class="island h-100">
-          <div class="island-header border-bottom pb-2">
+        <div class="island h-100 fade-in-up" style="animation-delay: 0.9s;">
+          <div class="island-header border-bottom pb-2 fade-in-up" style="animation-delay: 1s;">
             <i class="bi bi-building text-primary"></i>
             <h2>Senior High Shortcuts</h2>
           </div>
-          <div class="island-body p-4">
+          <div class="island-body p-4 fade-in-up" style="animation-delay: 1.1s;">
             <div class="d-flex flex-column gap-3">
                 <a href="shs_strands.php" class="btn btn-outline-primary text-start p-3 rounded-12 d-flex align-items-center gap-3">
                   <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-2"><i class="bi bi-journal-text fs-5"></i></div>

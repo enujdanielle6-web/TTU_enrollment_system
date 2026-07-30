@@ -21,7 +21,7 @@ require_once __DIR__ . '/../components/navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">Database Backup & Restore</h1>
         <p class="text-muted mb-0">Securely export the enrollment database or restore from a previous state.</p>
@@ -44,13 +44,13 @@ require_once __DIR__ . '/../components/navbar.php';
       
       <!-- Export Backup Island -->
       <div class="col-lg-6">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100" style="border-radius: 16px;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 fade-in-up" style="border-radius: 16px; animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light bg-primary-light mb-3">
+          <div class="island-header border-bottom border-light bg-primary-light mb-3 fade-in-up" style="animation-delay: 0.3s;">
             <i class="bi bi-cloud-download text-primary"></i>
             <h2 class="text-primary">Generate Database Backup</h2>
           </div>
-          <div class="island-body d-flex flex-column justify-content-between">
+          <div class="island-body d-flex flex-column justify-content-between fade-in-up" style="animation-delay: 0.4s;">
             <div>
               <p class="text-dark">Download a complete snapshot of the system's database. This includes all users, applications, uploaded file paths, and settings.</p>
               <div class="alert alert-info border-0 bg-info bg-opacity-10 text-dark small rounded-3 mt-3">
@@ -73,13 +73,13 @@ require_once __DIR__ . '/../components/navbar.php';
 
       <!-- Restore Database Island -->
       <div class="col-lg-6">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100" style="border-radius: 16px;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 fade-in-up" style="border-radius: 16px; animation-delay: 0.5s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light bg-danger bg-opacity-10 mb-3">
+          <div class="island-header border-bottom border-light bg-danger bg-opacity-10 mb-3 fade-in-up" style="animation-delay: 0.6s;">
             <i class="bi bi-exclamation-triangle-fill text-danger"></i>
             <h2 class="text-danger">Restore Database</h2>
           </div>
-          <div class="island-body d-flex flex-column justify-content-between">
+          <div class="island-body d-flex flex-column justify-content-between fade-in-up" style="animation-delay: 0.7s;">
             <div>
               <p class="text-dark fw-medium mb-2">Upload a previously generated <code>.sql</code> backup file to revert the system state.</p>
               <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger small rounded-3 mt-3">

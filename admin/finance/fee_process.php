@@ -37,6 +37,10 @@ try {
             throw new Exception('Template Name and Grade Level are required.');
         }
 
+        if ($tuition < 0 || $misc < 0 || $reg < 0 || $lab < 0 || $other < 0) {
+            throw new Exception('Fee amounts cannot be negative.');
+        }
+
         $totalAmount = $tuition + $misc + $reg + $lab + $other;
 
         $insertStmt = $pdo->prepare('
@@ -90,6 +94,10 @@ try {
 
         if ($id <= 0 || $name === '' || $gradeLevel === '') {
             throw new Exception('Missing required information to update fee template.');
+        }
+        
+        if ($tuition < 0 || $misc < 0 || $reg < 0 || $lab < 0 || $other < 0) {
+            throw new Exception('Fee amounts cannot be negative.');
         }
 
         $totalAmount = $tuition + $misc + $reg + $lab + $other;

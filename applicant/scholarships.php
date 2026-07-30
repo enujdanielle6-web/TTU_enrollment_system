@@ -75,7 +75,7 @@ require_once __DIR__ . '/components/navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container px-lg-5">
     
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <h1 class="h3 fw-bold text-dark mb-1">Scholarships</h1>
       <p class="text-muted mb-0">Apply for financial aid and academic scholarships.</p>
     </div>
@@ -88,21 +88,21 @@ require_once __DIR__ . '/components/navbar.php';
     <?php endif; ?>
 
     <?php if (!$isApproved): ?>
-        <div class="island text-center py-5">
+        <div class="island text-center py-5 fade-in-up" style="animation-delay: 0.2s;">
             <i class="bi bi-lock text-muted" style="font-size: 3rem;"></i>
             <h3 class="mt-3">Scholarships Locked</h3>
             <p class="text-muted">You can only apply for scholarships once your enrollment application has been <strong>Approved</strong>.</p>
 
         </div>
     <?php elseif (!$isMedicalVerified): ?>
-        <div class="island text-center py-5 border-warning border-2">
+        <div class="island text-center py-5 border-warning border-2 fade-in-up" style="animation-delay: 0.3s;">
             <i class="bi bi-heart-pulse text-warning" style="font-size: 3rem;"></i>
             <h3 class="mt-3">Medical Clearance Required</h3>
             <p class="text-muted">You must complete your Medical Clearance before applying for scholarships.</p>
             <a href="health_info.php" class="btn btn-primary rounded-pill mt-3 px-4">Go to Health Information</a>
         </div>
     <?php elseif (!$hasAssessment): ?>
-        <div class="island text-center py-5 border-warning border-2">
+        <div class="island text-center py-5 border-warning border-2 fade-in-up" style="animation-delay: 0.4s;">
             <i class="bi bi-hourglass-split text-warning" style="font-size: 3rem;"></i>
             <h3 class="mt-3">Awaiting Assessment</h3>
             <p class="text-muted">Your application is approved, but the administration is still finalizing your fee assessment.<br>Please check back later.</p>
@@ -113,12 +113,12 @@ require_once __DIR__ . '/components/navbar.php';
         <div class="row g-4">
             
             <div class="col-lg-8">
-                <div class="island mb-4">
-                    <div class="island-header">
+                <div class="island mb-4 fade-in-up" style="animation-delay: 0.5s;">
+                    <div class="island-header fade-in-up" style="animation-delay: 0.6s;">
                         <i class="bi bi-award-fill text-primary"></i>
                         <h2 class="mb-0 text-dark">Available Scholarships</h2>
                     </div>
-                    <div class="island-body p-0">
+                    <div class="island-body p-0 fade-in-up" style="animation-delay: 0.7s;">
                         <div class="list-group list-group-flush rounded-bottom-4">
                             <?php if (empty($activeScholarships)): ?>
                                 <div class="p-5 text-center text-muted">
@@ -165,12 +165,12 @@ require_once __DIR__ . '/components/navbar.php';
             </div>
 
             <div class="col-lg-4">
-                <div class="island sticky-top" style="top: 80px;">
-                    <div class="island-header bg-light">
+                <div class="island sticky-top fade-in-up" style="top: 80px; animation-delay: 0.8s;">
+                    <div class="island-header bg-light fade-in-up" style="animation-delay: 0.9s;">
                         <i class="bi bi-clock-history"></i>
                         <h2 class="mb-0">My Applications</h2>
                     </div>
-                    <div class="island-body p-0">
+                    <div class="island-body p-0 fade-in-up" style="animation-delay: 1s;">
                         <?php if (empty($myApplications)): ?>
                             <div class="p-4 text-center text-muted small">
                                 You haven't applied for any scholarships yet.

@@ -28,7 +28,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">Scholarship Types</h1>
         <p class="text-muted mb-0">Manage the scholarships and financial aids available to students.</p>
@@ -47,14 +47,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm" style="border-radius: 16px;">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm fade-in-up" style="border-radius: 16px; animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light">
+      <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.3s;">
         <i class="bi bi-award text-primary"></i>
         <h2 class="mb-0 text-dark">Existing Scholarship Types</h2>
       </div>
       
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light">
@@ -157,14 +157,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
           <div class="row g-3 mb-3">
             <div class="col-md-6">
               <label class="form-label small fw-semibold text-dark">Discount Type</label>
-              <select name="discount_type" class="form-select bg-light" required>
+              <select name="discount_type" id="addScholarshipType" class="form-select bg-light" required>
                 <option value="percentage">Percentage (%)</option>
                 <option value="fixed">Fixed Amount (₱)</option>
               </select>
             </div>
             <div class="col-md-6">
               <label class="form-label small fw-semibold text-dark">Discount Value</label>
-              <input type="number" step="0.01" min="0" name="discount_value" class="form-control bg-light" required placeholder="e.g. 50">
+              <input type="number" step="0.01" min="0" name="discount_value" id="addScholarshipValue" class="form-control bg-light" required placeholder="e.g. 50">
             </div>
           </div>
           
@@ -250,7 +250,54 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       $('#editScholarshipDesc').val($(this).data('desc'));
       $('#editScholarshipReq').val($(this).data('req'));
     });
-  });
+  
+    function setupScholarshipValidation(typeId, valueId) {
+        const typeSelect = document.getElementById(typeId);
+        const valueInput = document.getElementById(valueId);
+        
+        if (!typeSelect || !valueInput) return;
+        
+        typeSelect.addEventListener('change', function() {
+            if (this.value === 'percentage') {
+                valueInput.setAttribute('max', '100');
+                valueInput.setAttribute('min', '1');
+                valueInput.setAttribute('step', '1'); // Enforce whole numbers (no decimals)
+                
+                let val = parseFloat(valueInput.value);
+                if (val > 100) valueInput.value = '100';
+                if (val < 1) valueInput.value = '1';
+                
+                // Remove decimals if they exist
+                if (valueInput.value.includes('.')) {
+                    valueInput.value = Math.floor(val);
+                }
+            } else {
+                valueInput.removeAttribute('max');
+                valueInput.setAttribute('min', '0');
+                valueInput.setAttribute('step', '0.01'); // Allow decimals for currency
+            }
+        });
+        
+        // Trigger initially
+        typeSelect.dispatchEvent(new Event('change'));
+        
+        // Prevent typing > 100 or decimals on keyup/input
+        valueInput.addEventListener('input', function() {
+            if (typeSelect.value === 'percentage') {
+                if (parseFloat(this.value) > 100) {
+                    this.value = '100';
+                }
+                // Strip decimals immediately
+                if (this.value.includes('.')) {
+                    this.value = this.value.replace(/\./g, '');
+                }
+            }
+        });
+    }
+
+    setupScholarshipValidation('addScholarshipType', 'addScholarshipValue');
+    setupScholarshipValidation('editScholarshipType', 'editScholarshipValue');
+});
 </script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

@@ -125,7 +125,7 @@ require_once __DIR__ . '/../components/navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="h3 fw-bold text-dark mb-1">Analytics & Reports</h1>
@@ -156,7 +156,7 @@ require_once __DIR__ . '/../components/navbar.php';
     <div class="row g-4 mb-4">
       <?php if (hasPermission('payments.record')): ?>
       <div class="col-md-6 col-lg-3">
-        <div class="island minimal-card text-center py-4 h-100">
+        <div class="island minimal-card text-center py-4 h-100 fade-in-up" style="animation-delay: 0.2s;">
           <div class="text-info mb-3">
             <i class="bi bi-cash-stack display-6"></i>
           </div>
@@ -165,7 +165,7 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
-        <div class="island minimal-card text-center py-4 h-100">
+        <div class="island minimal-card text-center py-4 h-100 fade-in-up" style="animation-delay: 0.3s;">
           <div class="text-success mb-3">
             <i class="bi bi-bank display-6"></i>
           </div>
@@ -174,7 +174,7 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
-        <div class="island minimal-card text-center py-4 h-100">
+        <div class="island minimal-card text-center py-4 h-100 fade-in-up" style="animation-delay: 0.4s;">
           <div class="text-danger mb-3">
             <i class="bi bi-exclamation-triangle display-6"></i>
           </div>
@@ -185,7 +185,7 @@ require_once __DIR__ . '/../components/navbar.php';
       <?php endif; ?>
       <?php if (hasPermission(['scholarships.manage', 'payments.record'])): ?>
       <div class="col-md-6 col-lg-3">
-        <div class="island minimal-card text-center py-4 h-100">
+        <div class="island minimal-card text-center py-4 h-100 fade-in-up" style="animation-delay: 0.5s;">
           <div class="text-warning mb-3">
             <i class="bi bi-award-fill display-6"></i>
           </div>
@@ -199,13 +199,13 @@ require_once __DIR__ . '/../components/navbar.php';
     <div class="row g-4 mb-4">
       <?php if (hasPermission(['scholarships.manage', 'payments.record'])): ?>
       <div class="col-lg-6">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4 fade-in-up" style="animation-delay: 0.6s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header">
+          <div class="island-header fade-in-up" style="animation-delay: 0.7s;">
             <i class="bi bi-award text-warning"></i>
             <h2 class="mb-0 text-dark">Scholarship Distribution</h2>
           </div>
-          <div class="island-body p-0">
+          <div class="island-body p-0 fade-in-up" style="animation-delay: 0.8s;">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 custom-table">
                 <thead class="table-light">
@@ -241,13 +241,13 @@ require_once __DIR__ . '/../components/navbar.php';
       <?php endif; ?>
       <?php if (hasPermission('payments.record')): ?>
       <div class="col-lg-6">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4 fade-in-up" style="animation-delay: 0.9s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header">
+          <div class="island-header fade-in-up" style="animation-delay: 1s;">
             <i class="bi bi-wallet2 text-primary"></i>
             <h2 class="mb-0 text-dark">Payment Methods</h2>
           </div>
-          <div class="island-body p-0">
+          <div class="island-body p-0 fade-in-up" style="animation-delay: 1.1s;">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 custom-table">
                 <thead class="table-light">
@@ -285,13 +285,13 @@ require_once __DIR__ . '/../components/navbar.php';
 
     <?php if (hasPermission('applications.view_queue')): ?>
     <!-- Medical Clearance Statistics -->
-    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light">
+      <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.3s;">
         <i class="bi bi-heart-pulse-fill text-danger"></i>
         <h2 class="mb-0 text-dark">Medical Clearance Statistics</h2>
       </div>
-      <div class="island-body">
+      <div class="island-body fade-in-up" style="animation-delay: 1.4s;">
         <div class="row g-3 text-center">
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="p-3 bg-light rounded-3 h-100">
@@ -339,7 +339,7 @@ require_once __DIR__ . '/../components/navbar.php';
     <!-- Admissions Overview Cards -->
     <div class="row g-4 mb-4">
       <div class="col-md-6 col-lg-3">
-        <div class="island minimal-card text-center py-4 h-100">
+        <div class="island minimal-card text-center py-4 h-100 fade-in-up" style="animation-delay: 1.5s;">
           <div class="text-success mb-3">
             <i class="bi bi-patch-check-fill display-6"></i>
           </div>
@@ -348,7 +348,7 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
-        <div class="island minimal-card text-center py-4 h-100">
+        <div class="island minimal-card text-center py-4 h-100 fade-in-up" style="animation-delay: 1.6s;">
           <div class="text-primary mb-3">
             <i class="bi bi-person-check-fill display-6"></i>
           </div>
@@ -357,7 +357,7 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
-        <div class="island minimal-card text-center py-4 h-100">
+        <div class="island minimal-card text-center py-4 h-100 fade-in-up" style="animation-delay: 1.7s;">
           <div class="text-warning mb-3">
             <i class="bi bi-hourglass-split display-6"></i>
           </div>
@@ -366,7 +366,7 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
       </div>
       <div class="col-md-6 col-lg-3">
-        <div class="island minimal-card text-center py-4 h-100">
+        <div class="island minimal-card text-center py-4 h-100 fade-in-up" style="animation-delay: 1.8s;">
           <div class="text-dark mb-3">
             <i class="bi bi-files display-6"></i>
           </div>
@@ -379,13 +379,13 @@ require_once __DIR__ . '/../components/navbar.php';
     <!-- Charts Row 1: Line Chart (Submission Trend) -->
     <div class="row g-4 mb-4">
       <div class="col-12">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm" style="border-radius: 16px;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm fade-in-up" style="border-radius: 16px; animation-delay: 1.9s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 2s;">
             <i class="bi bi-graph-up text-primary"></i>
             <h2>14-Day Application Trend</h2>
           </div>
-          <div class="island-body mt-2">
+          <div class="island-body mt-2 fade-in-up" style="animation-delay: 2.1s;">
             <div style="position: relative; height: 320px; width: 100%;">
               <canvas id="trendChart"></canvas>
             </div>
@@ -399,13 +399,13 @@ require_once __DIR__ . '/../components/navbar.php';
       
       <!-- Program Distribution -->
       <div class="col-md-6 col-lg-4">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100" style="border-radius: 16px;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 fade-in-up" style="border-radius: 16px; animation-delay: 2.2s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header">
+          <div class="island-header fade-in-up" style="animation-delay: 2.3s;">
             <i class="bi bi-bar-chart text-info"></i>
             <h2>Program Distribution</h2>
           </div>
-          <div class="island-body mt-2 text-center">
+          <div class="island-body mt-2 text-center fade-in-up" style="animation-delay: 2.4s;">
             <div style="position: relative; height: 260px; width: 100%;">
               <canvas id="strandChart"></canvas>
             </div>
@@ -415,13 +415,13 @@ require_once __DIR__ . '/../components/navbar.php';
 
       <!-- Grade Demographics -->
       <div class="col-md-6 col-lg-4">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100" style="border-radius: 16px;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 fade-in-up" style="border-radius: 16px; animation-delay: 2.5s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header">
+          <div class="island-header fade-in-up" style="animation-delay: 2.6s;">
             <i class="bi bi-pie-chart text-success"></i>
             <h2>Level/Grade Demographics</h2>
           </div>
-          <div class="island-body mt-2 text-center">
+          <div class="island-body mt-2 text-center fade-in-up" style="animation-delay: 2.7s;">
             <div style="position: relative; height: 260px; width: 100%; display: inline-block;">
               <canvas id="gradeChart"></canvas>
             </div>
@@ -431,13 +431,13 @@ require_once __DIR__ . '/../components/navbar.php';
 
       <!-- Status Distribution -->
       <div class="col-md-12 col-lg-4">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100" style="border-radius: 16px;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 fade-in-up" style="border-radius: 16px; animation-delay: 2.8s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header">
+          <div class="island-header fade-in-up" style="animation-delay: 2.9s;">
             <i class="bi bi-diagram-3 text-warning"></i>
             <h2>Status Distribution</h2>
           </div>
-          <div class="island-body mt-2 text-center">
+          <div class="island-body mt-2 text-center fade-in-up" style="animation-delay: 3s;">
             <div style="position: relative; height: 260px; width: 100%; display: inline-block;">
               <canvas id="statusChart"></canvas>
             </div>

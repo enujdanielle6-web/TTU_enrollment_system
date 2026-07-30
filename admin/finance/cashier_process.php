@@ -126,6 +126,103 @@ try {
             $pdo->rollBack();
             throw $e;
         }
+    } elseif ($action === 'verify_online_payment') {
+        $paymentId = (int)($_POST['payment_id'] ?? 0);
+        $cashierId = (int)$_SESSION['user_id'];
+
+        if ($paymentId <= 0) {
+            throw new Exception('Invalid payment ID provided.');
+        }
+
+        $pdo->beginTransaction();
+
+        try {
+            // Fetch Payment Record
+            $payStmt = $pdo->prepare('SELECT * FROM payment_records WHERE id = :id FOR UPDATE');
+            $payStmt->execute(['id' => $paymentId]);
+            $payment = $payStmt->fetch();
+
+            if (!$payment || $payment['status'] !== 'pending') {
+                throw new Exception('Payment record not found or already processed.');
+            }
+
+            $assessmentId = (int)$payment['assessment_id'];
+            $userId = (int)$payment['user_id'];
+            $amount = (float)$payment['amount'];
+
+            // Fetch Assessment
+            $assStmt = $pdo->prepare('SELECT * FROM student_assessments WHERE id = :id FOR UPDATE');
+            $assStmt->execute(['id' => $assessmentId]);
+            $assessment = $assStmt->fetch();
+
+            if (!$assessment) {
+                throw new Exception('Assessment not found.');
+            }
+
+            $netAmount = (float)$assessment['net_amount'];
+            $currentPaid = (float)$assessment['total_paid'];
+            $balance = $netAmount - $currentPaid;
+
+            // Generate Receipt Number (Format: REC-YYYYMMDD-XXXX)
+            $datePrefix = date('Ymd');
+            $receiptStmt = $pdo->query("SELECT receipt_number FROM payment_records WHERE receipt_number LIKE 'REC-$datePrefix-%' ORDER BY id DESC LIMIT 1");
+            $lastReceipt = $receiptStmt->fetch();
+            $nextNum = 1;
+            if ($lastReceipt) {
+                $parts = explode('-', $lastReceipt['receipt_number']);
+                $nextNum = (int)end($parts) + 1;
+            }
+            $receiptNumber = sprintf("REC-%s-%04d", $datePrefix, $nextNum);
+
+            // Update Payment Record
+            $updPayStmt = $pdo->prepare('UPDATE payment_records SET status = "verified", cashier_id = :cashier, receipt_number = :receipt WHERE id = :id');
+            $updPayStmt->execute([
+                'cashier' => $cashierId,
+                'receipt' => $receiptNumber,
+                'id' => $paymentId
+            ]);
+
+            // Update Assessment
+            $newPaid = $currentPaid + $amount;
+            $newStatus = ($newPaid >= $netAmount) ? 'paid' : 'partial';
+
+            $updAssStmt = $pdo->prepare('UPDATE student_assessments SET total_paid = :paid, payment_status = :status WHERE id = :id');
+            $updAssStmt->execute([
+                'paid' => $newPaid,
+                'status' => $newStatus,
+                'id' => $assessmentId
+            ]);
+
+            if ($currentPaid == 0 && ($newStatus === 'paid' || $newStatus === 'partial')) {
+                // Application ID might be needed for the log message. We can just say "Your application" if we don't have it.
+                $logAppStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, ip_address, affected_record, icon, title, description) VALUES (:user_id, :ip_address, "Application", "bi-hourglass-split text-warning", "Awaiting Enrollment Finalization", "Your online payment has been verified. Your application has been forwarded to the Registrar for final enrollment processing.")');
+                $logAppStmt->execute(['user_id' => $userId, 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null]);
+            }
+
+            // Log payment activity for student
+            $logPayStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, ip_address, affected_record, icon, title, description) VALUES (:user_id, :ip_address, :affected_record, "bi-receipt-cutoff text-primary", "Payment Verified", "Your online payment of ₱' . number_format($amount, 2) . ' was verified. Receipt No: ' . $receiptNumber . '")');
+            $logPayStmt->execute(['user_id' => $userId, 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null, 'affected_record' => "Assessment #$assessmentId"]);
+
+            // Admin log
+            logActivity(
+                $cashierId, 
+                'bi-shield-check', 
+                'Online Payment Verified', 
+                "Verified online payment of ₱" . number_format($amount, 2) . " (Receipt: $receiptNumber) for Assessment #$assessmentId.",
+                "Payment Record #$paymentId",
+                ['status' => 'pending'],
+                ['status' => 'verified']
+            );
+
+            $pdo->commit();
+            
+            $_SESSION['success_msg'] = "Online payment verified successfully! Receipt No: $receiptNumber";
+            header("Location: cashier_payments.php");
+            exit;
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     } else {
         throw new Exception('Invalid action requested.');
     }

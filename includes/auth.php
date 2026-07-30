@@ -128,8 +128,7 @@ const ROLE_PERMISSIONS = [
     
     'admissions' => [
         'applications.view_queue', 'applications.view_details',
-        'applications.review', 'documents.verify', 
-        'medical.review'
+        'applications.review', 'documents.verify'
     ],
     
     'cashier' => [
@@ -140,6 +139,10 @@ const ROLE_PERMISSIONS = [
     'scholarship' => [
         'scholarships.manage', 
         'scholarship_applications.review' 
+    ],
+
+    'clinic' => [
+        'medical.review'
     ]
 ];
 

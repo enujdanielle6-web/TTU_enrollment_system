@@ -98,19 +98,52 @@ require_once __DIR__ . '/../components/header.php';
 ?>
 
 <?php require_once __DIR__ . '/components/navbar.php'; ?>
+<style>
+/* Wizard Styles */
+.wizard-step { display: none; animation: fadeIn 0.4s ease; }
+.wizard-step.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.wizard-progress { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; position: relative; }
+.wizard-progress::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: #e9ecef; z-index: 1; transform: translateY(-50%); border-radius: 2px; }
+.wizard-progress-bar { position: absolute; top: 50%; left: 0; height: 4px; background: var(--color-primary); z-index: 2; transform: translateY(-50%); border-radius: 2px; transition: width 0.4s ease; width: 0%; }
+.wizard-step-indicator { width: 40px; height: 40px; border-radius: 50%; background: #e9ecef; color: #adb5bd; display: flex; align-items: center; justify-content: center; font-weight: bold; z-index: 3; position: relative; transition: all 0.3s ease; border: 4px solid #f8f9fa; }
+.wizard-step-indicator.active { background: var(--color-primary); color: white; border-color: #dbe4f0; }
+.wizard-step-indicator.completed { background: #198754; color: white; border-color: #d1e7dd; }
+.wizard-nav { display: flex; justify-content: space-between; margin-top: 2rem; }
+.wizard-title { font-size: 0.85rem; font-weight: 600; color: #adb5bd; position: absolute; top: 45px; text-align: center; width: 100px; left: -30px; transition: color 0.3s ease; }
+.wizard-step-indicator.active .wizard-title { color: var(--color-primary); }
+.wizard-step-indicator.completed .wizard-title { color: #198754; }
+.review-section-title { font-size: 1.1rem; font-weight: 600; color: var(--color-primary); margin-bottom: 1rem; border-bottom: 2px solid #e9ecef; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+.review-item { margin-bottom: 0.75rem; }
+.review-label { font-size: 0.85rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem; }
+.review-value { font-size: 1rem; color: #212529; font-weight: 500; }
+@media (max-width: 768px) { .wizard-title { display: none; } }
+</style>
 
 <main class="status-page py-5 bg-light min-vh-100">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10 col-xl-9">
         
-        <div class="mb-4">
+        <div class="mb-5 text-center">
           <h1 class="h3 mb-2 fw-bold text-dark">Enrollment Application</h1>
           <?php if (!empty($existingApp) && $existingApp['status'] === 'correction_required'): ?>
             <p class="text-danger mb-0 fw-medium"><i class="bi bi-exclamation-triangle-fill me-1"></i> Update required: Please correct your information below and resubmit.</p>
           <?php else: ?>
-            <p class="text-muted mb-0">Please fill out all the fields below to submit your school enrollment application.</p>
+            <p class="text-muted mb-0">Complete the steps below to submit your enrollment.</p>
           <?php endif; ?>
+        </div>
+
+        <!-- Wizard Progress -->
+        <div class="wizard-progress px-md-5 mb-5">
+          <div class="wizard-progress-bar" id="wizardProgressBar"></div>
+          <div class="wizard-step-indicator active" id="indicator-1">1<div class="wizard-title">Personal</div></div>
+          <div class="wizard-step-indicator" id="indicator-2">2<div class="wizard-title">Address</div></div>
+          <div class="wizard-step-indicator" id="indicator-3">3<div class="wizard-title">Guardian</div></div>
+          <div class="wizard-step-indicator" id="indicator-4">4<div class="wizard-title">Academic</div></div>
+          <div class="wizard-step-indicator" id="indicator-5">5<div class="wizard-title">Requirements</div></div>
+          <div class="wizard-step-indicator" id="indicator-6">6<div class="wizard-title">Review</div></div>
+          <div class="wizard-step-indicator" id="indicator-7">7<div class="wizard-title">Submit</div></div>
         </div>
 
         <?php if (!empty($errors)): ?>
@@ -126,13 +159,14 @@ require_once __DIR__ . '/../components/header.php';
         <form action="enroll_process.php" method="post" id="enrollmentForm" novalidate>
           <?= getCsrfInput() ?>
           
+          <div class="wizard-step active" id="step-1">
           <!-- 1. Personal Information Island -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 0.1s;">
+            <div class="island-header fade-in-up" style="animation-delay: 0.2s;">
               <i class="bi bi-person"></i>
               <h2>Personal Information</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 0.3s;">
               <div class="row g-3">
                 <div class="col-md-3">
                   <label class="form-label text-muted small fw-semibold" for="firstName">First Name</label>
@@ -196,12 +230,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- 2. Contact Information Island -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 0.4s;">
+            <div class="island-header fade-in-up" style="animation-delay: 0.5s;">
               <i class="bi bi-telephone"></i>
               <h2>Contact Information</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 0.6s;">
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted small fw-semibold" for="contactNumber">Mobile Number</label>
@@ -221,13 +255,20 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           </div>
 
+                    <div class="wizard-nav">
+            <a href="dashboard.php" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold">Cancel</a>
+            <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold btn-next" data-step="1">Next Step <i class="bi bi-arrow-right"></i></button>
+          </div>
+          </div><!-- End Step 1 -->
+
+          <div class="wizard-step" id="step-2">
           <!-- 3. Current Address Island -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 0.7s;">
+            <div class="island-header fade-in-up" style="animation-delay: 0.8s;">
               <i class="bi bi-geo-alt"></i>
               <h2>Current Address</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 0.9s;">
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted small fw-semibold" for="addressHouseNumber">House Number</label>
@@ -263,13 +304,20 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           </div>
 
+                    <div class="wizard-nav">
+            <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold btn-prev" data-step="2">Previous</button>
+            <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold btn-next" data-step="2">Next Step <i class="bi bi-arrow-right"></i></button>
+          </div>
+          </div><!-- End Step 2 -->
+
+          <div class="wizard-step" id="step-3">
           <!-- 4. Parent / Guardian Information Island -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 1s;">
+            <div class="island-header fade-in-up" style="animation-delay: 1.1s;">
               <i class="bi bi-people"></i>
               <h2>Parent / Guardian Information</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.2s;">
               <h6 class="fw-semibold text-primary mb-3">Father's Information</h6>
               <div class="row g-3 mb-4">
                 <div class="col-md-4">
@@ -323,13 +371,20 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           </div>
 
+                    <div class="wizard-nav">
+            <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold btn-prev" data-step="3">Previous</button>
+            <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold btn-next" data-step="3">Next Step <i class="bi bi-arrow-right"></i></button>
+          </div>
+          </div><!-- End Step 3 -->
+
+          <div class="wizard-step" id="step-4">
           <!-- 5. Previous School Island -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 1.3s;">
+            <div class="island-header fade-in-up" style="animation-delay: 1.4s;">
               <i class="bi bi-building"></i>
               <h2>Previous School Information</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.5s;">
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label text-muted small fw-semibold" for="lastSchoolAttended">Previous School Name</label>
@@ -393,12 +448,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- 6. Enrollment Details Island -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 1.6s;">
+            <div class="island-header fade-in-up" style="animation-delay: 1.7s;">
               <i class="bi bi-mortarboard"></i>
               <h2>Enrollment Details</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.8s;">
               <div class="row g-3">
                 <div class="col-md-3">
                   <label class="form-label text-muted small fw-semibold" for="schoolYear">School Year</label>
@@ -461,12 +516,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Curriculum Subjects Island -->
-          <div class="island mb-4" id="curriculumContainer" style="display: none;">
-            <div class="island-header">
+          <div class="island mb-4 fade-in-up" id="curriculumContainer" style="display: none; animation-delay: 1.9s;">
+            <div class="island-header fade-in-up" style="animation-delay: 2s;">
               <i class="bi bi-journal-text"></i>
               <h2>Curriculum Subjects</h2>
             </div>
-            <div class="island-body p-0 mt-2">
+            <div class="island-body p-0 mt-2 fade-in-up" style="animation-delay: 2.1s;">
               <div class="table-responsive">
                 <table class="table table-hover mb-0">
                   <thead class="table-light text-muted small text-uppercase">
@@ -494,12 +549,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Section Selection Island -->
-          <div class="island mb-4" id="sectionContainer" style="display: none;">
-            <div class="island-header">
+          <div class="island mb-4 fade-in-up" id="sectionContainer" style="display: none; animation-delay: 2.2s;">
+            <div class="island-header fade-in-up" style="animation-delay: 2.3s;">
               <i class="bi bi-diagram-3"></i>
               <h2>Available Sections</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 2.4s;">
               <div id="sectionGrid" class="row g-3">
                 <!-- Dynamically populated sections will appear here -->
                 <div class="col-12 text-center text-muted py-3">Please select your Program, Year Level, Semester, and Student Type first.</div>
@@ -510,7 +565,7 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Irregular Info Island -->
-          <div class="island mb-4 border border-warning border-2 rounded-4 text-center overflow-hidden" id="irregularContainer" style="display: none; padding: 0;">
+          <div class="island mb-4 border border-warning border-2 rounded-4 text-center overflow-hidden fade-in-up" id="irregularContainer" style="display: none; padding: 0; animation-delay: 2.5s;">
             <div class="bg-warning bg-opacity-10 p-4 border-bottom border-warning border-opacity-25">
               <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2.5rem; line-height: 1;"></i>
               <h2 class="text-warning-emphasis mt-2 mb-0 fw-bold fs-4">Irregular Student Enrollment</h2>
@@ -522,12 +577,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Irregular Curriculum Selection Island -->
-          <div class="island mb-4" id="irregularCurriculumContainer" style="display: none;">
-            <div class="island-header">
+          <div class="island mb-4 fade-in-up" id="irregularCurriculumContainer" style="display: none; animation-delay: 2.6s;">
+            <div class="island-header fade-in-up" style="animation-delay: 2.7s;">
               <i class="bi bi-card-checklist"></i>
               <h2>Curriculum & Subject Selection</h2>
             </div>
-            <div class="island-body mt-3">
+            <div class="island-body mt-3 fade-in-up" style="animation-delay: 2.8s;">
               <div class="row g-4 align-items-start">
                 <div class="col-lg-7">
                   <h6 class="fw-bold text-dark mb-3">Official Curriculum <span class="badge bg-primary ms-2" id="irregProgramBadge"></span></h6>
@@ -538,11 +593,11 @@ require_once __DIR__ . '/../components/header.php';
                   </div>
                 </div>
                 <div class="col-lg-5">
-                  <div class="card border-primary border-opacity-25 shadow-sm sticky-top" style="top: 100px; z-index: 10;">
-                    <div class="card-header bg-primary bg-opacity-10 border-bottom border-primary border-opacity-25 py-3">
+                  <div class="card border-primary border-opacity-25 shadow-sm sticky-top fade-in-up" style="top: 100px; z-index: 10; animation-delay: 2.9s;">
+                    <div class="card-header bg-primary bg-opacity-10 border-bottom border-primary border-opacity-25 py-3 fade-in-up" style="animation-delay: 3s;">
                       <h6 class="mb-0 fw-bold text-primary-emphasis"><i class="bi bi-bag-check me-2"></i>Selected Subjects</h6>
                     </div>
-                    <div class="card-body p-0 bg-light">
+                    <div class="card-body p-0 bg-light fade-in-up" style="animation-delay: 3.1s;">
                       <ul class="list-group list-group-flush mb-0 p-2" id="selectedSubjectsList" style="max-height: 400px; overflow-y: auto;">
                         <li class="list-group-item bg-transparent px-0 py-3 text-center text-muted border-0 small" id="emptyCartMsg">
                           <i class="bi bi-bag-x fs-2 d-block mb-2 text-secondary opacity-50"></i>
@@ -550,7 +605,7 @@ require_once __DIR__ . '/../components/header.php';
                         </li>
                       </ul>
                     </div>
-                    <div class="card-footer bg-white border-top border-light py-3 d-flex justify-content-between align-items-center">
+                    <div class="card-footer bg-white border-top border-light py-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 3.2s;">
                       <span class="fw-bold text-dark small">Total Units:</span>
                       <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm" id="cartTotalUnitsBadge">0 Units</span>
                     </div>
@@ -564,13 +619,20 @@ require_once __DIR__ . '/../components/header.php';
             <div id="hiddenSubjectsContainer"></div>
           </div>
 
+                    <div class="wizard-nav">
+            <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold btn-prev" data-step="4">Previous</button>
+            <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold btn-next" data-step="4">Next Step <i class="bi bi-arrow-right"></i></button>
+          </div>
+          </div><!-- End Step 4 -->
+
+          <div class="wizard-step" id="step-5">
           <!-- 7. Emergency Contact Island -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 3.3s;">
+            <div class="island-header fade-in-up" style="animation-delay: 3.4s;">
               <i class="bi bi-heart-pulse"></i>
               <h2>Emergency Contact</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 3.5s;">
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted small fw-semibold" for="emergencyContactPerson">Contact Person</label>
@@ -592,12 +654,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- 8. Additional Information Island -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 3.6s;">
+            <div class="island-header fade-in-up" style="animation-delay: 3.7s;">
               <i class="bi bi-info-circle"></i>
               <h2>Additional Information</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 3.8s;">
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted small fw-semibold" for="specialNeeds">Special Needs (Optional)</label>
@@ -615,15 +677,46 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           </div>
 
-          <!-- Action Buttons -->
-          <div class="d-flex flex-wrap gap-3 justify-content-end mt-4 mb-5">
-            <a class="btn btn-outline-secondary px-4 py-2" style="border-radius: 12px; font-weight: 600;" href="dashboard.php">
-              Cancel
-            </a>
-            <button class="btn btn-primary px-4 py-2" style="border-radius: 12px; font-weight: 600;" type="submit">
-              <i class="bi bi-send-check"></i> <?= (!empty($existingApp) && $existingApp['status'] === 'correction_required') ? 'Resubmit Application' : 'Submit Application' ?>
-            </button>
+          <div class="wizard-nav">
+            <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold btn-prev" data-step="5">Previous</button>
+            <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold btn-next" data-step="5" id="btnGenerateReview">Review Information <i class="bi bi-arrow-right"></i></button>
           </div>
+          </div><!-- End Step 5 -->
+
+          <!-- 6. Review Information -->
+          <div class="wizard-step" id="step-6">
+            <div class="island mb-4 fade-in-up" style="animation-delay: 3.9s;">
+              <div class="island-header d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 4s;">
+                <div>
+                  <i class="bi bi-search"></i>
+                  <h2>Review Your Information</h2>
+                </div>
+              </div>
+              <div class="island-body mt-2 fade-in-up" id="reviewContent" style="animation-delay: 4.1s;">
+                <!-- Generated by JS -->
+              </div>
+            </div>
+            <div class="wizard-nav">
+              <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold btn-prev" data-step="6">Previous</button>
+              <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold btn-next" data-step="6">Final Step <i class="bi bi-arrow-right"></i></button>
+            </div>
+          </div><!-- End Step 6 -->
+
+          <!-- 7. Submit Enrollment -->
+          <div class="wizard-step" id="step-7">
+            <div class="island text-center py-5 fade-in-up" style="animation-delay: 4.2s;">
+              <i class="bi bi-check-circle text-success mb-3" style="font-size: 4rem;"></i>
+              <h2 class="h3 fw-bold text-dark">Ready to Submit!</h2>
+              <p class="text-muted mx-auto" style="max-width: 500px;">You have completed all the steps. Please verify everything on the previous page before submitting your application. By submitting, you agree to the University's enrollment terms and conditions.</p>
+              
+              <div class="mt-4">
+                <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold me-2 btn-prev" data-step="7">Back to Review</button>
+                <button class="btn btn-primary px-5 py-2 rounded-pill fw-bold shadow-sm" type="submit" id="finalSubmitBtn">
+                  <i class="bi bi-send-fill me-1"></i> <?= (!empty($existingApp) && $existingApp['status'] === 'correction_required') ? 'Resubmit Application' : 'Submit Application' ?>
+                </button>
+              </div>
+            </div>
+          </div><!-- End Step 7 -->
         </form>
 
       </div>
@@ -1236,7 +1329,7 @@ require_once __DIR__ . '/../components/header.php';
               html += `
                 <div class="col-md-6 col-lg-4">
                   <label class="card h-100 ${cardClass} section-card" style="cursor: ${cursor}; transition: all 0.2s;">
-                    <div class="card-body">
+                    <div class="card-body fade-in-up" style="animation-delay: 4.3s;">
                       <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="card-title fw-bold ${textClass} mb-0">${sec.section_code}</h5>
                         <input class="form-check-input section-radio" type="radio" name="section_choice" value="${sec.id}" ${disabled}>
@@ -1485,4 +1578,177 @@ require_once __DIR__ . '/../components/header.php';
   });
 </script>
 
+<script>
+// Wizard Navigation and Review Logic
+document.addEventListener('DOMContentLoaded', function() {
+  const totalSteps = 7;
+  let currentStep = 1;
+  const form = document.getElementById('enrollmentForm');
+  
+  function updateWizardUI() {
+    // Update steps visibility
+    document.querySelectorAll('.wizard-step').forEach(step => {
+      step.classList.remove('active');
+    });
+    document.getElementById('step-' + currentStep).classList.add('active');
+    
+    // Update progress bar
+    const progressPercentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+    document.getElementById('wizardProgressBar').style.width = progressPercentage + '%';
+    
+    // Update indicators
+    for (let i = 1; i <= totalSteps; i++) {
+      const indicator = document.getElementById('indicator-' + i);
+      if (i < currentStep) {
+        indicator.classList.add('completed');
+        indicator.classList.remove('active');
+        indicator.innerHTML = '<i class="bi bi-check-lg"></i><div class="wizard-title">' + indicator.querySelector('.wizard-title').innerText + '</div>';
+      } else if (i === currentStep) {
+        indicator.classList.add('active');
+        indicator.classList.remove('completed');
+        indicator.innerHTML = i + '<div class="wizard-title">' + indicator.querySelector('.wizard-title').innerText + '</div>';
+      } else {
+        indicator.classList.remove('active', 'completed');
+        indicator.innerHTML = i + '<div class="wizard-title">' + indicator.querySelector('.wizard-title').innerText + '</div>';
+      }
+    }
+    
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  // Next Button Handler
+  document.querySelectorAll('.btn-next').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const stepDiv = document.getElementById('step-' + currentStep);
+      const inputs = stepDiv.querySelectorAll('input, select, textarea');
+      let isValid = true;
+      
+      // Force native HTML5 validation on the current step's inputs only
+      inputs.forEach(input => {
+        if (!input.checkValidity()) {
+          input.reportValidity();
+          isValid = false;
+        }
+      });
+      
+      // Custom validation for step 4 (Sections & Curriculum)
+      if (currentStep === 4) {
+        const sectionContainer = document.getElementById('sectionContainer');
+        const sectionIdInput = document.getElementById('section_id');
+        const sectionFeedback = document.getElementById('sectionFeedback');
+        
+        if (sectionContainer.style.display === 'block' && !sectionIdInput.value) {
+          sectionFeedback.style.setProperty('display', 'block', 'important');
+          isValid = false;
+        }
+        
+        const irregularCurriculumContainer = document.getElementById('irregularCurriculumContainer');
+        const irregularFeedback = document.getElementById('irregularFeedback');
+        
+        if (irregularCurriculumContainer.style.display === 'block') {
+           // We have to check if selectedIrregularSubjects is empty.
+           // Because it's defined in another script block, we can check the badge or list
+           const badgeText = document.getElementById('cartTotalUnitsBadge').textContent;
+           if (badgeText === '0 Units') {
+             irregularFeedback.style.setProperty('display', 'block', 'important');
+             isValid = false;
+           }
+        }
+      }
+      
+      if (isValid) {
+        currentStep++;
+        updateWizardUI();
+      }
+    });
+  });
+  
+  // Previous Button Handler
+  document.querySelectorAll('.btn-prev').forEach(btn => {
+    btn.addEventListener('click', function() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateWizardUI();
+      }
+    });
+  });
+  
+  // Generate Review Step Handler
+  document.getElementById('btnGenerateReview').addEventListener('click', function() {
+     const reviewContent = document.getElementById('reviewContent');
+     let html = '';
+     
+     function addSection(title, fields, stepTarget) {
+       html += '<div class="review-section-title mt-4">' + title + 
+               '<button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 btn-edit-step" data-target="' + stepTarget + '"><i class="bi bi-pencil me-1"></i>Edit</button></div>';
+       html += '<div class="row g-3">';
+       fields.forEach(f => {
+         const el = document.getElementById(f.id);
+         let val = el ? el.value : '';
+         if (el && el.tagName === 'SELECT' && el.selectedIndex >= 0) {
+           val = el.options[el.selectedIndex].text;
+         }
+         if (!val) val = '<span class="text-muted fst-italic">None provided</span>';
+         
+         html += '<div class="col-md-6 review-item">';
+         html += '<div class="review-label">' + f.label + '</div>';
+         html += '<div class="review-value">' + val + '</div>';
+         html += '</div>';
+       });
+       html += '</div>';
+     }
+     
+     addSection('Personal Information', [
+       { id: 'firstName', label: 'First Name' },
+       { id: 'middleName', label: 'Middle Name' },
+       { id: 'lastName', label: 'Last Name' },
+       { id: 'gender', label: 'Sex' },
+       { id: 'birthDate', label: 'Date of Birth' },
+       { id: 'civilStatus', label: 'Civil Status' },
+       { id: 'contactNumber', label: 'Mobile Number' },
+       { id: 'email', label: 'Email Address' }
+     ], 1);
+     
+     addSection('Current Address', [
+       { id: 'addressHouseNumber', label: 'House Number' },
+       { id: 'addressStreet', label: 'Street' },
+       { id: 'addressBarangay', label: 'Barangay' },
+       { id: 'addressCity', label: 'City / Municipality' },
+       { id: 'addressProvince', label: 'Province' },
+       { id: 'addressZip', label: 'ZIP Code' }
+     ], 2);
+     
+     addSection('Guardian Information', [
+       { id: 'guardianName', label: 'Guardian Name' },
+       { id: 'guardianRelationship', label: 'Relationship' },
+       { id: 'guardianContact', label: 'Contact Number' }
+     ], 3);
+     
+     addSection('Academic Information', [
+       { id: 'lastSchoolAttended', label: 'Previous School' },
+       { id: 'previousSchoolLevel', label: 'Previous Level' },
+       { id: 'academicLevel', label: 'Target Level' },
+       { id: 'strand', label: 'Program / Strand' },
+       { id: 'gradeLevel', label: 'Year Level' },
+       { id: 'studentType', label: 'Student Type' }
+     ], 4);
+     
+     addSection('Emergency Contact', [
+       { id: 'emergencyContactPerson', label: 'Contact Person' },
+       { id: 'emergencyContactNumber', label: 'Contact Number' },
+       { id: 'emergencyContactRelationship', label: 'Relationship' }
+     ], 5);
+     
+     reviewContent.innerHTML = html;
+     
+     // Bind edit buttons
+     document.querySelectorAll('.btn-edit-step').forEach(btn => {
+       btn.addEventListener('click', function() {
+         currentStep = parseInt(this.getAttribute('data-target'));
+         updateWizardUI();
+       });
+     });
+  });
+});
+</script>
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

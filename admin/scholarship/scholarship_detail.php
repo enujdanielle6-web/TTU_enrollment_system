@@ -96,13 +96,13 @@ require_once __DIR__ . '/../components/navbar.php';
         
         <div class="col-lg-8">
         
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.2s;">
             <i class="bi bi-person-vcard-fill"></i>
             <h2>Applicant & Scholarship Details</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 0.3s;">
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="text-muted small fw-semibold text-uppercase">Full Name</label>
@@ -152,13 +152,13 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <?php if ($app['assessment_id']): ?>
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.4s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.5s;">
             <i class="bi bi-calculator-fill"></i>
             <h2>Assessment Impact Preview</h2>
           </div>
-          <div class="island-body bg-light rounded-bottom-4">
+          <div class="island-body bg-light rounded-bottom-4 fade-in-up" style="animation-delay: 0.6s;">
             <div class="row text-center">
               <div class="col-md-4 border-end">
                 <div class="text-muted small text-uppercase fw-bold mb-2">Original Total</div>
@@ -201,12 +201,12 @@ require_once __DIR__ . '/../components/navbar.php';
       </div>
 
       <div class="col-lg-4">
-        <div class="island border-primary border-top border-4 sticky-top" style="top: 80px;">
-          <div class="island-header bg-primary-light">
+        <div class="island border-primary border-top border-4 sticky-top fade-in-up" style="top: 80px; animation-delay: 0.7s;">
+          <div class="island-header bg-primary-light fade-in-up" style="animation-delay: 0.8s;">
             <i class="bi bi-shield-lock-fill text-primary"></i>
             <h2 class="text-primary">Admin Action Panel</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 0.9s;">
             
               <div class="mb-3">
                 <label for="status" class="form-label fw-semibold small text-dark">Decision</label>

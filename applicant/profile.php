@@ -56,7 +56,7 @@ require_once __DIR__ . '/../components/header.php';
       <div class="col-lg-8">
         
         <!-- Profile Header -->
-        <div class="island island-hero mb-4 border-0 shadow-sm position-relative overflow-hidden" style="border-radius: 16px;">
+        <div class="island island-hero mb-4 border-0 shadow-sm position-relative overflow-hidden fade-in-up" style="border-radius: 16px; animation-delay: 0.1s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
           <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-4">
@@ -101,14 +101,14 @@ require_once __DIR__ . '/../components/header.php';
         <?php else: ?>
           
           <!-- 1. Account Details Card -->
-          <div class="island mb-4 border-0 shadow-sm position-relative overflow-hidden" style="border-radius: 16px;">
-            <div class="island-header pt-4 px-4 pb-0 border-0 d-flex align-items-center">
+          <div class="island mb-4 border-0 shadow-sm position-relative overflow-hidden fade-in-up" style="border-radius: 16px; animation-delay: 0.2s;">
+            <div class="island-header pt-4 px-4 pb-0 border-0 d-flex align-items-center fade-in-up" style="animation-delay: 0.3s;">
               <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
                 <i class="bi bi-person-badge fs-5"></i>
               </div>
               <h2 class="h5 mb-0 fw-bold text-dark">Account Details</h2>
             </div>
-            <div class="island-body p-4">
+            <div class="island-body p-4 fade-in-up" style="animation-delay: 0.4s;">
               <form action="profile_process.php" method="POST" class="needs-validation" novalidate>
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="update_account">
@@ -160,14 +160,14 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- 2. Contact Details Card -->
-          <div class="island mb-4 border-0 shadow-sm position-relative overflow-hidden" style="border-radius: 16px;">
-            <div class="island-header pt-4 px-4 pb-0 border-0 d-flex align-items-center">
+          <div class="island mb-4 border-0 shadow-sm position-relative overflow-hidden fade-in-up" style="border-radius: 16px; animation-delay: 0.5s;">
+            <div class="island-header pt-4 px-4 pb-0 border-0 d-flex align-items-center fade-in-up" style="animation-delay: 0.6s;">
               <div class="bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
                 <i class="bi bi-telephone fs-5"></i>
               </div>
               <h2 class="h5 mb-0 fw-bold text-dark">Contact Details</h2>
             </div>
-            <div class="island-body p-4">
+            <div class="island-body p-4 fade-in-up" style="animation-delay: 0.7s;">
               <?php if (!$application): ?>
                 <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark small rounded-3 p-3 mb-0 d-flex align-items-center gap-2">
                   <i class="bi bi-info-circle-fill text-warning fs-5"></i>
@@ -197,14 +197,14 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- 3. Security Credentials Card -->
-          <div class="island mb-4 border-0 shadow-sm position-relative overflow-hidden" style="border-radius: 16px;">
-            <div class="island-header pt-4 px-4 pb-0 border-0 d-flex align-items-center">
+          <div class="island mb-4 border-0 shadow-sm position-relative overflow-hidden fade-in-up" style="border-radius: 16px; animation-delay: 0.8s;">
+            <div class="island-header pt-4 px-4 pb-0 border-0 d-flex align-items-center fade-in-up" style="animation-delay: 0.9s;">
               <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
                 <i class="bi bi-shield-lock fs-5"></i>
               </div>
               <h2 class="h5 mb-0 fw-bold text-dark">Security Credentials</h2>
             </div>
-            <div class="island-body p-4">
+            <div class="island-body p-4 fade-in-up" style="animation-delay: 1s;">
               <form action="profile_process.php" method="POST" class="needs-validation" id="passwordForm" novalidate>
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="action" value="change_password">

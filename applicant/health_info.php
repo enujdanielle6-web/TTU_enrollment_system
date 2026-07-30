@@ -38,7 +38,7 @@ require_once __DIR__ . '/components/navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container px-lg-5">
     
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <h1 class="h3 fw-bold text-dark mb-1">Health & Medical Clearance</h1>
       <p class="text-muted mb-0">Submit your health information to proceed with your enrollment.</p>
     </div>
@@ -53,7 +53,7 @@ require_once __DIR__ . '/components/navbar.php';
     <?php if ($health && in_array($health['status'], ['pending', 'under_review', 'verified', 'rejected'])): ?>
       
       <!-- Medical Clearance Card -->
-      <div class="island text-center py-5">
+      <div class="island text-center py-5 fade-in-up" style="animation-delay: 0.2s;">
         <?php if ($health['status'] === 'pending'): ?>
             <i class="bi bi-file-medical-fill text-warning" style="font-size: 4rem;"></i>
             <h3 class="mt-3 fw-bold">Medical Clearance Required</h3>
@@ -111,12 +111,12 @@ require_once __DIR__ . '/components/navbar.php';
             </div>
         <?php endif; ?>
 
-        <div class="island mb-4">
-            <div class="island-header">
+        <div class="island mb-4 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="island-header fade-in-up" style="animation-delay: 0.4s;">
                 <i class="bi bi-person-lines-fill text-primary"></i>
                 <h2 class="mb-0 text-dark">Physical Information</h2>
             </div>
-            <div class="island-body">
+            <div class="island-body fade-in-up" style="animation-delay: 0.5s;">
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label small fw-semibold text-dark">Height</label>
@@ -147,12 +147,12 @@ require_once __DIR__ . '/components/navbar.php';
             </div>
         </div>
 
-        <div class="island mb-4">
-            <div class="island-header">
+        <div class="island mb-4 fade-in-up" style="animation-delay: 0.6s;">
+            <div class="island-header fade-in-up" style="animation-delay: 0.7s;">
                 <i class="bi bi-clipboard2-pulse text-primary"></i>
                 <h2 class="mb-0 text-dark">Medical History</h2>
             </div>
-            <div class="island-body">
+            <div class="island-body fade-in-up" style="animation-delay: 0.8s;">
                 <p class="text-muted small mb-3">Please check all that apply to you.</p>
                 <div class="row g-3">
                     <?php 
@@ -184,12 +184,12 @@ require_once __DIR__ . '/components/navbar.php';
             </div>
         </div>
 
-        <div class="island mb-4">
-            <div class="island-header">
+        <div class="island mb-4 fade-in-up" style="animation-delay: 0.9s;">
+            <div class="island-header fade-in-up" style="animation-delay: 1s;">
                 <i class="bi bi-journal-medical text-primary"></i>
                 <h2 class="mb-0 text-dark">Additional Information</h2>
             </div>
-            <div class="island-body">
+            <div class="island-body fade-in-up" style="animation-delay: 1.1s;">
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label small fw-semibold text-dark">Medical Conditions</label>
@@ -211,12 +211,12 @@ require_once __DIR__ . '/components/navbar.php';
             </div>
         </div>
 
-        <div class="island mb-4">
-            <div class="island-header">
+        <div class="island mb-4 fade-in-up" style="animation-delay: 1.2s;">
+            <div class="island-header fade-in-up" style="animation-delay: 1.3s;">
                 <i class="bi bi-telephone-fill text-primary"></i>
                 <h2 class="mb-0 text-dark">Emergency Contact</h2>
             </div>
-            <div class="island-body">
+            <div class="island-body fade-in-up" style="animation-delay: 1.4s;">
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label small fw-semibold text-dark">Contact Name</label>

@@ -117,13 +117,13 @@ require_once __DIR__ . '/../components/navbar.php';
     <div class="row g-4">
       <div class="col-lg-4">
         <!-- Financial Summary -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.2s;">
             <i class="bi bi-calculator-fill text-primary"></i>
             <h2>Assessment Summary</h2>
           </div>
-          <div class="island-body p-0">
+          <div class="island-body p-0 fade-in-up" style="animation-delay: 0.3s;">
             <ul class="list-group list-group-flush rounded-bottom-4">
                 <li class="list-group-item d-flex justify-content-between align-items-center p-3">
                     <span class="text-muted fw-semibold">Original Total Fees</span>
@@ -155,13 +155,13 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
         
         <!-- Fee Breakdown -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.4s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.5s;">
             <i class="bi bi-list-nested text-secondary"></i>
             <h2>Fee Breakdown</h2>
           </div>
-          <div class="island-body p-0">
+          <div class="island-body p-0 fade-in-up" style="animation-delay: 0.6s;">
              <ul class="list-group list-group-flush rounded-bottom-4 small">
                 <li class="list-group-item d-flex justify-content-between p-3">
                     <div>
@@ -196,13 +196,13 @@ require_once __DIR__ . '/../components/navbar.php';
 
       <div class="col-lg-8">
         <?php if ($assessment['academic_level'] === 'College' && !empty($enrolledSubjects)): ?>
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.7s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.8s;">
             <i class="bi bi-journal-text text-primary"></i>
             <h2 class="mb-0 text-dark">Curriculum Enrolled</h2>
           </div>
-          <div class="island-body p-0">
+          <div class="island-body p-0 fade-in-up" style="animation-delay: 0.9s;">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 custom-table">
                 <thead class="table-light text-muted small text-uppercase">
@@ -238,14 +238,14 @@ require_once __DIR__ . '/../components/navbar.php';
         <?php endif; ?>
 
         <!-- Payment History (Receipts) -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4 fade-in-up" style="animation-delay: 1s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.1s;">
             <i class="bi bi-receipt-cutoff text-primary"></i>
             <h2 class="mb-0 text-dark">Payment History & Receipts</h2>
           </div>
           
-          <div class="island-body p-0">
+          <div class="island-body p-0 fade-in-up" style="animation-delay: 1.2s;">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 custom-table">
                 <thead class="table-light">

@@ -46,7 +46,7 @@ require_once __DIR__ . '/../components/navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="h3 fw-bold text-dark mb-1">System Settings</h1>
@@ -66,13 +66,13 @@ require_once __DIR__ . '/../components/navbar.php';
       
       <!-- System Configurations -->
       <div class="col-lg-5">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4 fade-in-up" style="animation-delay: 0.2s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.3s;">
             <i class="bi bi-sliders text-primary"></i>
             <h2 class="mb-0 text-dark">Global Parameters</h2>
           </div>
-          <div class="island-body p-4">
+          <div class="island-body p-4 fade-in-up" style="animation-delay: 0.4s;">
             <form action="settings_process.php" method="POST">
               <input type="hidden" name="action" value="update_settings">
               <?= getCsrfInput() ?>
@@ -110,9 +110,9 @@ require_once __DIR__ . '/../components/navbar.php';
 
       <!-- Announcements Manager -->
       <div class="col-lg-7">
-        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm h-100 rounded-4 fade-in-up" style="animation-delay: 0.5s;">
           <div class="position-absolute top-0 start-0 w-100 bg-info" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center">
+          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.6s;">
             <div class="d-flex align-items-center">
               <i class="bi bi-megaphone-fill text-info me-2 fs-4"></i>
               <h2 class="mb-0 text-dark">Portal Announcements</h2>
@@ -121,7 +121,7 @@ require_once __DIR__ . '/../components/navbar.php';
               <i class="bi bi-plus-lg me-1"></i> New Post
             </button>
           </div>
-          <div class="island-body p-4">
+          <div class="island-body p-4 fade-in-up" style="animation-delay: 0.7s;">
             <?php if (empty($announcements)): ?>
               <div class="text-center py-5 text-muted">
                 <i class="bi bi-chat-square-quote fs-1 d-block mb-3 text-secondary"></i>

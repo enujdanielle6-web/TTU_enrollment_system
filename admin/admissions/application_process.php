@@ -117,10 +117,54 @@ try {
         }
     }
 
+    // 0.6. Verify document requirements if changing to approved or enrolled
+    if ($status === 'approved' || $status === 'enrolled') {
+        $docMethodStmt = $pdo->prepare('SELECT document_submission_method FROM applications WHERE id = :id');
+        $docMethodStmt->execute(['id' => $appId]);
+        $docMethod = $docMethodStmt->fetchColumn();
+
+        if ($docMethod === 'online') {
+            $docsStmt = $pdo->prepare('SELECT id, status FROM application_documents WHERE application_id = :id');
+            $docsStmt->execute(['id' => $appId]);
+            $currentDocs = $docsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (empty($currentDocs)) {
+                $statusText = $status === 'enrolled' ? 'enroll' : 'approve';
+                $_SESSION['admin_error'] = "Cannot {$statusText} applicant. No documents have been uploaded yet.";
+                header("Location: application_detail.php?id={$appId}");
+                exit;
+            }
+
+            $docStatuses = $_POST['doc_status'] ?? [];
+            foreach ($currentDocs as $doc) {
+                $finalStatus = $docStatuses[$doc['id']] ?? $doc['status'];
+                if ($finalStatus !== 'verified') {
+                    $statusText = $status === 'enrolled' ? 'enroll' : 'approve';
+                    $_SESSION['admin_error'] = "Cannot {$statusText} applicant. All submitted documents must be verified first.";
+                    header("Location: application_detail.php?id={$appId}");
+                    exit;
+                }
+            }
+        }
+    }
+
     // Fetch old application state
     $oldAppStmt = $pdo->prepare('SELECT academic_level, status, admin_feedback, internal_notes FROM applications WHERE id = :id');
     $oldAppStmt->execute(['id' => $appId]);
     $oldApp = $oldAppStmt->fetch(PDO::FETCH_ASSOC);
+
+    // Validate Status Transitions (Prevent reverting from Approved or Enrolled)
+    if ($oldApp['status'] === 'enrolled' && $status !== 'enrolled') {
+        $_SESSION['admin_error'] = 'Cannot change status. The applicant is already Officially Enrolled.';
+        header("Location: application_detail.php?id={$appId}");
+        exit;
+    }
+    
+    if ($oldApp['status'] === 'approved' && !in_array($status, ['approved', 'enrolled'])) {
+        $_SESSION['admin_error'] = 'Cannot revert status. An approved application can only proceed to Officially Enrolled.';
+        header("Location: application_detail.php?id={$appId}");
+        exit;
+    }
 
     // 0. Process Section Assignment
     $assignSectionId = (int)($_POST['assign_section'] ?? 0);
@@ -317,8 +361,8 @@ try {
         }
     }
 
-    // 2. Process Assessment Generation
-    $generateAssessment = (bool)($_POST['generate_assessment'] ?? false);
+    // 2. Process Assessment Generation (Automatic)
+    $generateAssessment = ($status === 'approved' || $status === 'enrolled');
     
     if ($generateAssessment) {
         // Check if an assessment already exists

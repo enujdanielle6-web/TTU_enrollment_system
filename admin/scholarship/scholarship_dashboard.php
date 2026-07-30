@@ -42,7 +42,7 @@ try {
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">Scholarship Dashboard</h1>
         <p class="text-muted mb-0">Overview of scholarship programs and applicant status.</p>
@@ -60,7 +60,7 @@ try {
     <!-- Stats Grid -->
     <div class="row g-4 mb-4">
       <div class="col-sm-6 col-lg-3">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 56px; height: 56px;">
@@ -72,7 +72,7 @@ try {
         </div>
       </div>
       <div class="col-sm-6 col-lg-3">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.3s;">
           <div class="position-absolute top-0 start-0 w-100 bg-info" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-circle" style="width: 56px; height: 56px;">
@@ -84,7 +84,7 @@ try {
         </div>
       </div>
       <div class="col-sm-6 col-lg-3">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.4s;">
           <div class="position-absolute top-0 start-0 w-100 bg-warning" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle" style="width: 56px; height: 56px;">
@@ -96,7 +96,7 @@ try {
         </div>
       </div>
       <div class="col-sm-6 col-lg-3">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.5s;">
           <div class="position-absolute top-0 start-0 w-100 bg-success" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 56px; height: 56px;">
@@ -110,7 +110,7 @@ try {
     </div>
 
     <!-- Quick Action / Info Panel -->
-    <div class="island p-4 text-center">
+    <div class="island p-4 text-center fade-in-up" style="animation-delay: 0.6s;">
       <i class="bi bi-lightbulb text-warning fs-1 mb-2 d-block"></i>
       <h5 class="fw-bold">Ready to process applications?</h5>
       <p class="text-muted">Navigate to the <strong>Review Applications</strong> page to approve or reject student scholarship requests. Approved scholarships will automatically deduct from the student's fee assessment.</p>

@@ -147,7 +147,7 @@ require_once __DIR__ . '/../components/navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="h3 fw-bold text-dark mb-1">Section Management</h1>
@@ -170,16 +170,16 @@ require_once __DIR__ . '/../components/navbar.php';
       <?php unset($_SESSION['admin_error']); ?>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom d-flex justify-content-between align-items-center p-3">
+      <div class="island-header border-bottom d-flex justify-content-between align-items-center p-3 fade-in-up" style="animation-delay: 0.3s;">
         <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-list-ul me-2 text-primary"></i>All College Sections</h5>
         <div class="input-group shadow-sm" style="width: 250px;">
           <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
           <input type="text" id="sectionSearch" class="form-control border-start-0" placeholder="Search college_sections...">
         </div>
       </div>
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light text-muted small text-uppercase">
@@ -336,12 +336,12 @@ require_once __DIR__ . '/../components/navbar.php';
           </div>
           
           <!-- Subject Preview Panel -->
-          <div class="island border rounded-3 mb-4 d-none" id="subjectPreviewPanel">
-              <div class="island-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+          <div class="island border rounded-3 mb-4 d-none fade-in-up" id="subjectPreviewPanel" style="animation-delay: 0.5s;">
+              <div class="island-header bg-white border-bottom py-2 px-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.6s;">
                   <h6 class="mb-0 fw-bold text-dark"><i class="bi bi-journal-bookmark me-2 text-primary"></i>Curriculum Subjects Preview</h6>
                   <span class="badge bg-primary rounded-pill" id="previewSubCount">0 Subjects</span>
               </div>
-              <div class="island-body p-0">
+              <div class="island-body p-0 fade-in-up" style="animation-delay: 0.7s;">
                   <div class="table-responsive" style="max-height: 250px;">
                       <table class="table table-sm table-hover align-middle mb-0">
                           <thead class="table-light text-muted small sticky-top">
@@ -358,7 +358,7 @@ require_once __DIR__ . '/../components/navbar.php';
                       </table>
                   </div>
               </div>
-              <div class="island-footer bg-light border-top py-2 px-3 text-end text-muted small" id="previewSummary">
+              <div class="island-footer bg-light border-top py-2 px-3 text-end text-muted small fade-in-up" id="previewSummary" style="animation-delay: 0.8s;">
                   Total Units: 0
               </div>
           </div>

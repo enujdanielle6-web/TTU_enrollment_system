@@ -28,6 +28,9 @@ try {
         if ($name === '' || !in_array($type, ['percentage', 'fixed']) || $value <= 0) {
             throw new Exception('Invalid scholarship details provided.');
         }
+        if ($type === 'percentage' && ($value < 1 || $value > 100)) {
+            throw new Exception('Percentage discount must be between 1 and 100.');
+        }
 
         $stmt = $pdo->prepare('
             INSERT INTO scholarships (name, discount_type, discount_value, description, requirements) 
@@ -58,6 +61,9 @@ try {
         if ($id <= 0 || $name === '' || !in_array($type, ['percentage', 'fixed']) || $value <= 0) {
             throw new Exception('Missing or invalid required information.');
         }
+        if ($type === 'percentage' && ($value < 1 || $value > 100)) {
+            throw new Exception('Percentage discount must be between 1 and 100.');
+        }
 
         $stmt = $pdo->prepare('
             UPDATE scholarships 
@@ -77,6 +83,60 @@ try {
             'reqs' => $reqs,
             'id' => $id
         ]);
+
+        // Recalculate assessments that have this scholarship applied
+        // Fetch all assessments using this scholarship
+        $assStmt = $pdo->prepare('SELECT id, total_amount, tuition_fee FROM student_assessments WHERE scholarship_id = :id');
+        $assStmt->execute(['id' => $id]);
+        $assessments = $assStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($assessments) {
+            $updAssStmt = $pdo->prepare('
+                UPDATE student_assessments 
+                SET discount_amount = :discount, net_amount = :net, payment_status = :status 
+                WHERE id = :id
+            ');
+            $updStatusStmt = $pdo->prepare('SELECT total_paid FROM student_assessments WHERE id = :id');
+
+            foreach ($assessments as $ass) {
+                $targetAmount = (float)$ass['tuition_fee'];
+                $discountAmount = 0;
+                
+                if ($type === 'percentage') {
+                    $discountAmount = $targetAmount * ($value / 100);
+                } else {
+                    $discountAmount = $value;
+                }
+                
+                if ($discountAmount > $targetAmount) {
+                    $discountAmount = $targetAmount;
+                }
+                
+                $total = (float)$ass['total_amount'];
+                $netAmount = $total - $discountAmount;
+                
+                // Get current paid
+                $updStatusStmt->execute(['id' => $ass['id']]);
+                $totalPaid = (float)$updStatusStmt->fetchColumn();
+                
+                // Recalculate status
+                $newStatus = 'unpaid';
+                if ($totalPaid >= $netAmount && $netAmount > 0) {
+                    $newStatus = 'paid';
+                } elseif ($totalPaid > 0) {
+                    $newStatus = 'partial';
+                } elseif ($netAmount <= 0) {
+                    $newStatus = 'paid';
+                }
+
+                $updAssStmt->execute([
+                    'discount' => $discountAmount,
+                    'net' => $netAmount,
+                    'status' => $newStatus,
+                    'id' => $ass['id']
+                ]);
+            }
+        }
 
         logActivity((int)$_SESSION['user_id'], 'bi-pencil', 'Scholarship Updated', "Updated details for scholarship: " . $name);
         $_SESSION['success_msg'] = 'Scholarship details updated successfully.';

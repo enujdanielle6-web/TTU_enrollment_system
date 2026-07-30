@@ -74,7 +74,7 @@ $totalPages = ceil($totalLogs / $limit);
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex justify-content-between align-items-end">
+    <div class="island island-hero mb-4 d-flex justify-content-between align-items-end fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">System Audit Logs</h1>
         <p class="text-muted mb-0">Monitor applicant activities, form submissions, and administrative changes.</p>
@@ -86,9 +86,9 @@ $totalPages = ceil($totalLogs / $limit);
       </div>
     </div>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm" style="border-radius: 16px;">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm fade-in-up" style="border-radius: 16px; animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div class="island-header border-bottom border-light d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 fade-in-up" style="animation-delay: 0.3s;">
         <div class="d-flex align-items-center">
           <i class="bi bi-shield-lock-fill text-primary"></i>
           <h2 class="mb-0 text-dark">Activity Record</h2>
@@ -107,7 +107,7 @@ $totalPages = ceil($totalLogs / $limit);
         </form>
       </div>
       
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light">
@@ -185,6 +185,64 @@ $totalPages = ceil($totalLogs / $limit);
                           View
                         </button>
 
+                      <?php else: ?>
+                        <span class="text-muted small italic">N/A</span>
+                      <?php endif; ?>
+                    </td>
+                  </tr>
+                <?php endforeach; ?>
+              <?php endif; ?>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Pagination Controls -->
+      <?php if ($totalPages > 1): ?>
+        <div class="island-body border-top border-light py-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.5s;">
+          <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?> (<?= $totalLogs ?> total entries)</span>
+          <nav aria-label="Audit Log Pagination">
+            <ul class="pagination pagination-sm mb-0">
+              <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?page=<?= $page - 1 ?>&search=<?= urlencode($searchQuery) ?>" tabindex="-1" aria-disabled="true">Previous</a>
+              </li>
+              
+              <?php
+              $startPage = max(1, $page - 2);
+              $endPage = min($totalPages, $page + 2);
+              
+              if ($startPage > 1) {
+                  echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+              }
+              
+              for ($i = $startPage; $i <= $endPage; $i++): ?>
+                <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
+                  <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($searchQuery) ?>"><?= $i ?></a>
+                </li>
+              <?php endfor; 
+              
+              if ($endPage < $totalPages) {
+                  echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+              }
+              ?>
+              
+              <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
+                <a class="page-link" href="?page=<?= $page + 1 ?>&search=<?= urlencode($searchQuery) ?>">Next</a>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      <?php endif; ?>
+
+    </div>
+
+  </div>
+</main>
+
+
+
+<?php foreach ($logs as $log): ?>
+  <?php if ($log['old_value'] || $log['new_value']): ?>
                         <!-- Log Details Modal -->
                         <div class="modal fade" id="logModal<?= $log['id'] ?>" tabindex="-1" aria-hidden="true">
                           <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -242,59 +300,8 @@ $totalPages = ceil($totalLogs / $limit);
                             </div>
                           </div>
                         </div>
-                      <?php else: ?>
-                        <span class="text-muted small italic">N/A</span>
-                      <?php endif; ?>
-                    </td>
-                  </tr>
-                <?php endforeach; ?>
-              <?php endif; ?>
-            </tbody>
-          </table>
-        </div>
-      </div>
-      
-      <!-- Pagination Controls -->
-      <?php if ($totalPages > 1): ?>
-        <div class="island-body border-top border-light py-3 d-flex justify-content-between align-items-center">
-          <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?> (<?= $totalLogs ?> total entries)</span>
-          <nav aria-label="Audit Log Pagination">
-            <ul class="pagination pagination-sm mb-0">
-              <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?page=<?= $page - 1 ?>&search=<?= urlencode($searchQuery) ?>" tabindex="-1" aria-disabled="true">Previous</a>
-              </li>
-              
-              <?php
-              $startPage = max(1, $page - 2);
-              $endPage = min($totalPages, $page + 2);
-              
-              if ($startPage > 1) {
-                  echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-              }
-              
-              for ($i = $startPage; $i <= $endPage; $i++): ?>
-                <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
-                  <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($searchQuery) ?>"><?= $i ?></a>
-                </li>
-              <?php endfor; 
-              
-              if ($endPage < $totalPages) {
-                  echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
-              }
-              ?>
-              
-              <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?page=<?= $page + 1 ?>&search=<?= urlencode($searchQuery) ?>">Next</a>
-              </li>
-            </ul>
-          </nav>
-        </div>
-      <?php endif; ?>
-
-    </div>
-
-  </div>
-</main>
+  <?php endif; ?>
+<?php endforeach; ?>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
 

@@ -62,6 +62,12 @@ if (empty($height) || empty($weight) || empty($bloodType) || empty($emergencyNam
     exit;
 }
 
+if (!preg_match('/^(09\d{9}|(\+639)\d{9})$/', $emergencyContact)) {
+    $_SESSION['error_msg'] = 'Emergency contact number must be a valid 11-digit number starting with 09.';
+    header('Location: health_info.php');
+    exit;
+}
+
 try {
     $pdo->beginTransaction();
 

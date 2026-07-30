@@ -98,7 +98,7 @@ require_once __DIR__ . '/../../components/header.php';
   <div class="container-fluid px-lg-5">
     
     <!-- Top Header -->
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <a href="college_curriculum.php" class="btn btn-sm btn-light text-primary mb-2 fw-medium rounded-pill px-3 shadow-sm">
@@ -132,11 +132,11 @@ require_once __DIR__ . '/../../components/header.php';
     <div class="row g-4">
         <!-- Sidebar Summary -->
         <div class="col-lg-3">
-            <div class="island border-0 shadow-sm rounded-4 mb-4">
-                <div class="island-header border-bottom border-light">
+            <div class="island border-0 shadow-sm rounded-4 mb-4 fade-in-up" style="animation-delay: 0.2s;">
+                <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.3s;">
                     <h6 class="mb-0 fw-bold"><i class="bi bi-bar-chart-fill text-primary me-2"></i>Curriculum Summary</h6>
                 </div>
-                <div class="island-body p-4">
+                <div class="island-body p-4 fade-in-up" style="animation-delay: 0.4s;">
                     <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                         <span class="text-muted">Total Subjects</span>
                         <span class="fw-bold text-dark fs-5"><?= count($subjectsRaw) ?></span>
@@ -156,8 +156,8 @@ require_once __DIR__ . '/../../components/header.php';
                 </div>
             </div>
 
-            <div class="island border-0 shadow-sm rounded-4">
-                <div class="island-body p-3">
+            <div class="island border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.5s;">
+                <div class="island-body p-3 fade-in-up" style="animation-delay: 0.6s;">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
                         <input type="text" id="builderSearch" class="form-control border-start-0" placeholder="Filter subjects...">
@@ -169,7 +169,7 @@ require_once __DIR__ . '/../../components/header.php';
         <!-- Main Builder Area -->
         <div class="col-lg-9">
             <?php if (empty($subjects)): ?>
-                <div class="island border-0 shadow-sm rounded-4 text-center py-5">
+                <div class="island border-0 shadow-sm rounded-4 text-center py-5 fade-in-up" style="animation-delay: 0.7s;">
                     <i class="bi bi-diagram-3 fs-1 text-muted d-block mb-3"></i>
                     <h5 class="fw-bold text-dark">Curriculum is Empty</h5>
                     <p class="text-muted">Start building this curriculum by adding subjects.</p>
@@ -191,12 +191,12 @@ require_once __DIR__ . '/../../components/header.php';
                         <h4 class="fw-bold text-dark mb-3 border-bottom pb-2 border-2 border-primary d-inline-block"><?= htmlspecialchars($yl) ?></h4>
                         
                         <?php foreach ($semesters as $sem): ?>
-                            <div class="island border-0 shadow-sm rounded-4 mb-4 curriculum-sem-block">
-                                <div class="island-header bg-light border-bottom border-light d-flex justify-content-between align-items-center py-2">
+                            <div class="island border-0 shadow-sm rounded-4 mb-4 curriculum-sem-block fade-in-up" style="animation-delay: 0.8s;">
+                                <div class="island-header bg-light border-bottom border-light d-flex justify-content-between align-items-center py-2 fade-in-up" style="animation-delay: 0.9s;">
                                     <h6 class="mb-0 fw-bold text-secondary text-uppercase tracking-wide small"><i class="bi bi-calendar-event me-2"></i><?= htmlspecialchars($sem) ?></h6>
                                     <span class="badge bg-secondary rounded-pill"><?= count($subjects[$yl][$sem]) ?> subjects</span>
                                 </div>
-                                <div class="island-body p-0">
+                                <div class="island-body p-0 fade-in-up" style="animation-delay: 1s;">
                                     <div class="table-responsive">
                                         <table class="table table-borderless align-middle mb-0 builder-table">
                                             <thead class="border-bottom text-muted small text-uppercase">

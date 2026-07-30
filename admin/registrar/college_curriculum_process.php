@@ -8,6 +8,13 @@ require_once __DIR__ . '/../../config/database.php';
 
 requirePermission('college_curriculum.manage');
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: college_curriculum.php');
+    exit;
+}
+
+verifyCsrfToken();
+
 $action = $_POST['action'] ?? '';
 
 if ($action === 'create_curriculum') {
@@ -18,9 +25,15 @@ if ($action === 'create_curriculum') {
     $status = trim($_POST['status'] ?? 'active');
     $desc = trim($_POST['description'] ?? '');
 
+    if ($programId <= 0 || $name === '' || $ay === '') {
+        $_SESSION['error_msg'] = 'Program, Curriculum Name, and Academic Year are required.';
+        header('Location: college_curriculum.php');
+        exit;
+    }
+
     try {
         $stmt = $pdo->prepare("INSERT INTO college_curricula (program_id, curriculum_name, version, effective_academic_year, description, status) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$programId, $name, $version, $ay ?: null, $desc ?: null, $status]);
+        $stmt->execute([$programId, $name, $version, $ay, $desc ?: null, $status]);
         $_SESSION['success_msg'] = "Curriculum created successfully.";
     } catch (PDOException $e) {
         $_SESSION['error_msg'] = "Failed to create curriculum: " . $e->getMessage();
@@ -36,9 +49,15 @@ if ($action === 'create_curriculum') {
     $status = trim($_POST['status'] ?? 'active');
     $desc = trim($_POST['description'] ?? '');
 
+    if ($id <= 0 || $programId <= 0 || $name === '' || $ay === '') {
+        $_SESSION['error_msg'] = 'Invalid or missing data for updating curriculum.';
+        header('Location: college_curriculum.php');
+        exit;
+    }
+
     try {
         $stmt = $pdo->prepare("UPDATE college_curricula SET program_id = ?, curriculum_name = ?, version = ?, effective_academic_year = ?, description = ?, status = ? WHERE id = ?");
-        $stmt->execute([$programId, $name, $version, $ay ?: null, $desc ?: null, $status, $id]);
+        $stmt->execute([$programId, $name, $version, $ay, $desc ?: null, $status, $id]);
         $_SESSION['success_msg'] = "Curriculum updated successfully.";
     } catch (PDOException $e) {
         $_SESSION['error_msg'] = "Failed to update curriculum: " . $e->getMessage();
@@ -47,6 +66,13 @@ if ($action === 'create_curriculum') {
     exit;
 } elseif ($action === 'delete_curriculum') {
     $id = (int)($_POST['curriculum_id'] ?? 0);
+    
+    if ($id <= 0) {
+        $_SESSION['error_msg'] = "Invalid Curriculum ID.";
+        header('Location: college_curriculum.php');
+        exit;
+    }
+    
     try {
         $stmt = $pdo->prepare("DELETE FROM college_curricula WHERE id = ?");
         $stmt->execute([$id]);
@@ -61,6 +87,12 @@ if ($action === 'create_curriculum') {
     $subjectId = (int)($_POST['subject_id'] ?? 0);
     $yearLevel = trim($_POST['year_level'] ?? '');
     $semester = trim($_POST['semester'] ?? '');
+    
+    if ($currId <= 0 || $subjectId <= 0 || $yearLevel === '' || $semester === '') {
+        $_SESSION['error_msg'] = "All fields are required to add a subject.";
+        header("Location: college_curriculum_builder.php?id=$currId");
+        exit;
+    }
 
     try {
         // Get max display order

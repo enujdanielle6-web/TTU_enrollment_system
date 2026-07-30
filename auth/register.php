@@ -21,7 +21,7 @@ require_once __DIR__ . '/../components/header.php';
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12">
-        <div class="auth-island" style="max-width: 520px;">
+        <div class="auth-island fade-in-up" style="max-width: 520px; animation-delay: 0.1s;">
           <div class="text-center mb-4">
             <div class="school-logo mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem; border-radius: 16px; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%); box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);">
               <i class="bi bi-person-plus"></i>
@@ -40,7 +40,7 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php endif; ?>
 
-          <form id="registerForm" action="register_process.php" method="post" novalidate>
+          <form id="registerForm" class="no-spinner" action="register_process.php" method="post" novalidate>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
             <div class="row g-3">
               <div class="col-md-6">
@@ -104,6 +104,7 @@ require_once __DIR__ . '/../components/header.php';
 </main>
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   $(function () {
     $('#registerForm').on('submit', function (event) {
@@ -118,6 +119,21 @@ require_once __DIR__ . '/../components/header.php';
       if (!form.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
+      } else {
+        event.preventDefault(); // Stop normal submission temporarily
+        
+        Swal.fire({
+          title: 'Creating Account...',
+          text: 'Please wait while we set up your profile.',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          didOpen: () => {
+            Swal.showLoading();
+            setTimeout(() => {
+              form.submit(); // Actually submit the form
+            }, 1500);
+          }
+        });
       }
 
       $(form).addClass('was-validated');

@@ -139,7 +139,7 @@ require_once __DIR__ . '/../components/header.php';
     <div class="row justify-content-center">
       <div class="col-xl-10">
         
-        <div class="island island-hero mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div class="island island-hero mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 fade-in-up" style="animation-delay: 0.1s;">
           <div>
             <h1 class="h3 fw-bold text-dark mb-1">Application Status</h1>
             <p class="text-muted mb-0">Track your enrollment application progress and review your submitted details.</p>
@@ -152,7 +152,7 @@ require_once __DIR__ . '/../components/header.php';
             <?= htmlspecialchars($fetchError, ENT_QUOTES, 'UTF-8'); ?>
           </div>
         <?php elseif ($application === null): ?>
-          <div class="island text-center py-5">
+          <div class="island text-center py-5 fade-in-up" style="animation-delay: 0.2s;">
             <div class="status-empty-icon mx-auto mb-3">
               <i class="bi bi-file-earmark-text text-muted" style="font-size: 3rem;"></i>
             </div>
@@ -166,12 +166,12 @@ require_once __DIR__ . '/../components/header.php';
           <div class="row g-4">
             
             <div class="col-lg-4">
-              <div class="island h-100">
-                <div class="island-header">
+              <div class="island h-100 fade-in-up" style="animation-delay: 0.3s;">
+                <div class="island-header fade-in-up" style="animation-delay: 0.4s;">
                   <i class="bi bi-info-circle"></i>
                   <h2>Status Details</h2>
                 </div>
-                <div class="island-body mt-2">
+                <div class="island-body mt-2 fade-in-up" style="animation-delay: 0.5s;">
                   <p class="text-muted small mb-1">Application Reference Number</p>
                   <p class="mb-4 fw-bold text-dark" style="font-size: 1.1rem;"><?= htmlspecialchars($application['reference_number'], ENT_QUOTES, 'UTF-8'); ?></p>
 
@@ -206,12 +206,12 @@ require_once __DIR__ . '/../components/header.php';
             </div>
 
             <div class="col-lg-8">
-              <div class="island h-100">
-                <div class="island-header">
+              <div class="island h-100 fade-in-up" style="animation-delay: 0.6s;">
+                <div class="island-header fade-in-up" style="animation-delay: 0.7s;">
                   <i class="bi bi-clock-history"></i>
                   <h2>Progress Timeline</h2>
                 </div>
-                <div class="island-body mt-2">
+                <div class="island-body mt-2 fade-in-up" style="animation-delay: 0.8s;">
                   <div class="status-timeline">
                     <?php foreach ($timelineSteps as $step): ?>
                       <?php
@@ -244,12 +244,12 @@ require_once __DIR__ . '/../components/header.php';
             </div>
 
             <div class="col-12">
-              <div class="island">
-                <div class="island-header">
+              <div class="island fade-in-up" style="animation-delay: 0.9s;">
+                <div class="island-header fade-in-up" style="animation-delay: 1s;">
                   <i class="bi bi-file-earmark-text"></i>
                   <h2>Application Summary</h2>
                 </div>
-                <div class="island-body mt-2">
+                <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.1s;">
                   <div class="row g-4">
                     <div class="col-md-6 col-lg-4">
                       <p class="text-muted small mb-1">Applicant Name</p>

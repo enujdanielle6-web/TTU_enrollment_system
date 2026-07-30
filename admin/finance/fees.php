@@ -28,7 +28,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">Fee Templates</h1>
         <p class="text-muted mb-0">Manage the financial fee structures assigned to students upon enrollment.</p>
@@ -47,9 +47,9 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center">
+      <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.3s;">
         <div>
           <i class="bi bi-cash-stack text-primary"></i>
           <h2 class="mb-0 text-dark d-inline-block">Existing Fee Templates</h2>
@@ -62,7 +62,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         </div>
       </div>
       
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light">
@@ -159,14 +159,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
           <div class="row g-3 mb-3">
             <div class="col-md-4">
               <label class="form-label small fw-semibold text-dark">Academic Level</label>
-              <select name="academic_level" class="form-select bg-light" required>
+              <select name="academic_level" id="addTemplateLevel" class="form-select bg-light" required>
                 <option value="Senior High School">Senior High School</option>
                 <option value="College">College</option>
               </select>
             </div>
             <div class="col-md-4">
               <label class="form-label small fw-semibold text-dark">Grade/Year Level</label>
-              <select name="grade_level" class="form-select bg-light" required>
+              <select name="grade_level" id="addTemplateGrade" class="form-select bg-light" required>
                 <option value="" disabled selected>Select Level</option>
                 <option value="Grade 11">Grade 11</option>
                 <option value="Grade 12">Grade 12</option>
@@ -178,17 +178,17 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             </div>
             <div class="col-md-4">
               <label class="form-label small fw-semibold text-dark">Academic Program (Optional)</label>
-              <select name="strand" class="form-select bg-light">
+              <select name="strand" id="addTemplateStrand" class="form-select bg-light">
                 <option value="">Applies to All Strands</option>
                 <?php
                   $strands = $pdo->query('
-                    SELECT code, name FROM college_programs WHERE is_active = 1 
+                    SELECT code, name, "College" as level FROM college_programs WHERE is_active = 1 
                     UNION ALL 
-                    SELECT code, name FROM shs_strands WHERE is_active = 1 
+                    SELECT code, name, "Senior High School" as level FROM shs_strands WHERE is_active = 1 
                     ORDER BY code ASC
                   ')->fetchAll();
                   foreach ($strands as $strand) {
-                      echo '<option value="' . htmlspecialchars($strand['code'], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($strand['code'] . ' - ' . $strand['name'], ENT_QUOTES, 'UTF-8') . '</option>';
+                      echo '<option value="' . htmlspecialchars($strand['code'], ENT_QUOTES, 'UTF-8') . '" data-level="' . htmlspecialchars($strand['level'], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($strand['code'] . ' - ' . $strand['name'], ENT_QUOTES, 'UTF-8') . '</option>';
                   }
                 ?>
               </select>
@@ -352,6 +352,8 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 <script>
   $(document).ready(function() {
     $('.edit-template-btn').on('click', function() {
+      const level = $(this).data('level');
+      $('#editTemplateLevel').val(level).trigger('change');
       $('#editTemplateId').val($(this).data('id'));
       $('#editTemplateName').val($(this).data('name'));
       $('#editTemplateLevel').val($(this).data('level'));
@@ -391,7 +393,55 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             }
         });
     }
-  });
+  
+    function filterLevelsAndStrands(levelSelectId, gradeSelectId, strandSelectId) {
+        const levelSelect = document.getElementById(levelSelectId);
+        const gradeSelect = document.getElementById(gradeSelectId);
+        const strandSelect = document.getElementById(strandSelectId);
+
+        if (!levelSelect || !gradeSelect || !strandSelect) return;
+
+        levelSelect.addEventListener('change', function() {
+            const selectedLevel = this.value;
+
+            // Filter Grades
+            Array.from(gradeSelect.options).forEach(opt => {
+                if (opt.value === "") return; // keep the placeholder
+                if (selectedLevel === 'Senior High School') {
+                    opt.hidden = !opt.value.includes('Grade');
+                } else {
+                    opt.hidden = !opt.value.includes('Year');
+                }
+            });
+
+            // Filter Strands/Programs
+            Array.from(strandSelect.options).forEach(opt => {
+                if (opt.value === "") return; // keep the placeholder
+                if (opt.getAttribute('data-level') === selectedLevel) {
+                    opt.hidden = false;
+                } else {
+                    opt.hidden = true;
+                }
+            });
+            
+            // Only reset if the current selection is now hidden
+            if (gradeSelect.options[gradeSelect.selectedIndex]?.hidden) {
+                gradeSelect.value = "";
+            }
+            if (strandSelect.options[strandSelect.selectedIndex]?.hidden) {
+                strandSelect.value = "";
+            }
+        });
+
+        // Trigger change initially to set correct state (only for add modal)
+        if(levelSelectId === 'addTemplateLevel') {
+           levelSelect.dispatchEvent(new Event('change'));
+        }
+    }
+
+    filterLevelsAndStrands('addTemplateLevel', 'addTemplateGrade', 'addTemplateStrand');
+    filterLevelsAndStrands('editTemplateLevel', 'editTemplateGrade', 'editTemplateStrand');
+});
 </script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

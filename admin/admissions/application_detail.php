@@ -154,10 +154,15 @@ require_once __DIR__ . '/../components/navbar.php';
     <div class="mb-4 d-flex align-items-center justify-content-between">
       <div>
         <?php 
-          $backUrl = 'javascript:history.back()';
-          if (isset($_SERVER['HTTP_REFERER']) && str_contains($_SERVER['HTTP_REFERER'], '/admin/')) {
-              $backUrl = htmlspecialchars($_SERVER['HTTP_REFERER'], ENT_QUOTES, 'UTF-8');
+          if (isset($_SERVER['HTTP_REFERER']) && 
+              str_contains($_SERVER['HTTP_REFERER'], '/admin/') && 
+              !str_contains($_SERVER['HTTP_REFERER'], 'application_detail.php') && 
+              !str_contains($_SERVER['HTTP_REFERER'], 'application_process.php')) {
+              $_SESSION['app_detail_back_url'] = $_SERVER['HTTP_REFERER'];
           }
+          $backUrl = isset($_SESSION['app_detail_back_url']) 
+              ? htmlspecialchars($_SESSION['app_detail_back_url'], ENT_QUOTES, 'UTF-8') 
+              : 'review.php';
         ?>
         <a href="<?= $backUrl ?>" class="text-decoration-none text-muted small fw-medium"><i class="bi bi-arrow-left"></i> Back to List</a>
         <h1 class="h3 fw-bold text-dark mt-2 mb-1">
@@ -186,13 +191,13 @@ require_once __DIR__ . '/../components/navbar.php';
         <div class="col-lg-8">
         
         <!-- Personal Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.2s;">
             <i class="bi bi-person-vcard-fill"></i>
             <h2>Personal Information</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 0.3s;">
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="text-muted small fw-semibold text-uppercase">Full Name</label>
@@ -232,13 +237,13 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <!-- Academic Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.4s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.5s;">
             <i class="bi bi-mortarboard-fill"></i>
             <h2>Enrollment Details</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 0.6s;">
             <div class="row g-3">
               <div class="col-md-3">
                 <label class="text-muted small fw-semibold text-uppercase">Academic Level</label>
@@ -286,9 +291,9 @@ require_once __DIR__ . '/../components/navbar.php';
         
         <?php if (!empty($enrolledSubjects)): ?>
         <!-- Enrolled Subjects -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.7s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center">
+          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.8s;">
             <div>
               <i class="bi bi-journal-text"></i>
               <h2>Enrolled Subjects</h2>
@@ -299,7 +304,7 @@ require_once __DIR__ . '/../components/navbar.php';
             </button>
             <?php endif; ?>
           </div>
-          <div class="island-body p-0 mt-2">
+          <div class="island-body p-0 mt-2 fade-in-up" style="animation-delay: 0.9s;">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 custom-table">
                 <thead class="table-light text-muted small text-uppercase">
@@ -348,13 +353,13 @@ require_once __DIR__ . '/../components/navbar.php';
         <?php endif; ?>
 
         <!-- Educational History -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.1s;">
             <i class="bi bi-building"></i>
             <h2>Educational History</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 1.2s;">
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="text-muted small fw-semibold text-uppercase">Learner Reference Number (LRN)</label>
@@ -396,13 +401,13 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <!-- Family Background -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1.3s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.4s;">
             <i class="bi bi-people-fill"></i>
             <h2>Family Background</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 1.5s;">
             <div class="row g-3">
               <div class="col-md-4">
                 <label class="text-muted small fw-semibold text-uppercase">Father's Name</label>
@@ -451,13 +456,13 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <!-- Emergency & Medical Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1.6s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.7s;">
             <i class="bi bi-heart-pulse-fill"></i>
             <h2>Emergency & Medical Info</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 1.8s;">
             <div class="row g-3">
               <div class="col-md-4">
                 <label class="text-muted small fw-semibold text-uppercase">Emergency Contact</label>
@@ -491,13 +496,13 @@ require_once __DIR__ . '/../components/navbar.php';
         </div>
 
         <!-- Documents -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1.9s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
+          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 2s;">
             <i class="bi bi-folder-fill"></i>
             <h2>Uploaded Documents</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 2.1s;">
             <?php if ($app['document_submission_method'] === 'on_campus'): ?>
                <div class="alert alert-secondary bg-light border-0 text-center py-4 mb-0">
                  <i class="bi bi-building fs-2 text-muted mb-2 d-block"></i>
@@ -549,12 +554,12 @@ require_once __DIR__ . '/../components/navbar.php';
       <!-- Right Column: Administrative Action -->
       <div class="col-lg-4">
         
-        <div class="island border-primary border-top border-4 sticky-top" style="top: 80px;">
-          <div class="island-header bg-primary-light">
+        <div class="island border-primary border-top border-4 sticky-top fade-in-up" style="top: 80px; animation-delay: 2.2s;">
+          <div class="island-header bg-primary-light fade-in-up" style="animation-delay: 2.3s;">
             <i class="bi bi-shield-lock-fill text-primary"></i>
             <h2 class="text-primary">Admin Action Panel</h2>
           </div>
-          <div class="island-body">
+          <div class="island-body fade-in-up" style="animation-delay: 2.4s;">
             
               <?php if (hasPermission('enrollment.finalize') && empty($app['section_id'])): ?>
               <div class="mb-3 p-3 bg-white rounded border border-primary">
@@ -591,16 +596,22 @@ require_once __DIR__ . '/../components/navbar.php';
 
               <div class="mb-3">
                 <label for="status" class="form-label fw-semibold small text-dark">Update Status</label>
-                <select name="status" id="status" class="form-select form-select-sm" required>
-                  <option value="pending" <?= $app['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
-                  <option value="under_review" <?= $app['status'] === 'under_review' ? 'selected' : '' ?>>Under Review</option>
-                  <option value="correction_required" <?= $app['status'] === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
-                  <option value="approved" <?= $app['status'] === 'approved' ? 'selected' : '' ?>>Approved</option>
-                  <option value="rejected" <?= $app['status'] === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-                  <?php if (hasPermission('enrollment.finalize') || $app['status'] === 'enrolled'): ?>
-                  <option value="enrolled" <?= $app['status'] === 'enrolled' ? 'selected' : '' ?>>Officially Enrolled</option>
+                <select name="status" id="status" class="form-select form-select-sm" required <?= $app['status'] === 'enrolled' ? 'disabled' : '' ?>>
+                  <?php if ($app['status'] === 'enrolled'): ?>
+                    <option value="enrolled" selected>Officially Enrolled</option>
+                  <?php else: ?>
+                    <option value="under_review" <?= $app['status'] === 'under_review' ? 'selected' : '' ?> <?= $app['status'] === 'approved' ? 'disabled' : '' ?>>Under Review</option>
+                    <option value="correction_required" <?= $app['status'] === 'correction_required' ? 'selected' : '' ?> <?= $app['status'] === 'approved' ? 'disabled' : '' ?>>Correction Required</option>
+                    <option value="approved" <?= $app['status'] === 'approved' ? 'selected' : '' ?>>Approved</option>
+                    <option value="rejected" <?= $app['status'] === 'rejected' ? 'selected' : '' ?> <?= $app['status'] === 'approved' ? 'disabled' : '' ?>>Rejected</option>
+                    <?php if (hasPermission('enrollment.finalize')): ?>
+                    <option value="enrolled">Officially Enrolled</option>
+                    <?php endif; ?>
                   <?php endif; ?>
                 </select>
+                <?php if ($app['status'] === 'enrolled'): ?>
+                  <input type="hidden" name="status" value="enrolled">
+                <?php endif; ?>
               </div>
 
               <div class="mb-3">
@@ -617,11 +628,8 @@ require_once __DIR__ . '/../components/navbar.php';
 
               <?php if (!$assessment): ?>
               <div class="mb-4 p-3 bg-white rounded border border-warning">
-                <div class="form-check form-switch mb-2">
-                  <input class="form-check-input" type="checkbox" role="switch" id="generate_assessment" name="generate_assessment" value="1" <?= $app['status'] === 'approved' ? 'checked' : '' ?>>
-                  <label class="form-check-label fw-semibold small text-dark" for="generate_assessment"><i class="bi bi-cash-stack text-warning"></i> Auto-Generate Assessment</label>
-                </div>
-                <div class="form-text" style="font-size: 0.7rem;">The system will automatically assign the correct fee template for <strong><?= htmlspecialchars($app['grade_level'] ?? '', ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($app['strand'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong>. This is required before they can apply for scholarships.</div>
+                <div class="fw-semibold small text-dark mb-1"><i class="bi bi-cash-stack text-warning"></i> Automated Assessment Generation</div>
+                <div class="form-text mt-0" style="font-size: 0.7rem;">The system will automatically generate a fee assessment for <strong><?= htmlspecialchars($app['grade_level'] ?? '', ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($app['strand'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong> as soon as this application is marked as <strong>Approved</strong>. This is required before the student can apply for scholarships.</div>
               </div>
               <?php else: ?>
               <div class="mb-4 p-3 bg-white rounded border border-success">

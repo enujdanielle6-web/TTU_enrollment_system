@@ -71,7 +71,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3">
+    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">User Directory</h1>
         <p class="text-muted mb-0">Manage system access, reset credentials, and assign administrative roles.</p>
@@ -90,9 +90,9 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div class="island-header border-bottom border-light d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 fade-in-up" style="animation-delay: 0.3s;">
         <div class="d-flex align-items-center">
           <i class="bi bi-people-fill text-primary"></i>
           <h2 class="mb-0 text-dark">Registered Accounts</h2>
@@ -118,7 +118,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         </form>
       </div>
       
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light">
@@ -263,7 +263,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       
       <!-- Pagination Controls -->
       <?php if ($totalPages > 1): ?>
-        <div class="island-body border-top border-light py-3 d-flex justify-content-between align-items-center">
+        <div class="island-body border-top border-light py-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.5s;">
           <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?></span>
           <nav aria-label="User Pagination">
             <ul class="pagination pagination-sm mb-0">

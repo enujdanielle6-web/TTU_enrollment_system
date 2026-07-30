@@ -21,7 +21,7 @@ require_once __DIR__ . '/../components/header.php';
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12">
-        <div class="auth-island">
+        <div class="auth-island fade-in-up" style="animation-delay: 0.1s;">
           <div class="text-center mb-4">
             <div class="school-logo mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem; border-radius: 16px; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%); box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);">
               <i class="bi bi-box-arrow-in-right"></i>
@@ -74,6 +74,7 @@ require_once __DIR__ . '/../components/header.php';
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('cashier@ttu.edu.ph', 'password123')">Cashier</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admissions@ttu.edu.ph', 'password123')">Admissions</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scholarship@ttu.edu.ph', 'password123')">Scholarship</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('clinic@example.com', 'password123')">Clinic</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('jane.doe@example.com', 'password123')">Applicant</button>
                 </div>
             </div>
@@ -91,6 +92,9 @@ require_once __DIR__ . '/../components/header.php';
 
 <script>
   document.addEventListener("DOMContentLoaded", function() {
+    // Clear any cached enrollment form data from previous sessions
+    sessionStorage.removeItem('enrollmentFormData');
+
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
 

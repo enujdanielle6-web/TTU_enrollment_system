@@ -71,13 +71,13 @@ require_once __DIR__ . '/../components/navbar.php';
     <div class="row g-4">
         <!-- Main Details -->
         <div class="col-lg-8">
-            <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+            <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-                <div class="island-header border-bottom border-light">
+                <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.2s;">
                     <i class="bi bi-person-lines-fill text-primary"></i>
                     <h2 class="mb-0 text-dark">Physical Information</h2>
                 </div>
-                <div class="island-body">
+                <div class="island-body fade-in-up" style="animation-delay: 0.3s;">
                     <div class="row g-3">
                         <div class="col-md-4">
                             <span class="text-muted small fw-bold text-uppercase d-block mb-1">Height</span>
@@ -95,13 +95,13 @@ require_once __DIR__ . '/../components/navbar.php';
                 </div>
             </div>
 
-            <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+            <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.4s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-                <div class="island-header border-bottom border-light">
+                <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.5s;">
                     <i class="bi bi-clipboard2-pulse text-primary"></i>
                     <h2 class="mb-0 text-dark">Medical History</h2>
                 </div>
-                <div class="island-body">
+                <div class="island-body fade-in-up" style="animation-delay: 0.6s;">
                     <div class="row g-3">
                         <?php 
                             $historyFields = [
@@ -135,13 +135,13 @@ require_once __DIR__ . '/../components/navbar.php';
                 </div>
             </div>
 
-            <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+            <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.7s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-                <div class="island-header border-bottom border-light">
+                <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.8s;">
                     <i class="bi bi-journal-medical text-primary"></i>
                     <h2 class="mb-0 text-dark">Additional Details</h2>
                 </div>
-                <div class="island-body">
+                <div class="island-body fade-in-up" style="animation-delay: 0.9s;">
                     <div class="mb-3 border-bottom pb-3">
                         <span class="text-muted small fw-bold text-uppercase d-block mb-1">Medical Conditions</span>
                         <div class="text-dark"><?= nl2br(htmlspecialchars($record['medical_conditions'] ?: 'None reported', ENT_QUOTES, 'UTF-8')) ?></div>
@@ -161,13 +161,13 @@ require_once __DIR__ . '/../components/navbar.php';
                 </div>
             </div>
             
-            <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+            <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-                <div class="island-header border-bottom border-light">
+                <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.1s;">
                     <i class="bi bi-telephone-fill text-primary"></i>
                     <h2 class="mb-0 text-dark">Emergency Contact</h2>
                 </div>
-                <div class="island-body">
+                <div class="island-body fade-in-up" style="animation-delay: 1.2s;">
                     <div class="row g-3">
                         <div class="col-md-4">
                             <span class="text-muted small fw-bold text-uppercase d-block mb-1">Contact Name</span>
@@ -188,12 +188,12 @@ require_once __DIR__ . '/../components/navbar.php';
 
         <!-- Sidebar / Action Panel -->
         <div class="col-lg-4">
-            <div class="island sticky-top" style="top: 80px;">
-                <div class="island-header bg-light">
+            <div class="island sticky-top fade-in-up" style="top: 80px; animation-delay: 1.3s;">
+                <div class="island-header bg-light fade-in-up" style="animation-delay: 1.4s;">
                     <i class="bi bi-shield-check"></i>
                     <h2 class="mb-0">Medical Clearance Action</h2>
                 </div>
-                <div class="island-body bg-light">
+                <div class="island-body bg-light fade-in-up" style="animation-delay: 1.5s;">
                     <form action="medical_process.php" method="POST">
                         <?= getCsrfInput() ?>
                         <input type="hidden" name="record_id" value="<?= $record['id'] ?>">

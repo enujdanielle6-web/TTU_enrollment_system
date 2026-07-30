@@ -27,7 +27,7 @@ require_once __DIR__ . '/../../components/header.php';
 <?php require_once __DIR__ . '/../components/navbar.php'; ?>
 <main class="py-5 bg-light min-vh-100 w-100" id="mainContent">
   <div class="container-fluid px-lg-5">
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="h3 fw-bold text-dark mb-1">Subjects Management</h1>
@@ -48,9 +48,9 @@ require_once __DIR__ . '/../../components/header.php';
       <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center">
+      <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.3s;">
         <div>
           <i class="bi bi-journal-text"></i>
           <h2 class="mb-0 d-inline-block">All Subjects</h2>
@@ -73,7 +73,7 @@ require_once __DIR__ . '/../../components/header.php';
           </div>
         </div>
       </div>
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light text-muted small text-uppercase">
@@ -81,6 +81,7 @@ require_once __DIR__ . '/../../components/header.php';
                 <th class="ps-4">Subject Code</th>
                 <th>Subject Name</th>
                 <th>Units</th>
+                <th>Type</th>
                 <th>Level</th>
                 <th>Status</th>
                 <th class="text-end pe-4">Actions</th>
@@ -100,6 +101,9 @@ require_once __DIR__ . '/../../components/header.php';
                     <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($subject['subject_code'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><?= htmlspecialchars($subject['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><?= (int)$subject['units'] ?></td>
+                    <td>
+                      <span class="badge bg-light text-secondary border"><?= htmlspecialchars($subject['subject_type'] ?: 'Lecture', ENT_QUOTES, 'UTF-8') ?></span>
+                    </td>
                     <td>
                       <?php if (($subject['education_level'] ?? 'College') === 'College'): ?>
                         <span class="badge bg-light text-primary border border-primary border-opacity-25 rounded-pill px-3">College</span>
@@ -134,6 +138,7 @@ require_once __DIR__ . '/../../components/header.php';
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <form action="subject_process.php" method="POST">
+                          <?= getCsrfInput() ?>
                           <input type="hidden" name="action" value="edit">
                           <input type="hidden" name="subject_id" value="<?= $subject['id'] ?>">
                           <div class="modal-header">
@@ -152,6 +157,16 @@ require_once __DIR__ . '/../../components/header.php';
                             <div class="mb-3">
                               <label class="form-label">Units <span class="text-danger">*</span></label>
                               <input type="number" class="form-control" name="units" value="<?= (int)$subject['units'] ?>" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                              <label class="form-label">Subject Type <span class="text-danger">*</span></label>
+                              <select class="form-select" name="subject_type">
+                                <option value="Lecture" <?= ($subject['subject_type'] ?? '') === 'Lecture' ? 'selected' : '' ?>>Lecture</option>
+                                <option value="Laboratory" <?= ($subject['subject_type'] ?? '') === 'Laboratory' ? 'selected' : '' ?>>Laboratory</option>
+                                <option value="PE" <?= ($subject['subject_type'] ?? '') === 'PE' ? 'selected' : '' ?>>P.E.</option>
+                                <option value="NSTP" <?= ($subject['subject_type'] ?? '') === 'NSTP' ? 'selected' : '' ?>>NSTP</option>
+                                <option value="Other" <?= ($subject['subject_type'] ?? '') === 'Other' ? 'selected' : '' ?>>Other</option>
+                              </select>
                             </div>
                             <div class="mb-3">
                               <label class="form-label">Description</label>
@@ -202,6 +217,7 @@ require_once __DIR__ . '/../../components/header.php';
   <div class="modal-dialog">
     <div class="modal-content">
       <form action="subject_process.php" method="POST">
+        <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="add">
         <div class="modal-header">
           <h5 class="modal-title">Add New Subject</h5>
@@ -219,6 +235,16 @@ require_once __DIR__ . '/../../components/header.php';
           <div class="mb-3">
             <label class="form-label">Units <span class="text-danger">*</span></label>
             <input type="number" class="form-control" name="units" value="3" min="1" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Subject Type <span class="text-danger">*</span></label>
+            <select class="form-select" name="subject_type">
+              <option value="Lecture" selected>Lecture</option>
+              <option value="Laboratory">Laboratory</option>
+              <option value="PE">P.E.</option>
+              <option value="NSTP">NSTP</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
           <div class="mb-3">
             <label class="form-label">Education Level</label>
@@ -258,6 +284,7 @@ require_once __DIR__ . '/../../components/header.php';
       <div class="modal-footer bg-light border-top-0 pt-3 justify-content-center">
         <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
         <form action="subject_process.php" method="POST" class="d-inline">
+          <?= getCsrfInput() ?>
           <input type="hidden" name="action" value="delete">
           <input type="hidden" name="subject_id" id="deleteSubjectId">
           <button type="submit" class="btn btn-danger rounded-pill px-4 shadow-sm fw-medium">Yes, Delete Subject</button>

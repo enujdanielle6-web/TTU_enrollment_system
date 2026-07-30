@@ -8,6 +8,13 @@ require_once __DIR__ . '/../../config/database.php';
 
 requirePermission('shs_curriculum.manage');
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('Location: shs_curriculum.php');
+    exit;
+}
+
+verifyCsrfToken();
+
 $action = $_POST['action'] ?? '';
 
 if ($action === 'add') {
@@ -15,6 +22,12 @@ if ($action === 'add') {
     $gradeLevel = trim($_POST['grade_level'] ?? '');
     $semester = trim($_POST['semester'] ?? '');
     $subjectIds = $_POST['subject_ids'] ?? [];
+
+    if ($strandId <= 0 || $gradeLevel === '' || $semester === '') {
+        $_SESSION['error_msg'] = 'Strand, Grade Level, and Semester are required.';
+        header("Location: shs_curriculum_builder.php?strand_id=$strandId");
+        exit;
+    }
 
     if (!is_array($subjectIds)) {
         $subjectIds = [$subjectIds];

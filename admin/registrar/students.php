@@ -82,7 +82,7 @@ require_once __DIR__ . '/../../components/header.php';
       <p>Generated on <?= date('F j, Y') ?></p>
     </div>
 
-    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 no-print">
+    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 no-print fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">Student Records</h1>
         <p class="text-muted mb-0">Masterlist of officially enrolled and approved students.</p>
@@ -98,9 +98,9 @@ require_once __DIR__ . '/../../components/header.php';
     </div>
 
     <!-- Filters Panel -->
-    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4" style="border-radius: 16px;">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 16px; animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-body py-3">
+      <div class="island-body py-3 fade-in-up" style="animation-delay: 0.3s;">
         <div class="row g-3 align-items-center">
           <div class="col-md-auto fw-semibold text-muted small text-uppercase">
             <i class="bi bi-funnel-fill me-1"></i> Filter By:
@@ -150,9 +150,9 @@ require_once __DIR__ . '/../../components/header.php';
       </div>
     </div>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.4s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.5s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table" id="studentsTable">
             <thead class="table-light text-uppercase small text-muted">

@@ -59,7 +59,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <h1 class="h3 fw-bold text-dark mb-1">Scholarship Applications</h1>
       <p class="text-muted mb-0">Review and process student applications for financial aid.</p>
     </div>
@@ -74,7 +74,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
     <!-- Scholarship Statistics Row -->
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4 mb-4">
       <div class="col">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
           <div class="position-absolute top-0 start-0 w-100 bg-warning" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle" style="width: 56px; height: 56px;">
@@ -87,7 +87,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       </div>
       
       <div class="col">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.3s;">
           <div class="position-absolute top-0 start-0 w-100 bg-success" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 56px; height: 56px;">
@@ -100,7 +100,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       </div>
       
       <div class="col">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.4s;">
           <div class="position-absolute top-0 start-0 w-100 bg-danger" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 56px; height: 56px;">
@@ -113,7 +113,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       </div>
 
       <div class="col">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.5s;">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
           <div class="mb-3 d-flex justify-content-center">
             <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 56px; height: 56px;">
@@ -126,14 +126,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       </div>
     </div>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.6s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light">
+      <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.7s;">
         <i class="bi bi-inbox-fill text-primary"></i>
         <h2 class="mb-0 text-dark">Applications Queue</h2>
       </div>
       
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.8s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light">

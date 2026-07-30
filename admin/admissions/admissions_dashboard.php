@@ -53,7 +53,7 @@ try {
 
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
-    <div class="island island-hero mb-4">
+    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="h3 fw-bold text-dark mb-1">Admissions Dashboard</h1>
@@ -63,9 +63,9 @@ try {
     </div>
 
     <div class="row g-4 mb-4">
-      <div class="col-md-4">
+      <div class="col-md-6">
         <a href="review.php" class="text-decoration-none">
-            <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+            <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
               <div class="position-absolute top-0 start-0 w-100 bg-warning" style="height: 4px;"></div>
               <div class="mb-3 d-flex justify-content-center">
                 <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle" style="width: 56px; height: 56px;">
@@ -78,9 +78,9 @@ try {
         </a>
       </div>
       
-      <div class="col-md-4">
+      <div class="col-md-6">
         <a href="review.php" class="text-decoration-none">
-            <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
+            <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.3s;">
               <div class="position-absolute top-0 start-0 w-100 bg-info" style="height: 4px;"></div>
               <div class="mb-3 d-flex justify-content-center">
                 <div class="d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-circle" style="width: 56px; height: 56px;">
@@ -92,32 +92,15 @@ try {
             </div>
         </a>
       </div>
-      
-      <?php if (hasPermission('medical.review')): ?>
-      <div class="col-md-4">
-        <a href="medical_clearance.php" class="text-decoration-none">
-            <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4">
-              <div class="position-absolute top-0 start-0 w-100 bg-danger" style="height: 4px;"></div>
-              <div class="mb-3 d-flex justify-content-center">
-                <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 56px; height: 56px;">
-                  <i class="bi bi-heart-pulse fs-4"></i>
-                </div>
-              </div>
-              <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['pending_medical'] ?></h2>
-              <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Medical Queue</p>
-            </div>
-        </a>
-      </div>
-      <?php endif; ?>
     </div>
 
     <!-- Recent Applicants -->
-    <div class="island h-100">
-      <div class="island-header border-bottom pb-2">
+    <div class="island h-100 fade-in-up" style="animation-delay: 0.5s;">
+      <div class="island-header border-bottom pb-2 fade-in-up" style="animation-delay: 0.6s;">
         <i class="bi bi-list-task text-primary"></i>
         <h2>Recent Applicants</h2>
       </div>
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.7s;">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light text-muted small text-uppercase">

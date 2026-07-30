@@ -196,11 +196,11 @@ require_once __DIR__ . '/../components/header.php';
       <div class="col-lg-4">
         
         <!-- Student Information -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4 fade-in-up" style="animation-delay: 0.1s;">
+          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 fade-in-up" style="animation-delay: 0.2s;">
             <h5 class="fw-bold text-dark mb-0"><i class="bi bi-person-badge text-primary me-2"></i> Student Information</h5>
           </div>
-          <div class="card-body p-4">
+          <div class="card-body p-4 fade-in-up" style="animation-delay: 0.3s;">
             <table class="table table-sm table-borderless mb-0">
               <tbody>
                 <tr>
@@ -249,11 +249,11 @@ require_once __DIR__ . '/../components/header.php';
         </div>
 
         <!-- Requirements -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4 fade-in-up" style="animation-delay: 0.4s;">
+          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 fade-in-up" style="animation-delay: 0.5s;">
             <h5 class="fw-bold text-dark mb-0"><i class="bi bi-file-earmark-check text-primary me-2"></i> Requirements</h5>
           </div>
-          <div class="card-body p-4">
+          <div class="card-body p-4 fade-in-up" style="animation-delay: 0.6s;">
             <?php if (empty($documents)): ?>
               <p class="text-muted small mb-0">No documents submitted.</p>
             <?php else: ?>
@@ -276,11 +276,11 @@ require_once __DIR__ . '/../components/header.php';
         </div>
 
         <!-- Tuition / Assessment -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4 fade-in-up" style="animation-delay: 0.7s;">
+          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 fade-in-up" style="animation-delay: 0.8s;">
             <h5 class="fw-bold text-dark mb-0"><i class="bi bi-receipt text-primary me-2"></i> Assessment</h5>
           </div>
-          <div class="card-body p-4">
+          <div class="card-body p-4 fade-in-up" style="animation-delay: 0.9s;">
             <?php if (!$assessment): ?>
               <div class="alert alert-warning small mb-0">Assessment pending.</div>
             <?php else: 
@@ -332,11 +332,11 @@ require_once __DIR__ . '/../components/header.php';
       <div class="col-lg-8">
         
         <!-- Enrolled Subjects Table -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4 fade-in-up" style="animation-delay: 1s;">
+          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 fade-in-up" style="animation-delay: 1.1s;">
             <h5 class="fw-bold text-dark mb-0"><i class="bi bi-journal-bookmark-fill text-primary me-2"></i> Enrolled Subjects</h5>
           </div>
-          <div class="card-body p-4">
+          <div class="card-body p-4 fade-in-up" style="animation-delay: 1.2s;">
             <div class="table-responsive">
               <table class="table table-hover align-middle table-schedule">
                 <thead class="table-light">
@@ -421,11 +421,11 @@ require_once __DIR__ . '/../components/header.php';
         </div>
 
         <!-- Weekly Schedule Timetable -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4">
-          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+        <div class="card border-0 shadow-sm rounded-4 mb-4 fade-in-up" style="animation-delay: 1.3s;">
+          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4 fade-in-up" style="animation-delay: 1.4s;">
             <h5 class="fw-bold text-dark mb-0"><i class="bi bi-calendar-week text-primary me-2"></i> Weekly Schedule</h5>
           </div>
-          <div class="card-body p-4">
+          <div class="card-body p-4 fade-in-up" style="animation-delay: 1.5s;">
             <div class="table-responsive">
               <table class="timetable">
                 <thead>

@@ -22,7 +22,7 @@ $baseAdminUrl = substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'
 
     <!-- Navigation Links -->
     <nav class="flex-grow-1 p-3 overflow-y-auto">
-      <?php if (hasPermission(['applications.view_queue', 'medical.review'])): ?>
+      <?php if (hasPermission(['applications.view_queue'])): ?>
       <div class="small fw-bold text-muted text-uppercase mb-2 px-3">Admissions</div>
       <a class="nav-link d-flex align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'admissions_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>admissions/admissions_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> Dashboard
@@ -30,8 +30,15 @@ $baseAdminUrl = substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'
       <a class="nav-link d-flex align-items-center gap-3 <?= $current_page === 'review.php' || $current_page === 'application_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>admissions/review.php">
         <i class="bi bi-inbox fs-5"></i> Applications
       </a>
-      <a class="nav-link d-flex align-items-center gap-3 <?= $current_page === 'medical_clearance.php' || $current_page === 'medical_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>admissions/medical_clearance.php">
-        <i class="bi bi-heart-pulse fs-5"></i> Medical Clearance
+      <?php endif; ?>
+
+      <?php if (hasPermission('medical.review')): ?>
+      <div class="small fw-bold text-muted text-uppercase mt-4 mb-2 px-3">University Clinic</div>
+      <a class="nav-link d-flex align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'clinic_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>clinic/clinic_dashboard.php">
+        <i class="bi bi-heart-pulse fs-5"></i> Clinic Dashboard
+      </a>
+      <a class="nav-link d-flex align-items-center gap-3 <?= $current_page === 'medical_clearance.php' || $current_page === 'medical_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>clinic/medical_clearance.php">
+        <i class="bi bi-file-medical fs-5"></i> Medical Clearance
       </a>
       <?php endif; ?>
 

@@ -46,7 +46,11 @@ try {
         ];
 
         if (isset($_POST['college_cost_per_unit'])) {
-            $costPerUnit = number_format((float)$_POST['college_cost_per_unit'], 2, '.', '');
+            $costPerUnitFloat = (float)$_POST['college_cost_per_unit'];
+            if ($costPerUnitFloat < 0) {
+                throw new Exception('College cost per unit cannot be negative.');
+            }
+            $costPerUnit = number_format($costPerUnitFloat, 2, '.', '');
             $stmt->execute(['key' => 'college_cost_per_unit', 'val' => $costPerUnit]);
             $newSettings['college_cost_per_unit'] = $costPerUnit;
         }

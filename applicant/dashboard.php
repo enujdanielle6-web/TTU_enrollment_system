@@ -123,24 +123,33 @@ $timelineSteps = getApplicationTimelineSteps($application ? $application['status
 // Step 1: Account Created -> 15%
 // Step 2: Application Form Submitted -> +35% (Total 50%)
 // Step 3: Document Requirements -> Up to +50% (+12.5% per verified/uploaded document, or flat +50% if method is 'on_campus')
-$completionPercentage = 15;
+$completionPercentage = 10;
 $detailedChecklist = [];
 
 if ($application) {
-    $completionPercentage += 35;
+    $completionPercentage += 20;
     $detailedChecklist = getDetailedChecklist((int)$application['id']);
     
     if ($application['document_submission_method'] === 'on_campus') {
-        $completionPercentage += 50;
+        $completionPercentage += 30;
     } else {
         $uploadedCount = 0;
+        $totalDocs = count($detailedChecklist) > 0 ? count($detailedChecklist) : 4;
         foreach ($detailedChecklist as $doc) {
             if ($doc['status'] === 'Uploaded' || $doc['status'] === 'Verified') {
                 $uploadedCount++;
             }
         }
-        $completionPercentage += (int) ($uploadedCount * 12.5);
+        $completionPercentage += (int) (($uploadedCount / $totalDocs) * 30);
     }
+
+    if ($application['status'] === 'approved') {
+        $completionPercentage = 80;
+    } elseif ($application['status'] === 'enrolled') {
+        $completionPercentage = 100;
+    }
+
+    if ($completionPercentage > 100) $completionPercentage = 100;
 }
 
 // Fetch health status to refine timeline
@@ -228,7 +237,7 @@ require_once __DIR__ . '/../components/header.php';
     <?php else: ?>
       
       <!-- Welcome Hero Island -->
-      <div class="island island-hero mb-4">
+      <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
         <div class="row align-items-center g-3">
           <div class="col-md-8">
             <?php if ($application && !empty($application['school_year'])): ?>
@@ -236,7 +245,7 @@ require_once __DIR__ . '/../components/header.php';
                 <i class="bi bi-mortarboard-fill me-1"></i> Academic Year <?= htmlspecialchars($application['school_year'], ENT_QUOTES, 'UTF-8'); ?>
               </span>
             <?php endif; ?>
-            <h1 class="h3 mb-1 text-dark fw-bold">Welcome back, <?= htmlspecialchars($user_first_name . ' ' . $user_last_name, ENT_QUOTES, 'UTF-8'); ?>!</h1>
+            <h1 class="h3 mb-1 text-dark fw-bold">Welcome, <?= htmlspecialchars($user_first_name . ' ' . $user_last_name, ENT_QUOTES, 'UTF-8'); ?>!</h1>
             <p class="text-muted mb-0">
               <?php if ($application === null): ?>
                 Your account is ready. Get started by submitting your enrollment application today.
@@ -267,9 +276,11 @@ require_once __DIR__ . '/../components/header.php';
             <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: <?= $completionPercentage ?>%" aria-valuenow="<?= $completionPercentage ?>" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
           <div class="d-flex justify-content-between text-muted small mt-2" style="font-size: 0.75rem;">
-            <span>Account Created (15%)</span>
-            <span>Form Submitted (50%)</span>
-            <span>Documents Completed (100%)</span>
+            <span>Account (10%)</span>
+            <span>Form (30%)</span>
+            <span>Docs (60%)</span>
+            <span>Approved (80%)</span>
+            <span>Enrolled (100%)</span>
           </div>
         </div>
 
@@ -397,12 +408,12 @@ require_once __DIR__ . '/../components/header.php';
       </div>
 
       <!-- Status Overview Island -->
-      <div class="island mb-4">
-        <div class="island-header">
+      <div class="island mb-4 fade-in-up" style="animation-delay: 0.2s;">
+        <div class="island-header fade-in-up" style="animation-delay: 0.3s;">
           <i class="bi bi-bar-chart-fill"></i>
           <h2>Applicant Overview</h2>
         </div>
-        <div class="island-body">
+        <div class="island-body fade-in-up" style="animation-delay: 0.4s;">
           <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-5 g-3">
             <!-- Item 1: Application Status -->
             <div class="col">
@@ -479,12 +490,12 @@ require_once __DIR__ . '/../components/header.php';
         <div class="col-lg-8">
           
           <!-- Application Progress Timeline -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 0.5s;">
+            <div class="island-header fade-in-up" style="animation-delay: 0.6s;">
               <i class="bi bi-clock-history"></i>
               <h2>Application Progress</h2>
             </div>
-            <div class="island-body">
+            <div class="island-body fade-in-up" style="animation-delay: 0.7s;">
               <div class="status-timeline mt-2">
                 <?php foreach ($timelineSteps as $step): ?>
                   <?php
@@ -516,12 +527,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Applicant Information Summary -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 0.8s;">
+            <div class="island-header fade-in-up" style="animation-delay: 0.9s;">
               <i class="bi bi-person-lines-fill"></i>
               <h2>Applicant Profile Summary</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1s;">
               <?php if ($application === null): ?>
                 <div class="text-center py-5">
                   <div class="empty-state-icon bg-light text-muted rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
@@ -599,12 +610,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Recent Activity Timeline (Placeholders) -->
-          <div class="island mb-4">
-            <div class="island-header">
+          <div class="island mb-4 fade-in-up" style="animation-delay: 1.1s;">
+            <div class="island-header fade-in-up" style="animation-delay: 1.2s;">
               <i class="bi bi-activity"></i>
               <h2>Recent Activity</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.3s;">
               <div class="list-group list-group-flush">
                 <?php if (empty($activities)): ?>
                   <div class="text-center py-4">
@@ -636,12 +647,12 @@ require_once __DIR__ . '/../components/header.php';
 
 
           <!-- Required Documents Checklist -->
-          <div class="island">
-            <div class="island-header">
+          <div class="island fade-in-up" style="animation-delay: 1.4s;">
+            <div class="island-header fade-in-up" style="animation-delay: 1.5s;">
               <i class="bi bi-file-earmark-check"></i>
               <h2>Required Documents</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.6s;">
               <?php if ($application !== null && $application['document_submission_method'] === 'on_campus'): ?>
                 <div class="text-center py-4">
                   <i class="bi bi-building text-primary fs-1 mb-3"></i>
@@ -723,12 +734,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- School Announcements -->
-          <div class="island mb-4">
-            <div class="island-header">
+          <div class="island mb-4 fade-in-up" style="animation-delay: 1.7s;">
+            <div class="island-header fade-in-up" style="animation-delay: 1.8s;">
               <i class="bi bi-megaphone"></i>
               <h2>Announcements</h2>
             </div>
-            <div class="island-body mt-2">
+            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.9s;">
               <?php if (empty($announcements)): ?>
                 <div class="text-center py-4">
                   <i class="bi bi-megaphone text-muted fs-1 mb-3"></i>

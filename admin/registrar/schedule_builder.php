@@ -280,7 +280,7 @@ if (empty($semesters)) $semesters = ['1'];
 <main class="py-5 bg-light min-vh-100">
     <div class="container-fluid px-lg-5">
         
-        <div class="island island-hero mb-4">
+        <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <h1 class="h3 fw-bold text-dark mb-1">
@@ -308,7 +308,7 @@ if (empty($semesters)) $semesters = ['1'];
         <div class="row">
             <!-- Sidebar: Unscheduled Subjects -->
             <div class="col-xl-3 mb-4">
-                <div class="island">
+                <div class="island fade-in-up" style="animation-delay: 0.2s;">
                     <h5 class="fw-bold mb-3">Unscheduled</h5>
                     
                     <?php if ($type === 'shs'): ?>

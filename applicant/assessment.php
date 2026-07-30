@@ -58,7 +58,7 @@ require_once __DIR__ . '/../components/header.php';
     <div class="row justify-content-center">
       <div class="col-xl-10">
         
-        <div class="island island-hero mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div class="island island-hero mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 fade-in-up" style="animation-delay: 0.1s;">
           <div>
             <h1 class="h3 fw-bold text-dark mb-1">Financial Assessment & Payments</h1>
             <p class="text-muted mb-0">Review your fee breakdown and track your payment history.</p>
@@ -72,7 +72,7 @@ require_once __DIR__ . '/../components/header.php';
              $appStmt->execute(['user_id' => $userId]);
              $appStatus = $appStmt->fetchColumn();
           ?>
-          <div class="island text-center py-5">
+          <div class="island text-center py-5 fade-in-up" style="animation-delay: 0.2s;">
             <div class="status-empty-icon mx-auto mb-3">
               <i class="bi bi-receipt text-muted" style="font-size: 3rem;"></i>
             </div>
@@ -104,12 +104,12 @@ require_once __DIR__ . '/../components/header.php';
             <!-- Left Column: Breakdown -->
             <div class="col-lg-7">
               <?php if ($assessment['academic_level'] === 'College' && !empty($enrolledSubjects)): ?>
-              <div class="island mb-4">
-                <div class="island-header">
+              <div class="island mb-4 fade-in-up" style="animation-delay: 0.3s;">
+                <div class="island-header fade-in-up" style="animation-delay: 0.4s;">
                   <i class="bi bi-journal-text"></i>
                   <h2>Curriculum Enrolled</h2>
                 </div>
-                <div class="island-body p-0">
+                <div class="island-body p-0 fade-in-up" style="animation-delay: 0.5s;">
                   <div class="table-responsive">
                     <table class="table table-hover mb-0">
                       <thead class="table-light text-muted small text-uppercase">
@@ -144,11 +144,11 @@ require_once __DIR__ . '/../components/header.php';
               </div>
               <?php endif; ?>
 
-              <div class="island minimal-card mb-4">
-                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3">
+              <div class="island minimal-card mb-4 fade-in-up" style="animation-delay: 0.6s;">
+                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3 fade-in-up" style="animation-delay: 0.7s;">
                   <h2 class="mb-0 fs-5 fw-bold text-dark"><i class="bi bi-receipt me-2 text-primary"></i>Fee Breakdown</h2>
                 </div>
-                <div class="island-body p-0">
+                <div class="island-body p-0 fade-in-up" style="animation-delay: 0.8s;">
                   <ul class="list-group list-group-flush border-0">
                     <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom-dashed">
                       <div>
@@ -203,8 +203,8 @@ require_once __DIR__ . '/../components/header.php';
                 $totalPaid = (float)$assessment['total_paid'];
                 $paidPercent = $netPayable > 0 ? min(100, round(($totalPaid / $netPayable) * 100)) : 0;
               ?>
-              <div class="island minimal-card mb-4 border-0">
-                <div class="island-body p-4 p-md-5">
+              <div class="island minimal-card mb-4 border-0 fade-in-up" style="animation-delay: 0.9s;">
+                <div class="island-body p-4 p-md-5 fade-in-up" style="animation-delay: 1s;">
                   <div class="d-flex justify-content-between align-items-center mb-4">
                     <span class="text-muted small text-uppercase fw-bold tracking-wide">Financial Status</span>
                     <span class="badge <?= $statusBadge ?> px-3 py-1.5 rounded-pill fs-7 fw-semibold tracking-wide text-uppercase shadow-sm"><?= $statusLabel ?></span>
@@ -240,9 +240,12 @@ require_once __DIR__ . '/../components/header.php';
                   <!-- Quick Action Note -->
                   <div class="mt-4 p-3 bg-light rounded-3 text-center">
                     <?php if ($balance > 0): ?>
-                      <p class="text-muted small mb-0 fw-medium">
-                        <i class="bi bi-info-circle-fill text-primary me-1"></i> Settle your outstanding balance at the campus cashier to complete your enrollment.
+                      <p class="text-muted small mb-3 fw-medium">
+                        <i class="bi bi-info-circle-fill text-primary me-1"></i> Settle your outstanding balance at the campus cashier or upload your proof of payment online.
                       </p>
+                      <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold w-100 py-2" data-bs-toggle="modal" data-bs-target="#paymentModal">
+                        <i class="bi bi-credit-card-2-front me-2"></i> Pay Online Now
+                      </button>
                     <?php else: ?>
                       <p class="text-success small mb-0 fw-bold">
                         <i class="bi bi-patch-check-fill me-1"></i> Your account is fully settled. You are now officially enrolled!
@@ -253,11 +256,11 @@ require_once __DIR__ . '/../components/header.php';
               </div>
 
               <!-- Payment History -->
-              <div class="island minimal-card">
-                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3">
+              <div class="island minimal-card fade-in-up" style="animation-delay: 1.1s;">
+                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3 fade-in-up" style="animation-delay: 1.2s;">
                   <h2 class="mb-0 fs-5 fw-bold text-dark"><i class="bi bi-clock-history me-2 text-primary"></i>Payment History</h2>
                 </div>
-                <div class="island-body p-0">
+                <div class="island-body p-0 fade-in-up" style="animation-delay: 1.3s;">
                   <div class="list-group list-group-flush border-0">
                     <?php if (empty($payments)): ?>
                       <div class="text-center py-5">
@@ -269,11 +272,21 @@ require_once __DIR__ . '/../components/header.php';
                         <div class="list-group-item py-4 px-4 border-bottom-dashed">
                           <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="fw-bold text-dark fs-5">₱<?= number_format((float)$payment['amount'], 2) ?></span>
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-medium"><i class="bi bi-check-circle-fill me-1"></i> Verified</span>
+                            <?php if ($payment['status'] === 'pending'): ?>
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1 fw-medium"><i class="bi bi-hourglass-split me-1"></i> Pending Verification</span>
+                            <?php else: ?>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-medium"><i class="bi bi-check-circle-fill me-1"></i> Verified</span>
+                            <?php endif; ?>
                           </div>
                           <div class="d-flex justify-content-between align-items-center text-muted small mt-2">
                             <span class="fw-medium"><i class="bi bi-calendar-event me-1"></i><?= date('M d, Y', strtotime($payment['payment_date'])) ?> &bull; <?= htmlspecialchars($payment['payment_method'], ENT_QUOTES, 'UTF-8') ?></span>
-                            <span class="font-monospace opacity-75">Ref: <?= htmlspecialchars($payment['receipt_number'], ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="font-monospace opacity-75">
+                                <?php if ($payment['status'] === 'pending'): ?>
+                                    Ref: <?= htmlspecialchars((string)($payment['reference_number'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?>
+                                <?php else: ?>
+                                    Receipt: <?= htmlspecialchars((string)($payment['receipt_number'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?>
+                                <?php endif; ?>
+                            </span>
                           </div>
                         </div>
                       <?php endforeach; ?>
@@ -290,6 +303,67 @@ require_once __DIR__ . '/../components/header.php';
     </div>
   </div>
 </main>
+
+<!-- Payment Modal -->
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-primary text-white border-0 py-3">
+        <h5 class="modal-title fw-bold" id="paymentModalLabel"><i class="bi bi-wallet2 me-2"></i> Submit Proof of Payment</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="payment_process.php" method="POST" enctype="multipart/form-data">
+        <div class="modal-body p-4 bg-light">
+          <input type="hidden" name="assessment_id" value="<?= $assessment['id'] ?>">
+          <input type="hidden" name="action" value="submit_payment_proof">
+          <?= getCsrfInput() ?>
+
+          <!-- Payment Instructions -->
+          <div class="alert alert-info border-0 rounded-3 mb-4 shadow-sm">
+            <h6 class="fw-bold mb-2"><i class="bi bi-info-circle-fill me-1"></i> Payment Instructions</h6>
+            <p class="small mb-2">Please transfer the amount to any of the following accounts and upload a screenshot of your successful transaction.</p>
+            <ul class="small mb-0 list-unstyled fw-medium text-dark">
+              <li><i class="bi bi-phone text-primary me-2"></i><strong>GCash:</strong> 0912 345 6789 (SIA Finance)</li>
+              <li><i class="bi bi-phone text-primary me-2"></i><strong>Maya:</strong> 0998 765 4321 (SIA Finance)</li>
+              <li><i class="bi bi-bank text-primary me-2"></i><strong>BDO:</strong> 0012 3456 7890 (SIA Academy)</li>
+            </ul>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-dark">Amount Paid (₱)</label>
+            <input type="number" step="0.01" min="100" max="<?= $balance ?>" name="amount" class="form-control bg-white" required placeholder="e.g. <?= number_format($balance, 2, '.', '') ?>" value="<?= number_format($balance, 2, '.', '') ?>">
+            <div class="form-text" style="font-size: 0.7rem;">You can pay partially. Remaining Balance: ₱<?= number_format($balance, 2) ?></div>
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-dark">Payment Method Used</label>
+            <select name="payment_method" class="form-select bg-white" required>
+              <option value="GCash">GCash</option>
+              <option value="Maya">Maya</option>
+              <option value="Bank Transfer">Bank Transfer (BDO, BPI, etc.)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold text-dark">Reference Number</label>
+            <input type="text" name="reference_number" class="form-control bg-white" required placeholder="e.g. 100294828192">
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label small fw-semibold text-dark">Upload Screenshot / Receipt</label>
+            <input type="file" name="proof_image" class="form-control bg-white" accept="image/png, image/jpeg, image/jpg" required>
+            <div class="form-text" style="font-size: 0.7rem;">Accepted formats: JPG, PNG. Max size: 2MB.</div>
+          </div>
+
+        </div>
+        <div class="modal-footer border-top-0 pt-0 bg-light">
+          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold">Submit Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <style>
 /* Minimalist Premium Enhancements */

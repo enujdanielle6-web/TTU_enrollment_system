@@ -66,7 +66,7 @@ function getApplicationTimelineSteps(string $status, string $docMethod = 'online
         ],
         [
             'key' => 'documents',
-            'label' => $docMethod === 'on_campus' ? 'On-Campus Verification' : 'Documents Uploaded',
+            'label' => $docMethod === 'on_campus' ? 'On-Campus Verification' : 'Documents Upload',
             'description' => $docMethod === 'on_campus' ? 'Physical verification scheduled at the admissions office.' : 'Required academic documents uploaded (Verification pending).',
             'state' => 'pending',
             'timestamp' => $timestamps['documents'] ?? null,

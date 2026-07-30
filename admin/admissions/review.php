@@ -137,7 +137,7 @@ require_once __DIR__ . '/../components/navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex justify-content-between align-items-center">
+    <div class="island island-hero mb-4 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.1s;">
       <div>
         <h1 class="h3 fw-bold text-dark mb-1">Review Applications</h1>
         <p class="text-muted mb-0">Browse and process incoming student enrollment requests.</p>
@@ -152,9 +152,9 @@ require_once __DIR__ . '/../components/navbar.php';
     <?php endif; ?>
 
     <!-- Filters Panel -->
-    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4" style="border-radius: 16px;">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 fade-in-up" style="border-radius: 16px; animation-delay: 0.2s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-body py-3">
+      <div class="island-body py-3 fade-in-up" style="animation-delay: 0.3s;">
         <form action="review.php" method="GET" class="row g-3 align-items-center" id="filterForm">
           <div class="col-md-auto fw-semibold text-muted small text-uppercase">
             <i class="bi bi-funnel-fill me-1"></i> Filter By:
@@ -215,9 +215,9 @@ require_once __DIR__ . '/../components/navbar.php';
       </div>
     </div>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm" style="border-radius: 16px;">
+    <div class="island position-relative overflow-hidden border-0 shadow-sm fade-in-up" style="border-radius: 16px; animation-delay: 0.4s;">
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-body p-0">
+      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.5s;">
         <form action="bulk_process.php" method="POST" id="bulkForm">
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
           <input type="hidden" name="bulk_status" id="bulkStatusInput" value="">

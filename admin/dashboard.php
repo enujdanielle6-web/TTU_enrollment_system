@@ -22,6 +22,9 @@ if (hasPermission(['users.manage', 'settings.manage'])) {
 } elseif (hasPermission('scholarships.manage')) {
     header('Location: scholarship/scholarship_dashboard.php');
     exit;
+} elseif (hasPermission('medical.review')) {
+    header('Location: clinic/clinic_dashboard.php');
+    exit;
 } else {
     // Fallback if the user has no dashboard access but somehow logged into admin
     header('Location: ../auth/login.php');

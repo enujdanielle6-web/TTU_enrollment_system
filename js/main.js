@@ -1,8 +1,8 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // 1. Auto-show spinner on form submissions
     const forms = document.querySelectorAll('form');
     forms.forEach(form => {
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', function (e) {
             // For the backup restore execute, let the custom confirmation modal handle the spinner
             if (form.id === 'restoreForm') {
                 return;
@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             form.dataset.isSubmitting = 'true';
-            
+
             const submitBtn = form.querySelector('button[type="submit"]');
             if (submitBtn) {
                 // Just add a class to make it look disabled, without actually disabling it
