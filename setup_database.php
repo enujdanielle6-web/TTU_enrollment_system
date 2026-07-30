@@ -64,7 +64,7 @@ try {
     echo "<h3>🎉 Setup Complete!</h3>";
     echo "You can now log in using the credentials defined in your seed file or system.<br>";
     echo "Default Admin: <b>admin@ttu.edu.ph</b> / <b>password123</b><br>";
-    echo "Default Applicant: <b>applicant@example.com</b> / <b>password123</b><br>";
+    echo "Default Applicant: <b>jane.doe@example.com</b> / <b>password123</b><br>";
     echo "<br><br><b>SECURITY WARNING:</b> Please delete this setup_database.php file before deploying to production.<br>";
 
 } catch (PDOException $e) {

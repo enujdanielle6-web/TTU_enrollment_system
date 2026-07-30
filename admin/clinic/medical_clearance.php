@@ -59,7 +59,6 @@ require_once __DIR__ . '/../components/navbar.php';
             <select name="status" class="form-select bg-white border-0 shadow-sm" onchange="this.form.submit()">
                 <option value="all" <?= $statusFilter === 'all' ? 'selected' : '' ?>>All Statuses</option>
                 <option value="pending" <?= $statusFilter === 'pending' ? 'selected' : '' ?>>Pending Review</option>
-                <option value="under_review" <?= $statusFilter === 'under_review' ? 'selected' : '' ?>>Under Review</option>
                 <option value="verified" <?= $statusFilter === 'verified' ? 'selected' : '' ?>>Verified</option>
                 <option value="correction_required" <?= $statusFilter === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
                 <option value="rejected" <?= $statusFilter === 'rejected' ? 'selected' : '' ?>>Rejected</option>
@@ -125,10 +124,10 @@ require_once __DIR__ . '/../components/navbar.php';
                     <td>
                       <?php 
                         $badgeClass = match($record['status']) {
+                            'pending' => 'bg-warning text-dark',
                             'verified' => 'bg-success',
                             'rejected' => 'bg-danger',
-                            'correction_required' => 'bg-warning text-dark',
-                            'under_review' => 'bg-info text-dark',
+                            'correction_required' => 'bg-info text-dark',
                             default => 'bg-secondary'
                         };
                       ?>

@@ -214,6 +214,7 @@ require_once __DIR__ . '/../../components/header.php';
                                                         <td class="fw-medium text-success"><?= $sub['units'] ?></td>
                                                         <td class="text-end pe-4">
                                                             <form action="shs_curriculum_process.php" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Remove <?= htmlspecialchars(addslashes($sub['subject_code'])) ?> from this curriculum?');">
+                                                                <?= getCsrfInput() ?>
                                                                 <input type="hidden" name="action" value="delete_subject">
                                                                 <input type="hidden" name="strand_id" value="<?= $strandId ?>">
                                                                 <input type="hidden" name="mapping_id" value="<?= $sub['mapping_id'] ?>">
@@ -243,6 +244,7 @@ require_once __DIR__ . '/../../components/header.php';
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <form action="shs_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="add">
         <input type="hidden" name="strand_id" value="<?= $strandId ?>">
         

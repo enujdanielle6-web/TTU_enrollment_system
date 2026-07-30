@@ -65,8 +65,10 @@ try {
         }
         $subjects[$sid]['schedules'][] = [
             'day' => $r['day'],
-            'start_time' => $r['start_time'],
-            'end_time' => $r['end_time'],
+            'start_time_raw' => $r['start_time'],
+            'end_time_raw' => $r['end_time'],
+            'start_time' => date('h:i A', strtotime($r['start_time'])),
+            'end_time' => date('h:i A', strtotime($r['end_time'])),
             'room' => $r['room']
         ];
     }

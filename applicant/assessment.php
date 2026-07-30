@@ -330,9 +330,10 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <div class="mb-3">
+            <?php $minPayment = min(3000.0, (float)$balance); ?>
             <label class="form-label small fw-semibold text-dark">Amount Paid (₱)</label>
-            <input type="number" step="0.01" min="100" max="<?= $balance ?>" name="amount" class="form-control bg-white" required placeholder="e.g. <?= number_format($balance, 2, '.', '') ?>" value="<?= number_format($balance, 2, '.', '') ?>">
-            <div class="form-text" style="font-size: 0.7rem;">You can pay partially. Remaining Balance: ₱<?= number_format($balance, 2) ?></div>
+            <input type="number" step="0.01" min="<?= $minPayment ?>" max="<?= $balance ?>" name="amount" class="form-control bg-white" required placeholder="e.g. <?= number_format($balance, 2, '.', '') ?>" value="<?= number_format($balance, 2, '.', '') ?>">
+            <div class="form-text" style="font-size: 0.7rem;">You can pay partially (Minimum: ₱<?= number_format($minPayment, 2) ?>). Remaining Balance: ₱<?= number_format($balance, 2) ?></div>
           </div>
           
           <div class="mb-3">

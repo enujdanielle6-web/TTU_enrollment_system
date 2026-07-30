@@ -215,26 +215,45 @@ require_once __DIR__ . '/../components/navbar.php';
                             </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold text-dark">Update Status</label>
-                            <select name="status" class="form-select" required>
-                                <option value="pending" <?= $record['status'] === 'pending' ? 'selected' : '' ?>>Pending Review</option>
-                                <option value="under_review" <?= $record['status'] === 'under_review' ? 'selected' : '' ?>>Under Review</option>
-                                <option value="verified" <?= $record['status'] === 'verified' ? 'selected' : '' ?>>Verified (Cleared)</option>
-                                <option value="correction_required" <?= $record['status'] === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
-                                <option value="rejected" <?= $record['status'] === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-                            </select>
-                        </div>
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-semibold text-dark">Clinic / Admin Remarks</label>
-                            <textarea name="admin_remarks" class="form-control" rows="4" placeholder="Enter instructions or reasons if correction is required..."><?= htmlspecialchars($record['admin_remarks'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
-                            <div class="form-text small">These remarks will be visible to the applicant on their medical clearance card.</div>
-                        </div>
+                        <?php if ($record['status'] === 'verified'): ?>
+                            <div class="alert alert-success border-0 bg-success bg-opacity-10 rounded-4 mt-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill fs-3 text-success me-3"></i>
+                                    <div>
+                                        <h6 class="mb-0 fw-bold text-success">Clearance Verified</h6>
+                                        <p class="mb-0 small text-success opacity-75">This medical clearance has been finalized and can no longer be modified.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <?php if (!empty($record['admin_remarks'])): ?>
+                                <div class="mt-4">
+                                    <label class="form-label fw-semibold text-dark">Clinic / Admin Remarks</label>
+                                    <div class="p-3 bg-white rounded-3 border">
+                                        <?= nl2br(htmlspecialchars($record['admin_remarks'], ENT_QUOTES, 'UTF-8')) ?>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <div class="mb-3 mt-4">
+                                <label class="form-label fw-semibold text-dark">Update Status</label>
+                                <select name="status" class="form-select" required>
+                                    <option value="pending" <?= $record['status'] === 'pending' ? 'selected' : '' ?>>Pending Review</option>
+                                    <option value="verified" <?= $record['status'] === 'verified' ? 'selected' : '' ?>>Verified (Cleared)</option>
+                                    <option value="correction_required" <?= $record['status'] === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
+                                    <option value="rejected" <?= $record['status'] === 'rejected' ? 'selected' : '' ?>>Rejected</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-semibold text-dark">Clinic / Admin Remarks</label>
+                                <textarea name="admin_remarks" class="form-control" rows="4" placeholder="Enter instructions or reasons if correction is required..."><?= htmlspecialchars($record['admin_remarks'] ?? '', ENT_QUOTES, 'UTF-8') ?></textarea>
+                                <div class="form-text small">These remarks will be visible to the applicant on their medical clearance card.</div>
+                            </div>
 
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm">
-                            Save Medical Clearance <i class="bi bi-save ms-1"></i>
-                        </button>
+                            <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold py-2 shadow-sm">
+                                Save Medical Clearance <i class="bi bi-save ms-1"></i>
+                            </button>
+                        <?php endif; ?>
                     </form>
                 </div>
             </div>

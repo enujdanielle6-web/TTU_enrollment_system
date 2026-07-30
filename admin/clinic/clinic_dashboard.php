@@ -20,7 +20,7 @@ $recent_records = [];
 
 try {
     // 1. Pending Medical Reviews
-    $medicalStmt = $pdo->query('SELECT COUNT(*) FROM health_records WHERE status IN ("pending", "under_review", "correction_required")');
+    $medicalStmt = $pdo->query('SELECT COUNT(*) FROM health_records WHERE status IN ("pending", "correction_required")');
     $stats['pending_medical'] = (int) $medicalStmt->fetchColumn();
 
     // 2. Verified Records
@@ -121,7 +121,7 @@ try {
                   <td>
                     <?php
                       $statusBadge = match($rec['status']) {
-                          'pending', 'under_review' => '<span class="badge bg-warning text-dark rounded-pill fw-semibold"><i class="bi bi-hourglass-split me-1"></i> Under Review</span>',
+                          'pending' => '<span class="badge bg-warning text-dark rounded-pill fw-semibold"><i class="bi bi-hourglass-split me-1"></i> Pending Review</span>',
                           'verified' => '<span class="badge bg-success rounded-pill fw-semibold"><i class="bi bi-check-circle me-1"></i> Verified</span>',
                           'correction_required' => '<span class="badge bg-info text-dark rounded-pill fw-semibold"><i class="bi bi-arrow-return-left me-1"></i> Needs Correction</span>',
                           'rejected' => '<span class="badge bg-danger rounded-pill fw-semibold"><i class="bi bi-x-circle me-1"></i> Rejected</span>',

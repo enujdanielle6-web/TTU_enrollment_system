@@ -218,6 +218,7 @@ require_once __DIR__ . '/../../components/header.php';
                                                         <td class="text-end pe-4">
                                                             <div class="btn-group btn-group-sm me-2 shadow-sm rounded-pill">
                                                                 <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0">
+                                                                    <?= getCsrfInput() ?>
                                                                     <input type="hidden" name="action" value="move_subject">
                                                                     <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
                                                                     <input type="hidden" name="subject_mapping_id" value="<?= $sub['mapping_id'] ?>">
@@ -225,6 +226,7 @@ require_once __DIR__ . '/../../components/header.php';
                                                                     <button type="submit" class="btn btn-light border-end py-1 px-2" title="Move Up" <?= $index === 0 ? 'disabled' : '' ?>><i class="bi bi-arrow-up text-secondary"></i></button>
                                                                 </form>
                                                                 <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0">
+                                                                    <?= getCsrfInput() ?>
                                                                     <input type="hidden" name="action" value="move_subject">
                                                                     <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
                                                                     <input type="hidden" name="subject_mapping_id" value="<?= $sub['mapping_id'] ?>">
@@ -237,6 +239,7 @@ require_once __DIR__ . '/../../components/header.php';
                                                                 <i class="bi bi-pencil-fill"></i>
                                                             </button>
                                                             <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Remove <?= htmlspecialchars(addslashes($sub['subject_code'])) ?> from this curriculum?');">
+                                                                <?= getCsrfInput() ?>
                                                                 <input type="hidden" name="action" value="delete_subject">
                                                                 <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
                                                                 <input type="hidden" name="subject_mapping_id" value="<?= $sub['mapping_id'] ?>">
@@ -266,6 +269,7 @@ require_once __DIR__ . '/../../components/header.php';
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="add_subject">
         <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
         <div class="modal-header bg-light border-bottom-0 pb-3">
@@ -317,6 +321,7 @@ require_once __DIR__ . '/../../components/header.php';
   <div class="modal-dialog modal-sm modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="edit_subject">
         <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
         <input type="hidden" name="subject_mapping_id" id="edit_sub_mapping_id" value="">

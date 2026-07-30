@@ -43,6 +43,17 @@ try {
             throw new Exception("Assessment not found or unauthorized.");
         }
 
+        $balance = (float)$assessment['net_amount'] - (float)$assessment['total_paid'];
+        if ($balance < 0) {
+            $balance = 0.0;
+        }
+
+        $minPayment = min(3000.0, $balance);
+        
+        if ($amount < $minPayment) {
+            throw new Exception("The minimum allowed payment is ₱" . number_format($minPayment, 2));
+        }
+
         // Handle File Upload
         if (!isset($_FILES['proof_image']) || $_FILES['proof_image']['error'] !== UPLOAD_ERR_OK) {
             throw new Exception("Proof of payment screenshot is required.");

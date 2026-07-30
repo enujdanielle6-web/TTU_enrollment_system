@@ -118,6 +118,20 @@ require_once __DIR__ . '/../components/header.php';
 .review-label { font-size: 0.85rem; color: #6c757d; font-weight: 500; margin-bottom: 0.2rem; }
 .review-value { font-size: 1rem; color: #212529; font-weight: 500; }
 @media (max-width: 768px) { .wizard-title { display: none; } }
+
+/* Timetable Styles */
+.timetable-container { position: relative; overflow-x: auto; background: #fff; border-radius: 1rem; border: 1px solid #e9ecef; margin-bottom: 1rem; }
+.timetable-grid { display: flex; min-width: 800px; }
+.time-col { width: 80px; flex-shrink: 0; border-right: 1px solid #e9ecef; background: #f8f9fa; }
+.day-col { flex: 1; border-right: 1px solid #e9ecef; position: relative; background: repeating-linear-gradient(to bottom, transparent, transparent 59px, #f1f3f5 59px, #f1f3f5 60px); min-height: 830px; }
+.day-col:last-child { border-right: none; }
+.time-header, .day-header { height: 50px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; color: #495057; border-bottom: 1px solid #e9ecef; background: #f8f9fa; position: sticky; top: 0; z-index: 10; }
+.time-slot { height: 60px; display: flex; align-items: flex-start; justify-content: flex-end; padding-right: 10px; font-size: 0.75rem; color: #6c757d; transform: translateY(-8px); }
+.sched-card { position: absolute; left: 4px; right: 4px; border-radius: 6px; padding: 6px 8px; font-size: 0.7rem; line-height: 1.2; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.2s ease; z-index: 5; border-left: 4px solid rgba(0,0,0,0.2); animation: fadeIn 0.3s ease; cursor: pointer; color: #fff; }
+.sched-card:hover { transform: scale(1.02); z-index: 15; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+.sched-title { font-weight: 700; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sched-room, .sched-time { opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.legend-box { width: 16px; height: 16px; border-radius: 4px; display: inline-block; vertical-align: middle; }
 </style>
 
 <main class="status-page py-5 bg-light min-vh-100">
@@ -583,6 +597,40 @@ require_once __DIR__ . '/../components/header.php';
               <h2>Curriculum & Subject Selection</h2>
             </div>
             <div class="island-body mt-3 fade-in-up" style="animation-delay: 2.8s;">
+              
+              <!-- Weekly Schedule GUI -->
+              <div class="mb-5">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h6 class="fw-bold text-dark mb-0"><i class="bi bi-calendar-week text-primary me-2"></i>Weekly Schedule Preview</h6>
+                  <div class="d-flex gap-3 small">
+                    <span class="text-muted"><span class="legend-box bg-primary me-1"></span> Selected Subject</span>
+                    <span class="text-muted"><span class="legend-box bg-danger me-1"></span> Conflict</span>
+                  </div>
+                </div>
+                <div class="timetable-container shadow-sm">
+                  <div class="timetable-grid" id="weeklyTimetable">
+                    <!-- JS will populate -->
+                    <div class="time-col">
+                      <div class="time-header">Time</div>
+                      <!-- 7 AM to 8 PM -->
+                      <div class="time-slot">07:00 AM</div><div class="time-slot">08:00 AM</div>
+                      <div class="time-slot">09:00 AM</div><div class="time-slot">10:00 AM</div>
+                      <div class="time-slot">11:00 AM</div><div class="time-slot">12:00 PM</div>
+                      <div class="time-slot">01:00 PM</div><div class="time-slot">02:00 PM</div>
+                      <div class="time-slot">03:00 PM</div><div class="time-slot">04:00 PM</div>
+                      <div class="time-slot">05:00 PM</div><div class="time-slot">06:00 PM</div>
+                      <div class="time-slot">07:00 PM</div><div class="time-slot">08:00 PM</div>
+                    </div>
+                    <div class="day-col" id="day-Monday"><div class="day-header">Monday</div></div>
+                    <div class="day-col" id="day-Tuesday"><div class="day-header">Tuesday</div></div>
+                    <div class="day-col" id="day-Wednesday"><div class="day-header">Wednesday</div></div>
+                    <div class="day-col" id="day-Thursday"><div class="day-header">Thursday</div></div>
+                    <div class="day-col" id="day-Friday"><div class="day-header">Friday</div></div>
+                    <div class="day-col" id="day-Saturday"><div class="day-header">Saturday</div></div>
+                  </div>
+                </div>
+              </div>
+
               <div class="row g-4 align-items-start">
                 <div class="col-lg-7">
                   <h6 class="fw-bold text-dark mb-3">Official Curriculum <span class="badge bg-primary ms-2" id="irregProgramBadge"></span></h6>
@@ -765,6 +813,7 @@ require_once __DIR__ . '/../components/header.php';
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
   $(function () {
 
@@ -919,6 +968,7 @@ require_once __DIR__ . '/../components/header.php';
     }
 
     let selectedIrregularSubjects = <?= json_encode($old['selected_subjects'] ?? []) ?>;
+    let referenceSectionSubjects = [];
     
     // Ensure numeric types for units
     selectedIrregularSubjects = selectedIrregularSubjects.map(s => ({
@@ -934,16 +984,18 @@ require_once __DIR__ . '/../components/header.php';
       const irregularCurriculumContainer = document.getElementById('irregularCurriculumContainer');
       
       if (level === 'College') {
-        sectionContainer.style.display = 'block';
-        if (type === 'Irregular') {
-           irregularContainer.style.display = 'block';
-           irregularCurriculumContainer.style.display = 'block';
-           sectionIdInput.removeAttribute('required');
-           fetchIrregularCurriculum();
-        } else {
-           irregularContainer.style.display = 'none';
-           irregularCurriculumContainer.style.display = 'none';
-           sectionIdInput.setAttribute('required', 'required');
+        if (type === 'Regular') {
+          irregularContainer.style.display = 'none';
+          irregularCurriculumContainer.style.display = 'none';
+          sectionContainer.style.display = 'block';
+          sectionIdInput.setAttribute('required', 'required');
+        } else if (type === 'Irregular') {
+          irregularContainer.style.display = 'block';
+          irregularCurriculumContainer.style.display = 'block';
+          sectionContainer.style.display = 'block';
+          sectionIdInput.removeAttribute('required');
+          sectionIdInput.value = '';
+          fetchIrregularCurriculum();
         }
         fetchSections();
       } else {
@@ -955,28 +1007,17 @@ require_once __DIR__ . '/../components/header.php';
       }
     }
     
-    // When an irregular student picks a section, auto-load its subjects into the cart
+    // When an irregular student picks a section, load it as a reference schedule, NOT into their cart
     sectionIdInput.addEventListener('change', function() {
         if (studentTypeSelect.value === 'Irregular' && this.value) {
-            if (selectedIrregularSubjects.length > 0) {
-                if (!confirm('This will clear your current cart and load the subjects for this section. Proceed?')) {
-                    this.value = '';
-                    return;
-                }
-            }
+            const sectionId = this.value;
             
-            selectedIrregularSubjects = [];
-            renderCart();
-            
-            fetch(`api_get_section_subjects.php?section_id=${this.value}`)
+            fetch(`api_get_section_subjects.php?section_id=${sectionId}`)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.subjects) {
-                        data.subjects.forEach(sub => {
-                            selectedIrregularSubjects.push(sub);
-                        });
-                        renderCart();
-                        alert(`Successfully imported ${data.subjects.length} subjects from the selected section.`);
+                        referenceSectionSubjects = data.subjects;
+                        renderTimetable();
                     }
                 })
                 .catch(err => console.error(err));
@@ -1043,23 +1084,30 @@ require_once __DIR__ . '/../components/header.php';
             return sCode === btnCode || sName === btnName;
         });
 
+        let schedContainer = btn.closest('.py-2').querySelector('.selected-sched-text');
+
         if (isSelected) {
            btn.classList.remove('btn-outline-primary', 'btn-outline-secondary');
            btn.classList.add('btn-success', 'text-white');
            btn.innerHTML = '<i class="bi bi-check2"></i> Added';
            btn.disabled = true;
+           if (schedContainer) schedContainer.innerHTML = `<i class="bi bi-clock-history me-1"></i>${(isSelected.schedule_text || '').replace(/<br>/g, ' &middot; ')}`;
         } else if (isEquivalent) {
            btn.classList.remove('btn-outline-primary', 'btn-success');
            btn.classList.add('btn-outline-secondary');
            btn.innerHTML = '<i class="bi bi-dash-circle"></i> Added Equivalent';
            btn.disabled = true;
+           if (schedContainer) schedContainer.innerHTML = '';
         } else {
            btn.classList.add('btn-outline-primary');
            btn.classList.remove('btn-success', 'btn-outline-secondary', 'text-white');
            btn.innerHTML = '<i class="bi bi-plus-lg"></i> Add';
            btn.disabled = false;
+           if (schedContainer) schedContainer.innerHTML = '';
         }
       });
+      
+      renderTimetable();
     }
 
     // --- Self-Service Scheduling Logic ---
@@ -1079,7 +1127,11 @@ require_once __DIR__ . '/../components/header.php';
       });
       
       if (duplicate) {
-          alert(`You have already selected an equivalent subject: ${duplicate.code} - ${duplicate.name}`);
+          Swal.fire({
+              icon: 'warning',
+              title: 'Duplicate Subject',
+              text: `You have already selected an equivalent subject: ${duplicate.code} - ${duplicate.name}`
+          });
           return;
       }
       
@@ -1167,7 +1219,12 @@ require_once __DIR__ . '/../components/header.php';
             // Conflict Detection
             const conflict = checkConflict(schedules);
             if (conflict) {
-              alert(`Schedule Conflict! This overlaps with your existing subject: ${conflict}`);
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Schedule Conflict!',
+                  text: `This overlaps with your existing subject: ${conflict}`,
+                  confirmButtonColor: '#dc3545'
+              });
               return;
             }
             
@@ -1193,7 +1250,7 @@ require_once __DIR__ . '/../components/header.php';
     };
     
     function parseTime(timeStr) {
-       // timeStr like "08:00:00" or "13:30:00"
+       if (!timeStr) return 0;
        const parts = timeStr.split(':');
        return parseInt(parts[0]) * 60 + parseInt(parts[1]);
     }
@@ -1203,8 +1260,13 @@ require_once __DIR__ . '/../components/header.php';
           if (!existingSub.schedules) continue;
           for (const existSched of existingSub.schedules) {
              for (const newSched of newSchedules) {
-                // If they are on the same day
-                if (existSched.day === newSched.day) {
+                const eDays = expandDays(existSched.day);
+                const nDays = expandDays(newSched.day);
+                
+                // Check if any day intersects
+                const dayIntersects = eDays.some(d => nDays.includes(d));
+                
+                if (dayIntersects) {
                    const eStart = parseTime(existSched.start_time_raw);
                    const eEnd = parseTime(existSched.end_time_raw);
                    const nStart = parseTime(newSched.start_time_raw);
@@ -1226,6 +1288,79 @@ require_once __DIR__ . '/../components/header.php';
       selectedIrregularSubjects.splice(index, 1);
       renderCart();
     };
+
+    function expandDays(dayStr) {
+        if (!dayStr || dayStr.toUpperCase().trim() === 'TBA') return [];
+        let d = dayStr.toUpperCase().trim();
+        if (d === 'MWF') return ['Monday', 'Wednesday', 'Friday'];
+        if (d === 'TTH') return ['Tuesday', 'Thursday'];
+        
+        const validDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        // Case-insensitive match for single days
+        for (let i = 0; i < validDays.length; i++) {
+            if (validDays[i].toUpperCase() === d) return [validDays[i]];
+        }
+        
+        return [];
+    }
+
+    function renderTimetable() {
+        const dayCols = {
+            'Monday': document.getElementById('day-Monday'),
+            'Tuesday': document.getElementById('day-Tuesday'),
+            'Wednesday': document.getElementById('day-Wednesday'),
+            'Thursday': document.getElementById('day-Thursday'),
+            'Friday': document.getElementById('day-Friday'),
+            'Saturday': document.getElementById('day-Saturday')
+        };
+
+        Object.values(dayCols).forEach(col => {
+            if (col) {
+                const header = col.querySelector('.day-header');
+                col.innerHTML = '';
+                if (header) col.appendChild(header);
+            }
+        });
+
+        const baseOffset = 50; 
+        const baseMinutes = 7 * 60; // 420
+
+        selectedIrregularSubjects.forEach((sub, idx) => {
+            if (!sub.schedules) return;
+            const color = colorPalette[idx % colorPalette.length];
+
+            sub.schedules.forEach(sched => {
+                const targetDays = expandDays(sched.day);
+                
+                targetDays.forEach(targetDay => {
+                    const dayCol = dayCols[targetDay];
+                    if (!dayCol) return;
+
+                    const startMin = parseTime(sched.start_time_raw);
+                    const endMin = parseTime(sched.end_time_raw);
+                    
+                    if (startMin === 0 && endMin === 0) return; // TBA time
+                    
+                    const topPx = baseOffset + (startMin - baseMinutes);
+                    const heightPx = (endMin - startMin);
+
+                    const card = document.createElement('div');
+                    card.className = 'sched-card';
+                    card.style.top = topPx + 'px';
+                    card.style.height = heightPx + 'px';
+                    card.style.backgroundColor = color;
+                    
+                    card.innerHTML = `
+                        <div class="sched-title">${sub.code}</div>
+                        <div class="sched-time">${sched.start_time} - ${sched.end_time}</div>
+                        <div class="sched-room">${sched.room || ''}</div>
+                    `;
+                    dayCol.appendChild(card);
+                });
+            });
+        });
+    }
 
     function fetchIrregularCurriculum() {
       const prog = strandSelect.value;
@@ -1261,6 +1396,7 @@ require_once __DIR__ . '/../components/header.php';
                       <div>
                         <div class="fw-bold text-dark small">${sub.subject_code}</div>
                         <div class="text-muted" style="font-size: 0.75rem;">${sub.subject_name}</div>
+                        <div class="selected-sched-text text-primary mt-1" style="font-size: 0.65rem;"></div>
                       </div>
                       <div class="d-flex align-items-center gap-3">
                         <span class="badge bg-light text-muted border">${sub.units} Units</span>

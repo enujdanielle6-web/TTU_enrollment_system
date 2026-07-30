@@ -20,7 +20,7 @@ $userId = (int)($_POST['user_id'] ?? 0);
 $status = $_POST['status'] ?? '';
 $adminRemarks = trim($_POST['admin_remarks'] ?? '');
 
-$validStatuses = ['pending', 'under_review', 'verified', 'correction_required', 'rejected'];
+$validStatuses = ['pending', 'verified', 'correction_required', 'rejected'];
 
 if ($recordId <= 0 || !in_array($status, $validStatuses, true)) {
     $_SESSION['error_msg'] = 'Invalid request parameters.';
@@ -39,6 +39,10 @@ try {
     if ($oldStatus === false) {
         throw new Exception('Record not found.');
     }
+    
+    if ($oldStatus === 'verified') {
+        throw new Exception('Cannot modify a verified medical clearance record.');
+    }
 
     // Update record
     $upd = $pdo->prepare('UPDATE health_records SET status = :status, admin_remarks = :remarks WHERE id = :id');
@@ -54,7 +58,6 @@ try {
             'verified' => 'bi-heart-pulse-fill text-success',
             'rejected' => 'bi-x-circle-fill text-danger',
             'correction_required' => 'bi-exclamation-triangle-fill text-warning',
-            'under_review' => 'bi-search text-info',
             default => 'bi-info-circle-fill text-primary'
         };
 

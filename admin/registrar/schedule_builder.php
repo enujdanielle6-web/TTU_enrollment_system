@@ -152,6 +152,7 @@ foreach ($subjects as $s) {
         'subject_id' => $s['subject_id'],
         'subject_code' => $s['subject_code'],
         'subject_name' => $s['subject_name'],
+        'units' => $s['units'],
         'day' => $s['day'],
         'start_time' => $s['start_time'],
         'end_time' => $s['end_time'],
@@ -230,51 +231,67 @@ if (empty($semesters)) $semesters = ['1'];
 .sched-block {
     position: absolute;
     left: 4px; right: 4px;
-    background: #e7f1ff;
-    border: 1px solid #0d6efd;
+    background: #eef2fa;
+    border: 1px solid #d0d7e6;
     border-left: 4px solid #0d6efd;
-    border-radius: 4px;
-    padding: 6px;
+    border-radius: 6px;
+    padding: 6px 8px;
     font-size: 0.75rem;
     overflow: hidden;
     cursor: grab;
-    transition: box-shadow 0.2s, background-color 0.2s;
+    transition: all 0.2s ease;
     z-index: 10;
-    line-height: 1.2;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    line-height: 1.3;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    display: flex;
+    flex-direction: column;
 }
-.sched-block:active { cursor: grabbing; }
+.sched-block:active { cursor: grabbing; opacity: 0.8; }
 .sched-block:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 6px 12px rgba(13,110,253,0.15);
+    transform: translateY(-2px);
     z-index: 11;
+    border-color: #0d6efd;
 }
 .sched-block.conflict {
-    background: #ffe6e6 !important;
+    background: #fff3f3 !important;
     border: 1px solid #dc3545 !important;
     border-left: 4px solid #dc3545 !important;
 }
-.sched-block .sub-code { font-weight: 700; color: #084298; margin-bottom: 2px; }
+.sched-block .sub-code { font-weight: 700; color: #084298; font-size: 0.8rem; margin-bottom: 2px; }
 .sched-block.conflict .sub-code { color: #842029; }
-.sched-block .sub-meta { color: #333; font-size: 0.7rem; }
+.sched-block .sub-meta { color: #495057; font-size: 0.7rem; display: flex; align-items: center; gap: 4px; margin-bottom: 1px; }
+.sched-block .sub-meta i { font-size: 0.65rem; color: #6c757d; }
 
 .unscheduled-list {
-    min-height: 200px;
+    min-height: 300px;
     border: 2px dashed #dee2e6;
-    border-radius: 8px;
-    padding: 10px;
+    border-radius: 12px;
+    padding: 12px;
     background: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 .unscheduled-item {
     background: #fff;
     border: 1px solid #dee2e6;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 8px;
+    border-radius: 8px;
+    padding: 12px;
     cursor: grab;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    transition: all 0.2s ease;
+    border-left: 4px solid #6c757d;
 }
-.unscheduled-item:active { cursor: grabbing; }
-.unscheduled-item .sub-code { font-weight: bold; color: #495057; }
+.unscheduled-item:active { cursor: grabbing; opacity: 0.8; }
+.unscheduled-item:hover {
+    border-left-color: #0d6efd;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+    transform: translateX(2px);
+}
+.unscheduled-item .sub-code { font-weight: 700; color: #343a40; font-size: 0.9rem; }
+.unscheduled-item .sub-name { font-size: 0.75rem; color: #6c757d; line-height: 1.2; margin-top: 2px; }
+.unscheduled-item .sub-badges { margin-top: 6px; display: flex; gap: 4px; flex-wrap: wrap; }
 </style>
 
 <main class="py-5 bg-light min-vh-100">
@@ -462,6 +479,8 @@ function render() {
     document.querySelectorAll('.day-col').forEach(c => c.innerHTML = '');
     document.querySelectorAll('.unscheduled-list').forEach(l => l.innerHTML = '');
 
+    let unscheduledCount = 0;
+
     subjects.forEach(sub => {
         if (sub.semester !== currentSemester && type === 'shs') {
             return; // Only render current semester for SHS
@@ -494,22 +513,48 @@ function render() {
             el.style.top = top + 'px';
             el.style.height = height + 'px';
 
+            const roomText = sub.room ? sub.room : 'TBA';
+            const instText = sub.instructor ? sub.instructor : 'TBA';
+            const modeBadge = sub.delivery_mode === 'Online' ? '<span class="badge bg-info bg-opacity-10 text-info border border-info ms-auto py-0 px-1" style="font-size: 0.6rem;">Online</span>' : '';
+
             el.innerHTML = `
-                <div class="sub-code">${sub.subject_code}</div>
-                <div class="sub-meta">${startStr}-${endStr}</div>
-                <div class="sub-meta">${sub.room || 'TBA'}</div>
-                <div class="sub-meta text-truncate">${sub.instructor || 'TBA'}</div>
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="sub-code">${sub.subject_code}</div>
+                    ${modeBadge}
+                </div>
+                <div class="sub-meta"><i class="bi bi-clock"></i> ${startStr}-${endStr}</div>
+                <div class="sub-meta"><i class="bi bi-door-open"></i> ${roomText}</div>
+                <div class="sub-meta text-truncate"><i class="bi bi-person"></i> ${instText}</div>
             `;
             const col = document.getElementById('col_' + sub.day);
             if (col) col.appendChild(el);
         } else {
+            unscheduledCount++;
             el.className = 'unscheduled-item';
             el.innerHTML = `
-                <div class="sub-code">${sub.subject_code}</div>
-                <div class="small text-muted">${sub.subject_name}</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="sub-code">${sub.subject_code}</div>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">${sub.units} Units</span>
+                </div>
+                <div class="sub-name">${sub.subject_name}</div>
+                <div class="sub-badges">
+                    <span class="badge bg-light text-muted border"><i class="bi bi-easel2 me-1"></i>${sub.delivery_mode || 'F2F'}</span>
+                </div>
             `;
             const list = document.getElementById('unscheduledList_' + currentSemester) || document.querySelector('.unscheduled-list');
             if (list) list.appendChild(el);
+        }
+    });
+
+    // Handle empty state for unscheduled lists
+    document.querySelectorAll('.unscheduled-list').forEach(list => {
+        if (list.children.length === 0) {
+            list.innerHTML = `
+                <div class="text-center py-4 text-muted d-flex flex-column align-items-center justify-content-center h-100">
+                    <i class="bi bi-check-circle-fill fs-2 text-success opacity-50 mb-2"></i>
+                    <p class="mb-0 small fw-medium">All subjects scheduled</p>
+                </div>
+            `;
         }
     });
 }
@@ -555,11 +600,43 @@ function dropToCalendar(ev, day) {
     const startHour = CAL_START_HOUR + Math.floor(snappedY / 60);
     const startMin = (snappedY % 60) === 30 ? 30 : 0;
     
-    // Default duration 1.5 hrs
+    const isScheduled = sub.day && sub.day !== 'TBA' && sub.start_time && sub.end_time && sub.start_time !== '00:00:00';
     let duration = 1.5;
     
+    if (isScheduled) {
+        let s_sh = parseInt(sub.start_time.split(':')[0]);
+        let s_sm = parseInt(sub.start_time.split(':')[1]);
+        let s_eh = parseInt(sub.end_time.split(':')[0]);
+        let s_em = parseInt(sub.end_time.split(':')[1]);
+        duration = ((s_eh * 60 + s_em) - (s_sh * 60 + s_sm)) / 60;
+    } else {
+        let totalOtherMinutes = 0;
+        subjects.forEach(s => {
+            if (s.subject_code === sub.subject_code && s.id !== sub.id && s.day && s.day !== 'TBA' && s.start_time !== '00:00:00') {
+                let s_sh = parseInt(s.start_time.split(':')[0]);
+                let s_sm = parseInt(s.start_time.split(':')[1]);
+                let s_eh = parseInt(s.end_time.split(':')[0]);
+                let s_em = parseInt(s.end_time.split(':')[1]);
+                totalOtherMinutes += ((s_eh * 60 + s_em) - (s_sh * 60 + s_sm));
+            }
+        });
+
+        let maxAllowedMinutes = (parseFloat(sub.units) || 0) * 60;
+        if (maxAllowedMinutes > 0) {
+            let remainingMinutes = maxAllowedMinutes - totalOtherMinutes;
+            if (remainingMinutes <= 0) {
+                alert(`Cannot schedule: Total scheduled time already reached the maximum allowed ${sub.units} units for this subject.`);
+                return;
+            }
+            duration = remainingMinutes / 60;
+            if (duration > 3) duration = 3; 
+        } else {
+            duration = 1.5;
+        }
+    }
+    
     let endHour = startHour + Math.floor(duration);
-    let endMin = startMin + ((duration % 1) * 60);
+    let endMin = startMin + Math.round((duration % 1) * 60);
     if (endMin >= 60) {
         endHour++;
         endMin -= 60;
@@ -643,11 +720,54 @@ function saveEdit() {
     const st = document.getElementById('edit_start').value;
     const et = document.getElementById('edit_end').value;
     
-    if (d && st && et) {
+    if (d || st || et) {
+        if (!d || !st || !et) {
+            alert('Please complete the schedule by providing Day, Start Time, and End Time, or leave them all empty to set as TBA.');
+            return;
+        }
+        
         if (st >= et) {
             alert('Start time must be before end time.');
             return;
         }
+        
+        if (st < "07:00" || et > "18:00") {
+            alert('Classes must be scheduled between 07:00 AM and 06:00 PM.');
+            return;
+        }
+
+        let sh = parseInt(st.split(':')[0]);
+        let sm = parseInt(st.split(':')[1]);
+        let eh = parseInt(et.split(':')[0]);
+        let em = parseInt(et.split(':')[1]);
+        
+        let diffMinutes = (eh * 60 + em) - (sh * 60 + sm);
+        if (diffMinutes < 30) {
+            alert('Minimum duration for a class is 30 minutes.');
+            return;
+        }
+        if (diffMinutes > 360) {
+            alert('Maximum duration for a single session is 6 hours.');
+            return;
+        }
+
+        let totalOtherMinutes = 0;
+        subjects.forEach(s => {
+            if (s.subject_code === sub.subject_code && s.id !== sub.id && s.day && s.day !== 'TBA' && s.start_time !== '00:00:00') {
+                let s_sh = parseInt(s.start_time.split(':')[0]);
+                let s_sm = parseInt(s.start_time.split(':')[1]);
+                let s_eh = parseInt(s.end_time.split(':')[0]);
+                let s_em = parseInt(s.end_time.split(':')[1]);
+                totalOtherMinutes += ((s_eh * 60 + s_em) - (s_sh * 60 + s_sm));
+            }
+        });
+
+        let maxAllowedMinutes = (parseFloat(sub.units) || 0) * 60;
+        if (maxAllowedMinutes > 0 && (totalOtherMinutes + diffMinutes) > maxAllowedMinutes) {
+            alert(`Total scheduled time exceeds the maximum allowed ${sub.units} units (${maxAllowedMinutes / 60} hours) for this subject.`);
+            return;
+        }
+
         sub.day = d;
         sub.start_time = st + ':00';
         sub.end_time = et + ':00';
@@ -709,15 +829,23 @@ function autoGenerate() {
         if (!sub.day || sub.day === 'TBA' || !sub.start_time || sub.start_time === '00:00:00') {
             // Find slot
             let placed = false;
+            let duration = parseFloat(sub.units) || 1.5;
+            if (duration < 0.5) duration = 1.0; 
+
             while(!placed && currentDayIdx < days.length) {
                 // Check if fits
-                if (currentHour + 1.5 <= 17) { // Max 5PM
+                if (currentHour + duration <= 17) { // Max 5PM
                     // check overlaps with ALREADY scheduled things this sem
                     let overlap = false;
-                    let st = `${currentHour.toString().padStart(2,'0')}:00:00`;
-                    let eh = currentHour + 1;
-                    let em = 30;
-                    let et = `${eh.toString().padStart(2,'0')}:${em}:00`;
+                    
+                    let stHour = Math.floor(currentHour);
+                    let stMin = Math.round((currentHour % 1) * 60);
+                    let st = `${stHour.toString().padStart(2,'0')}:${stMin.toString().padStart(2,'0')}:00`;
+                    
+                    let endHourVal = currentHour + duration;
+                    let eh = Math.floor(endHourVal);
+                    let em = Math.round((endHourVal % 1) * 60);
+                    let et = `${eh.toString().padStart(2,'0')}:${em.toString().padStart(2,'0')}:00`;
                     
                     for (let s of subjects) {
                         if (s.semester === currentSemester && s.day === days[currentDayIdx] && s.start_time !== '00:00:00') {
@@ -732,9 +860,9 @@ function autoGenerate() {
                         sub.start_time = st;
                         sub.end_time = et;
                         placed = true;
-                        currentHour += 1.5;
+                        currentHour += duration;
                     } else {
-                        currentHour += 1.5; // push forward
+                        currentHour += 0.5; // push forward by 30 mins
                     }
                 } else {
                     // Next day

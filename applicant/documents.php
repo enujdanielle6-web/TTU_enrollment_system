@@ -347,4 +347,102 @@ require_once __DIR__ . '/../components/header.php';
   </div>
 </main>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function showToast(message, type = 'success') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-4 shadow`;
+        alertDiv.style.zIndex = '9999';
+        alertDiv.innerHTML = `
+            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i>${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.body.appendChild(alertDiv);
+        setTimeout(() => {
+            alertDiv.classList.remove('show');
+            setTimeout(() => alertDiv.remove(), 150);
+        }, 4000);
+    }
+
+    const uploadForms = document.querySelectorAll('form[action="document_upload.php"]');
+    uploadForms.forEach(form => {
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = form.querySelector('button[type="submit"]');
+            const originalBtnHtml = btn.innerHTML;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Uploading...';
+            btn.disabled = true;
+
+            const formData = new FormData(form);
+            formData.append('ajax', '1');
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    
+                    const card = form.closest('.doc-card');
+                    card.classList.add('border-success');
+                    
+                    // Update badge
+                    const badgeContainer = card.querySelector('.d-flex.align-items-center.gap-2.mb-1');
+                    let badge = badgeContainer.querySelector('.badge-status');
+                    if (badge) {
+                        badge.className = 'badge badge-status bg-warning text-dark rounded-pill';
+                        badge.textContent = 'Pending';
+                    } else {
+                        // Create badge if Missing
+                        const title = badgeContainer.querySelector('h3');
+                        badge = document.createElement('span');
+                        badge.className = 'badge badge-status bg-warning text-dark rounded-pill';
+                        badge.textContent = 'Pending';
+                        badgeContainer.insertBefore(badge, title.nextSibling);
+                    }
+                    
+                    // Update icon
+                    const icon = card.querySelector('.doc-icon i');
+                    if (icon) {
+                        icon.className = 'bi bi-file-earmark-check-fill';
+                    }
+                    
+                    // Add or update "View Current File" button
+                    let viewBtnContainer = card.querySelector('.mb-2');
+                    if (!viewBtnContainer) {
+                        const uploadContainer = card.querySelector('.text-md-end.custom-file-upload');
+                        viewBtnContainer = document.createElement('div');
+                        viewBtnContainer.className = 'mb-2';
+                        uploadContainer.insertBefore(viewBtnContainer, form);
+                    }
+                    
+                    viewBtnContainer.innerHTML = `
+                        <a href="document_view.php?id=${data.doc_id}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm btn-sm">
+                            <i class="bi bi-eye me-1"></i> View Current File
+                        </a>
+                    `;
+                    
+                    // Change button text to 'Replace'
+                    btn.innerHTML = '<i class="bi bi-upload me-1"></i> Replace';
+                } else {
+                    showToast(data.message, 'danger');
+                    btn.innerHTML = originalBtnHtml;
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('An unexpected error occurred during upload.', 'danger');
+                btn.innerHTML = originalBtnHtml;
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    });
+});
+</script>
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

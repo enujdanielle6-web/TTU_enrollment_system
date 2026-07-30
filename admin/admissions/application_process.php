@@ -149,7 +149,7 @@ try {
     }
 
     // Fetch old application state
-    $oldAppStmt = $pdo->prepare('SELECT academic_level, status, admin_feedback, internal_notes FROM applications WHERE id = :id');
+    $oldAppStmt = $pdo->prepare('SELECT academic_level, status, admin_feedback, internal_notes, strand FROM applications WHERE id = :id');
     $oldAppStmt->execute(['id' => $appId]);
     $oldApp = $oldAppStmt->fetch(PDO::FETCH_ASSOC);
 

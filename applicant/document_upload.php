@@ -9,34 +9,48 @@ requireApplicantLogin();
 
 $userId = (int) $_SESSION['user_id'];
 
+$isAjax = isset($_POST['ajax']) || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
+function respond($success, $message, $extra = []) {
+    global $isAjax;
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(array_merge(['success' => $success, 'message' => $message], $extra));
+        exit;
+    } else {
+        if ($success) {
+            $_SESSION['doc_success'] = $message;
+        } else {
+            $_SESSION['doc_error'] = $message;
+        }
+        header('Location: documents.php');
+        exit;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: documents.php');
-    exit;
+    respond(false, 'Invalid request method.');
 }
 
 // 1. Validate CSRF Token
-verifyCsrfToken();
+if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
+    respond(false, 'Invalid CSRF token.');
+}
 
 $documentName = trim($_POST['document_name'] ?? '');
 $file = $_FILES['document_file'] ?? null;
 
 if ($documentName === '' || !$file || $file['error'] === UPLOAD_ERR_NO_FILE) {
-    $_SESSION['doc_error'] = 'Please select a file to upload.';
-    header('Location: documents.php');
-    exit;
+    respond(false, 'Please select a file to upload.');
 }
 
 if ($file['error'] !== UPLOAD_ERR_OK) {
-    $_SESSION['doc_error'] = 'A server error occurred during file upload. Please try again.';
-    header('Location: documents.php');
-    exit;
+    respond(false, 'A server error occurred during file upload. Please try again.');
 }
 
 $maxSize = 5 * 1024 * 1024; // 5MB
 if ($file['size'] > $maxSize) {
-    $_SESSION['doc_error'] = 'File exceeds the maximum limit of 5MB.';
-    header('Location: documents.php');
-    exit;
+    respond(false, 'File exceeds the maximum limit of 5MB.');
 }
 
 // 2. Validate file extension explicitly
@@ -44,9 +58,7 @@ $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $allowedExts = ['pdf', 'jpg', 'jpeg', 'png'];
 
 if (!in_array($ext, $allowedExts, true)) {
-    $_SESSION['doc_error'] = 'Invalid file extension. Only PDF, JPG, JPEG, and PNG are allowed.';
-    header('Location: documents.php');
-    exit;
+    respond(false, 'Invalid file extension. Only PDF, JPG, JPEG, and PNG are allowed.');
 }
 
 // 3. Validate MIME type explicitly and correlate with extension
@@ -61,9 +73,7 @@ $mimeMap = [
 ];
 
 if (!isset($mimeMap[$ext]) || $mimeType !== $mimeMap[$ext]) {
-    $_SESSION['doc_error'] = 'File content type mismatch. Uploaded file MIME type does not match its extension.';
-    header('Location: documents.php');
-    exit;
+    respond(false, 'File content type mismatch. Uploaded file MIME type does not match its extension.');
 }
 
 try {
@@ -73,9 +83,7 @@ try {
     $app = $appStmt->fetch();
 
     if (!$app) {
-        $_SESSION['doc_error'] = 'No active application found.';
-        header('Location: documents.php');
-        exit;
+        respond(false, 'No active application found.');
     }
     
     $appId = (int) $app['id'];
@@ -99,6 +107,7 @@ try {
         $checkStmt->execute(['app_id' => $appId, 'doc_name' => $documentName]);
         $existing = $checkStmt->fetch();
 
+        $docId = 0;
         if ($existing) {
             // Remove old file if it exists
             if (!empty($existing['file_path'])) {
@@ -109,6 +118,7 @@ try {
             }
             $updateStmt = $pdo->prepare('UPDATE application_documents SET file_path = :file_path, status = "pending" WHERE id = :id');
             $updateStmt->execute(['file_path' => $newFilename, 'id' => $existing['id']]);
+            $docId = $existing['id'];
         } else {
             $insertStmt = $pdo->prepare('INSERT INTO application_documents (application_id, document_name, file_path, status) VALUES (:app_id, :doc_name, :file_path, "pending")');
             $insertStmt->execute([
@@ -116,6 +126,7 @@ try {
                 'doc_name' => $documentName,
                 'file_path' => $newFilename
             ]);
+            $docId = $pdo->lastInsertId();
         }
         
         // Log activity
@@ -127,15 +138,12 @@ try {
             'description' => "You successfully uploaded your {$documentName}."
         ]);
 
-        $_SESSION['doc_success'] = "{$documentName} uploaded successfully.";
+        respond(true, "{$documentName} uploaded successfully.", ['doc_id' => $docId]);
     } else {
-        $_SESSION['doc_error'] = 'Failed to move uploaded file. Check directory permissions.';
+        respond(false, 'Failed to move uploaded file. Check directory permissions.');
     }
 
 } catch (PDOException $e) {
     error_log('Upload DB Error: ' . $e->getMessage());
-    $_SESSION['doc_error'] = 'A database error occurred.';
+    respond(false, 'A database error occurred.');
 }
-
-header('Location: documents.php');
-exit;

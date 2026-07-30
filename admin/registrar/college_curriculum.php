@@ -153,6 +153,7 @@ require_once __DIR__ . '/../../components/header.php';
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="create_curriculum">
         <div class="modal-header bg-light border-bottom-0 pb-3">
           <h5 class="modal-title fw-bold text-dark"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Create New Curriculum</h5>
@@ -209,6 +210,7 @@ require_once __DIR__ . '/../../components/header.php';
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="update_curriculum">
         <input type="hidden" name="curriculum_id" id="edit_curr_id" value="">
         <div class="modal-header bg-light border-bottom-0 pb-3">
@@ -278,6 +280,7 @@ require_once __DIR__ . '/../../components/header.php';
       <div class="modal-footer border-top-0 d-flex justify-content-center pb-4">
         <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
         <form action="college_curriculum_process.php" method="POST" class="d-inline">
+            <?= getCsrfInput() ?>
             <input type="hidden" name="action" value="delete_curriculum">
             <input type="hidden" name="curriculum_id" id="deleteCurrId" value="">
             <button type="submit" class="btn btn-danger px-4 rounded-pill fw-medium shadow-sm">Yes, Delete Curriculum</button>
