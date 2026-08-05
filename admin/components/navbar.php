@@ -10,9 +10,7 @@ $baseAdminUrl = substr($_SERVER['SCRIPT_NAME'], 0, strpos($_SERVER['SCRIPT_NAME'
     <!-- Brand / Logo Area -->
     <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
       <a class="text-decoration-none d-flex align-items-center" href="<?= $baseAdminUrl ?>dashboard.php" aria-label="Admin portal home">
-        <span class="bg-primary-light text-primary border border-primary border-opacity-10 shadow-sm d-flex align-items-center justify-content-center rounded-circle" style="width: 44px; height: 44px;">
-          <i class="bi bi-shield-lock-fill fs-5"></i>
-        </span>
+        <img src="<?= $baseAdminUrl ?>../images/TTU_LOGO.png" alt="TTU Logo" style="height: 36px; width: auto; object-fit: contain;">
         <span class="text-dark fw-bold ms-3 fs-5">Admin Portal</span>
       </a>
       <button class="btn btn-sm btn-light d-lg-none" id="sidebarClose" onclick="document.getElementById('adminSidebar').classList.remove('show'); document.getElementById('sidebarBackdrop').classList.add('d-none');">

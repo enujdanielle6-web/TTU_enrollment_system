@@ -27,16 +27,38 @@ require_once __DIR__ . '/../components/navbar.php';
           </div>
         </div>
         <div class="col-lg-6">
-          <div class="school-illustration-placeholder" aria-label="School illustration placeholder">
-            <div class="illustration-sun"></div>
-            <div class="illustration-building">
-              <i class="bi bi-building"></i>
+          <div class="hero-image-container position-relative">
+            <img src="../images/TTU_CAMPUS.png" alt="TTU Campus" class="img-fluid rounded shadow-lg" style="animation: fadeInUp 1s ease forwards; opacity: 0;">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lms-portals" class="py-5 bg-light">
+    <div class="container py-4">
+      <div class="section-heading text-center mb-5">
+        <h2>Learning Management System</h2>
+        <p class="text-muted">Access your online courses, assignments, and grades.</p>
+      </div>
+      <div class="row g-4 justify-content-center">
+        <div class="col-md-5">
+          <div class="card h-100 shadow-sm border-0 text-center p-4 hover-lift">
+            <div class="card-body">
+              <div class="display-4 text-primary mb-3"><i class="bi bi-mortarboard"></i></div>
+              <h3 class="h4 mb-3">Student Portal</h3>
+              <p class="text-muted mb-4">View enrolled subjects, submit assignments, and check your academic progress.</p>
+              <a href="../auth/lms_student_login.php" class="btn btn-primary w-100">Student Login</a>
             </div>
-            <div class="illustration-card illustration-card-primary fade-in-up" style="animation-delay: 0.1s;">
-              <i class="bi bi-mortarboard-fill"></i>
-            </div>
-            <div class="illustration-card illustration-card-secondary fade-in-up" style="animation-delay: 0.2s;">
-              <i class="bi bi-journal-check"></i>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <div class="card h-100 shadow-sm border-0 text-center p-4 hover-lift">
+            <div class="card-body">
+              <div class="display-4 text-primary mb-3"><i class="bi bi-person-video3"></i></div>
+              <h3 class="h4 mb-3">Faculty Portal</h3>
+              <p class="text-muted mb-4">Manage your classes, grade students, and upload course modules.</p>
+              <a href="../auth/lms_faculty_login.php" class="btn btn-outline-primary w-100">Faculty Login</a>
             </div>
           </div>
         </div>

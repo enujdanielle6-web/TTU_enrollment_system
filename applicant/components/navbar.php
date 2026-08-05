@@ -45,10 +45,8 @@ $isApprovedOrEnrolled = $hasApplication && in_array($navAppStatus, ['approved', 
 
 <!-- Mobile Top Nav -->
 <nav class="navbar bg-white border-bottom sticky-top d-lg-none px-3">
-  <a class="navbar-brand d-flex align-items-center fw-bold" href="dashboard.php">
-    <div class="bg-primary bg-opacity-10 text-primary rounded d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-      <i class="bi bi-mortarboard-fill"></i>
-    </div>
+  <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="dashboard.php">
+    <img src="../images/TTU_LOGO.png" alt="TTU Logo" style="height: 32px; width: auto; object-fit: contain;">
     Applicant Portal
   </a>
   <button class="btn btn-light border" type="button" data-bs-toggle="offcanvas" data-bs-target="#applicantSidebar">
@@ -59,10 +57,8 @@ $isApprovedOrEnrolled = $hasApplication && in_array($navAppStatus, ['approved', 
 <!-- Sidebar -->
 <div class="offcanvas-lg offcanvas-start app-sidebar border-end bg-white fixed-top h-100 shadow-sm" tabindex="-1" id="applicantSidebar">
   <div class="offcanvas-header border-bottom px-4 py-3">
-    <a class="navbar-brand d-flex align-items-center fw-bold text-dark text-decoration-none" href="dashboard.php">
-      <div class="bg-primary bg-opacity-10 text-primary rounded d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-        <i class="bi bi-mortarboard-fill"></i>
-      </div>
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-dark text-decoration-none" href="dashboard.php">
+      <img src="../images/TTU_LOGO.png" alt="TTU Logo" style="height: 32px; width: auto; object-fit: contain;">
       TTU Admissions
     </a>
     <button type="button" class="btn-close d-lg-none" data-bs-dismiss="offcanvas" data-bs-target="#applicantSidebar"></button>

@@ -702,7 +702,7 @@ CREATE TABLE `users` (
   `last_name` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('applicant','admin','superadmin','admissions','scholarship','cashier','clinic') NOT NULL DEFAULT 'applicant',
+  `role` enum('applicant','admin','superadmin','admissions','scholarship','cashier','clinic','faculty') NOT NULL DEFAULT 'applicant',
   `department` varchar(100) DEFAULT NULL,
   `permissions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`permissions`)),
   `student_number` varchar(50) DEFAULT NULL,
@@ -719,6 +719,66 @@ CREATE TABLE `users` (
   CONSTRAINT `fk_users_college_curriculum` FOREIGN KEY (`college_curriculum_id`) REFERENCES `college_curricula` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+--
+-- Table structure for table `lms_modules`
+--
+
+DROP TABLE IF EXISTS `lms_modules`;
+CREATE TABLE `lms_modules` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `subject_id` int(10) unsigned NOT NULL,
+  `teacher_id` int(10) unsigned NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_lms_mod_subject` (`subject_id`),
+  KEY `fk_lms_mod_teacher` (`teacher_id`),
+  CONSTRAINT `fk_lms_mod_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_lms_mod_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Table structure for table `lms_assignments`
+--
+
+DROP TABLE IF EXISTS `lms_assignments`;
+CREATE TABLE `lms_assignments` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `subject_id` int(10) unsigned NOT NULL,
+  `teacher_id` int(10) unsigned NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `due_date` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_lms_ass_subject` (`subject_id`),
+  KEY `fk_lms_ass_teacher` (`teacher_id`),
+  CONSTRAINT `fk_lms_ass_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_lms_ass_teacher` FOREIGN KEY (`teacher_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Table structure for table `lms_submissions`
+--
+
+DROP TABLE IF EXISTS `lms_submissions`;
+CREATE TABLE `lms_submissions` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `assignment_id` int(10) unsigned NOT NULL,
+  `student_id` int(10) unsigned NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `grade` decimal(5,2) DEFAULT NULL,
+  `feedback` text DEFAULT NULL,
+  `submitted_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `fk_lms_sub_assign` (`assignment_id`),
+  KEY `fk_lms_sub_student` (`student_id`),
+  CONSTRAINT `fk_lms_sub_assign` FOREIGN KEY (`assignment_id`) REFERENCES `lms_assignments` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_lms_sub_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

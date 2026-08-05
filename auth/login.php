@@ -23,8 +23,8 @@ require_once __DIR__ . '/../components/header.php';
       <div class="col-12">
         <div class="auth-island fade-in-up" style="animation-delay: 0.1s;">
           <div class="text-center mb-4">
-            <div class="school-logo mx-auto mb-3" style="width: 56px; height: 56px; font-size: 1.5rem; border-radius: 16px; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%); box-shadow: 0 4px 12px rgba(13, 110, 253, 0.2);">
-              <i class="bi bi-box-arrow-in-right"></i>
+            <div class="mx-auto mb-3">
+              <img src="../images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain;">
             </div>
             <h1 class="h4 mb-2 fw-bold text-dark">TRIPLE T UNIVERSITY</h1>
             <p class="text-muted mb-0 small">Login to continue your enrollment account.</p>

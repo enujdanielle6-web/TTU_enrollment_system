@@ -1,0 +1,13 @@
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS `lms_student_materials`;
+DROP TABLE IF EXISTS `lms_submissions`;
+DROP TABLE IF EXISTS `lms_assignments`;
+DROP TABLE IF EXISTS `lms_material_files`;
+DROP TABLE IF EXISTS `lms_materials`;
+DROP TABLE IF EXISTS `lms_topics`;
+DROP TABLE IF EXISTS `lms_student_progress`;
+DROP TABLE IF EXISTS `lms_lessons`;
+DROP TABLE IF EXISTS `lms_modules`;
+DROP TABLE IF EXISTS `lms_course_resources`;
+DROP TABLE IF EXISTS `lms_courses`;
+SET FOREIGN_KEY_CHECKS = 1;

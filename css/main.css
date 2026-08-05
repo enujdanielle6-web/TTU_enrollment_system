@@ -181,13 +181,13 @@
 }
 
 .illustration-card-primary {
-  bottom: 16%;
-  left: 12%;
+  bottom: 15%;
+  left: -38px;
 }
 
 .illustration-card-secondary {
-  right: 14%;
-  top: 42%;
+  right: -38px;
+  top: 15%;
 }
 
 @media (max-width: 991.98px) {
