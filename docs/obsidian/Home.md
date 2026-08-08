@@ -22,4 +22,4 @@ Use the links below to navigate the architecture, database schema, user roles, a
 ---
 **Code Name:** SIA (`sia`)
 **Stack:** PHP (Vanilla) + MySQL + Bootstrap 5
-**Pattern:** Page-Controller (SSR)
+**Pattern:** MVC (Vanilla PHP)

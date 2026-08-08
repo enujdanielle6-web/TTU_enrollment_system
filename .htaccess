@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Disable directory listing
+    Options -Indexes
+
+    # Prevent direct access to sensitive directories
+    RewriteRule ^(app|config|database)/ - [F,L]
+
+    # If it's not an existing file, route it to public/index.php
+    # We remove the !-d condition so the root directory '/' is also routed to the front controller
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^(.*)$ public/index.php [QSA,L]
+
+    # Optionally, force all .php requests (except index.php in public) to the router
+    # This prevents anyone from directly executing any lingering PHP files.
+    RewriteCond %{REQUEST_URI} \.php$
+    RewriteCond %{REQUEST_URI} !public/index\.php$
+    RewriteRule ^(.*)$ public/index.php [QSA,L]
+</IfModule>
