@@ -610,9 +610,9 @@ try {
         $existingNumber = $uStmt->fetchColumn();
 
         if (empty($existingNumber)) {
-            $newNumber = generateStudentNumber($pdo);
+            $existingNumber = generateStudentNumber($pdo);
             $updUser = $pdo->prepare('UPDATE users SET student_number = :student_number WHERE id = :id');
-            $updUser->execute(['student_number' => $newNumber, 'id' => $userId]);
+            $updUser->execute(['student_number' => $existingNumber, 'id' => $userId]);
             
             // Log it
             $logDocStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, :icon, :title, :description)');
@@ -620,8 +620,86 @@ try {
                 'user_id' => $userId,
                 'icon' => 'bi-person-vcard-fill text-success',
                 'title' => 'Student Number Assigned',
-                'description' => "Your official student number is {$newNumber}."
+                'description' => "Your official student number is {$existingNumber}."
             ]);
+        }
+
+        // 1.3 GENERATE CREDENTIALS & SEND EMAIL
+        $uStmt = $pdo->prepare('SELECT first_name, last_name, email, ttu_email FROM users WHERE id = :id LIMIT 1');
+        $uStmt->execute(['id' => $userId]);
+        $userRow = $uStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (empty($userRow['ttu_email'])) {
+            $cleanFirst = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $userRow['first_name']));
+            $cleanLast = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $userRow['last_name']));
+            $ttuEmail = $cleanFirst . '.' . $cleanLast . '@ttu.edu.ph';
+            
+            // Check for duplicates in ttu_email
+            $checkEmail = $pdo->prepare('SELECT COUNT(*) FROM users WHERE ttu_email = :email');
+            $counter = 1;
+            while(true) {
+                $checkEmail->execute(['email' => $ttuEmail]);
+                if ($checkEmail->fetchColumn() == 0) break;
+                $ttuEmail = $cleanFirst . '.' . $cleanLast . $counter . '@ttu.edu.ph';
+                $counter++;
+            }
+
+            $tempPassword = $existingNumber;
+            $hashedPassword = password_hash($tempPassword, PASSWORD_DEFAULT);
+
+            $updCreds = $pdo->prepare('UPDATE users SET ttu_email = :ttu_email, password = :pwd, force_password_reset = 1 WHERE id = :id');
+            $updCreds->execute([
+                'ttu_email' => $ttuEmail,
+                'pwd' => $hashedPassword,
+                'id' => $userId
+            ]);
+
+            // SEND EMAIL VIA PHPMAILER
+            $autoloadPath = __DIR__ . '/../../../vendor/autoload.php';
+            if (file_exists($autoloadPath)) {
+                require_once $autoloadPath;
+                $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = getenv('SMTP_USERNAME');
+                    $mail->Password   = getenv('SMTP_PASSWORD');
+                    
+                    // Handle TLS vs SSL
+                    $enc = getenv('SMTP_ENCRYPTION') ?: 'tls';
+                    if (strtolower($enc) === 'ssl') {
+                        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+                    } else {
+                        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+                    }
+                    
+                    $mail->Port       = getenv('SMTP_PORT') ?: 587;
+
+                    $mail->setFrom(getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph', getenv('MAIL_FROM_NAME') ?: 'Triple T University');
+                    $mail->addAddress($userRow['email'], $userRow['first_name'] . ' ' . $userRow['last_name']);
+
+                    // Embed Logo
+                    $mail->addEmbeddedImage(__DIR__ . '/../../../../images/TTU_LOGO.png', 'ttu_logo');
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Welcome to Triple T University - Enrollment Finalized';
+                    
+                    ob_start();
+                    extract([
+                        'firstName' => $userRow['first_name'],
+                        'ttuEmail' => $ttuEmail,
+                        'studentNumber' => $existingNumber,
+                        'tempPassword' => $tempPassword
+                    ]);
+                    require __DIR__ . '/../../Views/emails/welcome_credentials.php';
+                    $mail->Body = ob_get_clean();
+
+                    $mail->send();
+                } catch (\Exception $e) {
+                    error_log('Mailer Error: ' . $mail->ErrorInfo);
+                }
+            }
         }
     }
 

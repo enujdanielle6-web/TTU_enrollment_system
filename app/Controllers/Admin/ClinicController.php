@@ -140,11 +140,11 @@ try {
     $oldStatus = $stmt->fetchColumn();
 
     if ($oldStatus === false) {
-        throw new Exception('Record not found.');
+        throw new \Exception('Record not found.');
     }
     
     if ($oldStatus === 'verified') {
-        throw new Exception('Cannot modify a verified medical clearance record.');
+        throw new \Exception('Cannot modify a verified medical clearance record.');
     }
 
     // Update record
@@ -185,7 +185,7 @@ try {
     $response->redirect("/sia/admin/clinic/medical_detail.php?id={$recordId}");
     return;
 
-} catch (Exception $e) {
+} catch (\Exception $e) {
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }

@@ -124,7 +124,7 @@ require_once __DIR__ . '/../components/header.php';
   }
 </style>
 
-<main class="py-5 bg-light min-vh-100">
+<main id="spa-main" class="py-5 bg-light min-vh-100">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-xl-9 col-lg-10">
@@ -163,6 +163,7 @@ require_once __DIR__ . '/../components/header.php';
             <div class="island-body pt-0 fade-in-up" style="animation-delay: 0.2s;">
               <form action="document_workflow.php" method="POST" class="d-flex flex-column gap-3">
                 <?= getCsrfInput() ?>
+                <input type="hidden" name="action" value="save_preference">
                 <p class="mb-1 text-muted small">Choose how you would like to submit your documents:</p>
                 
                 <div class="d-flex flex-column flex-md-row gap-3 mt-2">
@@ -217,7 +218,9 @@ require_once __DIR__ . '/../components/header.php';
             <div class="row g-4">
               <?php 
                 $delay = 0.2;
-                foreach ($requiredDocs as $docName => $docDesc): 
+                foreach ($requiredDocs as $doc): 
+                  $docName = $doc['name'];
+                  $docDesc = $doc['description'];
                   $hasDoc = isset($documents[$docName]);
                   $docStatus = $hasDoc ? $documents[$docName]['status'] : null;
                   $docId = $hasDoc ? $documents[$docName]['id'] : null;

@@ -13,12 +13,6 @@ class ApplicantApiController extends BaseController
     {
         $pdo = Database::getConnection();
         
-require_once __DIR__ . '/../config/database.php';
-
-requireApplicantLogin();
-
-header('Content-Type: application/json');
-
 $programCode = $_GET['program_code'] ?? '';
 $yearLevel = $_GET['year_level'] ?? '';
 $semester = $_GET['semester'] ?? '';
@@ -105,10 +99,6 @@ try {
     public function getFullCurriculum(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-require_once __DIR__ . '/../config/database.php';
-
-header('Content-Type: application/json');
-
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     return;
@@ -206,12 +196,6 @@ try {
     {
         $pdo = Database::getConnection();
         
-require_once __DIR__ . '/../config/database.php';
-
-requireApplicantLogin();
-
-header('Content-Type: application/json');
-
 $sectionId = $_GET['section_id'] ?? 0;
 
 if (!$sectionId) {
@@ -255,12 +239,6 @@ try {
     {
         $pdo = Database::getConnection();
         
-require_once __DIR__ . '/../config/database.php';
-
-requireApplicantLogin();
-
-header('Content-Type: application/json');
-
 $programCode = $_GET['program_code'] ?? '';
 $yearLevel = $_GET['year_level'] ?? '';
 $semester = $_GET['semester'] ?? '';
@@ -343,10 +321,6 @@ try {
     {
         $pdo = Database::getConnection();
         
-require_once __DIR__ . '/../config/database.php';
-
-header('Content-Type: application/json');
-
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['success' => false, 'message' => 'Unauthorized']);
     return;
@@ -433,12 +407,6 @@ try {
     {
         $pdo = Database::getConnection();
         
-require_once __DIR__ . '/../config/database.php';
-
-requireApplicantLogin();
-
-header('Content-Type: application/json');
-
 $subjectId = (int)($_GET['subject_id'] ?? 0);
 $level = $_GET['level'] ?? '';
 

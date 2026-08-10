@@ -47,7 +47,15 @@ class EnrollController extends BaseController
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
 
-        // We pass empty arrays for dropdowns because they are fetched dynamically via APIs in the frontend.
+        // Fetch active programs for dropdowns
+        $shsStmt = $pdo->query("SELECT code, name, 'Senior High School' as category FROM shs_strands WHERE is_active = 1");
+        $shsStrands = $shsStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $collegeStmt = $pdo->query("SELECT code, name, 'College' as category FROM college_programs WHERE is_active = 1");
+        $collegePrograms = $collegeStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        $activeStrands = array_merge($shsStrands, $collegePrograms);
+
         return $this->render('applicant/enroll', [
             'userId' => $userId,
             'user' => $user,
@@ -56,7 +64,8 @@ class EnrollController extends BaseController
             'activeSem' => $activeSem,
             'existingStatus' => $existingStatus,
             'errors' => $errors,
-            'old' => $old
+            'old' => $old,
+            'activeStrands' => $activeStrands
         ]);
     }
 

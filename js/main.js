@@ -60,4 +60,52 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => alert.remove(), 150);
         }, 5000);
     });
+
+    // 3. Sidebar Minimize Toggle & Tooltips
+    const sidebar = document.getElementById('adminSidebar');
+    const minimizeBtn = document.getElementById('sidebarMinimize');
+    
+    // Initialize tooltips for sidebar
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('#adminSidebar [data-sidebar-tooltip="true"]'));
+    const tooltips = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            trigger: 'hover',
+            boundary: document.body
+        });
+    });
+
+    function updateTooltips() {
+        if (!sidebar) return;
+        if (sidebar.classList.contains('minimized')) {
+            tooltips.forEach(t => t.enable());
+        } else {
+            tooltips.forEach(t => t.disable());
+            // Also hide any currently showing tooltips
+            tooltips.forEach(t => t.hide());
+        }
+    }
+    
+    // Check LocalStorage for saved state
+    if (sidebar && localStorage.getItem('sidebarMinimized') === 'true') {
+        sidebar.classList.add('minimized');
+    }
+
+    // Set initial tooltip state
+    updateTooltips();
+
+    if (minimizeBtn && sidebar) {
+        minimizeBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.toggle('minimized');
+            
+            updateTooltips();
+            
+            // Save state
+            if (sidebar.classList.contains('minimized')) {
+                localStorage.setItem('sidebarMinimized', 'true');
+            } else {
+                localStorage.setItem('sidebarMinimized', 'false');
+            }
+        });
+    }
 });

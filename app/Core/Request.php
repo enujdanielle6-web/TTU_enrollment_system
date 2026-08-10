@@ -120,4 +120,14 @@ class Request
 
         return $default;
     }
+
+    public function isAjax(): bool
+    {
+        return $this->header('X-Requested-With') === 'XMLHttpRequest' || $this->input('ajax') == '1';
+    }
+
+    public function isPost(): bool
+    {
+        return $this->getMethod() === 'POST';
+    }
 }

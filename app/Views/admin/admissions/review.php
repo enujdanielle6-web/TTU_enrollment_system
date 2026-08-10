@@ -83,7 +83,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
           <input type="hidden" name="bulk_status" id="bulkStatusInput" value="">
           
-          <div class="table-responsive">
+          <div class="table-responsive px-3">
             <table class="table table-hover align-middle mb-0 custom-table">
               <thead class="table-light text-uppercase small text-muted">
                 <tr>
@@ -116,7 +116,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       $badgeClass = getApplicationStatusBadgeClass($app['status']);
                       $docBadge = $app['document_submission_method'] === 'on_campus' 
                           ? '<span class="badge bg-secondary" title="On-Campus"><i class="bi bi-building"></i> Physical</span>'
-                          : '<span class="badge bg-info text-dark"><i class="bi bi-cloud-arrow-up"></i> ' . $app['doc_count'] . ' Files</span>';
+                          : '<span class="badge bg-info text-dark"><i class="bi bi-cloud-arrow-up"></i> ' . ($app['doc_count'] ?? 0) . ' Files</span>';
                     ?>
                     <tr>
                       <td class="ps-4">
@@ -272,8 +272,6 @@ $(function() {
 });
 </script>
 
-  </div>
-</main>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>
 

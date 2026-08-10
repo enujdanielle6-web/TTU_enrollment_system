@@ -5,7 +5,7 @@ require_once __DIR__ . '/../components/header.php';
 
 <?php require_once __DIR__ . '/../components/applicant_navbar.php'; ?>
 
-<main class="py-5 bg-light min-vh-100">
+<main id="spa-main" class="py-5 bg-light min-vh-100">
   <div class="container">
     <?php if ($fetchError !== null): ?>
       <div class="alert alert-danger shadow-sm rounded-12">

@@ -35,10 +35,15 @@ class HealthController extends BaseController
         $stmt = $pdo->prepare('SELECT * FROM health_records WHERE user_id = :user_id LIMIT 1');
         $stmt->execute(['user_id' => $userId]);
         $healthRecord = $stmt->fetch();
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         return $this->render('applicant/health_info', [
             'application' => $application,
-            'healthRecord' => $healthRecord
+            'healthRecord' => $healthRecord,
+            'successMsg' => $successMsg,
+            'errorMsg' => $errorMsg
         ]);
     }
 

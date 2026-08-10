@@ -72,7 +72,7 @@ require_once __DIR__ . '/../components/header.php';
 <?php require_once __DIR__ . '/../components/applicant_navbar.php'; ?>
 </div>
 
-<main class="py-5 bg-light min-vh-100">
+<main id="spa-main" class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
     <div class="no-print d-flex justify-content-between align-items-center mb-4">

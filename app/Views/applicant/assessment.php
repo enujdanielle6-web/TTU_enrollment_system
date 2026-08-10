@@ -4,7 +4,7 @@ require_once __DIR__ . '/../components/header.php';
 
 <?php require_once __DIR__ . '/../components/applicant_navbar.php'; ?>
 
-<main class="py-5 bg-light min-vh-100">
+<main id="spa-main" class="py-5 bg-light min-vh-100">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-xl-10">
@@ -40,6 +40,18 @@ require_once __DIR__ . '/../components/header.php';
           <?php
             $balance = (float)$assessment['net_amount'] - (float)$assessment['total_paid'];
             if ($balance < 0) $balance = 0;
+            
+            $pendingAmount = 0.0;
+            if (!empty($payments)) {
+                foreach ($payments as $p) {
+                    if ($p['status'] === 'pending') {
+                        $pendingAmount += (float)$p['amount'];
+                    }
+                }
+            }
+            $allowablePayment = $balance - $pendingAmount;
+            if ($allowablePayment < 0) $allowablePayment = 0;
+
             $statusBadge = match($assessment['payment_status']) {
                 'paid' => 'bg-success',
                 'partial' => 'bg-warning text-dark',
@@ -190,13 +202,23 @@ require_once __DIR__ . '/../components/header.php';
 
                   <!-- Quick Action Note -->
                   <div class="mt-4 p-3 bg-light rounded-3 text-center">
-                    <?php if ($balance > 0): ?>
+                    <?php if ($balance > 0 && $allowablePayment > 0): ?>
                       <p class="text-muted small mb-3 fw-medium">
                         <i class="bi bi-info-circle-fill text-primary me-1"></i> Settle your outstanding balance at the campus cashier or upload your proof of payment online.
                       </p>
                       <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold w-100 py-2" data-bs-toggle="modal" data-bs-target="#paymentModal">
                         <i class="bi bi-credit-card-2-front me-2"></i> Pay Online Now
                       </button>
+                    <?php elseif ($balance > 0 && $allowablePayment <= 0): ?>
+                      <div class="alert alert-warning border-0 rounded-4 shadow-sm mb-0 d-flex align-items-center gap-3 text-start" style="background-color: #fff3cd; border-left: 4px solid #ffc107 !important;">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px; background-color: #ffe898;">
+                          <i class="bi bi-hourglass-split fs-5" style="color: #856404;"></i>
+                        </div>
+                        <div>
+                          <h6 class="fw-bold mb-1" style="color: #664d03; letter-spacing: -0.5px;">Verification Pending</h6>
+                          <p class="small mb-0" style="color: #403001; line-height: 1.4;">You have pending payments covering your entire balance. Please wait for the cashier to verify them.</p>
+                        </div>
+                      </div>
                     <?php else: ?>
                       <p class="text-success small mb-0 fw-bold">
                         <i class="bi bi-patch-check-fill me-1"></i> Your account is fully settled. You are now officially enrolled!
@@ -224,7 +246,7 @@ require_once __DIR__ . '/../components/header.php';
                           <div class="d-flex justify-content-between align-items-center mb-2">
                             <span class="fw-bold text-dark fs-5">₱<?= number_format((float)$payment['amount'], 2) ?></span>
                             <?php if ($payment['status'] === 'pending'): ?>
-                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1 fw-medium"><i class="bi bi-hourglass-split me-1"></i> Pending Verification</span>
+                                <span class="badge rounded-pill px-3 py-1 fw-medium" style="background-color: #ffe898; color: #664d03; border: 1px solid #ffc107;"><i class="bi bi-hourglass-split me-1"></i> Pending Verification</span>
                             <?php else: ?>
                                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 fw-medium"><i class="bi bi-check-circle-fill me-1"></i> Verified</span>
                             <?php endif; ?>
@@ -281,10 +303,10 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <div class="mb-3">
-            <?php $minPayment = min(3000.0, (float)$balance); ?>
+            <?php $minPayment = min(3000.0, (float)$allowablePayment); ?>
             <label class="form-label small fw-semibold text-dark">Amount Paid (₱)</label>
-            <input type="number" step="0.01" min="<?= $minPayment ?>" max="<?= $balance ?>" name="amount" class="form-control bg-white" required placeholder="e.g. <?= number_format($balance, 2, '.', '') ?>" value="<?= number_format($balance, 2, '.', '') ?>">
-            <div class="form-text" style="font-size: 0.7rem;">You can pay partially (Minimum: ₱<?= number_format($minPayment, 2) ?>). Remaining Balance: ₱<?= number_format($balance, 2) ?></div>
+            <input type="number" step="0.01" min="<?= $minPayment ?>" max="<?= $allowablePayment ?>" name="amount" class="form-control bg-white" required placeholder="e.g. <?= number_format($allowablePayment, 2, '.', '') ?>" value="<?= number_format($allowablePayment, 2, '.', '') ?>">
+            <div class="form-text" style="font-size: 0.7rem;">You can pay partially (Minimum: ₱<?= number_format($minPayment, 2) ?>). Allowable Payment: ₱<?= number_format($allowablePayment, 2) ?> <?php if($pendingAmount > 0) echo "(Pending: ₱" . number_format($pendingAmount, 2) . ")"; ?></div>
           </div>
           
           <div class="mb-3">
@@ -340,6 +362,29 @@ require_once __DIR__ . '/../components/header.php';
     border-bottom: none;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const proofInput = document.querySelector('input[name="proof_image"]');
+    if (proofInput) {
+        proofInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('The uploaded file exceeds the 2MB size limit. Please choose a smaller file.');
+                    this.value = '';
+                    return;
+                }
+                if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+                    alert('Invalid file format. Only JPG and PNG are allowed.');
+                    this.value = '';
+                    return;
+                }
+            }
+        });
+    }
+});
+</script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
 

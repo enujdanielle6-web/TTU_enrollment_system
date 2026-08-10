@@ -206,11 +206,41 @@ class DocumentController extends BaseController
         }
 
         $action = $request->input('action', '');
-        if ($action !== 'submit_documents') {
+        if (!in_array($action, ['submit_documents', 'save_preference'], true)) {
             $respond(false, 'Invalid action.');
         }
 
         try {
+            if ($action === 'save_preference') {
+                $submissionMethod = $request->input('submission_method', '');
+                if (!in_array($submissionMethod, ['online', 'on_campus'], true)) {
+                    $respond(false, 'Invalid submission method.');
+                }
+                
+                $appStmt = $pdo->prepare('SELECT id, status FROM applications WHERE user_id = :user_id LIMIT 1');
+                $appStmt->execute(['user_id' => $userId]);
+                $application = $appStmt->fetch();
+
+                if (!$application) {
+                    $respond(false, 'Application not found.');
+                }
+                
+                $appId = (int) $application['id'];
+                
+                if ($submissionMethod === 'on_campus' && in_array($application['status'], ['pending', 'correction_required'])) {
+                    $updStmt = $pdo->prepare('UPDATE applications SET document_submission_method = :method, status = "under_review" WHERE id = :id');
+                    $updStmt->execute(['method' => $submissionMethod, 'id' => $appId]);
+                    User::logActivity($userId, 'Submission Preference Updated', 'You selected On-Campus submission. Application is now under review.', 'bi-building text-primary');
+                } else {
+                    $updStmt = $pdo->prepare('UPDATE applications SET document_submission_method = :method WHERE id = :id');
+                    $updStmt->execute(['method' => $submissionMethod, 'id' => $appId]);
+                    User::logActivity($userId, 'Submission Preference Updated', 'You updated your document submission preference.', 'bi-gear text-primary');
+                }
+
+                $respond(true, 'Submission preference saved successfully.');
+            }
+
+            // Existing logic for submit_documents
             $appStmt = $pdo->prepare('SELECT id, status, academic_level, student_type, strand FROM applications WHERE user_id = :user_id LIMIT 1');
             $appStmt->execute(['user_id' => $userId]);
             $application = $appStmt->fetch();

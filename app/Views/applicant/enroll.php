@@ -38,7 +38,7 @@ require_once __DIR__ . '/../components/header.php';
 .legend-box { width: 16px; height: 16px; border-radius: 4px; display: inline-block; vertical-align: middle; }
 </style>
 
-<main class="status-page py-5 bg-light min-vh-100">
+<main id="spa-main" class="status-page py-5 bg-light min-vh-100">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-lg-10 col-xl-9">
@@ -73,6 +73,10 @@ require_once __DIR__ . '/../components/header.php';
             </ul>
           </div>
         <?php endif; ?>
+
+        <button type="button" class="btn btn-warning mb-3 fw-bold" onclick="autoFillEnrollment()">
+          <i class="bi bi-magic"></i> Auto-Fill Test Data
+        </button>
 
         <form action="enroll_process.php" method="post" id="enrollmentForm" novalidate>
           <?= getCsrfInput() ?>
@@ -1790,7 +1794,37 @@ document.addEventListener('DOMContentLoaded', function() {
      });
   });
 });
+
+function autoFillEnrollment() {
+  const form = document.getElementById('enrollmentForm');
+  if(!form) return;
+  
+  const textInputs = form.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]):not([readonly]):not([disabled]):not([type="file"])');
+  textInputs.forEach(input => {
+    if(input.value.trim() === '') {
+      if(input.type === 'date') input.value = '2005-06-15';
+      else if(input.type === 'number') input.value = '12345';
+      else if(input.type === 'email') input.value = 'test@example.com';
+      else if(input.id.toLowerCase().includes('contact') || input.id.toLowerCase().includes('phone') || input.id.toLowerCase().includes('number')) input.value = '09123456789';
+      else if(input.id.toLowerCase().includes('zip')) input.value = '1000';
+      else input.value = 'Test Data';
+    }
+  });
+  
+  const selects = form.querySelectorAll('select:not([disabled])');
+  selects.forEach(select => {
+    if(select.options.length > 1 && (select.selectedIndex === 0 || select.value === '')) {
+      select.selectedIndex = 1;
+      select.dispatchEvent(new Event('change'));
+    }
+  });
+  
+  const textareas = form.querySelectorAll('textarea:not([readonly]):not([disabled])');
+  textareas.forEach(ta => {
+    if(ta.value.trim() === '') ta.value = 'Test Data Notes';
+  });
+  
+  alert('Form fields auto-filled successfully!');
+}
 </script>
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
-
-

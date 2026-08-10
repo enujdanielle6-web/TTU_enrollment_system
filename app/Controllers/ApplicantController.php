@@ -389,7 +389,7 @@ try {
         $refNo = trim($_POST['reference_number'] ?? '');
 
         if ($assessmentId <= 0 || $amount <= 0 || empty($method) || empty($refNo)) {
-            throw new Exception("Invalid payment details provided.");
+            throw new \Exception("Invalid payment details provided.");
         }
 
         // Verify Assessment belongs to user
@@ -403,23 +403,32 @@ try {
         $assessment = $assStmt->fetch();
 
         if (!$assessment) {
-            throw new Exception("Assessment not found or unauthorized.");
+            throw new \Exception("Assessment not found or unauthorized.");
         }
 
-        $balance = (float)$assessment['net_amount'] - (float)$assessment['total_paid'];
-        if ($balance < 0) {
-            $balance = 0.0;
+        $pendingStmt = $pdo->prepare('SELECT SUM(amount) FROM payment_records WHERE assessment_id = :id AND status = "pending"');
+        $pendingStmt->execute(['id' => $assessmentId]);
+        $pendingAmount = (float)$pendingStmt->fetchColumn();
+
+        $balance = (float)$assessment['net_amount'] - (float)$assessment['total_paid'] - $pendingAmount;
+        
+        if ($balance <= 0) {
+            throw new \Exception("You have fully paid or have enough pending payments to cover your balance.");
+        }
+
+        if ($amount > $balance) {
+            throw new \Exception("Payment amount cannot exceed your remaining balance of ₱" . number_format($balance, 2));
         }
 
         $minPayment = min(3000.0, $balance);
         
         if ($amount < $minPayment) {
-            throw new Exception("The minimum allowed payment is ₱" . number_format($minPayment, 2));
+            throw new \Exception("The minimum allowed payment is ₱" . number_format($minPayment, 2));
         }
 
         // Handle File Upload
         if (!isset($_FILES['proof_image']) || $_FILES['proof_image']['error'] !== UPLOAD_ERR_OK) {
-            throw new Exception("Proof of payment screenshot is required.");
+            throw new \Exception("Proof of payment screenshot is required.");
         }
 
         $fileTmpPath = $_FILES['proof_image']['tmp_name'];
@@ -429,17 +438,17 @@ try {
 
         // Max 2MB
         if ($fileSize > 2 * 1024 * 1024) {
-            throw new Exception("The uploaded file exceeds the 2MB size limit.");
+            throw new \Exception("The uploaded file exceeds the 2MB size limit.");
         }
 
         $allowedMimeTypes = ['image/jpeg', 'image/png'];
         if (!in_array($fileType, $allowedMimeTypes)) {
-            throw new Exception("Invalid file format. Only JPG and PNG are allowed.");
+            throw new \Exception("Invalid file format. Only JPG and PNG are allowed.");
         }
 
         $ext = pathinfo($fileName, PATHINFO_EXTENSION);
         $newFileName = 'proof_' . $userId . '_' . time() . '.' . $ext;
-        $uploadDir = __DIR__ . '/../uploads/payments/';
+        $uploadDir = __DIR__ . '/../../uploads/payments/';
         
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
@@ -448,7 +457,7 @@ try {
         $destPath = $uploadDir . $newFileName;
         
         if (!move_uploaded_file($fileTmpPath, $destPath)) {
-            throw new Exception("Failed to upload the file. Please try again.");
+            throw new \Exception("Failed to upload the file. Please try again.");
         }
 
         // Insert into payment_records as "pending"
@@ -473,7 +482,7 @@ try {
         $response->redirect("/sia/applicant/assessment.php");
         return;
     }
-} catch (Exception $e) {
+} catch (\Exception $e) {
     $_SESSION['error_msg'] = $e->getMessage();
     $response->redirect("/sia/applicant/assessment.php");
     return;
@@ -582,11 +591,11 @@ try {
     $eligibility = $stmt->fetch();
 
     if (!$eligibility || !in_array($eligibility['status'], ['approved', 'enrolled'], true)) {
-        throw new Exception('You are not eligible to apply for scholarships at this time.');
+        throw new \Exception('You are not eligible to apply for scholarships at this time.');
     }
 
     if (!$eligibility['assessment_id']) {
-        throw new Exception('Your fee assessment has not been generated yet.');
+        throw new \Exception('Your fee assessment has not been generated yet.');
     }
 
     // Check if scholarship exists and is active
@@ -595,14 +604,14 @@ try {
     $scholarship = $scholStmt->fetch();
 
     if (!$scholarship) {
-        throw new Exception('The selected scholarship is no longer available.');
+        throw new \Exception('The selected scholarship is no longer available.');
     }
 
     // Check if already applied
     $checkAppStmt = $pdo->prepare('SELECT id FROM scholarship_applications WHERE user_id = :user_id AND scholarship_id = :schol_id LIMIT 1');
     $checkAppStmt->execute(['user_id' => $userId, 'schol_id' => $scholarshipId]);
     if ($checkAppStmt->fetch()) {
-        throw new Exception('You have already applied for this scholarship.');
+        throw new \Exception('You have already applied for this scholarship.');
     }
 
     // Insert Application
@@ -621,7 +630,7 @@ try {
     ]);
 
     $_SESSION['success_msg'] = 'Your scholarship application has been submitted successfully.';
-} catch (Exception $e) {
+} catch (\Exception $e) {
     $_SESSION['error_msg'] = $e->getMessage();
 }
 

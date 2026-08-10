@@ -104,7 +104,7 @@ try {
                                 data-amount="<?= number_format((float)$payment['amount'], 2) ?>"
                                 data-method="<?= htmlspecialchars($payment['payment_method'], ENT_QUOTES, 'UTF-8') ?>"
                                 data-ref="<?= htmlspecialchars($payment['reference_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>"
-                                data-img="../../uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                data-img="/sia/app/uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                 data-bs-toggle="modal" data-bs-target="#verifyModal">
                           <i class="bi bi-shield-check"></i> Verify
                         </button>
@@ -135,8 +135,13 @@ try {
 <div class="modal fade" id="verifyModal" tabindex="-1" aria-labelledby="verifyModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-      <div class="modal-header bg-warning border-0 py-3">
-        <h5 class="modal-title fw-bold text-dark" id="verifyModalLabel"><i class="bi bi-shield-check me-2"></i> Verify Proof of Payment</h5>
+      <div class="modal-header bg-white border-bottom py-3">
+        <h5 class="modal-title fw-bold text-dark d-flex align-items-center" id="verifyModalLabel">
+          <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-25 text-warning-emphasis rounded-circle me-3" style="width: 36px; height: 36px;">
+            <i class="bi bi-shield-check fs-5" style="color: #d97706;"></i>
+          </div>
+          Verify Proof of Payment
+        </h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <form action="cashier_process.php" method="POST">
@@ -147,22 +152,30 @@ try {
 
           <div class="row g-4">
             <div class="col-md-5">
-              <div class="p-3 bg-white rounded-3 shadow-sm mb-3">
-                <p class="text-muted small fw-bold text-uppercase mb-1">Student</p>
-                <p class="fw-semibold text-dark mb-0 fs-5" id="verifyStudentName"></p>
-              </div>
-              <div class="p-3 bg-white rounded-3 shadow-sm mb-3">
-                <p class="text-muted small fw-bold text-uppercase mb-1">Amount Declared</p>
-                <p class="fw-bold text-success mb-0 fs-3">₱<span id="verifyAmount"></span></p>
-              </div>
-              <div class="p-3 bg-white rounded-3 shadow-sm mb-3">
-                <p class="text-muted small fw-bold text-uppercase mb-1">Method & Reference</p>
-                <p class="fw-semibold text-dark mb-0"><span id="verifyMethod"></span> - <span id="verifyRef"></span></p>
+              <div class="d-flex flex-column gap-3 h-100">
+                <div class="p-3 bg-white border rounded-3 shadow-sm">
+                  <p class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;"><i class="bi bi-person me-1"></i> Student Name</p>
+                  <p class="fw-bold text-dark mb-0 fs-6" id="verifyStudentName"></p>
+                </div>
+                <div class="p-3 bg-white border rounded-3 shadow-sm" style="border-color: #a3cfbb !important;">
+                  <p class="text-success small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;"><i class="bi bi-cash-stack me-1"></i> Amount Declared</p>
+                  <p class="fw-bolder text-success mb-0 fs-3" style="letter-spacing: -1px;">₱<span id="verifyAmount"></span></p>
+                </div>
+                <div class="p-3 bg-white border rounded-3 shadow-sm">
+                  <p class="text-muted small fw-bold text-uppercase mb-1" style="letter-spacing: 0.5px;"><i class="bi bi-credit-card me-1"></i> Method & Reference</p>
+                  <div class="d-flex align-items-center gap-2 mt-2">
+                    <span class="badge bg-light text-dark border px-2 py-1" id="verifyMethod"></span>
+                    <span class="fw-medium text-secondary font-monospace small" id="verifyRef"></span>
+                  </div>
+                </div>
               </div>
             </div>
-            <div class="col-md-7 text-center">
-              <div class="bg-white p-2 rounded-3 shadow-sm h-100 d-flex align-items-center justify-content-center">
-                <img id="verifyImage" src="" alt="Proof of Payment" class="img-fluid rounded" style="max-height: 400px; object-fit: contain;">
+            <div class="col-md-7">
+              <div class="bg-light p-3 rounded-4 h-100 d-flex flex-column align-items-center justify-content-center position-relative" style="min-height: 350px; border: 2px dashed #dee2e6;">
+                <div class="position-absolute top-0 start-0 w-100 p-2 text-center text-muted small fw-medium" style="z-index: 1;">
+                  <i class="bi bi-image me-1"></i> Transaction Screenshot
+                </div>
+                <img id="verifyImage" src="" alt="Proof of Payment" class="img-fluid rounded shadow-sm position-relative mt-4" style="max-height: 320px; object-fit: contain; z-index: 2;">
               </div>
             </div>
           </div>
@@ -206,17 +219,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const verifyButtons = document.querySelectorAll('.verify-btn');
-    verifyButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.getElementById('verifyPaymentId').value = this.getAttribute('data-id');
-            document.getElementById('verifyStudentName').textContent = this.getAttribute('data-name');
-            document.getElementById('verifyAmount').textContent = this.getAttribute('data-amount');
-            document.getElementById('verifyMethod').textContent = this.getAttribute('data-method');
-            document.getElementById('verifyRef').textContent = this.getAttribute('data-ref');
-            document.getElementById('verifyImage').src = this.getAttribute('data-img');
+    const verifyModal = document.getElementById('verifyModal');
+    if (verifyModal) {
+        verifyModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            
+            document.getElementById('verifyPaymentId').value = button.getAttribute('data-id') || '';
+            document.getElementById('verifyStudentName').textContent = button.getAttribute('data-name') || '';
+            document.getElementById('verifyAmount').textContent = button.getAttribute('data-amount') || '';
+            document.getElementById('verifyMethod').textContent = button.getAttribute('data-method') || '';
+            document.getElementById('verifyRef').textContent = button.getAttribute('data-ref') || '';
+            document.getElementById('verifyImage').src = button.getAttribute('data-img') || '';
         });
-    });
+    }
 });
 </script>
 

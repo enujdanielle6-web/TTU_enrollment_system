@@ -92,5 +92,5 @@ $current_page = isset($current_page) ? $current_page : basename($_SERVER['PHP_SE
 </aside>
 
 <!-- Main Content Area -->
-<div class="lms-main">
+<div class="lms-main" id="spa-main">
 

@@ -5,7 +5,7 @@ require_once __DIR__ . '/../components/header.php';
 require_once __DIR__ . '/../components/applicant_navbar.php';
 ?>
 
-<main class="py-5 bg-light min-vh-100">
+<main id="spa-main" class="py-5 bg-light min-vh-100">
   <div class="container px-lg-5">
     
     <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
