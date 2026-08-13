@@ -96,9 +96,12 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             <option value="all" <?= $roleFilter === 'all' ? 'selected' : '' ?>>All Roles</option>
             <option value="applicant" <?= $roleFilter === 'applicant' ? 'selected' : '' ?>>Applicants</option>
             <option value="superadmin" <?= $roleFilter === 'superadmin' ? 'selected' : '' ?>>Super Administrators</option>
+            <option value="admin" <?= $roleFilter === 'admin' ? 'selected' : '' ?>>Registrars</option>
+            <option value="scheduler" <?= $roleFilter === 'scheduler' ? 'selected' : '' ?>>Schedulers</option>
             <option value="admissions" <?= $roleFilter === 'admissions' ? 'selected' : '' ?>>Admissions Officers</option>
             <option value="scholarship" <?= $roleFilter === 'scholarship' ? 'selected' : '' ?>>Scholarship Officers</option>
             <option value="cashier" <?= $roleFilter === 'cashier' ? 'selected' : '' ?>>Cashiers</option>
+            <option value="clinic" <?= $roleFilter === 'clinic' ? 'selected' : '' ?>>Clinic Officers</option>
           </select>
           <div class="input-group input-group-sm shadow-sm" style="width: 250px;">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
@@ -156,17 +159,24 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                     <td>
                       <?php 
                         $badgeClass = match($user['role']) {
-                            'superadmin' => 'bg-danger',
-                            'admissions' => 'bg-primary',
-                            'scholarship' => 'bg-success',
-                            'cashier' => 'bg-info text-dark',
-                            default => 'bg-secondary'
+                            'superadmin' => 'bg-danger-subtle text-danger',
+                            'admin' => 'bg-primary-subtle text-primary',
+                            'scheduler' => 'bg-indigo-subtle text-indigo',
+                            'admissions' => 'bg-info-subtle text-info',
+                            'cashier' => 'bg-success-subtle text-success',
+                            'scholarship' => 'bg-warning-subtle text-warning',
+                            'clinic' => 'bg-danger-subtle text-danger',
+                            'applicant' => 'bg-secondary-subtle text-secondary',
+                            default => 'bg-light text-dark'
                         };
                         $roleLabel = match($user['role']) {
                             'superadmin' => 'Superadmin',
+                            'admin' => 'Registrar',
+                            'scheduler' => 'Scheduler',
                             'admissions' => 'Admissions',
                             'scholarship' => 'Scholarship',
                             'cashier' => 'Cashier',
+                            'clinic' => 'Clinic',
                             default => 'Applicant'
                         };
                       ?>
@@ -314,9 +324,12 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
               <label class="form-label small fw-semibold text-dark">Account Role</label>
               <select name="role" class="form-select form-select-sm bg-light" required>
                 <option value="applicant">Applicant</option>
+                <option value="admin">Registrar</option>
+                <option value="scheduler">Scheduler</option>
                 <option value="admissions">Admissions Officer</option>
                 <option value="scholarship">Scholarship Officer</option>
                 <option value="cashier">Cashier</option>
+                <option value="clinic">Clinic Officer</option>
                 <option value="superadmin">Super Administrator</option>
               </select>
             </div>
@@ -399,9 +412,12 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
               <label class="form-label small fw-semibold text-dark">Account Role</label>
               <select name="role" id="editUserRole" class="form-select form-select-sm bg-light" required>
                 <option value="applicant">Applicant</option>
+                <option value="admin">Registrar</option>
+                <option value="scheduler">Scheduler</option>
                 <option value="admissions">Admissions Officer</option>
                 <option value="scholarship">Scholarship Officer</option>
                 <option value="cashier">Cashier</option>
+                <option value="clinic">Clinic Officer</option>
                 <option value="superadmin">Super Administrator</option>
               </select>
             </div>

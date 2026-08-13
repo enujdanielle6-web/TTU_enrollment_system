@@ -512,9 +512,12 @@ const ROLE_PERMISSIONS = [
         'students.view', 'students.edit',
         'programs.manage', 'subjects.manage', 
         'curriculum.manage', 'shs_curriculum.manage', 'college_curriculum.manage', 
-        'sections.manage', 'shs_sections.manage', 'college_sections.manage',
-        'schedules.manage', 'enrollment.finalize',
+        'enrollment.finalize',
         'applications.view_details'
+    ],
+    'scheduler' => [
+        'sections.manage', 'shs_sections.manage', 'college_sections.manage',
+        'schedules.manage'
     ],
     'admissions' => [
         'applications.view_queue', 'applications.view_details',

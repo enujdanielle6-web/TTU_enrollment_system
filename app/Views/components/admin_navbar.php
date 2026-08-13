@@ -35,6 +35,7 @@ $baseAdminUrl = '/sia/admin/';
   $isRegistrarCore = in_array($current_page, ['registrar_dashboard.php', 'students.php', 'subjects.php']);
   $isShs = strpos($current_page, 'shs_') === 0;
   $isCollege = strpos($current_page, 'college_') === 0;
+  $isScheduler = strpos($uri, '/scheduler/') !== false;
   $isScholarship = strpos($uri, '/scholarship/') !== false;
   $isFinance = strpos($uri, '/finance/') !== false;
   $isSysAdmin = strpos($uri, '/system/') !== false;
@@ -74,7 +75,7 @@ $baseAdminUrl = '/sia/admin/';
   </div>
   <?php endif; ?>
 
-  <?php if (hasPermission(['students.view', 'programs.manage', 'sections.manage'])): ?>
+  <?php if (hasPermission(['students.view', 'programs.manage'])): ?>
   <button title="Registrar" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isRegistrarCore ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseRegistrar" aria-expanded="<?= $isRegistrarCore ? 'true' : 'false' ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-journal-bookmark fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">Registrar</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
@@ -105,9 +106,6 @@ $baseAdminUrl = '/sia/admin/';
       <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'shs_curriculum.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/shs_curriculum.php">
         <i class="bi bi-diagram-3 fs-5"></i> <span class="nav-text">Curriculum</span>
       </a>
-      <a title="Sections & Schedules" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'shs_sections.php' || $current_page === 'shs_schedule_builder.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/shs_sections.php">
-        <i class="bi bi-diagram-3-fill fs-5"></i> <span class="nav-text">Sections & Schedules</span>
-      </a>
       <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'shs_enrollment_queue.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/shs_enrollment_queue.php">
         <i class="bi bi-person-lines-fill fs-5"></i> <span class="nav-text">Enrollments</span>
       </a>
@@ -126,11 +124,28 @@ $baseAdminUrl = '/sia/admin/';
       <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'college_curriculum.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/college_curriculum.php">
         <i class="bi bi-diagram-3 fs-5"></i> <span class="nav-text">Curriculum</span>
       </a>
-      <a title="Sections & Schedules" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'college_sections.php' || $current_page === 'college_schedule_builder.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/college_sections.php">
-        <i class="bi bi-diagram-3-fill fs-5"></i> <span class="nav-text">Sections & Schedules</span>
-      </a>
       <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'college_enrollment_queue.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/college_enrollment_queue.php">
         <i class="bi bi-person-lines-fill fs-5"></i> <span class="nav-text">Enrollments</span>
+      </a>
+    </div>
+  </div>
+  <?php endif; ?>
+
+  <?php if (hasPermission(['sections.manage', 'schedules.manage'])): ?>
+  <button title="Scheduler" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.35s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isScheduler ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseScheduler" aria-expanded="<?= $isScheduler ? 'true' : 'false' ?>">
+    <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-calendar-week fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">Scheduler</span></div>
+    <i class="bi bi-chevron-down transition-transform text-muted"></i>
+  </button>
+  <div class="collapse <?= $isScheduler ? 'show' : '' ?>" id="collapseScheduler">
+    <div class="ms-3 mb-3 border-start border-2 ps-3">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'scheduler_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scheduler/scheduler_dashboard.php">
+        <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
+      </a>
+      <a title="SHS Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'shs_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'shs') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scheduler/shs_sections.php">
+        <i class="bi bi-diagram-3-fill fs-5"></i> <span class="nav-text">SHS Sections & Scheds</span>
+      </a>
+      <a title="College Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'college_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'college') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scheduler/college_sections.php">
+        <i class="bi bi-diagram-3-fill fs-5"></i> <span class="nav-text">College Sections & Scheds</span>
       </a>
     </div>
   </div>

@@ -702,7 +702,7 @@ CREATE TABLE `users` (
   `last_name` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` enum('applicant','admin','superadmin','admissions','scholarship','cashier','clinic','faculty') NOT NULL DEFAULT 'applicant',
+  `role` enum('applicant','admin','superadmin','admissions','scholarship','cashier','clinic','faculty','scheduler') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'applicant',
   `department` varchar(100) DEFAULT NULL,
   `permissions` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`permissions`)),
   `student_number` varchar(50) DEFAULT NULL,

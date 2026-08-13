@@ -15,9 +15,12 @@ class RoleMiddleware implements MiddlewareInterface
             'students.view', 'students.edit',
             'programs.manage', 'subjects.manage', 
             'curriculum.manage', 'shs_curriculum.manage', 'college_curriculum.manage', 
-            'sections.manage', 'shs_sections.manage', 'college_sections.manage',
-            'schedules.manage', 'enrollment.finalize',
+            'enrollment.finalize',
             'applications.view_details'
+        ],
+        'scheduler' => [
+            'sections.manage', 'shs_sections.manage', 'college_sections.manage',
+            'schedules.manage'
         ],
         'admissions' => [
             'applications.view_queue', 'applications.view_details',
@@ -66,7 +69,7 @@ class RoleMiddleware implements MiddlewareInterface
         // For Phase 2, we just need basic role checking if needed, but AuthController doesn't strictly need RoleMiddleware for login/logout!
         // We will just define a generic `AdminMiddleware` or similar if needed, or handle it via a setter if we update the router later.
 
-        $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic'];
+        $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
 
         if (!empty($this->allowedRoles)) {
             if (in_array('admin', $this->allowedRoles, true)) {
@@ -102,8 +105,13 @@ class RoleMiddleware implements MiddlewareInterface
                 $response->redirect('/sia/admin/scholarship/scholarship_dashboard.php');
             } elseif ($userRole === 'cashier') {
                 $response->redirect('/sia/admin/finance/cashier_dashboard.php');
+            } elseif ($userRole === 'scheduler') {
+                $response->redirect('/sia/admin/scheduler/scheduler_dashboard.php');
             } else {
-                $response->redirect('/sia/admin/dashboard.php');
+                // If the role is empty or unknown, destroy session and force login to prevent redirect loops
+                session_unset();
+                session_destroy();
+                $response->redirect('/sia/auth/login.php');
             }
         }
         exit;

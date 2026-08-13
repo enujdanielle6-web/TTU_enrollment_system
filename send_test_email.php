@@ -27,7 +27,7 @@ try {
 
     // Recipients
     $mail->setFrom(getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph', getenv('MAIL_FROM_NAME') ?: 'Triple T University');
-    $mail->addAddress('kzen0614@gmail.com', 'Test User');
+    $mail->addAddress('enujdanielle6@gmail.com', 'Test User');
 
     // Embed Logo
     $mail->addEmbeddedImage(__DIR__ . '/images/TTU_LOGO.png', 'ttu_logo');

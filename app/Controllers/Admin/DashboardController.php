@@ -27,6 +27,9 @@ class DashboardController extends BaseController
         } elseif (hasPermission('medical.review')) {
             $response->redirect('/sia/admin/clinic/clinic_dashboard.php');
             return;
+        } elseif (hasPermission('sections.manage') || hasPermission('shs_sections.manage')) {
+            $response->redirect('/sia/admin/scheduler/scheduler_dashboard.php');
+            return;
         } else {
             // Fallback if the user has no dashboard access but somehow logged into admin
             $response->redirect('/sia/auth/login.php');

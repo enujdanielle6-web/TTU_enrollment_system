@@ -13,7 +13,7 @@ class AuthController extends BaseController
     {
         if (!empty($_SESSION['logged_in'])) {
             $userRole = $_SESSION['user_role'] ?? '';
-            $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic'];
+            $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
             
             if (in_array($userRole, $adminRoles, true)) {
                 $response->redirect('/sia/admin/dashboard.php');
@@ -97,7 +97,7 @@ class AuthController extends BaseController
 
         User::updateLastLogin((int)$user['id']);
 
-        $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic'];
+        $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
         if (in_array($user['role'], $adminRoles, true)) {
             User::logActivity((int)$user['id'], "Logged In", "Administrator logged into the system.", "bi-box-arrow-in-right");
             $response->redirect('/sia/admin/dashboard.php');
@@ -183,7 +183,7 @@ class AuthController extends BaseController
     {
         if (session_status() === PHP_SESSION_ACTIVE) {
             if (!empty($_SESSION['user_id']) && !empty($_SESSION['user_role'])) {
-                $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic'];
+                $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
                 if (in_array($_SESSION['user_role'], $adminRoles, true)) {
                     User::logActivity((int)$_SESSION['user_id'], 'Logged Out', 'Administrator logged out of the system.', 'bi-box-arrow-right');
                 }

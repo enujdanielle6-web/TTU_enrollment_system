@@ -22,7 +22,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware']], f
     $router->post('/auth/lms_login_process.php', ['App\Controllers\Lms\LmsAuthController', 'loginProcess']);
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {
     // Applicant Portal Legacy Routes
     $router->get('/applicant/dashboard.php', ['App\Controllers\ApplicantController', 'dashboard']);
     $router->get('/applicant/application_form.php', ['App\Controllers\ApplicantController', 'applicationForm']);
@@ -78,8 +78,6 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->post('/admin/registrar/college_curriculum_process.php', ['App\Controllers\Admin\CollegeController', 'processCurriculum']);
     $router->get('/admin/registrar/college_curriculum_builder.php', ['App\Controllers\Admin\CollegeController', 'curriculumBuilder']);
     $router->post('/admin/registrar/college_curriculum_builder.php', ['App\Controllers\Admin\CollegeController', 'curriculumBuilder']); // Handles POST for builder
-    $router->get('/admin/registrar/college_sections.php', ['App\Controllers\Admin\CollegeController', 'sections']);
-    $router->post('/admin/registrar/college_sections.php', ['App\Controllers\Admin\CollegeController', 'sections']); // Handles POST for section creation
 
     $router->get('/admin/registrar/shs_strands.php', ['App\Controllers\Admin\ShsController', 'strands']);
     $router->post('/admin/registrar/shs_strand_process.php', ['App\Controllers\Admin\ShsController', 'processStrand']);
@@ -87,12 +85,6 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->post('/admin/registrar/shs_curriculum_process.php', ['App\Controllers\Admin\ShsController', 'processCurriculum']);
     $router->get('/admin/registrar/shs_curriculum_builder.php', ['App\Controllers\Admin\ShsController', 'curriculumBuilder']);
     $router->post('/admin/registrar/shs_curriculum_builder.php', ['App\Controllers\Admin\ShsController', 'curriculumBuilder']);
-    $router->get('/admin/registrar/shs_sections.php', ['App\Controllers\Admin\ShsController', 'sections']);
-    $router->post('/admin/registrar/shs_sections.php', ['App\Controllers\Admin\ShsController', 'sections']);
-
-    $router->get('/admin/registrar/schedule_builder.php', ['App\Controllers\Admin\ScheduleController', 'builder']);
-    $router->post('/admin/registrar/schedule_builder.php', ['App\Controllers\Admin\ScheduleController', 'builder']);
-    $router->post('/admin/registrar/schedule_builder_process.php', ['App\Controllers\Admin\ScheduleController', 'process']);
 
     // Admin Finance
     $router->get('/admin/finance/cashier_dashboard.php', ['App\Controllers\Admin\FinanceController', 'dashboard']);
@@ -139,7 +131,22 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/admin/dashboard.php', ['App\Controllers\Admin\DashboardController', 'index']);
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:scheduler']], function (Router $router) {
+    // Admin Scheduler
+    $router->get('/admin/scheduler/scheduler_dashboard.php', ['App\Controllers\Admin\SchedulerController', 'dashboard']);
+    
+    $router->get('/admin/scheduler/college_sections.php', ['App\Controllers\Admin\SchedulerController', 'collegeSections']);
+    $router->post('/admin/scheduler/college_sections.php', ['App\Controllers\Admin\SchedulerController', 'collegeSections']);
+    
+    $router->get('/admin/scheduler/shs_sections.php', ['App\Controllers\Admin\SchedulerController', 'shsSections']);
+    $router->post('/admin/scheduler/shs_sections.php', ['App\Controllers\Admin\SchedulerController', 'shsSections']);
+    
+    $router->get('/admin/scheduler/schedule_builder.php', ['App\Controllers\Admin\SchedulerController', 'builder']);
+    $router->post('/admin/scheduler/schedule_builder.php', ['App\Controllers\Admin\SchedulerController', 'builder']);
+    $router->post('/admin/scheduler/schedule_builder_process.php', ['App\Controllers\Admin\SchedulerController', 'process']);
+});
+
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {
     // Applicant API Routes
     $router->get('/applicant/api_get_curriculum.php', ['App\Controllers\Api\ApplicantApiController', 'getCurriculum']);
     $router->get('/applicant/api_get_full_curriculum.php', ['App\Controllers\Api\ApplicantApiController', 'getFullCurriculum']);
@@ -148,6 +155,9 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/applicant/api_get_section_subjects.php', ['App\Controllers\Api\ApplicantApiController', 'getSectionSubjects']);
     $router->get('/applicant/api_get_subject_schedules.php', ['App\Controllers\Api\ApplicantApiController', 'getSubjectSchedules']);
 
+});
+
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware']], function (Router $router) {
     // LMS Student Portal
     $router->get('/lms/student/dashboard.php', ['App\Controllers\Lms\StudentController', 'dashboard']);
     $router->get('/lms/student/course.php', ['App\Controllers\Lms\StudentController', 'course']);
@@ -155,6 +165,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
 
     // LMS Faculty Portal
     $router->get('/lms/faculty/dashboard.php', ['App\Controllers\Lms\FacultyController', 'dashboard']);
+
 });
 
 // Grouped routes with Middleware and Prefix

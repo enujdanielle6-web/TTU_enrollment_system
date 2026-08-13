@@ -61,6 +61,7 @@ require_once __DIR__ . '/../components/header.php';
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admissions@ttu.edu.ph', 'password123')">Admissions</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scholarship@ttu.edu.ph', 'password123')">Scholarship</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('clinic@example.com', 'password123')">Clinic</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scheduler@ttu.edu.ph', 'password123')">Scheduler</button>
                     <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('jane.doe@example.com', 'password123')">Applicant</button>
                 </div>
             </div>
