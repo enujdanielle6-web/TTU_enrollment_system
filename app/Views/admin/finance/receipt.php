@@ -135,17 +135,28 @@ body {
           </div>
           <div class="text-end">
             <h2 class="h5 fw-bold text-primary mb-2 text-uppercase tracking-wider">Official Receipt</h2>
-            <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1 fs-6 fw-bold">
-              <i class="bi bi-check-circle-fill me-1"></i> VERIFIED
-            </span>
+            <?php if ($payment['status'] === 'pending'): ?>
+              <span class="badge bg-warning text-dark border border-warning rounded-pill px-3 py-1 fs-6 fw-bold">
+                <i class="bi bi-hourglass-split me-1"></i> PENDING
+              </span>
+            <?php elseif ($payment['status'] === 'rejected'): ?>
+              <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-1 fs-6 fw-bold">
+                <i class="bi bi-x-circle-fill me-1"></i> REJECTED
+              </span>
+            <?php else: ?>
+              <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-1 fs-6 fw-bold">
+                <i class="bi bi-check-circle-fill me-1"></i> VERIFIED
+              </span>
+            <?php endif; ?>
           </div>
         </div>
 
-        <!-- Details Grid -->
         <div class="row g-4 mb-5">
           <div class="col-sm-6">
             <p class="receipt-label">Receipt Number</p>
-            <p class="receipt-value text-primary fs-5">RCPT-<?= str_pad((string)$payment['id'], 6, '0', STR_PAD_LEFT) ?></p>
+            <p class="receipt-value text-primary fs-5">
+              <?= !empty($payment['receipt_number']) ? htmlspecialchars($payment['receipt_number'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic fs-6">Pending Generation</span>' ?>
+            </p>
           </div>
           <div class="col-sm-6 text-sm-end">
             <p class="receipt-label">Date Processed</p>

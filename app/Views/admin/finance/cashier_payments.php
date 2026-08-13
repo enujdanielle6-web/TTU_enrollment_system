@@ -76,6 +76,8 @@ try {
                     <td class="ps-4 fw-bold text-primary">
                       <?php if ($payment['status'] === 'pending'): ?>
                         <span class="badge bg-warning text-dark"><i class="bi bi-hourglass-split"></i> Pending Verification</span>
+                      <?php elseif ($payment['status'] === 'rejected'): ?>
+                        <span class="badge bg-danger"><i class="bi bi-x-circle"></i> Rejected</span>
                       <?php else: ?>
                         <?= htmlspecialchars($payment['receipt_number'], ENT_QUOTES, 'UTF-8') ?>
                       <?php endif; ?>
@@ -94,7 +96,13 @@ try {
                       ₱<?= number_format((float)$payment['amount'], 2) ?>
                     </td>
                     <td class="small text-muted">
-                      <?= $payment['status'] === 'pending' ? '<span class="text-warning fw-medium">Needs Review</span>' : htmlspecialchars($payment['cashier_last'] ?? 'System', ENT_QUOTES, 'UTF-8') ?>
+                      <?php if ($payment['status'] === 'pending'): ?>
+                        <span class="text-warning fw-medium">Needs Review</span>
+                      <?php elseif ($payment['status'] === 'rejected'): ?>
+                        <span class="text-danger fw-medium">Rejected</span>
+                      <?php else: ?>
+                        <?= htmlspecialchars($payment['cashier_last'] ?? 'System', ENT_QUOTES, 'UTF-8') ?>
+                      <?php endif; ?>
                     </td>
                     <td class="text-end pe-4">
                       <?php if ($payment['status'] === 'pending'): ?>
@@ -107,6 +115,11 @@ try {
                                 data-img="/sia/app/uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                 data-bs-toggle="modal" data-bs-target="#verifyModal">
                           <i class="bi bi-shield-check"></i> Verify
+                        </button>
+                      <?php elseif ($payment['status'] === 'rejected'): ?>
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"
+                                onclick="showRejectReason('<?= htmlspecialchars(addslashes($payment['remarks'] ?? 'No reason provided.')) ?>')">
+                          <i class="bi bi-info-circle me-1"></i> Reason
                         </button>
                       <?php else: ?>
                         <a href="cashier_receipt.php?id=<?= $payment['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
@@ -179,12 +192,75 @@ try {
               </div>
             </div>
           </div>
+          
+          <div class="mt-4 pt-3 border-top border-light">
+            <label for="verifyRemarks" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;"><i class="bi bi-chat-left-text me-1"></i>Remarks / Reason for Rejection</label>
+            <textarea name="remarks" id="verifyRemarks" class="form-control border-secondary border-opacity-25 rounded-3 shadow-sm" rows="2" placeholder="e.g., Screenshot is blurry, Amount is incorrect, etc."></textarea>
+            <div class="form-text small text-danger mt-1"><i class="bi bi-info-circle me-1"></i>Please provide a reason if you are rejecting the payment.</div>
+          </div>
         </div>
-        <div class="modal-footer border-top-0 pt-0 bg-light">
+        <div class="modal-footer border-top-0 pt-0 bg-light d-flex justify-content-between">
           <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm fw-semibold">Approve Payment</button>
+          <div>
+            <button type="button" class="btn btn-outline-danger rounded-pill px-4 shadow-sm fw-semibold me-2" onclick="confirmReject(this)"><i class="bi bi-x-circle me-1"></i> Reject Payment</button>
+            <button type="submit" name="decision" value="approve" class="btn btn-success rounded-pill px-4 shadow-sm fw-semibold"><i class="bi bi-check-circle me-1"></i> Approve Payment</button>
+          </div>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Reason Modal -->
+<div class="modal fade" id="customReasonModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-danger bg-opacity-10 border-bottom-0 pb-0">
+        <h6 class="modal-title text-danger fw-bold"><i class="bi bi-info-circle me-2"></i>Rejection Reason</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center pt-3 pb-4">
+        <p class="text-dark fw-medium mb-0" id="customReasonText"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Warning Modal -->
+<div class="modal fade" id="customWarningModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-body text-center p-4">
+        <div class="text-warning mb-3">
+          <i class="bi bi-exclamation-triangle-fill display-4"></i>
+        </div>
+        <h6 class="fw-bold mb-2">Remarks Required</h6>
+        <p class="text-muted small mb-4">Please provide a reason for rejection in the Remarks field before proceeding.</p>
+        <button type="button" class="btn btn-warning rounded-pill px-4 fw-medium text-dark" data-bs-dismiss="modal" onclick="setTimeout(()=>document.getElementById('verifyRemarks').focus(), 300)">OK, Got It</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Confirm Modal -->
+<div class="modal fade" id="customConfirmModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+      <div class="modal-body p-4 text-center">
+        <div class="text-danger mb-3">
+          <i class="bi bi-question-circle display-4"></i>
+        </div>
+        <h5 class="fw-bold mb-3">Reject Payment?</h5>
+        <p class="text-muted mb-3">Are you sure you want to <b>REJECT</b> this payment?</p>
+        <div class="bg-light p-3 rounded mb-4 text-start border">
+            <span class="text-danger fw-bold small text-uppercase" style="letter-spacing: 0.5px;">Reason:</span><br>
+            <span class="fw-medium text-dark" id="customConfirmReasonText"></span>
+        </div>
+        <div class="d-flex justify-content-center gap-2">
+            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" class="btn btn-danger rounded-pill px-4" id="customConfirmBtn">Yes, Reject It</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -233,6 +309,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function showRejectReason(reason) {
+    document.getElementById('customReasonText').textContent = reason || 'No reason provided.';
+    const modal = new bootstrap.Modal(document.getElementById('customReasonModal'));
+    modal.show();
+}
+
+function confirmReject(btn) {
+    const remarks = document.getElementById('verifyRemarks').value.trim();
+    if (remarks === '') {
+        const warnModal = new bootstrap.Modal(document.getElementById('customWarningModal'));
+        warnModal.show();
+        return;
+    }
+    
+    document.getElementById('customConfirmReasonText').textContent = remarks;
+    const confirmModal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
+    
+    const confirmBtn = document.getElementById('customConfirmBtn');
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    
+    newConfirmBtn.addEventListener('click', function() {
+        const form = btn.closest('form');
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'decision';
+        input.value = 'reject';
+        form.appendChild(input);
+        form.submit();
+    });
+    
+    confirmModal.show();
+}
 </script>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>

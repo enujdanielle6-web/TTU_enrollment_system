@@ -7,6 +7,7 @@ use App\Core\Response;
 use App\Core\Database;
 use PDO;
 use PDOException;
+use Exception;
 
 class FinanceController extends BaseController
 {
@@ -264,6 +265,8 @@ try {
         }
     } elseif ($action === 'verify_online_payment') {
         $paymentId = (int)($_POST['payment_id'] ?? 0);
+        $decision = $_POST['decision'] ?? 'approve';
+        $remarks = trim($_POST['remarks'] ?? '');
         $cashierId = (int)$_SESSION['user_id'];
 
         if ($paymentId <= 0) {
@@ -298,6 +301,42 @@ try {
             $netAmount = (float)$assessment['net_amount'];
             $currentPaid = (float)$assessment['total_paid'];
             $balance = $netAmount - $currentPaid;
+
+            if ($decision === 'reject') {
+                if (empty($remarks)) {
+                    throw new Exception('A reason for rejection is required. Please provide a remark.');
+                }
+                
+                // Update Payment Record
+                $updPayStmt = $pdo->prepare('UPDATE payment_records SET status = "rejected", remarks = :remarks, cashier_id = :cashier WHERE id = :id');
+                $updPayStmt->execute([
+                    'remarks' => $remarks,
+                    'cashier' => $cashierId,
+                    'id' => $paymentId
+                ]);
+
+                // Log payment activity for student
+                $studentLogDesc = "Your online payment of ₱" . number_format($amount, 2) . " was rejected by the cashier. Reason: " . htmlspecialchars($remarks, ENT_QUOTES, 'UTF-8') . " Please submit a valid proof of payment.";
+                $logPayStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, ip_address, affected_record, icon, title, description) VALUES (:user_id, :ip_address, :affected_record, "bi-x-circle text-danger", "Payment Rejected", :desc)');
+                $logPayStmt->execute(['user_id' => $userId, 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null, 'affected_record' => "Assessment #$assessmentId", 'desc' => $studentLogDesc]);
+
+                // Admin log
+                logActivity(
+                    $cashierId, 
+                    'bi-shield-x', 
+                    'Online Payment Rejected', 
+                    "Rejected online payment of ₱" . number_format($amount, 2) . " for Assessment #$assessmentId.",
+                    "Payment Record #$paymentId",
+                    ['status' => 'pending'],
+                    ['status' => 'rejected']
+                );
+
+                $pdo->commit();
+                
+                $_SESSION['success_msg'] = "Online payment successfully rejected.";
+                $response->redirect("/sia/admin/finance/cashier_payments.php");
+                return;
+            }
 
             // Generate Receipt Number (Format: REC-YYYYMMDD-XXXX)
             $datePrefix = date('Ymd');
@@ -357,7 +396,9 @@ try {
             return;
         } catch (Exception $e) {
             $pdo->rollBack();
-            throw $e;
+            $_SESSION['error_msg'] = $e->getMessage();
+            $response->redirect("/sia/admin/finance/cashier_payments.php");
+            return;
         }
     } else {
         throw new Exception('Invalid action requested.');

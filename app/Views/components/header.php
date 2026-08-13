@@ -1,4 +1,10 @@
 <?php
+// Prevent browser caching of pages to ensure latest data is always shown
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+header('Expires: Wed, 11 Jan 1984 05:00:00 GMT');
+
 $pageTitle = $pageTitle ?? 'Triple T University';
 ?>
 <!doctype html>

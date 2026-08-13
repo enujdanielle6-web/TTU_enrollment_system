@@ -191,7 +191,13 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     <?php foreach ($payments as $payment): ?>
                       <tr>
                         <td class="ps-4 fw-bold text-primary">
-                          <?= htmlspecialchars($payment['receipt_number'], ENT_QUOTES, 'UTF-8') ?>
+                          <?php if ($payment['status'] === 'pending'): ?>
+                            <span class="badge bg-warning text-dark border rounded-pill"><i class="bi bi-hourglass-split"></i> Pending</span>
+                          <?php elseif ($payment['status'] === 'rejected'): ?>
+                            <span class="badge bg-danger border rounded-pill"><i class="bi bi-x-circle"></i> Rejected</span>
+                          <?php else: ?>
+                            <?= htmlspecialchars($payment['receipt_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>
+                          <?php endif; ?>
                         </td>
                         <td>
                           <?= date('M d, Y g:i A', strtotime($payment['created_at'])) ?>
@@ -203,12 +209,29 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                           ₱<?= number_format((float)$payment['amount'], 2) ?>
                         </td>
                         <td class="small text-muted">
-                          <?= htmlspecialchars($payment['cashier_last'] ?? 'System', ENT_QUOTES, 'UTF-8') ?>
+                          <?php if ($payment['status'] === 'pending'): ?>
+                            <span class="text-warning fw-bold">Needs Review</span>
+                          <?php elseif ($payment['status'] === 'rejected'): ?>
+                            <span class="text-danger fw-bold">Rejected</span>
+                          <?php else: ?>
+                            <?= htmlspecialchars($payment['cashier_last'] ?? 'System', ENT_QUOTES, 'UTF-8') ?>
+                          <?php endif; ?>
                         </td>
                         <td class="text-end pe-4">
-                          <a href="cashier_receipt.php?id=<?= $payment['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
-                            <i class="bi bi-printer"></i> View
-                          </a>
+                          <?php if ($payment['status'] === 'pending'): ?>
+                            <a href="cashier_payments.php" class="btn btn-sm btn-warning rounded-pill px-3 fw-medium">
+                              Verify
+                            </a>
+                          <?php elseif ($payment['status'] === 'rejected'): ?>
+                            <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium"
+                                    onclick="showRejectReason('<?= htmlspecialchars(addslashes($payment['remarks'] ?? 'No reason provided.')) ?>')">
+                              <i class="bi bi-info-circle me-1"></i> Reason
+                            </button>
+                          <?php else: ?>
+                            <a href="cashier_receipt.php?id=<?= $payment['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
+                              <i class="bi bi-printer"></i> View
+                            </a>
+                          <?php endif; ?>
                         </td>
                       </tr>
                     <?php endforeach; ?>
@@ -274,6 +297,29 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
   </div>
 </div>
 <?php endif; ?>
+
+<!-- Custom Reason Modal -->
+<div class="modal fade" id="customReasonModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-danger bg-opacity-10 border-bottom-0 pb-0">
+        <h6 class="modal-title text-danger fw-bold"><i class="bi bi-info-circle me-2"></i>Rejection Reason</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center pt-3 pb-4">
+        <p class="text-dark fw-medium mb-0" id="customReasonText"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showRejectReason(reason) {
+    document.getElementById('customReasonText').textContent = reason || 'No reason provided.';
+    const modal = new bootstrap.Modal(document.getElementById('customReasonModal'));
+    modal.show();
+}
+</script>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>
 

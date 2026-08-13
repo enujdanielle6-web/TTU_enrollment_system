@@ -35,7 +35,7 @@ try {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
     // 4. Import schema.sql
-    $schemaPath = __DIR__ . '/database/schema.sql';
+    $schemaPath = dirname(__DIR__) . '/schema.sql';
     if (file_exists($schemaPath)) {
         echo "<p>4. Importing initial schema (database/schema.sql)...</p>\n";
         $schemaSql = file_get_contents($schemaPath);
@@ -44,11 +44,11 @@ try {
         $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
         echo "   -> Schema imported successfully.<br>\n";
     } else {
-        echo "<p>4. [WARNING] database/schema.sql not found! Proceeding...</p>\n";
+        echo "<p>4. [WARNING] database/schema.sql not found at $schemaPath ! Proceeding...</p>\n";
     }
 
     // 5. Import seed.sql (if exists)
-    $seedPath = __DIR__ . '/database/seed.sql';
+    $seedPath = dirname(__DIR__) . '/seed.sql';
     if (file_exists($seedPath)) {
         echo "<p>5. Importing seed data (database/seed.sql)...</p>\n";
         $seedSql = file_get_contents($seedPath);
