@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../components/header.php';
           <p class="text-muted mb-0">Add and manage academic subjects</p>
         </div>
         <div>
-          <button class="btn btn-primary fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+          <button type="button" class="btn btn-primary fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#addSubjectModal" onclick="try{new bootstrap.Modal(document.getElementById('addSubjectModal')).show();}catch(e){}">
             <i class="bi bi-plus-lg me-1"></i> Add Subject
           </button>
         </div>

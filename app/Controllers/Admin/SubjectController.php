@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 
 $action = $_POST['action'] ?? '';
+error_log("SubjectController::process hit! Action: $action, POST: " . print_r($_POST, true));
 
 if ($action === 'add') {
     $code = trim($_POST['subject_code'] ?? '');
