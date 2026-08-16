@@ -84,4 +84,16 @@ class StudentController extends BaseController
 
         return $this->render('lms/student/my_courses', get_defined_vars());
     }
+
+    public function profile(Request $request, Response $response)
+    {
+        $pageTitle = 'My Profile - TTU LMS';
+        return $this->render('lms/student/profile', get_defined_vars());
+    }
+
+    public function messages(Request $request, Response $response)
+    {
+        $pageTitle = 'Messages & Forums - TTU LMS';
+        return $this->render('lms/student/messages', get_defined_vars());
+    }
 }

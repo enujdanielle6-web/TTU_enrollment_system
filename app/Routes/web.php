@@ -183,12 +183,18 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/lms/student/course/{course_id}/attendance', ['App\Controllers\Lms\StudentAttendanceController', 'index']);
     $router->get('/lms/student/course/{course_id}/announcements', ['App\Controllers\Lms\StudentAnnouncementController', 'index']);
     $router->get('/lms/student/calendar', ['App\Controllers\Lms\StudentCalendarController', 'index']);
+    
+    $router->get('/lms/student/profile.php', ['App\Controllers\Lms\StudentController', 'profile']);
+    $router->get('/lms/student/messages.php', ['App\Controllers\Lms\StudentController', 'messages']);
 
     // LMS Faculty Portal
     $router->get('/lms/faculty/dashboard.php', ['App\Controllers\Lms\FacultyController', 'dashboard']);
     $router->get('/lms/faculty/course.php', ['App\Controllers\Lms\FacultyController', 'course']);
     $router->post('/lms/faculty/module_create.php', ['App\Controllers\Lms\FacultyController', 'createModule']);
     $router->post('/lms/faculty/material_upload.php', ['App\Controllers\Lms\FacultyController', 'uploadMaterial']);
+    
+    $router->get('/lms/faculty/profile.php', ['App\Controllers\Lms\FacultyController', 'profile']);
+    $router->get('/lms/faculty/messages.php', ['App\Controllers\Lms\FacultyController', 'messages']);
     $router->get('/lms/faculty/calendar', ['App\Controllers\Lms\FacultyCalendarController', 'index']);
     
     $router->get('/lms/faculty/course/{course_id}/assignments', ['App\Controllers\Lms\FacultyAssignmentController', 'index']);

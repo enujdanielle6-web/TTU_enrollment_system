@@ -73,11 +73,11 @@ $current_page = isset($current_page) ? $current_page : basename($_SERVER['PHP_SE
         <i class="bi bi-calendar-event-fill"></i>
         <span class="nav-text">Calendar</span>
     </a>
-    <a href="#" class="lms-nav-link">
+    <a href="/sia/lms/student/messages.php" class="lms-nav-link <?= strpos($_SERVER['REQUEST_URI'], 'messages.php') !== false ? 'active' : '' ?>">
         <i class="bi bi-chat-dots-fill"></i>
         <span class="nav-text">Messages / Forums</span>
     </a>
-    <a href="#" class="lms-nav-link">
+    <a href="/sia/lms/student/profile.php" class="lms-nav-link <?= strpos($_SERVER['REQUEST_URI'], 'profile.php') !== false ? 'active' : '' ?>">
         <i class="bi bi-person-fill"></i>
         <span class="nav-text">Profile</span>
     </a>

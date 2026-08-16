@@ -34,48 +34,56 @@
     <h4 class="fw-bold mb-3 h5 text-dark mt-2">Quick Actions</h4>
     <div class="row g-3 mb-4">
         <div class="col-md-3">
-            <div class="lms-card p-3 h-100 transition-all shadow-sm-hover d-flex align-items-center gap-3 border-0">
-                <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px;">
-                    <i class="bi bi-play-circle fs-5"></i>
+            <a href="/sia/lms/student/my_courses.php" class="text-decoration-none">
+                <div class="lms-card p-3 h-100 transition-all shadow-sm-hover d-flex align-items-center gap-3 border-0">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px;">
+                        <i class="bi bi-journal-bookmark-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark fs-6 lh-sm">My Courses</h6>
+                        <p class="text-muted small mb-0 lh-sm" style="font-size: 0.75rem;">View enrolled subjects</p>
+                    </div>
                 </div>
-                <div>
-                    <h6 class="fw-bold mb-1 text-dark fs-6 lh-sm">Resume Course</h6>
-                    <p class="text-muted small mb-0 lh-sm" style="font-size: 0.75rem;">Pick up where you left off</p>
-                </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-3">
-            <div class="lms-card p-3 h-100 transition-all shadow-sm-hover d-flex align-items-center gap-3 border-0">
-                <div class="bg-warning bg-opacity-10 text-warning rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px;">
-                    <i class="bi bi-file-earmark-text fs-5"></i>
+            <a href="/sia/lms/student/calendar" class="text-decoration-none">
+                <div class="lms-card p-3 h-100 transition-all shadow-sm-hover d-flex align-items-center gap-3 border-0">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px;">
+                        <i class="bi bi-calendar-event-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark fs-6 lh-sm">Calendar</h6>
+                        <p class="text-muted small mb-0 lh-sm" style="font-size: 0.75rem;">Upcoming deadlines</p>
+                    </div>
                 </div>
-                <div>
-                    <h6 class="fw-bold mb-1 text-dark fs-6 lh-sm">View Assignments</h6>
-                    <p class="text-muted small mb-0 lh-sm" style="font-size: 0.75rem;">Up to date</p>
-                </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-3">
-            <div class="lms-card p-3 h-100 transition-all shadow-sm-hover d-flex align-items-center gap-3 border-0">
-                <div class="bg-info bg-opacity-10 text-info rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px;">
-                    <i class="bi bi-people fs-5"></i>
+            <a href="/sia/lms/student/messages.php" class="text-decoration-none">
+                <div class="lms-card p-3 h-100 transition-all shadow-sm-hover d-flex align-items-center gap-3 border-0">
+                    <div class="bg-info bg-opacity-10 text-info rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px;">
+                        <i class="bi bi-chat-dots-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark fs-6 lh-sm">Messages</h6>
+                        <p class="text-muted small mb-0 lh-sm" style="font-size: 0.75rem;">Connect with peers</p>
+                    </div>
                 </div>
-                <div>
-                    <h6 class="fw-bold mb-1 text-dark fs-6 lh-sm">Join Community</h6>
-                    <p class="text-muted small mb-0 lh-sm" style="font-size: 0.75rem;">Connect & learn together</p>
-                </div>
-            </div>
+            </a>
         </div>
         <div class="col-md-3">
-            <div class="lms-card p-3 h-100 transition-all shadow-sm-hover d-flex align-items-center gap-3 border-0">
-                <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px;">
-                    <i class="bi bi-download fs-5"></i>
+            <a href="/sia/lms/student/profile.php" class="text-decoration-none">
+                <div class="lms-card p-3 h-100 transition-all shadow-sm-hover d-flex align-items-center gap-3 border-0">
+                    <div class="bg-success bg-opacity-10 text-success rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width:48px; height:48px;">
+                        <i class="bi bi-person-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold mb-1 text-dark fs-6 lh-sm">Profile</h6>
+                        <p class="text-muted small mb-0 lh-sm" style="font-size: 0.75rem;">Manage your account</p>
+                    </div>
                 </div>
-                <div>
-                    <h6 class="fw-bold mb-1 text-dark fs-6 lh-sm">Download Cert</h6>
-                    <p class="text-muted small mb-0 lh-sm" style="font-size: 0.75rem;">Get achievement</p>
-                </div>
-            </div>
+            </a>
         </div>
     </div>
 

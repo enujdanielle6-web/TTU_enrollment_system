@@ -99,4 +99,16 @@ class FacultyController extends BaseController
         
         $this->redirect('/sia/lms/faculty/course.php?id=' . $courseId);
     }
+
+    public function profile(Request $request, Response $response)
+    {
+        $pageTitle = 'My Profile - TTU LMS';
+        return $this->render('lms/faculty/profile', get_defined_vars());
+    }
+
+    public function messages(Request $request, Response $response)
+    {
+        $pageTitle = 'Messages & Forums - TTU LMS';
+        return $this->render('lms/faculty/messages', get_defined_vars());
+    }
 }
