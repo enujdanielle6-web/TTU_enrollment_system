@@ -13,7 +13,7 @@ $current_page = isset($current_page) ? $current_page : basename($_SERVER['PHP_SE
     <link rel="stylesheet" href="/sia/public/vendor/fonts/fonts.css">
     <link rel="stylesheet" href="/sia/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
     <!-- Custom LMS CSS -->
-    <link rel="stylesheet" href="/sia/public/css/lms.css">
+    <link rel="stylesheet" href="/sia/public/css/lms.css?v=<?= filemtime(__DIR__ . '/../../../../public/css/lms.css') ?>">
 </head>
 <body class="lms-layout">
 
