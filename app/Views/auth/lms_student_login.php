@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../components/header.php'; ?>
 
-<main class="auth-page py-5 bg-light" style="min-height: 100vh;">
+<main class="auth-page">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12">
@@ -28,7 +28,7 @@
             </div>
 
             <div class="mb-3 d-flex justify-content-end">
-              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="document.getElementById('student_id').value='2026-9999'; document.getElementById('password').value='password123';">
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="document.getElementById('student_id').value='2026-000002'; document.getElementById('password').value='password123';">
                 <i class="bi bi-magic me-1"></i> Auto-fill Test Student
               </button>
             </div>

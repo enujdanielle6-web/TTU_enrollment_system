@@ -8,8 +8,11 @@ require_once __DIR__ . '/../../components/header.php';
       <div class="d-flex justify-content-between align-items-center">
         <div>
           <h1 class="h3 fw-bold text-dark mb-1">SHS Curriculum Management</h1>
-          <p class="text-muted mb-0">Manage subjects assigned to SHS Strands</p>
+          <p class="text-muted mb-0">Manage and version curricula for SHS Strands</p>
         </div>
+        <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createCurriculumModal">
+          <i class="bi bi-plus-lg me-2"></i>Create Curriculum
+        </button>
       </div>
     </div>
 
@@ -25,12 +28,12 @@ require_once __DIR__ . '/../../components/header.php';
       <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.3s;">
         <div>
           <i class="bi bi-diagram-3"></i>
-          <h2 class="mb-0 d-inline-block">SHS Strands</h2>
+          <h2 class="mb-0 d-inline-block">Curricula</h2>
         </div>
         <div>
           <div class="input-group shadow-sm" style="width: 250px;">
               <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-              <input type="text" id="tableSearch" class="form-control border-start-0" placeholder="Search strands...">
+              <input type="text" id="tableSearch" class="form-control border-start-0" placeholder="Search curricula...">
           </div>
         </div>
       </div>
@@ -39,30 +42,42 @@ require_once __DIR__ . '/../../components/header.php';
           <table class="table table-hover align-middle mb-0 custom-table">
             <thead class="table-light text-muted small text-uppercase">
               <tr>
-                <th class="ps-4">Strand Code</th>
-                <th>Strand Name</th>
+                <th class="ps-4">Strand</th>
+                <th>Curriculum Name</th>
+                <th>Version</th>
+                <th>Effective Year</th>
+                <th>Status</th>
                 <th>Total Subjects</th>
-                <th>Total Units</th>
                 <th class="text-end pe-4">Actions</th>
               </tr>
             </thead>
             <tbody>
-              <?php if (empty($strandsData)): ?>
+              <?php if (empty($curriculaData)): ?>
                 <tr>
-                  <td colspan="5" class="text-center py-5 text-muted">
+                  <td colspan="7" class="text-center py-5 text-muted">
                     <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
-                    No active SHS Strands found.
+                    No curricula found.
                   </td>
                 </tr>
               <?php else: ?>
-                <?php foreach ($strandsData as $strand): ?>
+                <?php foreach ($curriculaData as $cur): ?>
                   <tr>
-                    <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($strand['code'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td class="fw-medium text-dark"><?= htmlspecialchars($strand['name'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><span class="badge bg-secondary rounded-pill px-3"><?= $strand['total_subjects'] ?></span></td>
-                    <td class="fw-medium text-success"><?= $strand['total_units'] ?></td>
+                    <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($cur['strand_code'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td class="fw-medium text-dark"><?= htmlspecialchars($cur['curriculum_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><span class="badge bg-secondary rounded-pill px-3">v<?= htmlspecialchars($cur['version'], ENT_QUOTES, 'UTF-8') ?></span></td>
+                    <td><?= htmlspecialchars($cur['effective_academic_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></td>
+                    <td>
+                      <?php if ($cur['status'] === 'active'): ?>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Active</span>
+                      <?php elseif ($cur['status'] === 'inactive'): ?>
+                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Inactive</span>
+                      <?php else: ?>
+                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3">Draft</span>
+                      <?php endif; ?>
+                    </td>
+                    <td><?= $cur['total_subjects'] ?> (<?= $cur['total_units'] ?> Units)</td>
                     <td class="text-end pe-4">
-                      <a href="shs_curriculum_builder.php?strand_id=<?= $strand['id'] ?>" class="btn btn-sm btn-primary rounded-pill px-3">
+                      <a href="shs_curriculum_builder.php?curriculum_id=<?= $cur['curriculum_id'] ?>" class="btn btn-sm btn-primary rounded-pill px-3">
                         <i class="bi bi-tools me-1"></i> Builder
                       </a>
                     </td>
@@ -70,9 +85,9 @@ require_once __DIR__ . '/../../components/header.php';
                 <?php endforeach; ?>
               <?php endif; ?>
               <tr id="noResultsRow" style="display: none;">
-                <td colspan="5" class="text-center py-5 text-muted">
+                <td colspan="7" class="text-center py-5 text-muted">
                   <i class="bi bi-search fs-1 d-block mb-3 text-secondary"></i>
-                  No strands match your search.
+                  No curricula match your search.
                 </td>
               </tr>
             </tbody>
@@ -82,6 +97,54 @@ require_once __DIR__ . '/../../components/header.php';
     </div>
   </div>
 </main>
+
+<!-- Create Curriculum Modal -->
+<div class="modal fade" id="createCurriculumModal" tabindex="-1" aria-labelledby="createCurriculumModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-primary text-white border-0 py-3">
+        <h5 class="modal-title fw-bold" id="createCurriculumModalLabel"><i class="bi bi-plus-circle me-2"></i>Create Curriculum</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/sia/admin/registrar/shs_curriculum.php" method="POST">
+        <div class="modal-body p-4 bg-light">
+          <input type="hidden" name="action" value="create_curriculum">
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">SHS Strand</label>
+            <select class="form-select form-control-lg shadow-sm" name="strand_id" required>
+              <option value="">-- Select Strand --</option>
+              <?php foreach ($activeStrands as $s): ?>
+                <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['code'] . ' - ' . $s['name']) ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Curriculum Name</label>
+            <input type="text" class="form-control form-control-lg shadow-sm" name="curriculum_name" placeholder="e.g. 2025 STEM Standard" required>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold text-dark">Version</label>
+              <input type="text" class="form-control shadow-sm" name="version" value="1.0" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-semibold text-dark">Effective Year</label>
+              <input type="text" class="form-control shadow-sm" name="effective_academic_year" placeholder="e.g. 2025-2026">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold text-dark">Description</label>
+            <textarea class="form-control shadow-sm" name="description" rows="2" placeholder="Optional internal notes"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer border-0 bg-white p-3">
+          <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4"><i class="bi bi-save me-2"></i>Save Curriculum</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -99,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 hasDataRows = true;
                 
                 const text = row.textContent.toLowerCase();
-                if (text.includes(filter)) {
+                if(text.includes(filter)) {
                     row.style.display = '';
                     visibleCount++;
                 } else {
@@ -107,14 +170,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            const noResultsRow = document.getElementById('noResultsRow');
-            if (noResultsRow) {
-                noResultsRow.style.display = (visibleCount === 0 && hasDataRows) ? '' : 'none';
+            const noResults = document.getElementById('noResultsRow');
+            if (hasDataRows) {
+                if(visibleCount === 0) {
+                    noResults.style.display = '';
+                } else {
+                    noResults.style.display = 'none';
+                }
             }
         });
     }
 });
 </script>
-
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>
-

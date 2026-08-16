@@ -36,13 +36,13 @@
             <i class="bi bi-journal-x text-muted mb-3" style="font-size: 3rem;"></i>
             <h3 class="h5 fw-bold text-dark">No Courses Found</h3>
             <p class="text-muted">You are not currently enrolled in any courses for this semester.</p>
-            <a href="../../admissions/dashboard.php" class="btn btn-primary mt-2">Go to Admissions</a>
+            <a href="/sia/applicant/dashboard.php" class="btn btn-primary mt-2">Go to Admissions</a>
         </div>
     <?php else: ?>
         <div class="row g-4">
             <?php foreach ($enrolled_courses as $course): ?>
                 <div class="col-md-4 col-lg-3">
-                    <a href="course.php?id=<?= $course['subject_id'] ?>" class="text-decoration-none text-dark d-block h-100">
+                    <a href="/sia/lms/student/course.php?id=<?= $course['lms_course_id'] ?>" class="text-decoration-none text-dark d-block h-100">
                         <div class="lms-card h-100 transition-all shadow-sm-hover overflow-hidden border bg-white rounded">
                             <div class="card-img-top bg-light d-flex align-items-center justify-content-center border-bottom" style="height: 160px;">
                                 <i class="bi bi-image text-muted opacity-25" style="font-size: 3rem;"></i>

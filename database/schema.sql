@@ -436,8 +436,11 @@ CREATE TABLE `scholarship_applications` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` int(10) unsigned NOT NULL,
   `scholarship_id` int(10) unsigned NOT NULL,
-  `status` enum('pending','under_review','approved','rejected') NOT NULL DEFAULT 'pending',
-  `admin_feedback` text DEFAULT NULL,
+  `academic_year_id` int(10) unsigned DEFAULT NULL,
+  `semester` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `status` enum('pending','under_review','approved','rejected') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `admin_feedback` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `submitted_documents` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -445,7 +448,7 @@ CREATE TABLE `scholarship_applications` (
   KEY `scholarship_id` (`scholarship_id`),
   CONSTRAINT `scholarship_applications_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `scholarship_applications_ibfk_2` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarships` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -457,40 +460,105 @@ DROP TABLE IF EXISTS `scholarships`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `scholarships` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL,
-  `discount_type` enum('percentage','fixed') NOT NULL,
-  `discount_value` decimal(10,2) NOT NULL,
-  `description` text DEFAULT NULL,
-  `requirements` text DEFAULT NULL,
-  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `name` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `code` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `category` enum('School-Based','Government','Department-Based','Private','Special') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'School-Based',
+  `provider` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `department_id` int(10) unsigned DEFAULT NULL,
+  `program_id` int(10) unsigned DEFAULT NULL,
+  `year_level` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `min_gwa` decimal(4,2) DEFAULT NULL,
+  `income_requirement` decimal(12,2) DEFAULT NULL,
+  `slots` int(11) DEFAULT NULL,
+  `tuition_coverage_type` enum('full','percentage','fixed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'fixed',
+  `tuition_coverage_value` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `misc_coverage_type` enum('full','percentage','fixed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'fixed',
+  `misc_coverage_value` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `stipend_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `book_allowance` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `description` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `requirements` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `required_documents` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `application_start` date DEFAULT NULL,
+  `application_end` date DEFAULT NULL,
+  `status` enum('Draft','Active','Closed','Suspended') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Draft',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Table structure for table `shs_curriculum`
+-- Table structure for table `scholarship_recipients`
 --
 
-DROP TABLE IF EXISTS `shs_curriculum`;
+DROP TABLE IF EXISTS `scholarship_recipients`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `shs_curriculum` (
+CREATE TABLE `scholarship_recipients` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `scholarship_id` int(10) unsigned NOT NULL,
+  `academic_year_id` int(10) unsigned NOT NULL,
+  `semester` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `status` enum('Active','Suspended','Terminated','Renewed') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'Active',
+  `remarks` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `scholarship_id` (`scholarship_id`),
+  CONSTRAINT `scholarship_recipients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `scholarship_recipients_ibfk_2` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarships` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `shs_curricula`
+--
+
+DROP TABLE IF EXISTS `shs_curricula`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `shs_curricula` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `strand_id` int(10) unsigned NOT NULL,
+  `curriculum_name` varchar(255) NOT NULL,
+  `version` varchar(50) NOT NULL DEFAULT '1.0',
+  `effective_academic_year` varchar(20) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `status` enum('active','inactive','draft') NOT NULL DEFAULT 'active',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `strand_id` (`strand_id`),
+  CONSTRAINT `shs_curricula_ibfk_1` FOREIGN KEY (`strand_id`) REFERENCES `shs_strands` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `shs_curriculum_subjects`
+--
+
+DROP TABLE IF EXISTS `shs_curriculum_subjects`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `shs_curriculum_subjects` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `curriculum_id` int(10) unsigned NOT NULL,
   `grade_level` varchar(50) NOT NULL,
   `semester` enum('First','Second') DEFAULT NULL,
   `subject_id` int(10) unsigned NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_shs_curriculum` (`strand_id`,`grade_level`,`semester`,`subject_id`),
+  UNIQUE KEY `uq_shs_curriculum_sub` (`curriculum_id`,`grade_level`,`semester`,`subject_id`),
   KEY `subject_id` (`subject_id`),
-  KEY `idx_strand_id` (`strand_id`),
-  CONSTRAINT `shs_curriculum_ibfk_1` FOREIGN KEY (`strand_id`) REFERENCES `shs_strands` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `shs_curriculum_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  KEY `idx_curriculum_id` (`curriculum_id`),
+  CONSTRAINT `shs_curriculum_subs_ibfk_1` FOREIGN KEY (`curriculum_id`) REFERENCES `shs_curricula` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `shs_curriculum_subs_ibfk_2` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -557,6 +625,7 @@ CREATE TABLE `shs_sections` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `section_code` varchar(100) NOT NULL,
   `strand_id` int(10) unsigned NOT NULL,
+  `curriculum_id` int(10) unsigned DEFAULT NULL,
   `grade_level` varchar(50) NOT NULL,
   `academic_year` varchar(20) DEFAULT NULL,
   `schedule_type` enum('Morning','Afternoon') NOT NULL,
@@ -790,3 +859,49 @@ CREATE TABLE `lms_submissions` (
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-07-31  4:59:47
+CREATE OR REPLACE VIEW student_academic_records_view AS
+SELECT
+    u.id AS user_id,
+    u.student_number,
+    u.first_name,
+    u.last_name,
+    a.id AS application_id,
+    a.academic_level,
+    a.grade_level,
+    a.school_year,
+    a.semester,
+    a.strand,
+    s.id AS subject_id,
+    s.subject_code,
+    s.subject_name,
+    s.units,
+    'College' AS enrollment_type,
+    ce.created_at AS enrolled_at
+FROM college_enrollments ce
+JOIN applications a ON ce.application_id = a.id
+JOIN users u ON a.user_id = u.id
+JOIN subjects s ON ce.subject_id = s.id
+
+UNION ALL
+
+SELECT
+    u.id AS user_id,
+    u.student_number,
+    u.first_name,
+    u.last_name,
+    a.id AS application_id,
+    a.academic_level,
+    a.grade_level,
+    a.school_year,
+    a.semester,
+    a.strand,
+    s.id AS subject_id,
+    s.subject_code,
+    s.subject_name,
+    s.units,
+    'SHS' AS enrollment_type,
+    se.created_at AS enrolled_at
+FROM shs_enrollments se
+JOIN applications a ON se.application_id = a.id
+JOIN users u ON a.user_id = u.id
+JOIN subjects s ON se.subject_id = s.id;

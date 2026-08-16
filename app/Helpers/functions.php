@@ -585,3 +585,112 @@ function requirePermission(string|array $permission): void
         throw new \App\Core\HttpException(403, 'Access Denied. You do not have permission to access this module.');
     }
 }
+
+/**
+ * Recalculates the student assessment based on active scholarship recipients.
+ * @param int $userId
+ * @param \PDO $pdo
+ * @return void
+ */
+function recalculateStudentAssessment(int $userId, \PDO $pdo): void
+{
+    // Find active assessment for user
+    $assStmt = $pdo->prepare('
+        SELECT sa.* 
+        FROM student_assessments sa
+        JOIN applications a ON sa.application_id = a.id
+        WHERE sa.user_id = :user_id 
+          AND a.status IN ("approved", "enrolled")
+        ORDER BY sa.created_at DESC LIMIT 1
+    ');
+    $assStmt->execute(['user_id' => $userId]);
+    $assessment = $assStmt->fetch(\PDO::FETCH_ASSOC);
+
+    if (!$assessment) return;
+
+    $assessmentId = $assessment['id'];
+    
+    // Find active scholarships for user
+    $sysStmt = $pdo->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('active_academic_year_id', 'active_semester')");
+    $settings = [];
+    foreach ($sysStmt->fetchAll() as $row) {
+        $settings[$row['setting_key']] = $row['setting_value'];
+    }
+
+    $activeAy = $settings['active_academic_year_id'] ?? 0;
+    $activeSem = $settings['active_semester'] ?? '';
+
+    $scholStmt = $pdo->prepare('
+        SELECT s.* 
+        FROM scholarship_recipients sr
+        JOIN scholarships s ON sr.scholarship_id = s.id
+        WHERE sr.user_id = :uid AND sr.status = "Active"
+          AND sr.academic_year_id = :ay AND sr.semester = :sem
+    ');
+    $scholStmt->execute([
+        'uid' => $userId,
+        'ay' => $activeAy,
+        'sem' => $activeSem
+    ]);
+    
+    $activeScholarships = $scholStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+    $totalTuitionDiscount = 0;
+    $totalMiscDiscount = 0;
+
+    $tuitionFee = (float)$assessment['tuition_fee'];
+    $miscFee = (float)$assessment['miscellaneous_fee'] + (float)$assessment['registration_fee'] + (float)$assessment['laboratory_fee'] + (float)$assessment['other_fees'];
+
+    foreach ($activeScholarships as $scholarship) {
+        // Tuition discount
+        if ($scholarship['tuition_coverage_type'] === 'full') {
+            $totalTuitionDiscount = $tuitionFee;
+        } elseif ($scholarship['tuition_coverage_type'] === 'percentage') {
+            $percent = (float)$scholarship['tuition_coverage_value'];
+            $totalTuitionDiscount += $tuitionFee * ($percent / 100);
+        } else {
+            $totalTuitionDiscount += (float)$scholarship['tuition_coverage_value'];
+        }
+
+        // Misc discount
+        if ($scholarship['misc_coverage_type'] === 'full') {
+            $totalMiscDiscount = $miscFee;
+        } elseif ($scholarship['misc_coverage_type'] === 'percentage') {
+            $percent = (float)$scholarship['misc_coverage_value'];
+            $totalMiscDiscount += $miscFee * ($percent / 100);
+        } else {
+            $totalMiscDiscount += (float)$scholarship['misc_coverage_value'];
+        }
+    }
+
+    if ($totalTuitionDiscount > $tuitionFee) $totalTuitionDiscount = $tuitionFee;
+    if ($totalMiscDiscount > $miscFee) $totalMiscDiscount = $miscFee;
+
+    $totalDiscount = $totalTuitionDiscount + $totalMiscDiscount;
+    $totalAmount = (float)$assessment['total_amount'];
+    
+    $netAmount = $totalAmount - $totalDiscount;
+    if ($netAmount < 0) $netAmount = 0;
+    
+    $totalPaid = (float)$assessment['total_paid'];
+    $paymentStatus = 'unpaid';
+    if ($totalPaid >= $netAmount && $netAmount > 0) {
+        $paymentStatus = 'paid';
+    } elseif ($totalPaid > 0) {
+        $paymentStatus = 'partial';
+    } elseif ($netAmount == 0) {
+        $paymentStatus = 'paid';
+    }
+
+    $updStmt = $pdo->prepare('
+        UPDATE student_assessments 
+        SET discount_amount = :discount, net_amount = :net, payment_status = :status 
+        WHERE id = :id
+    ');
+    $updStmt->execute([
+        'discount' => $totalDiscount,
+        'net' => $netAmount,
+        'status' => $paymentStatus,
+        'id' => $assessmentId
+    ]);
+}

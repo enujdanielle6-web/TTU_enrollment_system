@@ -13,14 +13,14 @@ $current_page = isset($current_page) ? $current_page : basename($_SERVER['PHP_SE
     <link rel="stylesheet" href="/sia/public/vendor/fonts/fonts.css">
     <link rel="stylesheet" href="/sia/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
     <!-- Custom LMS CSS -->
-    <link rel="stylesheet" href="../../public/css/lms.css">
+    <link rel="stylesheet" href="/sia/public/css/lms.css">
 </head>
 <body class="lms-layout">
 
 <!-- Sidebar -->
 <aside class="lms-sidebar" id="lmsSidebar">
     <div class="lms-sidebar-logo text-primary d-flex align-items-center gap-2 lms-brand">
-        <img src="../../images/TTU_LOGO.png" alt="TTU Logo" style="height: 32px; width: auto; object-fit: contain;">
+        <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 32px; width: auto; object-fit: contain;">
         <span class="nav-text">TTU LMS</span>
     </div>
 
@@ -32,31 +32,44 @@ $current_page = isset($current_page) ? $current_page : basename($_SERVER['PHP_SE
         </div>
     </div>
 
-    <a href="dashboard.php" class="lms-nav-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>">
+    <a href="/sia/lms/student/dashboard.php" class="lms-nav-link <?= $current_page == 'dashboard.php' ? 'active' : '' ?>">
         <i class="bi bi-grid-1x2-fill"></i>
         <span class="nav-text">Dashboard</span>
     </a>
-    <a href="my_courses.php" class="lms-nav-link <?= $current_page == 'my_courses.php' ? 'active' : '' ?>">
+    <a href="/sia/lms/student/my_courses.php" class="lms-nav-link <?= $current_page == 'my_courses.php' ? 'active' : '' ?>">
         <i class="bi bi-journal-bookmark-fill"></i>
         <span class="nav-text">My Courses</span>
     </a>
-    <a href="#" class="lms-nav-link">
-        <i class="bi bi-journal-text"></i>
-        <span class="nav-text">Assignments</span>
-    </a>
-    <a href="#" class="lms-nav-link">
-        <i class="bi bi-pencil-square"></i>
-        <span class="nav-text">Online Quizzes</span>
-    </a>
-    <a href="#" class="lms-nav-link">
-        <i class="bi bi-star-fill"></i>
-        <span class="nav-text">Grades</span>
-    </a>
-    <a href="#" class="lms-nav-link">
-        <i class="bi bi-person-check-fill"></i>
-        <span class="nav-text">Attendance</span>
-    </a>
-    <a href="#" class="lms-nav-link">
+    <?php if (isset($course) && isset($course['lms_course_id'])): ?>
+        <hr class="text-secondary mx-3 my-2">
+        <div class="px-3 pb-2 text-muted small fw-bold text-uppercase">Course Menu</div>
+        <a href="/sia/lms/student/course.php?id=<?= $course['lms_course_id'] ?>" class="lms-nav-link <?= strpos($current_page, 'course.php') !== false ? 'active' : '' ?>">
+            <i class="bi bi-folder2-open"></i>
+            <span class="nav-text">Modules & Materials</span>
+        </a>
+        <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/announcements" class="lms-nav-link <?= strpos($_SERVER['REQUEST_URI'], '/announcements') !== false ? 'active' : '' ?>">
+            <i class="bi bi-megaphone"></i>
+            <span class="nav-text">Announcements</span>
+        </a>
+        <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/assignments" class="lms-nav-link <?= strpos($_SERVER['REQUEST_URI'], '/assignments') !== false ? 'active' : '' ?>">
+            <i class="bi bi-journal-text"></i>
+            <span class="nav-text">Assignments</span>
+        </a>
+        <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/quizzes" class="lms-nav-link <?= strpos($_SERVER['REQUEST_URI'], '/quizzes') !== false ? 'active' : '' ?>">
+            <i class="bi bi-pencil-square"></i>
+            <span class="nav-text">Online Quizzes</span>
+        </a>
+        <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/gradebook" class="lms-nav-link <?= strpos($_SERVER['REQUEST_URI'], '/gradebook') !== false ? 'active' : '' ?>">
+            <i class="bi bi-star-fill"></i>
+            <span class="nav-text">Grades</span>
+        </a>
+        <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/attendance" class="lms-nav-link <?= strpos($_SERVER['REQUEST_URI'], '/attendance') !== false ? 'active' : '' ?>">
+            <i class="bi bi-person-check-fill"></i>
+            <span class="nav-text">Attendance</span>
+        </a>
+    <?php endif; ?>
+    <hr class="text-secondary mx-3 my-2">
+    <a href="/sia/lms/student/calendar" class="lms-nav-link <?= strpos($_SERVER['REQUEST_URI'], '/calendar') !== false ? 'active' : '' ?>">
         <i class="bi bi-calendar-event-fill"></i>
         <span class="nav-text">Calendar</span>
     </a>
@@ -85,7 +98,7 @@ $current_page = isset($current_page) ? $current_page : basename($_SERVER['PHP_SE
             <i class="bi bi-bell text-muted ms-auto nav-text"></i>
         </div>
         
-        <a href="../../auth/logout.php" class="btn btn-light w-100 text-danger fw-semibold d-flex align-items-center justify-content-center gap-2 border lms-logout-btn">
+        <a href="/sia/auth/logout.php" class="btn btn-light w-100 text-danger fw-semibold d-flex align-items-center justify-content-center gap-2 border lms-logout-btn">
             <i class="bi bi-box-arrow-right"></i> <span class="nav-text">Sign out</span>
         </a>
     </div>

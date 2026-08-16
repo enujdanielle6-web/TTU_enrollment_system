@@ -167,6 +167,9 @@ $baseAdminUrl = '/sia/admin/';
       <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'scholarship_review.php' || $current_page === 'scholarship_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scholarship/scholarship_review.php">
         <i class="bi bi-file-earmark-text fs-5"></i> <span class="nav-text">Applications</span>
       </a>
+      <a title="Active Scholars" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'scholars.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scholarship/scholars.php">
+        <i class="bi bi-people-fill fs-5"></i> <span class="nav-text">Active Scholars</span>
+      </a>
     </div>
   </div>
   <?php endif; ?>

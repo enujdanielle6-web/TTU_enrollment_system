@@ -79,6 +79,13 @@ async function navigateTo(url, pushHistory = true) {
         mainContainer.innerHTML = newMain.innerHTML;
         mainContainer.style.opacity = '1';
         mainContainer.style.pointerEvents = 'auto';
+
+        // Swap Sidebar if present (fixes dynamic course menus not appearing)
+        const currentSidebar = document.getElementById('lmsSidebar');
+        const newSidebar = doc.getElementById('lmsSidebar');
+        if (currentSidebar && newSidebar) {
+            currentSidebar.innerHTML = newSidebar.innerHTML;
+        }
         
         // Update URL
         if (pushHistory) {

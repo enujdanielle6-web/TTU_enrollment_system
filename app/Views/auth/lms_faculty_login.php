@@ -1,6 +1,6 @@
 <?php require_once __DIR__ . '/../components/header.php'; ?>
 
-<main class="auth-page py-5 bg-light" style="min-height: 100vh;">
+<main class="auth-page">
   <div class="container">
     <div class="row justify-content-center">
       <div class="col-12">

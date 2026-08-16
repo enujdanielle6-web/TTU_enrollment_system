@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/../../components/header.php';
-
 require_once __DIR__ . '/../../components/admin_navbar.php';
 ?>
 
@@ -30,7 +29,6 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
       <input type="hidden" name="application_id" value="<?= $app['id'] ?>">
       <input type="hidden" name="user_id" value="<?= $app['user_id'] ?>">
       <input type="hidden" name="scholarship_id" value="<?= $app['scholarship_id'] ?>">
-      <input type="hidden" name="assessment_id" value="<?= $app['assessment_id'] ?? 0 ?>">
       <?= getCsrfInput() ?>
       
       <div class="row g-4">
@@ -53,19 +51,9 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <label class="text-muted small fw-semibold text-uppercase">Email Address</label>
                 <div class="fw-medium text-dark"><?= htmlspecialchars($app['email'], ENT_QUOTES, 'UTF-8') ?></div>
               </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Grade Level</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['grade_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Strand</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['strand'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Enrollment Ref</label>
-                <div class="fw-medium text-dark">
-                  <a href="../admissions/application_detail.php?id=<?= $app['application_id'] ?? 0 ?>" target="_blank"><?= htmlspecialchars($app['reference_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?> <i class="bi bi-box-arrow-up-right small"></i></a>
-                </div>
+              <div class="col-md-6">
+                <label class="text-muted small fw-semibold text-uppercase">Applied For Term</label>
+                <div class="fw-medium text-dark"><?= htmlspecialchars($app['ay_name'] ?? 'Current Term', ENT_QUOTES, 'UTF-8') ?> <?= htmlspecialchars($app['semester'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
               </div>
             </div>
             
@@ -77,67 +65,41 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <div class="fw-bold fs-5 text-primary"><?= htmlspecialchars($app['scholarship_name'], ENT_QUOTES, 'UTF-8') ?></div>
                 <div class="text-muted small mt-1"><?= htmlspecialchars($app['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></div>
               </div>
-              <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Discount Value</label>
-                <div class="fw-medium text-success fs-5">
-                  <?php if ($app['discount_type'] === 'percentage'): ?>
-                    <?= number_format((float)$app['discount_value'], 0) ?>% Discount
-                  <?php else: ?>
-                    ₱<?= number_format((float)$app['discount_value'], 2) ?> Discount
-                  <?php endif; ?>
-                </div>
-              </div>
+              
             </div>
             
           </div>
         </div>
 
-        <?php if ($app['assessment_id']): ?>
         <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.4s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="position-absolute top-0 start-0 w-100 bg-info" style="height: 4px;"></div>
           <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.5s;">
-            <i class="bi bi-calculator-fill"></i>
-            <h2>Assessment Impact Preview</h2>
+            <i class="bi bi-file-earmark-check"></i>
+            <h2>Submitted Documents / Requirements</h2>
           </div>
           <div class="island-body bg-light rounded-bottom-4 fade-in-up" style="animation-delay: 0.6s;">
-            <div class="row text-center">
-              <div class="col-md-4 border-end">
-                <div class="text-muted small text-uppercase fw-bold mb-2">Original Total</div>
-                <div class="fs-4 fw-bold text-dark">₱<?= number_format((float)$app['total_amount'], 2) ?></div>
-              </div>
-              <div class="col-md-4 border-end">
-                <div class="text-muted small text-uppercase fw-bold mb-2">Estimated Discount</div>
-                <div class="fs-4 fw-bold text-success">
-                  <?php
-                    $total = (float)$app['total_amount'];
-                    $tuition = (float)$app['tuition_fee'];
-                    $discountValue = (float)$app['discount_value'];
-                    $discountAmount = 0;
-                    if ($app['discount_type'] === 'percentage') {
-                        $discountAmount = $tuition * ($discountValue / 100);
-                    } else {
-                        $discountAmount = $discountValue;
-                    }
-                    if ($discountAmount > $tuition) $discountAmount = $tuition; // Cap at 100% of tuition
-                    
-                    echo '-₱' . number_format($discountAmount, 2);
-                  ?>
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="text-muted small text-uppercase fw-bold mb-2">New Net Amount</div>
-                <div class="fs-4 fw-bold text-primary">
-                  ₱<?= number_format($total - $discountAmount, 2) ?>
-                </div>
-              </div>
+            <div class="p-3 bg-white rounded border">
+                <?php
+                    $docs = json_decode($app['submitted_documents'] ?? '[]', true);
+                    if (empty($docs)):
+                ?>
+                    <p class="text-muted mb-0"><i class="bi bi-info-circle me-1"></i>No documents uploaded or submitted electronically.</p>
+                <?php else: ?>
+                    <ul class="list-group list-group-flush mb-0">
+                        <?php foreach($docs as $doc): ?>
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                    <span class="fw-medium"><?= htmlspecialchars($doc['name'], ENT_QUOTES, 'UTF-8') ?></span>
+                                </div>
+                                <a href="<?= htmlspecialchars($doc['url'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="btn btn-sm btn-outline-secondary">View</a>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php endif; ?>
             </div>
           </div>
         </div>
-        <?php else: ?>
-        <div class="alert alert-warning shadow-sm rounded-12 border-warning">
-          <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Warning:</strong> This applicant does not have a generated fee assessment. You must generate an assessment for their enrollment application before you can approve this scholarship.
-        </div>
-        <?php endif; ?>
 
       </div>
 
@@ -159,7 +121,11 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 </select>
                 <?php if ($app['status'] === 'approved'): ?>
                   <div class="form-text text-danger mt-1" style="font-size: 0.7rem;">
-                    Note: If you change this from Approved to another status, the discount will be removed from their assessment.
+                    Note: Changing this from Approved will not automatically cancel active scholarship grants; you must suspend them in the Scholar tracker.
+                  </div>
+                <?php else: ?>
+                  <div class="form-text text-success mt-1" style="font-size: 0.7rem;">
+                    Approving this will register the applicant as a Scholar for the active Academic Year/Semester.
                   </div>
                 <?php endif; ?>
               </div>
@@ -170,7 +136,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               </div>
 
               <div class="d-grid">
-                <button type="submit" class="btn btn-primary fw-medium rounded-pill shadow-sm" <?= (!$app['assessment_id'] && $app['status'] !== 'approved') ? 'id="submitBtn"' : '' ?>>
+                <button type="submit" class="btn btn-primary fw-medium rounded-pill shadow-sm" id="submitBtn">
                   <i class="bi bi-save2 me-1"></i> Save Decision
                 </button>
               </div>
@@ -184,24 +150,4 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
   </div>
 </main>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const statusSelect = document.getElementById('status');
-    const submitBtn = document.getElementById('submitBtn');
-    const hasAssessment = <?= $app['assessment_id'] ? 'true' : 'false' ?>;
-    
-    if (statusSelect && submitBtn && !hasAssessment) {
-        statusSelect.addEventListener('change', function() {
-            if (this.value === 'approved') {
-                alert('You cannot approve this scholarship because the applicant does not have a fee assessment generated yet. Please generate their assessment via their Enrollment Application Review page first.');
-                this.value = '<?= $app['status'] ?>'; // reset
-            }
-        });
-    }
-});
-</script>
-
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>
-
-
-

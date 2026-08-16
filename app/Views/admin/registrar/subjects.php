@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../components/header.php';
 ?>
 <?php require_once __DIR__ . '/../../components/admin_navbar.php'; ?>
-<main class="py-5 bg-light min-vh-100 w-100" id="mainContent">
+<main class="py-5 bg-light min-vh-100" id="mainContent">
   <div class="container-fluid px-lg-5">
     <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="d-flex justify-content-between align-items-center">
@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../components/header.php';
           <p class="text-muted mb-0">Add and manage academic subjects</p>
         </div>
         <div>
-          <button type="button" class="btn btn-primary fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#addSubjectModal" onclick="try{new bootstrap.Modal(document.getElementById('addSubjectModal')).show();}catch(e){}">
+          <button type="button" class="btn btn-primary fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
             <i class="bi bi-plus-lg me-1"></i> Add Subject
           </button>
         </div>
@@ -187,7 +187,6 @@ require_once __DIR__ . '/../../components/header.php';
       </div>
     </div>
   </main>
-</div>
 
 <!-- Add Subject Modal -->
 <div class="modal fade" id="addSubjectModal" tabindex="-1">

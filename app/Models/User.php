@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Core\Database;
 use PDO;
 
-class User
+class User extends BaseModel
 {
+    protected static string $table = 'users';
+
     public static function findByEmail(string $email)
     {
         $pdo = Database::getConnection();

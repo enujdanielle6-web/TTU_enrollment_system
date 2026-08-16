@@ -12,6 +12,11 @@ class HomeController extends BaseController
     {
         return $this->render('home');
     }
+
+    public function demo(Request $request, Response $response)
+    {
+        return $this->render('demo_landing');
+    }
 }
 
 

@@ -12,7 +12,7 @@ $stats = [
 ];
 
 try {
-    $stmt1 = $pdo->query('SELECT COUNT(*) FROM scholarships WHERE is_active = 1');
+    $stmt1 = $pdo->query('SELECT COUNT(*) FROM scholarships WHERE status = "Active"');
     $stats['active_scholarships'] = (int)$stmt1->fetchColumn();
 
     $stmt2 = $pdo->query('SELECT COUNT(*) FROM scholarship_applications');

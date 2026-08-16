@@ -191,15 +191,11 @@ class ApplicantController extends BaseController
         $application = null;
         
         try {
-            $pdo = Database::getConnection();
-            $userStmt = $pdo->prepare('SELECT first_name, last_name, email, role, created_at FROM users WHERE id = :id LIMIT 1');
-            $userStmt->execute(['id' => $userId]);
-            $user = $userStmt->fetch();
+            $user = User::find($userId);
             
             if ($user) {
-                $appStmt = $pdo->prepare('SELECT reference_number, contact_number FROM applications WHERE user_id = :user_id LIMIT 1');
-                $appStmt->execute(['user_id' => $userId]);
-                $application = $appStmt->fetch() ?: null;
+                $applications = Application::where('user_id', $userId);
+                $application = !empty($applications) ? $applications[0] : null;
             }
         } catch (\PDOException $e) {
             error_log('Profile page fetch failed: ' . $e->getMessage());
@@ -495,147 +491,210 @@ return;
     {
         $pdo = Database::getConnection();
         
+        $userId = (int)$_SESSION['user_id'];
+        $pageTitle = 'Scholarships - Applicant Portal';
 
-$userId = (int)$_SESSION['user_id'];
-$pageTitle = 'Scholarships - Applicant Portal';
+        // Fetch user's application status
+        $stmt = $pdo->prepare('
+            SELECT a.status, a.id, a.college_curriculum_id, a.grade_level, c.college_program_id
+            FROM applications a 
+            LEFT JOIN college_curriculums c ON a.college_curriculum_id = c.id
+            WHERE a.user_id = :user_id LIMIT 1
+        ');
+        $stmt->execute(['user_id' => $userId]);
+        $app = $stmt->fetch();
 
-// Fetch user's application status
-$stmt = $pdo->prepare('SELECT status, id FROM applications WHERE user_id = :user_id LIMIT 1');
-$stmt->execute(['user_id' => $userId]);
-$app = $stmt->fetch();
+        $isApproved = ($app && in_array($app['status'], ['approved', 'enrolled'], true));
+        $appId = $app ? $app['id'] : 0;
+        $userProgramId = $app ? $app['college_program_id'] : null;
+        $userYearLevel = $app ? $app['grade_level'] : null;
 
-$isApproved = ($app && in_array($app['status'], ['approved', 'enrolled'], true));
-$appId = $app ? $app['id'] : 0;
+        // Check if an assessment exists
+        $hasAssessment = false;
+        $assessmentId = 0;
+        if ($isApproved) {
+            $assStmt = $pdo->prepare('SELECT id FROM student_assessments WHERE application_id = :app_id LIMIT 1');
+            $assStmt->execute(['app_id' => $appId]);
+            $assessment = $assStmt->fetch();
+            if ($assessment) {
+                $hasAssessment = true;
+                $assessmentId = $assessment['id'];
+            }
+        }
 
-// Check if an assessment exists
-$hasAssessment = false;
-$assessmentId = 0;
-if ($isApproved) {
-    $assStmt = $pdo->prepare('SELECT id FROM student_assessments WHERE application_id = :app_id LIMIT 1');
-    $assStmt->execute(['app_id' => $appId]);
-    $assessment = $assStmt->fetch();
-    if ($assessment) {
-        $hasAssessment = true;
-        $assessmentId = $assessment['id'];
-    }
-}
+        // Check medical clearance
+        $isMedicalVerified = false;
+        if ($isApproved) {
+            $hStmt = $pdo->prepare('SELECT status FROM health_records WHERE user_id = :user_id LIMIT 1');
+            $hStmt->execute(['user_id' => $userId]);
+            $healthStatus = $hStmt->fetchColumn();
+            if ($healthStatus === 'verified') {
+                $isMedicalVerified = true;
+            }
+        }
 
-// Check medical clearance
-$isMedicalVerified = false;
-if ($isApproved) {
-    $hStmt = $pdo->prepare('SELECT status FROM health_records WHERE user_id = :user_id LIMIT 1');
-    $hStmt->execute(['user_id' => $userId]);
-    $healthStatus = $hStmt->fetchColumn();
-    if ($healthStatus === 'verified') {
-        $isMedicalVerified = true;
-    }
-}
+        // Fetch active scholarships (Filtered by eligibility if possible)
+        $activeScholarships = [];
+        if ($isApproved && $isMedicalVerified && $hasAssessment) {
+            $query = 'SELECT * FROM scholarships WHERE status = "Active"';
+            $params = [];
 
-// Fetch active scholarships
-$activeScholarships = [];
-if ($isApproved && $isMedicalVerified && $hasAssessment) {
-    $scholStmt = $pdo->query('SELECT * FROM scholarships WHERE is_active = 1 ORDER BY discount_value DESC');
-    $activeScholarships = $scholStmt->fetchAll();
-}
+            // We filter program if the scholarship requires a specific program
+            if ($userProgramId) {
+                $query .= ' AND (program_id IS NULL OR program_id = :prog_id)';
+                $params['prog_id'] = $userProgramId;
+            } else {
+                $query .= ' AND program_id IS NULL';
+            }
 
-// Fetch user's scholarship applications
-$myApplications = [];
-if ($isApproved && $isMedicalVerified && $hasAssessment) {
-    $myAppStmt = $pdo->prepare('
-        SELECT sa.*, s.name as scholarship_name, s.discount_type, s.discount_value 
-        FROM scholarship_applications sa 
-        JOIN scholarships s ON sa.scholarship_id = s.id 
-        WHERE sa.user_id = :user_id 
-        ORDER BY sa.created_at DESC
-    ');
-    $myAppStmt->execute(['user_id' => $userId]);
-    $myApplications = $myAppStmt->fetchAll();
-}
+            // We filter year level if the scholarship requires it
+            if ($userYearLevel) {
+                $query .= ' AND (year_level IS NULL OR year_level = "" OR year_level = :yl)';
+                $params['yl'] = $userYearLevel;
+            }
 
-$successMsg = $_SESSION['success_msg'] ?? null;
-$errorMsg = $_SESSION['error_msg'] ?? null;
-unset($_SESSION['success_msg'], $_SESSION['error_msg']);
+            $query .= ' ORDER BY name ASC';
+            
+            $scholStmt = $pdo->prepare($query);
+            $scholStmt->execute($params);
+            $activeScholarships = $scholStmt->fetchAll();
+        }
 
+        // Fetch user's scholarship applications
+        $myApplications = [];
+        if ($isApproved && $isMedicalVerified && $hasAssessment) {
+            $myAppStmt = $pdo->prepare('
+                SELECT sa.*, s.name as scholarship_name, s.category, s.tuition_coverage_type, s.tuition_coverage_value 
+                FROM scholarship_applications sa 
+                JOIN scholarships s ON sa.scholarship_id = s.id 
+                WHERE sa.user_id = :user_id 
+                ORDER BY sa.created_at DESC
+            ');
+            $myAppStmt->execute(['user_id' => $userId]);
+            $myApplications = $myAppStmt->fetchAll();
+        }
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         return $this->render('applicant/scholarships', get_defined_vars());
     }
+
     public function applyScholarship(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/applicant/scholarships.php");
-    return;
-}
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $response->redirect("/sia/applicant/scholarships.php");
+            return;
+        }
 
+        $userId = (int)$_SESSION['user_id'];
+        $scholarshipId = (int)($_POST['scholarship_id'] ?? 0);
 
+        if ($scholarshipId <= 0) {
+            $_SESSION['error_msg'] = 'Invalid scholarship selection.';
+            $response->redirect("/sia/applicant/scholarships.php");
+            return;
+        }
 
-$userId = (int)$_SESSION['user_id'];
-$scholarshipId = (int)($_POST['scholarship_id'] ?? 0);
+        try {
+            // Verify eligibility
+            $stmt = $pdo->prepare('
+                SELECT a.id, a.status, sa.id as assessment_id 
+                FROM applications a 
+                LEFT JOIN student_assessments sa ON a.id = sa.application_id 
+                WHERE a.user_id = :user_id LIMIT 1
+            ');
+            $stmt->execute(['user_id' => $userId]);
+            $eligibility = $stmt->fetch();
 
-if ($scholarshipId <= 0) {
-    $_SESSION['error_msg'] = 'Invalid scholarship selection.';
-    $response->redirect("/sia/applicant/scholarships.php");
-    return;
-}
+            if (!$eligibility || !in_array($eligibility['status'], ['approved', 'enrolled'], true)) {
+                throw new \Exception('You are not eligible to apply for scholarships at this time.');
+            }
 
-try {
-    // Verify eligibility (Application must be approved/enrolled and have an assessment)
-    $stmt = $pdo->prepare('
-        SELECT a.id, a.status, sa.id as assessment_id 
-        FROM applications a 
-        LEFT JOIN student_assessments sa ON a.id = sa.application_id 
-        WHERE a.user_id = :user_id LIMIT 1
-    ');
-    $stmt->execute(['user_id' => $userId]);
-    $eligibility = $stmt->fetch();
+            if (!$eligibility['assessment_id']) {
+                throw new \Exception('Your fee assessment has not been generated yet.');
+            }
 
-    if (!$eligibility || !in_array($eligibility['status'], ['approved', 'enrolled'], true)) {
-        throw new \Exception('You are not eligible to apply for scholarships at this time.');
-    }
+            // Check if scholarship exists and is active
+            $scholStmt = $pdo->prepare('SELECT name FROM scholarships WHERE id = :id AND status = "Active"');
+            $scholStmt->execute(['id' => $scholarshipId]);
+            $scholarship = $scholStmt->fetch();
 
-    if (!$eligibility['assessment_id']) {
-        throw new \Exception('Your fee assessment has not been generated yet.');
-    }
+            if (!$scholarship) {
+                throw new \Exception('The selected scholarship is no longer available.');
+            }
 
-    // Check if scholarship exists and is active
-    $scholStmt = $pdo->prepare('SELECT name FROM scholarships WHERE id = :id AND is_active = 1');
-    $scholStmt->execute(['id' => $scholarshipId]);
-    $scholarship = $scholStmt->fetch();
+            // Check if already applied
+            $checkAppStmt = $pdo->prepare('SELECT id FROM scholarship_applications WHERE user_id = :user_id AND scholarship_id = :schol_id LIMIT 1');
+            $checkAppStmt->execute(['user_id' => $userId, 'schol_id' => $scholarshipId]);
+            if ($checkAppStmt->fetch()) {
+                throw new \Exception('You have already applied for this scholarship.');
+            }
 
-    if (!$scholarship) {
-        throw new \Exception('The selected scholarship is no longer available.');
-    }
+            // Process uploaded documents
+            $uploadedDocs = [];
+            if (isset($_FILES['requirements']) && !empty($_FILES['requirements']['name'][0])) {
+                $uploadDir = __DIR__ . '/../../uploads/scholarships/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
 
-    // Check if already applied
-    $checkAppStmt = $pdo->prepare('SELECT id FROM scholarship_applications WHERE user_id = :user_id AND scholarship_id = :schol_id LIMIT 1');
-    $checkAppStmt->execute(['user_id' => $userId, 'schol_id' => $scholarshipId]);
-    if ($checkAppStmt->fetch()) {
-        throw new \Exception('You have already applied for this scholarship.');
-    }
+                $allowedTypes = ['application/pdf', 'image/jpeg', 'image/png'];
+                $maxSize = 5 * 1024 * 1024; // 5MB
 
-    // Insert Application
-    $insertStmt = $pdo->prepare('INSERT INTO scholarship_applications (user_id, scholarship_id, status) VALUES (:user_id, :schol_id, "pending")');
-    $insertStmt->execute([
-        'user_id' => $userId,
-        'schol_id' => $scholarshipId
-    ]);
+                foreach ($_FILES['requirements']['tmp_name'] as $key => $tmpName) {
+                    if ($_FILES['requirements']['error'][$key] === UPLOAD_ERR_OK) {
+                        $fileType = $_FILES['requirements']['type'][$key];
+                        $fileSize = $_FILES['requirements']['size'][$key];
+                        
+                        if (!in_array($fileType, $allowedTypes)) {
+                            throw new \Exception('Invalid file type for document: ' . $_FILES['requirements']['name'][$key]);
+                        }
+                        if ($fileSize > $maxSize) {
+                            throw new \Exception('File too large: ' . $_FILES['requirements']['name'][$key]);
+                        }
 
-    // Log Activity
-    $logStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, "bi-award text-primary", :title, :description)');
-    $logStmt->execute([
-        'user_id' => $userId,
-        'title' => 'Scholarship Application Submitted',
-        'description' => 'You applied for the ' . $scholarship['name'] . ' scholarship.'
-    ]);
+                        $ext = pathinfo($_FILES['requirements']['name'][$key], PATHINFO_EXTENSION);
+                        $newName = 'schol_' . $userId . '_' . $scholarshipId . '_' . time() . '_' . $key . '.' . $ext;
+                        
+                        if (move_uploaded_file($tmpName, $uploadDir . $newName)) {
+                            $uploadedDocs[] = [
+                                'name' => htmlspecialchars($_FILES['requirements']['name'][$key], ENT_QUOTES, 'UTF-8'),
+                                'url' => '/sia/uploads/scholarships/' . $newName
+                            ];
+                        }
+                    }
+                }
+            }
+            
+            $submittedDocsJson = json_encode($uploadedDocs);
 
-    $_SESSION['success_msg'] = 'Your scholarship application has been submitted successfully.';
-} catch (\Exception $e) {
-    $_SESSION['error_msg'] = $e->getMessage();
-}
+            // Insert Application
+            $insertStmt = $pdo->prepare('INSERT INTO scholarship_applications (user_id, scholarship_id, status, submitted_documents) VALUES (:user_id, :schol_id, "pending", :docs)');
+            $insertStmt->execute([
+                'user_id' => $userId,
+                'schol_id' => $scholarshipId,
+                'docs' => $submittedDocsJson
+            ]);
 
-$response->redirect("/sia/applicant/scholarships.php");
-return;
+            // Log Activity
+            $logStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, "bi-award text-primary", :title, :description)');
+            $logStmt->execute([
+                'user_id' => $userId,
+                'title' => 'Scholarship Application Submitted',
+                'description' => 'You applied for the ' . $scholarship['name'] . ' scholarship.'
+            ]);
+
+            $_SESSION['success_msg'] = 'Your scholarship application has been submitted successfully.';
+        } catch (\Exception $e) {
+            $_SESSION['error_msg'] = $e->getMessage();
+        }
+
+        $response->redirect("/sia/applicant/scholarships.php");
+        return;
     }
     public function printSlip(Request $request, Response $response)
     {

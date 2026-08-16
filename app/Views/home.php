@@ -6,29 +6,24 @@ require_once __DIR__ . '/components/navbar.php';
 ?>
 
 <main>
-  <section id="hero" class="hero-section">
+  <section id="hero" class="hero-section text-center text-white">
     <div class="container">
-      <div class="row align-items-center g-5">
-        <div class="col-lg-6">
-          <span class="hero-eyebrow">Triple T University</span>
-          <h1 class="hero-title">Empowering Minds. Transforming Futures.</h1>
-          <p class="hero-text">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <span class="hero-eyebrow" style="color: #60a5fa;">Triple T University</span>
+          <h1 class="hero-title text-white">Empowering Minds. Transforming Futures.</h1>
+          <p class="hero-text text-white opacity-75 mx-auto" style="max-width: 600px;">
             Start your school application online with a clear, guided enrollment experience built for students and families.
           </p>
-          <div class="hero-actions">
+          <div class="hero-actions justify-content-center mt-4">
             <a class="btn btn-primary btn-lg" href="/sia/auth/register.php">
               <i class="bi bi-pencil-square"></i>
               Enroll Now
             </a>
-            <a class="btn btn-outline-primary btn-lg" href="#about">
+            <a class="btn btn-outline-light btn-lg" href="#lms-portals">
               <i class="bi bi-info-circle"></i>
               Learn More
             </a>
-          </div>
-        </div>
-        <div class="col-lg-6">
-          <div class="hero-image-container position-relative">
-            <img src="/sia/images/TTU_CAMPUS.png" alt="TTU Campus" class="img-fluid rounded shadow-lg fade-in-up" style="animation-delay: 0.2s;">
           </div>
         </div>
       </div>
@@ -66,9 +61,65 @@ require_once __DIR__ . '/components/navbar.php';
     </div>
   </section>
 
-  <section id="about">
-    <div class="container">
-      <h2>About</h2>
+  <!-- CLEAN MODERN CARDS -->
+  <section class="modern-features">
+      <div class="container">
+          <div class="text-center mb-5">
+              <h2 class="fw-bold">Everything You Need</h2>
+              <p class="text-muted">A fully integrated academic experience.</p>
+          </div>
+          <div class="row g-4">
+              <div class="col-md-4">
+                  <div class="feature-card">
+                      <div class="feature-icon">
+                          <i class="bi bi-laptop"></i>
+                      </div>
+                      <h4 class="fw-bold">Smart LMS</h4>
+                      <p class="text-muted mb-0">Access courses, track your progress, and interact with faculty through our seamless online portal.</p>
+                  </div>
+              </div>
+              <div class="col-md-4">
+                  <div class="feature-card">
+                      <div class="feature-icon">
+                          <i class="bi bi-rocket"></i>
+                      </div>
+                      <h4 class="fw-bold">Fast Enrollment</h4>
+                      <p class="text-muted mb-0">Skip the lines. Our 10-step digital enrollment process makes registering for classes a breeze.</p>
+                  </div>
+              </div>
+              <div class="col-md-4">
+                  <div class="feature-card">
+                      <div class="feature-icon">
+                          <i class="bi bi-globe"></i>
+                      </div>
+                      <h4 class="fw-bold">Connected Community</h4>
+                      <p class="text-muted mb-0">Join clubs, attend virtual seminars, and stay engaged with a university that never sleeps.</p>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </section>
+
+  <!-- CAMPUS LIFE SECTION -->
+  <section class="py-5 bg-white">
+    <div class="container py-5">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6 fade-in-up">
+          <h2 class="fw-bold mb-4">Discover Campus Life</h2>
+          <p class="text-muted fs-5 mb-4">
+            Experience a vibrant community where academic excellence meets personal growth. Our modern facilities and expansive grounds provide the perfect environment for your journey.
+          </p>
+          <ul class="list-unstyled text-muted mb-0">
+            <li class="mb-3"><i class="bi bi-check-circle-fill text-info me-2"></i> Modern Library & Study Centers</li>
+            <li class="mb-3"><i class="bi bi-check-circle-fill text-info me-2"></i> State-of-the-Art Laboratories</li>
+            <li class="mb-3"><i class="bi bi-check-circle-fill text-info me-2"></i> Expansive Sports Complex</li>
+            <li><i class="bi bi-check-circle-fill text-info me-2"></i> Collaborative Student Hubs</li>
+          </ul>
+        </div>
+        <div class="col-lg-6 fade-in-up" style="animation-delay: 0.2s;">
+          <img src="/sia/images/TTU_OUTSIDE.png" alt="TTU Campus Outside" class="img-fluid rounded-4 shadow-lg" style="border: 1px solid var(--color-border);">
+        </div>
+      </div>
     </div>
   </section>
 
@@ -81,8 +132,8 @@ require_once __DIR__ . '/components/navbar.php';
 
       <div class="admission-timeline">
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 0.3s;">
-            <div class="card-body fade-in-up" style="animation-delay: 0.4s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-person-plus"></i>
               </div>
@@ -94,8 +145,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 0.5s;">
-            <div class="card-body fade-in-up" style="animation-delay: 0.6s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-box-arrow-in-right"></i>
               </div>
@@ -107,8 +158,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 0.7s;">
-            <div class="card-body fade-in-up" style="animation-delay: 0.8s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-ui-checks"></i>
               </div>
@@ -120,8 +171,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 0.9s;">
-            <div class="card-body fade-in-up" style="animation-delay: 1s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-send-check"></i>
               </div>
@@ -133,8 +184,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 1.1s;">
-            <div class="card-body fade-in-up" style="animation-delay: 1.2s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-heart-pulse"></i>
               </div>
@@ -146,8 +197,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 1.3s;">
-            <div class="card-body fade-in-up" style="animation-delay: 1.4s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-award"></i>
               </div>
@@ -159,8 +210,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 1.5s;">
-            <div class="card-body fade-in-up" style="animation-delay: 1.6s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-hourglass-split"></i>
               </div>
@@ -172,8 +223,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 1.7s;">
-            <div class="card-body fade-in-up" style="animation-delay: 1.8s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-building"></i>
               </div>
@@ -185,8 +236,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 1.9s;">
-            <div class="card-body fade-in-up" style="animation-delay: 2s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-file-earmark-check"></i>
               </div>
@@ -198,8 +249,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 2.1s;">
-            <div class="card-body fade-in-up" style="animation-delay: 2.2s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-credit-card"></i>
               </div>
@@ -211,8 +262,8 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
 
         <div class="admission-step">
-          <div class="card admission-card fade-in-up" style="animation-delay: 2.3s;">
-            <div class="card-body fade-in-up" style="animation-delay: 2.4s;">
+          <div class="card admission-card fade-in-up">
+            <div class="card-body fade-in-up">
               <div class="admission-icon">
                 <i class="bi bi-patch-check"></i>
               </div>
@@ -247,8 +298,8 @@ require_once __DIR__ . '/components/navbar.php';
         <div class="tab-pane fade show active" id="shs-req" role="tabpanel" aria-labelledby="shs-req-tab">
           <div class="row g-4">
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 2.5s;">
-                <div class="card-body fade-in-up" style="animation-delay: 2.6s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-file-earmark-person"></i></div>
                   <h3>Birth Certificate</h3>
                   <p>Submit a clear copy issued by the civil registrar.</p>
@@ -256,8 +307,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 2.7s;">
-                <div class="card-body fade-in-up" style="animation-delay: 2.8s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-card-checklist"></i></div>
                   <h3>Form 138 (Report Card)</h3>
                   <p>Provide your latest Grade 10 report card.</p>
@@ -265,8 +316,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 2.9s;">
-                <div class="card-body fade-in-up" style="animation-delay: 3s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-shield-check"></i></div>
                   <h3>Good Moral Certificate</h3>
                   <p>Include a certificate from your previous school.</p>
@@ -274,8 +325,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 3.1s;">
-                <div class="card-body fade-in-up" style="animation-delay: 3.2s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-person-bounding-box"></i></div>
                   <h3>2x2 ID Picture</h3>
                   <p>Prepare a recent photo with a clean background.</p>
@@ -283,8 +334,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 3.3s;">
-                <div class="card-body fade-in-up" style="animation-delay: 3.4s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-person-vcard"></i></div>
                   <h3>Parent/Guardian ID</h3>
                   <p>Submit a valid ID of your parent or guardian.</p>
@@ -292,8 +343,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 3.5s;">
-                <div class="card-body fade-in-up" style="animation-delay: 3.6s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-file-earmark-text"></i></div>
                   <h3>NCAE Results</h3>
                   <p>Photocopy of NCAE results (if available).</p>
@@ -307,8 +358,8 @@ require_once __DIR__ . '/components/navbar.php';
         <div class="tab-pane fade" id="college-req" role="tabpanel" aria-labelledby="college-req-tab">
           <div class="row g-4">
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 3.7s;">
-                <div class="card-body fade-in-up" style="animation-delay: 3.8s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-file-earmark-person"></i></div>
                   <h3>Birth Certificate</h3>
                   <p>Submit a clear copy issued by the civil registrar.</p>
@@ -316,8 +367,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 3.9s;">
-                <div class="card-body fade-in-up" style="animation-delay: 4s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-card-checklist"></i></div>
                   <h3>Form 138 / Transcript of Records</h3>
                   <p>Provide your Grade 12 report card or official TOR for transferees.</p>
@@ -325,8 +376,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 4.1s;">
-                <div class="card-body fade-in-up" style="animation-delay: 4.2s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-shield-check"></i></div>
                   <h3>Good Moral Certificate</h3>
                   <p>Include a certificate from your senior high school.</p>
@@ -334,8 +385,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 4.3s;">
-                <div class="card-body fade-in-up" style="animation-delay: 4.4s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-person-bounding-box"></i></div>
                   <h3>2x2 ID Picture</h3>
                   <p>Prepare a recent photo with a clean background.</p>
@@ -343,8 +394,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card requirement-card fade-in-up" style="animation-delay: 4.5s;">
-                <div class="card-body fade-in-up" style="animation-delay: 4.6s;">
+              <div class="card requirement-card fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="requirement-icon"><i class="bi bi-file-earmark-text"></i></div>
                   <h3>Certificate of Enrollment</h3>
                   <p>Required only for transferee applicants.</p>
@@ -383,8 +434,8 @@ require_once __DIR__ . '/components/navbar.php';
         <div class="tab-pane fade show active" id="shs" role="tabpanel" aria-labelledby="shs-tab">
           <div class="row g-4">
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 4.7s;">
-                <div class="card-body fade-in-up" style="animation-delay: 4.8s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-calculator"></i>
                   </div>
@@ -396,8 +447,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 4.9s;">
-                <div class="card-body fade-in-up" style="animation-delay: 5s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-briefcase"></i>
                   </div>
@@ -409,8 +460,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.1s;">
-                <div class="card-body fade-in-up" style="animation-delay: 5.2s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-chat-square-quote"></i>
                   </div>
@@ -422,8 +473,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.3s;">
-                <div class="card-body fade-in-up" style="animation-delay: 5.4s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-tools"></i>
                   </div>
@@ -435,8 +486,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.5s;">
-                <div class="card-body fade-in-up" style="animation-delay: 5.6s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-journal-bookmark"></i>
                   </div>
@@ -454,8 +505,8 @@ require_once __DIR__ . '/components/navbar.php';
         <div class="tab-pane fade" id="college" role="tabpanel" aria-labelledby="college-tab">
           <div class="row g-4">
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.7s;">
-                <div class="card-body fade-in-up" style="animation-delay: 5.8s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-pc-display"></i>
                   </div>
@@ -467,8 +518,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 5.9s;">
-                <div class="card-body fade-in-up" style="animation-delay: 6s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-laptop"></i>
                   </div>
@@ -480,8 +531,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 6.1s;">
-                <div class="card-body fade-in-up" style="animation-delay: 6.2s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-calculator-fill"></i>
                   </div>
@@ -493,8 +544,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 6.3s;">
-                <div class="card-body fade-in-up" style="animation-delay: 6.4s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-book-half"></i>
                   </div>
@@ -506,8 +557,8 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
             </div>
             <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up" style="animation-delay: 6.5s;">
-                <div class="card-body fade-in-up" style="animation-delay: 6.6s;">
+              <div class="card program-card h-100 fade-in-up">
+                <div class="card-body fade-in-up">
                   <div class="program-icon">
                     <i class="bi bi-bar-chart-line"></i>
                   </div>
@@ -664,14 +715,14 @@ require_once __DIR__ . '/components/navbar.php';
             </div>
 
             <div class="map-container mt-4" style="border-radius: 12px; overflow: hidden; height: 250px;">
-              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2794.4765924235903!2d-122.62732272379954!3d45.54073737107526!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5495a1d116b8b961%3A0x8ab2d7d1d7acf0e9!2sTung%20Tung%20Tung%20Sahur%20death%20house!5e0!3m2!1sen!2sph!4v1782695956338!5m2!1sen!2sph" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
+              <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2733.471547765584!2d121.01362955409941!3d14.328123255462542!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d7003ea37227%3A0x7a7aa8c20812ec54!2sBahay%20ni%20tung%20sahur!5e0!3m2!1sen!2sph!4v1786858331902!5m2!1sen!2sph" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
             </div>
           </div>
         </div>
 
         <div class="col-lg-7">
-          <div class="card contact-form-card fade-in-up" style="animation-delay: 6.7s;">
-            <div class="card-body fade-in-up" style="animation-delay: 6.8s;">
+          <div class="card contact-form-card fade-in-up">
+            <div class="card-body fade-in-up">
               <form action="#" method="post">
                 <div class="row g-3">
                   <div class="col-md-6">
@@ -710,5 +761,25 @@ require_once __DIR__ . '/components/navbar.php';
   </section>
 </main>
 
-<?php require_once __DIR__ . '/components/footer.php'; ?>
+<style>
+.fade-in-up { animation-play-state: paused; }
+.fade-in-up.is-visible { animation-play-state: running; }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+            if(entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    document.querySelectorAll('.fade-in-up').forEach(function(el) {
+        observer.observe(el);
+    });
+});
+</script>
 
+<?php require_once __DIR__ . '/components/footer.php'; ?>

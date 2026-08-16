@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Core\Database;
 
-class Application
+class Application extends BaseModel
 {
+    protected static string $table = 'applications';
+
     public static function findByUserId(int $userId)
     {
         $pdo = Database::getConnection();

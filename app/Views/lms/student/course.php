@@ -78,13 +78,24 @@
                                     
                                     <!-- Placeholder for Lessons -->
                                     <div class="list-group list-group-flush border-top pt-2">
-                                        <div class="list-group-item px-0 py-3 d-flex align-items-center gap-3 border-bottom-0 text-muted">
-                                            <i class="bi bi-journal-text fs-5"></i>
-                                            <div>
-                                                <span class="d-block fw-semibold">Lessons will appear here</span>
-                                                <small>Coming in the next module implementation</small>
+                                        <?php if (empty($module['materials'])): ?>
+                                            <div class="list-group-item px-0 py-3 d-flex align-items-center gap-3 border-bottom-0 text-muted">
+                                                <i class="bi bi-journal-text fs-5"></i>
+                                                <div>
+                                                    <span class="d-block fw-semibold">No materials uploaded yet</span>
+                                                </div>
                                             </div>
-                                        </div>
+                                        <?php else: ?>
+                                            <?php foreach ($module['materials'] as $material): ?>
+                                                <a href="/sia/lms/download/material/<?= $material['id'] ?>" class="list-group-item list-group-item-action px-0 py-3 d-flex align-items-center gap-3 border-bottom-0 text-dark">
+                                                    <i class="bi bi-file-earmark-arrow-down fs-4 text-primary"></i>
+                                                    <div>
+                                                        <span class="d-block fw-bold"><?= htmlspecialchars($material['file_name']) ?></span>
+                                                        <small class="text-muted"><?= round($material['file_size'] / 1024, 2) ?> KB &bull; Uploaded <?= date('M d, Y', strtotime($material['created_at'])) ?></small>
+                                                    </div>
+                                                </a>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>

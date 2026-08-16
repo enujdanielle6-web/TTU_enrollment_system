@@ -16,13 +16,15 @@ require_once __DIR__ . '/../../components/header.php';
           <a href="shs_curriculum.php" class="btn btn-sm btn-light text-primary mb-2 fw-medium rounded-pill px-3 shadow-sm">
             <i class="bi bi-arrow-left me-1"></i> Back to Curricula
           </a>
-          <h1 class="h3 fw-bold text-dark mb-1"><?= htmlspecialchars($strand['code']) ?> Curriculum</h1>
+          <h1 class="h3 fw-bold text-dark mb-1"><?= htmlspecialchars($curriculum['strand_code']) ?> Curriculum</h1>
           <p class="text-muted mb-0">
-            <?= htmlspecialchars($strand['name']) ?> | 
-            <?php if ($strand['is_active'] == 1): ?>
+            <?= htmlspecialchars($curriculum['strand_name']) ?> | v<?= htmlspecialchars($curriculum['version']) ?> | 
+            <?php if ($curriculum['status'] === 'active'): ?>
                 <span class="text-success fw-medium"><i class="bi bi-check-circle-fill me-1"></i>Active</span>
+            <?php elseif ($curriculum['status'] === 'inactive'): ?>
+                <span class="text-danger fw-medium"><i class="bi bi-x-circle-fill me-1"></i>Inactive</span>
             <?php else: ?>
-                <span class="text-secondary fw-medium"><i class="bi bi-circle me-1"></i>Inactive</span>
+                <span class="text-warning fw-medium"><i class="bi bi-circle me-1"></i>Draft</span>
             <?php endif; ?>
           </p>
         </div>
@@ -120,7 +122,7 @@ require_once __DIR__ . '/../../components/header.php';
                                                             <form action="shs_curriculum_process.php" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Remove <?= htmlspecialchars(addslashes($sub['subject_code'])) ?> from this curriculum?');">
                                                                 <?= getCsrfInput() ?>
                                                                 <input type="hidden" name="action" value="delete_subject">
-                                                                <input type="hidden" name="strand_id" value="<?= $strandId ?>">
+                                                                <input type="hidden" name="curriculum_id" value="<?= $curriculumId ?>">
                                                                 <input type="hidden" name="mapping_id" value="<?= $sub['mapping_id'] ?>">
                                                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle px-2 py-1 ms-1" title="Remove Subject">
                                                                     <i class="bi bi-trash-fill"></i>
@@ -150,7 +152,7 @@ require_once __DIR__ . '/../../components/header.php';
       <form action="shs_curriculum_process.php" method="POST">
         <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="add">
-        <input type="hidden" name="strand_id" value="<?= $strandId ?>">
+        <input type="hidden" name="curriculum_id" value="<?= $curriculumId ?>">
         
         <div class="modal-header bg-light border-bottom-0 pb-3">
           <div>

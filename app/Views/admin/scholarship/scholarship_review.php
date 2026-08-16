@@ -9,7 +9,7 @@ try {
     $stmt = $pdo->query('
         SELECT sa.*, 
                u.first_name, u.last_name, u.email,
-               s.name as scholarship_name, s.discount_type, s.discount_value
+               s.name as scholarship_name, s.category, s.tuition_coverage_type, s.tuition_coverage_value
         FROM scholarship_applications sa
         INNER JOIN users u ON sa.user_id = u.id
         INNER JOIN scholarships s ON sa.scholarship_id = s.id
@@ -158,10 +158,13 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                     <td>
                       <?= htmlspecialchars($app['scholarship_name'], ENT_QUOTES, 'UTF-8') ?>
                       <span class="d-block small text-muted">
-                        <?php if ($app['discount_type'] === 'percentage'): ?>
-                          <?= number_format((float)$app['discount_value'], 0) ?>% Discount
+                        <span class="badge bg-light text-dark border"><i class="bi bi-tag-fill me-1 text-primary"></i><?= htmlspecialchars($app['category'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <?php if ($app['tuition_coverage_type'] === 'percentage'): ?>
+                          <?= number_format((float)$app['tuition_coverage_value'], 0) ?>% Tuition Coverage
+                        <?php elseif ($app['tuition_coverage_type'] === 'fixed'): ?>
+                          ₱<?= number_format((float)$app['tuition_coverage_value'], 2) ?> Tuition Coverage
                         <?php else: ?>
-                          ₱<?= number_format((float)$app['discount_value'], 2) ?>
+                          Full Tuition Coverage
                         <?php endif; ?>
                       </span>
                     </td>
