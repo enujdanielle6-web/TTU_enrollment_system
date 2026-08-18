@@ -107,6 +107,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/admin/scholarship/scholarships.php', ['App\Controllers\Admin\Scholarship\ScholarshipController', 'index']);
     $router->get('/admin/scholarship/scholarship_review.php', ['App\Controllers\Admin\Scholarship\ScholarshipController', 'review']);
     $router->get('/admin/scholarship/scholarship_detail.php', ['App\Controllers\Admin\Scholarship\ScholarshipController', 'detail']);
+    $router->get('/admin/scholarship/scholars.php', ['App\Controllers\Admin\Scholarship\ScholarshipController', 'scholars']);
     $router->post('/admin/scholarship/scholarship_process.php', ['App\Controllers\Admin\Scholarship\ScholarshipController', 'process']);
 
     // Admin System

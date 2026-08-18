@@ -292,7 +292,7 @@ class ScholarshipController extends BaseController
                     throw $e;
                 }
 
-                header('Location: scholarship_detail.php?id=' . $appId);
+                $response->redirect("/sia/admin/scholarship/scholarship_detail.php?id=" . $appId);
                 return;
             }
             elseif ($action === 'update_recipient_status') {

@@ -116,7 +116,7 @@ require_once __DIR__ . '/../components/header.php';
                     <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom-dashed">
                       <div>
                         <span class="text-muted fw-medium">Tuition Fee</span>
-                        <?php if ($assessment['academic_level'] === 'College' && isset($totalUnits) && $totalUnits > 0): ?>
+                        <?php if (!empty($assessment['is_per_unit']) && isset($totalUnits) && $totalUnits > 0): ?>
                           <?php $inferredCost = (float)$assessment['tuition_fee'] / $totalUnits; ?>
                           <small class="text-secondary d-block mt-1"><?= esc($totalUnits) ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
                         <?php endif; ?>
