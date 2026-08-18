@@ -75,9 +75,9 @@ require_once __DIR__ . '/../../components/header.php';
                         <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3">Draft</span>
                       <?php endif; ?>
                     </td>
-                    <td><?= $cur['total_subjects'] ?> (<?= $cur['total_units'] ?> Units)</td>
+                    <td><?= esc($cur['total_subjects']) ?> (<?= esc($cur['total_units']) ?> Units)</td>
                     <td class="text-end pe-4">
-                      <a href="shs_curriculum_builder.php?curriculum_id=<?= $cur['curriculum_id'] ?>" class="btn btn-sm btn-primary rounded-pill px-3">
+                      <a href="shs_curriculum_builder.php?curriculum_id=<?= esc($cur['curriculum_id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3">
                         <i class="bi bi-tools me-1"></i> Builder
                       </a>
                     </td>
@@ -114,7 +114,7 @@ require_once __DIR__ . '/../../components/header.php';
             <select class="form-select form-control-lg shadow-sm" name="strand_id" required>
               <option value="">-- Select Strand --</option>
               <?php foreach ($activeStrands as $s): ?>
-                <option value="<?= $s['id'] ?>"><?= htmlspecialchars($s['code'] . ' - ' . $s['name']) ?></option>
+                <option value="<?= esc($s['id']) ?>"><?= htmlspecialchars($s['code'] . ' - ' . $s['name']) ?></option>
               <?php endforeach; ?>
             </select>
           </div>

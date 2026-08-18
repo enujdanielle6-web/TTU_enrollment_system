@@ -52,7 +52,7 @@
                             <?php foreach ($unmapped_courses as $course): ?>
                                 <tr>
                                     <td>
-                                        <span class="badge bg-<?= $course['academic_level'] === 'College' ? 'primary' : 'warning text-dark' ?>">
+                                        <span class="badge bg-<?= esc($course['academic_level'] === 'College' ? 'primary' : 'warning text-dark') ?>">
                                             <?= htmlspecialchars($course['academic_level']) ?>
                                         </span>
                                     </td>

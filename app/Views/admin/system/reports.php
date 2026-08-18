@@ -61,7 +61,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             <i class="bi bi-exclamation-triangle display-6"></i>
           </div>
           <h2 class="h3 fw-bold text-dark mb-1">₱<?= number_format((float)$pendingFinData['outstanding_balance'], 2) ?></h2>
-          <p class="text-muted small text-uppercase tracking-wide mb-0">Outstanding (<?= $pendingFinData['pending_count'] ?>)</p>
+          <p class="text-muted small text-uppercase tracking-wide mb-0">Outstanding (<?= esc($pendingFinData['pending_count']) ?>)</p>
         </div>
       </div>
       <?php endif; ?>
@@ -109,7 +109,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     <?php foreach ($scholarshipData as $row): ?>
                     <tr>
                       <td class="ps-4 fw-medium"><?= htmlspecialchars($row['name'], ENT_QUOTES, 'UTF-8') ?></td>
-                      <td class="text-center"><?= $row['count'] ?></td>
+                      <td class="text-center"><?= esc($row['count']) ?></td>
                       <td class="text-end pe-4 fw-bold text-success">₱<?= number_format((float)$row['total_discount'], 2) ?></td>
                     </tr>
                     <?php endforeach; ?>
@@ -151,7 +151,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     <?php foreach ($paymentMethodData as $row): ?>
                     <tr>
                       <td class="ps-4 fw-medium"><?= htmlspecialchars($row['payment_method'], ENT_QUOTES, 'UTF-8') ?></td>
-                      <td class="text-center"><?= $row['count'] ?></td>
+                      <td class="text-center"><?= esc($row['count']) ?></td>
                       <td class="text-end pe-4 fw-bold text-success">₱<?= number_format((float)$row['total_amount'], 2) ?></td>
                     </tr>
                     <?php endforeach; ?>
@@ -177,37 +177,37 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         <div class="row g-3 text-center">
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="p-3 bg-light rounded-3 h-100">
-                    <div class="fs-4 fw-bold text-dark mb-1"><?= $medicalData['total_records'] ?? 0 ?></div>
+                    <div class="fs-4 fw-bold text-dark mb-1"><?= esc($medicalData['total_records'] ?? 0) ?></div>
                     <div class="small fw-semibold text-muted text-uppercase">Total Submissions</div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="p-3 bg-warning bg-opacity-10 rounded-3 h-100">
-                    <div class="fs-4 fw-bold text-warning mb-1"><?= $medicalData['total_pending'] ?? 0 ?></div>
+                    <div class="fs-4 fw-bold text-warning mb-1"><?= esc($medicalData['total_pending'] ?? 0) ?></div>
                     <div class="small fw-semibold text-warning text-uppercase">Pending Visit</div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="p-3 bg-info bg-opacity-10 rounded-3 h-100">
-                    <div class="fs-4 fw-bold text-info mb-1"><?= $medicalData['total_under_review'] ?? 0 ?></div>
+                    <div class="fs-4 fw-bold text-info mb-1"><?= esc($medicalData['total_under_review'] ?? 0) ?></div>
                     <div class="small fw-semibold text-info text-uppercase">Under Review</div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="p-3 bg-success bg-opacity-10 rounded-3 h-100">
-                    <div class="fs-4 fw-bold text-success mb-1"><?= $medicalData['total_verified'] ?? 0 ?></div>
+                    <div class="fs-4 fw-bold text-success mb-1"><?= esc($medicalData['total_verified'] ?? 0) ?></div>
                     <div class="small fw-semibold text-success text-uppercase">Verified</div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="p-3 bg-warning rounded-3 h-100 text-dark">
-                    <div class="fs-4 fw-bold mb-1"><?= $medicalData['total_corrections'] ?? 0 ?></div>
+                    <div class="fs-4 fw-bold mb-1"><?= esc($medicalData['total_corrections'] ?? 0) ?></div>
                     <div class="small fw-semibold text-uppercase">Corrections</div>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-lg-2">
                 <div class="p-3 bg-danger bg-opacity-10 rounded-3 h-100">
-                    <div class="fs-4 fw-bold text-danger mb-1"><?= $medicalData['total_rejected'] ?? 0 ?></div>
+                    <div class="fs-4 fw-bold text-danger mb-1"><?= esc($medicalData['total_rejected'] ?? 0) ?></div>
                     <div class="small fw-semibold text-danger text-uppercase">Rejected</div>
                 </div>
             </div>
@@ -225,7 +225,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           <div class="text-success mb-3">
             <i class="bi bi-patch-check-fill display-6"></i>
           </div>
-          <h2 class="h2 fw-bold text-dark mb-1"><?= (int) $pipeline['total_enrolled'] ?></h2>
+          <h2 class="h2 fw-bold text-dark mb-1"><?= esc((int) $pipeline['total_enrolled']) ?></h2>
           <p class="text-muted small text-uppercase tracking-wide mb-0">Officially Enrolled</p>
         </div>
       </div>
@@ -234,7 +234,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           <div class="text-primary mb-3">
             <i class="bi bi-person-check-fill display-6"></i>
           </div>
-          <h2 class="h2 fw-bold text-dark mb-1"><?= (int) $pipeline['total_approved'] ?></h2>
+          <h2 class="h2 fw-bold text-dark mb-1"><?= esc((int) $pipeline['total_approved']) ?></h2>
           <p class="text-muted small text-uppercase tracking-wide mb-0">Approved Queue</p>
         </div>
       </div>
@@ -243,7 +243,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           <div class="text-warning mb-3">
             <i class="bi bi-hourglass-split display-6"></i>
           </div>
-          <h2 class="h2 fw-bold text-dark mb-1"><?= (int) $pipeline['total_pending'] ?></h2>
+          <h2 class="h2 fw-bold text-dark mb-1"><?= esc((int) $pipeline['total_pending']) ?></h2>
           <p class="text-muted small text-uppercase tracking-wide mb-0">Awaiting Action</p>
         </div>
       </div>
@@ -252,7 +252,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           <div class="text-dark mb-3">
             <i class="bi bi-files display-6"></i>
           </div>
-          <h2 class="h2 fw-bold text-dark mb-1"><?= (int) $pipeline['total_apps'] ?></h2>
+          <h2 class="h2 fw-bold text-dark mb-1"><?= esc((int) $pipeline['total_apps']) ?></h2>
           <p class="text-muted small text-uppercase tracking-wide mb-0">Total Submissions</p>
         </div>
       </div>

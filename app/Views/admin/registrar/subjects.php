@@ -74,10 +74,10 @@ require_once __DIR__ . '/../../components/header.php';
                 </tr>
               <?php else: ?>
                 <?php foreach ($subjects as $subject): ?>
-                  <tr class="subject-row" data-level="<?= htmlspecialchars($subject['education_level'] ?? 'College', ENT_QUOTES, 'UTF-8') ?>" data-status="<?= $subject['status'] ?>">
+                  <tr class="subject-row" data-level="<?= htmlspecialchars($subject['education_level'] ?? 'College', ENT_QUOTES, 'UTF-8') ?>" data-status="<?= esc($subject['status']) ?>">
                     <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($subject['subject_code'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><?= htmlspecialchars($subject['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= (int)$subject['units'] ?></td>
+                    <td><?= esc((int)$subject['units']) ?></td>
                     <td>
                       <span class="badge bg-light text-secondary border"><?= htmlspecialchars($subject['subject_type'] ?: 'Lecture', ENT_QUOTES, 'UTF-8') ?></span>
                     </td>
@@ -98,26 +98,26 @@ require_once __DIR__ . '/../../components/header.php';
                       <?php endif; ?>
                     </td>
                     <td class="text-end pe-4">
-                      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSubjectModal<?= $subject['id'] ?>">
+                      <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editSubjectModal<?= esc($subject['id']) ?>">
                         <i class="bi bi-pencil"></i> Edit
                       </button>
                       <button type="button" class="btn btn-sm btn-outline-danger ms-1" 
                               data-bs-toggle="modal" 
                               data-bs-target="#deleteSubjectModal"
-                              onclick="setDeleteSubject(<?= $subject['id'] ?>, '<?= htmlspecialchars($subject['subject_code'], ENT_QUOTES, 'UTF-8') ?>')">
+                              onclick="setDeleteSubject(<?= esc($subject['id']) ?>, '<?= htmlspecialchars($subject['subject_code'], ENT_QUOTES, 'UTF-8') ?>')">
                         <i class="bi bi-trash-fill"></i> Delete
                       </button>
                     </td>
                   </tr>
 
                   <!-- Edit Subject Modal -->
-                  <div class="modal fade" id="editSubjectModal<?= $subject['id'] ?>" tabindex="-1">
+                  <div class="modal fade" id="editSubjectModal<?= esc($subject['id']) ?>" tabindex="-1">
                     <div class="modal-dialog">
                       <div class="modal-content">
                         <form action="subject_process.php" method="POST">
                           <?= getCsrfInput() ?>
                           <input type="hidden" name="action" value="edit">
-                          <input type="hidden" name="subject_id" value="<?= $subject['id'] ?>">
+                          <input type="hidden" name="subject_id" value="<?= esc($subject['id']) ?>">
                           <div class="modal-header">
                             <h5 class="modal-title">Edit Subject</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -133,16 +133,16 @@ require_once __DIR__ . '/../../components/header.php';
                             </div>
                             <div class="mb-3">
                               <label class="form-label">Units <span class="text-danger">*</span></label>
-                              <input type="number" class="form-control" name="units" value="<?= (int)$subject['units'] ?>" min="1" required>
+                              <input type="number" class="form-control" name="units" value="<?= esc((int)$subject['units']) ?>" min="1" required>
                             </div>
                             <div class="mb-3">
                               <label class="form-label">Subject Type <span class="text-danger">*</span></label>
                               <select class="form-select" name="subject_type">
-                                <option value="Lecture" <?= ($subject['subject_type'] ?? '') === 'Lecture' ? 'selected' : '' ?>>Lecture</option>
-                                <option value="Laboratory" <?= ($subject['subject_type'] ?? '') === 'Laboratory' ? 'selected' : '' ?>>Laboratory</option>
-                                <option value="PE" <?= ($subject['subject_type'] ?? '') === 'PE' ? 'selected' : '' ?>>P.E.</option>
-                                <option value="NSTP" <?= ($subject['subject_type'] ?? '') === 'NSTP' ? 'selected' : '' ?>>NSTP</option>
-                                <option value="Other" <?= ($subject['subject_type'] ?? '') === 'Other' ? 'selected' : '' ?>>Other</option>
+                                <option value="Lecture" <?= esc(($subject['subject_type'] ?? '') === 'Lecture' ? 'selected' : '') ?>>Lecture</option>
+                                <option value="Laboratory" <?= esc(($subject['subject_type'] ?? '') === 'Laboratory' ? 'selected' : '') ?>>Laboratory</option>
+                                <option value="PE" <?= esc(($subject['subject_type'] ?? '') === 'PE' ? 'selected' : '') ?>>P.E.</option>
+                                <option value="NSTP" <?= esc(($subject['subject_type'] ?? '') === 'NSTP' ? 'selected' : '') ?>>NSTP</option>
+                                <option value="Other" <?= esc(($subject['subject_type'] ?? '') === 'Other' ? 'selected' : '') ?>>Other</option>
                               </select>
                             </div>
                             <div class="mb-3">
@@ -152,16 +152,16 @@ require_once __DIR__ . '/../../components/header.php';
                             <div class="mb-3">
                               <label class="form-label">Education Level</label>
                               <select class="form-select" name="education_level">
-                                <option value="College" <?= ($subject['education_level'] ?? 'College') === 'College' ? 'selected' : '' ?>>College</option>
-                                <option value="SHS" <?= ($subject['education_level'] ?? '') === 'SHS' ? 'selected' : '' ?>>SHS</option>
-                                <option value="Both" <?= ($subject['education_level'] ?? '') === 'Both' ? 'selected' : '' ?>>Both (College & SHS)</option>
+                                <option value="College" <?= esc(($subject['education_level'] ?? 'College') === 'College' ? 'selected' : '') ?>>College</option>
+                                <option value="SHS" <?= esc(($subject['education_level'] ?? '') === 'SHS' ? 'selected' : '') ?>>SHS</option>
+                                <option value="Both" <?= esc(($subject['education_level'] ?? '') === 'Both' ? 'selected' : '') ?>>Both (College & SHS)</option>
                               </select>
                             </div>
                             <div class="mb-3">
                               <label class="form-label">Status</label>
                               <select class="form-select" name="status">
-                                <option value="1" <?= $subject['status'] ? 'selected' : '' ?>>Active</option>
-                                <option value="0" <?= !$subject['status'] ? 'selected' : '' ?>>Inactive</option>
+                                <option value="1" <?= esc($subject['status'] ? 'selected' : '') ?>>Active</option>
+                                <option value="0" <?= esc(!$subject['status'] ? 'selected' : '') ?>>Inactive</option>
                               </select>
                             </div>
                           </div>

@@ -27,7 +27,7 @@
                                 <th colspan="<?= count($gradebook['quizzes']) ?>" class="bg-info bg-opacity-10 text-info border-info border-opacity-25">Quizzes</th>
                             <?php endif; ?>
 
-                            <th rowspan="2" class="bg-light text-dark fw-bold">Total Pts<br><span class="text-muted small fw-normal"><?= $gradebook['total_possible'] ?></span></th>
+                            <th rowspan="2" class="bg-light text-dark fw-bold">Total Pts<br><span class="text-muted small fw-normal"><?= esc($gradebook['total_possible']) ?></span></th>
                             <th rowspan="2" class="bg-light text-dark fw-bold">Percentage</th>
                         </tr>
                         <tr>
@@ -36,7 +36,7 @@
                                     <div class="text-truncate" style="max-width: 100px;" title="<?= htmlspecialchars($a['title']) ?>">
                                         <?= htmlspecialchars($a['title']) ?>
                                     </div>
-                                    <div class="text-muted"><?= $a['max_score'] ?> pts</div>
+                                    <div class="text-muted"><?= esc($a['max_score']) ?> pts</div>
                                 </th>
                             <?php endforeach; ?>
 
@@ -45,7 +45,7 @@
                                     <div class="text-truncate" style="max-width: 100px;" title="<?= htmlspecialchars($q['title']) ?>">
                                         <?= htmlspecialchars($q['title']) ?>
                                     </div>
-                                    <div class="text-muted"><?= $gradebook['quiz_max_points'][$q['id']] ?> pts</div>
+                                    <div class="text-muted"><?= esc($gradebook['quiz_max_points'][$q['id']]) ?> pts</div>
                                 </th>
                             <?php endforeach; ?>
                         </tr>
@@ -65,19 +65,19 @@
                                     </td>
 
                                     <?php foreach ($gradebook['assignments'] as $a): ?>
-                                        <td class="<?= $row['assignments'][$a['id']] === null ? 'text-muted bg-light' : '' ?>">
-                                            <?= $row['assignments'][$a['id']] !== null ? $row['assignments'][$a['id']] : '-' ?>
+                                        <td class="<?= esc($row['assignments'][$a['id']] === null ? 'text-muted bg-light' : '') ?>">
+                                            <?= esc($row['assignments'][$a['id']] !== null ? $row['assignments'][$a['id']] : '-') ?>
                                         </td>
                                     <?php endforeach; ?>
 
                                     <?php foreach ($gradebook['quizzes'] as $q): ?>
-                                        <td class="<?= $row['quizzes'][$q['id']] === null ? 'text-muted bg-light' : '' ?>">
-                                            <?= $row['quizzes'][$q['id']] !== null ? $row['quizzes'][$q['id']] : '-' ?>
+                                        <td class="<?= esc($row['quizzes'][$q['id']] === null ? 'text-muted bg-light' : '') ?>">
+                                            <?= esc($row['quizzes'][$q['id']] !== null ? $row['quizzes'][$q['id']] : '-') ?>
                                         </td>
                                     <?php endforeach; ?>
 
-                                    <td class="fw-bold bg-light"><?= $row['total'] ?></td>
-                                    <td class="fw-bold bg-light <?= $row['percentage'] >= 75 ? 'text-success' : 'text-danger' ?>">
+                                    <td class="fw-bold bg-light"><?= esc($row['total']) ?></td>
+                                    <td class="fw-bold bg-light <?= esc($row['percentage'] >= 75 ? 'text-success' : 'text-danger') ?>">
                                         <?= number_format($row['percentage'], 1) ?>%
                                     </td>
                                 </tr>

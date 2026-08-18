@@ -6,7 +6,7 @@
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
             <li class="breadcrumb-item"><a href="/sia/lms/student/my_courses.php" class="text-decoration-none">My Courses</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= $course['lms_course_id'] ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
             <li class="breadcrumb-item active" aria-current="page">Assignment</li>
         </ol>
     </nav>
@@ -18,13 +18,13 @@
                 <div class="d-flex justify-content-between align-items-start mb-3">
                     <h1 class="h3 fw-bold text-dark mb-0"><?= htmlspecialchars($assignment['title']) ?></h1>
                     <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-2 fs-6">
-                        <?= $assignment['max_score'] ?> pts
+                        <?= esc($assignment['max_score']) ?> pts
                     </span>
                 </div>
                 
                 <p class="text-muted mb-4 fw-medium">
                     <i class="bi bi-calendar-event me-1"></i> Due: 
-                    <?= $assignment['due_date'] ? date('M d, Y h:i A', strtotime($assignment['due_date'])) : 'No deadline' ?>
+                    <?= esc($assignment['due_date'] ? date('M d, Y h:i A', strtotime($assignment['due_date'])) : 'No deadline') ?>
                 </p>
 
                 <h5 class="fw-bold mb-3">Instructions</h5>
@@ -58,7 +58,7 @@
                         </div>
                         <div class="d-flex justify-content-between mb-3">
                             <span class="text-muted fw-bold">File</span>
-                            <a href="/sia/lms/download/submission/<?= $submission['id'] ?>" class="text-decoration-none fw-medium text-truncate" style="max-width: 150px;">
+                            <a href="/sia/lms/download/submission/<?= esc($submission['id']) ?>" class="text-decoration-none fw-medium text-truncate" style="max-width: 150px;">
                                 <i class="bi bi-file-earmark-arrow-down"></i> <?= htmlspecialchars($submission['file_name']) ?>
                             </a>
                         </div>
@@ -67,7 +67,7 @@
                     <!-- Grading / Feedback -->
                     <?php if ($submission['status'] === 'GRADED'): ?>
                         <div class="alert alert-success bg-success bg-opacity-10 border-success border-opacity-25 p-3 rounded-3 mb-4">
-                            <h6 class="alert-heading fw-bold text-success mb-2">Grade: <?= $submission['grade'] ?> / <?= $assignment['max_score'] ?></h6>
+                            <h6 class="alert-heading fw-bold text-success mb-2">Grade: <?= esc($submission['grade']) ?> / <?= esc($assignment['max_score']) ?></h6>
                             <?php if ($submission['feedback']): ?>
                                 <p class="mb-0 text-dark small mt-2 pt-2 border-top border-success border-opacity-25">
                                     <strong>Feedback:</strong><br>
@@ -96,14 +96,14 @@
                 ?>
                 
                 <?php if ($canSubmit): ?>
-                    <form action="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/assignments/<?= $assignment['id'] ?>/submit" method="POST" enctype="multipart/form-data">
+                    <form action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submit" method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
-                            <label class="form-label fw-bold text-muted small text-uppercase">Upload <?= $submission ? 'New ' : '' ?>File</label>
+                            <label class="form-label fw-bold text-muted small text-uppercase">Upload <?= esc($submission ? 'New ' : '') ?>File</label>
                             <input type="file" name="submission_file" class="form-control" required>
                             <div class="form-text">Max file size: 10MB. Allowed formats: PDF, DOCX, ZIP, PNG, JPG.</div>
                         </div>
                         <button type="submit" class="btn btn-primary w-100 fw-bold">
-                            <i class="bi bi-cloud-upload me-2"></i> <?= $submission ? 'Resubmit Assignment' : 'Submit Assignment' ?>
+                            <i class="bi bi-cloud-upload me-2"></i> <?= esc($submission ? 'Resubmit Assignment' : 'Submit Assignment') ?>
                         </button>
                     </form>
                 <?php else: ?>

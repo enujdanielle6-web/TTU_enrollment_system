@@ -79,10 +79,10 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                             <div class="d-flex align-items-center border-bottom pb-2 pt-2">
                                 <?php if ($isChecked): ?>
                                     <i class="bi bi-check-circle-fill text-danger me-3 fs-5"></i>
-                                    <span class="fw-bold text-dark"><?= $label ?></span>
+                                    <span class="fw-bold text-dark"><?= esc($label) ?></span>
                                 <?php else: ?>
                                     <i class="bi bi-x-circle text-muted me-3 fs-5"></i>
-                                    <span class="text-muted"><?= $label ?></span>
+                                    <span class="text-muted"><?= esc($label) ?></span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -152,8 +152,8 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <div class="island-body bg-light fade-in-up" style="animation-delay: 1.5s;">
                     <form action="medical_process.php" method="POST">
                         <?= getCsrfInput() ?>
-                        <input type="hidden" name="record_id" value="<?= $record['id'] ?>">
-                        <input type="hidden" name="user_id" value="<?= $record['user_id'] ?>">
+                        <input type="hidden" name="record_id" value="<?= esc($record['id']) ?>">
+                        <input type="hidden" name="user_id" value="<?= esc($record['user_id']) ?>">
                         
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted text-uppercase">Current Status</label>
@@ -167,7 +167,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                                 };
                             ?>
                             <div class="fs-5 mt-1">
-                                <span class="badge <?= $badgeClass ?> rounded-pill px-3 py-2 w-100"><?= formatApplicationStatus($record['status']) ?></span>
+                                <span class="badge <?= esc($badgeClass) ?> rounded-pill px-3 py-2 w-100"><?= formatApplicationStatus($record['status']) ?></span>
                             </div>
                         </div>
                         
@@ -193,10 +193,10 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                             <div class="mb-3 mt-4">
                                 <label class="form-label fw-semibold text-dark">Update Status</label>
                                 <select name="status" class="form-select" required>
-                                    <option value="pending" <?= $record['status'] === 'pending' ? 'selected' : '' ?>>Pending Review</option>
-                                    <option value="verified" <?= $record['status'] === 'verified' ? 'selected' : '' ?>>Verified (Cleared)</option>
-                                    <option value="correction_required" <?= $record['status'] === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
-                                    <option value="rejected" <?= $record['status'] === 'rejected' ? 'selected' : '' ?>>Rejected</option>
+                                    <option value="pending" <?= esc($record['status'] === 'pending' ? 'selected' : '') ?>>Pending Review</option>
+                                    <option value="verified" <?= esc($record['status'] === 'verified' ? 'selected' : '') ?>>Verified (Cleared)</option>
+                                    <option value="correction_required" <?= esc($record['status'] === 'correction_required' ? 'selected' : '') ?>>Correction Required</option>
+                                    <option value="rejected" <?= esc($record['status'] === 'rejected' ? 'selected' : '') ?>>Rejected</option>
                                 </select>
                             </div>
                             

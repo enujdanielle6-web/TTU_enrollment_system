@@ -83,7 +83,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                       <?php endif; ?>
                     </td>
                     <td>
-                      <?= $scholarship['slots'] ? (int)$scholarship['slots'] : '<span class="text-muted">Unlimited</span>' ?>
+                      <?= esc($scholarship['slots'] ? (int)$scholarship['slots'] : '<span class="text-muted">Unlimited</span>') ?>
                     </td>
                     <td>
                       <?php 
@@ -95,7 +95,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                             default => 'bg-light text-dark'
                         };
                       ?>
-                      <span class="badge <?= $statusClass ?> rounded-pill px-3"><?= htmlspecialchars($scholarship['status'], ENT_QUOTES, 'UTF-8') ?></span>
+                      <span class="badge <?= esc($statusClass) ?> rounded-pill px-3"><?= htmlspecialchars($scholarship['status'], ENT_QUOTES, 'UTF-8') ?></span>
                     </td>
                     <td class="text-end pe-4">
                       <button class="btn btn-sm btn-outline-secondary rounded-pill edit-scholarship-btn" 
@@ -218,7 +218,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                     <select class="form-select bg-light" name="program_id" id="s_program">
                         <option value="">-- No Restriction --</option>
                         <?php foreach ($programs as $prog): ?>
-                            <option value="<?= $prog['id'] ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?></option>
+                            <option value="<?= esc($prog['id']) ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>

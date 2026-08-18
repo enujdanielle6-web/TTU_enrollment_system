@@ -48,10 +48,10 @@ require_once __DIR__ . '/../components/header.php';
         <div class="mt-4 p-3 bg-white bg-opacity-75 rounded-12 shadow-sm border border-white">
           <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="text-dark small fw-bold"><i class="bi bi-percent me-1 text-primary"></i>Enrollment Completion Progress</span>
-            <span class="badge bg-primary rounded-pill"><?= $completionPercentage ?>% Complete</span>
+            <span class="badge bg-primary rounded-pill"><?= esc($completionPercentage) ?>% Complete</span>
           </div>
           <div class="progress" style="height: 10px; background-color: rgba(0, 0, 0, 0.05);">
-            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: <?= $completionPercentage ?>%" aria-valuenow="<?= $completionPercentage ?>" aria-valuemin="0" aria-valuemax="100"></div>
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: <?= esc($completionPercentage) ?>%" aria-valuenow="<?= esc($completionPercentage) ?>" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
           <div class="d-flex justify-content-between text-muted small mt-2" style="font-size: 0.75rem;">
             <span>Account (10%)</span>
@@ -402,7 +402,7 @@ require_once __DIR__ . '/../components/header.php';
                   </div>
                 <?php else: ?>
                   <?php foreach ($activities as $index => $activity): ?>
-                    <div class="list-group-item bg-transparent border-0 px-0 <?= $index > 0 ? 'pt-3 pb-3 border-top border-light' : 'pb-3' ?>">
+                    <div class="list-group-item bg-transparent border-0 px-0 <?= esc($index > 0 ? 'pt-3 pb-3 border-top border-light' : 'pb-3') ?>">
                       <div class="d-flex w-100 justify-content-between mb-1">
                         <h6 class="mb-0 fw-bold"><i class="bi <?= htmlspecialchars($activity['icon'], ENT_QUOTES, 'UTF-8'); ?> text-primary me-2"></i><?= htmlspecialchars($activity['title'], ENT_QUOTES, 'UTF-8'); ?></h6>
                         <small class="text-muted"><?= htmlspecialchars(date('M j, Y g:i A', strtotime($activity['created_at'])), ENT_QUOTES, 'UTF-8'); ?></small>
@@ -459,20 +459,20 @@ require_once __DIR__ . '/../components/header.php';
                 <div class="mb-3">
                   <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="text-muted small fw-semibold">Upload Progress</span>
-                    <span class="text-dark small fw-bold"><?= $docPercent ?>%</span>
+                    <span class="text-dark small fw-bold"><?= esc($docPercent) ?>%</span>
                   </div>
                   <div class="progress" style="height: 6px;">
-                    <div class="progress-bar bg-info" role="progressbar" style="width: <?= $docPercent ?>%" aria-valuenow="<?= $docPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-info" role="progressbar" style="width: <?= esc($docPercent) ?>%" aria-valuenow="<?= esc($docPercent) ?>" aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
                 </div>
                 
                 <div class="mb-3">
                   <div class="d-flex justify-content-between align-items-center mb-1">
                     <span class="text-muted small fw-semibold">Verification Progress</span>
-                    <span class="text-dark small fw-bold"><?= $verPercent ?>%</span>
+                    <span class="text-dark small fw-bold"><?= esc($verPercent) ?>%</span>
                   </div>
                   <div class="progress" style="height: 6px;">
-                    <div class="progress-bar bg-success" role="progressbar" style="width: <?= $verPercent ?>%" aria-valuenow="<?= $verPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                    <div class="progress-bar bg-success" role="progressbar" style="width: <?= esc($verPercent) ?>%" aria-valuenow="<?= esc($verPercent) ?>" aria-valuemin="0" aria-valuemax="100"></div>
                   </div>
                 </div>
 
@@ -495,8 +495,8 @@ require_once __DIR__ . '/../components/header.php';
                     ?>
                     <li class="list-group-item bg-transparent px-0 py-2 border-light">
                       <div class="d-flex justify-content-between align-items-center">
-                        <span><i class="bi <?= $docIcon ?> me-2"></i><?= htmlspecialchars($doc['name'], ENT_QUOTES, 'UTF-8'); ?></span>
-                        <span class="badge <?= $docBadge ?>"><?= htmlspecialchars($docStatus, ENT_QUOTES, 'UTF-8'); ?></span>
+                        <span><i class="bi <?= esc($docIcon) ?> me-2"></i><?= htmlspecialchars($doc['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                        <span class="badge <?= esc($docBadge) ?>"><?= htmlspecialchars($docStatus, ENT_QUOTES, 'UTF-8'); ?></span>
                       </div>
                       <?php if (!empty($doc['feedback'])): ?>
                         <div class="text-muted mt-1 ps-4" style="font-size: 0.75rem;">
@@ -525,8 +525,8 @@ require_once __DIR__ . '/../components/header.php';
                 </div>
               <?php else: ?>
                 <?php foreach ($announcements as $index => $ann): ?>
-                  <div class="<?= $index > 0 ? 'mb-3 border-top pt-3 border-light' : 'mb-3' ?>">
-                    <span class="badge bg-<?= htmlspecialchars($ann['badge_color'], ENT_QUOTES, 'UTF-8'); ?><?= in_array($ann['badge_color'], ['warning', 'info']) ? ' text-dark' : ''; ?> mb-1 small"><?= htmlspecialchars($ann['badge_label'], ENT_QUOTES, 'UTF-8'); ?></span>
+                  <div class="<?= esc($index > 0 ? 'mb-3 border-top pt-3 border-light' : 'mb-3') ?>">
+                    <span class="badge bg-<?= htmlspecialchars($ann['badge_color'], ENT_QUOTES, 'UTF-8'); ?><?= esc(in_array($ann['badge_color'], ['warning', 'info']) ? ' text-dark' : '';) ?> mb-1 small"><?= htmlspecialchars($ann['badge_label'], ENT_QUOTES, 'UTF-8'); ?></span>
                     <h6 class="fw-bold mb-1 small text-dark"><?= htmlspecialchars($ann['title'], ENT_QUOTES, 'UTF-8'); ?></h6>
                     <p class="text-muted mb-0" style="font-size: 0.8rem;"><?= nl2br(htmlspecialchars($ann['content'], ENT_QUOTES, 'UTF-8')); ?></p>
                   </div>

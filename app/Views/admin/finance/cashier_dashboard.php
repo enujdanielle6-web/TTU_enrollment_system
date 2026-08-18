@@ -172,10 +172,10 @@ try {
                             default => 'bg-warning text-dark'
                         };
                       ?>
-                      <span class="badge <?= $badgeClass ?> rounded-pill px-3"><?= ucfirst($acc['payment_status']) ?></span>
+                      <span class="badge <?= esc($badgeClass) ?> rounded-pill px-3"><?= ucfirst($acc['payment_status']) ?></span>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="cashier_assessment.php?id=<?= $acc['assessment_id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
+                      <a href="cashier_assessment.php?id=<?= esc($acc['assessment_id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
                         Manage <i class="bi bi-arrow-right ms-1"></i>
                       </a>
                     </td>

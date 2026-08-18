@@ -6,7 +6,7 @@
             <h1 class="h3 fw-bold text-dark mb-1">Announcements: <?= htmlspecialchars($course['subject_code']) ?></h1>
             <p class="text-muted mb-0"><?= htmlspecialchars($course['subject_name']) ?> &bull; Section <?= htmlspecialchars($course['section_code']) ?></p>
         </div>
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/announcements/create" class="btn btn-primary shadow-sm">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/create" class="btn btn-primary shadow-sm">
             <i class="bi bi-plus-circle me-1"></i> New Announcement
         </a>
     </div>
@@ -30,7 +30,7 @@
                                     <?php else: ?>
                                         <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 px-3 py-2"><i class="bi bi-pencil me-1"></i> Draft</span>
                                     <?php endif; ?>
-                                    <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/announcements/<?= $ann['id'] ?>/edit" class="btn btn-sm btn-outline-primary">
+                                    <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/<?= esc($ann['id']) ?>/edit" class="btn btn-sm btn-outline-primary">
                                         Edit
                                     </a>
                                 </div>

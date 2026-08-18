@@ -17,7 +17,7 @@ $pageTitle = $pageTitle ?? 'Triple T University';
   <link rel="stylesheet" href="/sia/public/vendor/fonts/fonts.css">
   <link href="/sia/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
   <link href="/sia/public/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
-  <link href="/sia/css/main.css?v=<?= filemtime(__DIR__ . '/../../../css/main.css') ?>" rel="stylesheet">
+  <link href="/sia/css/main.css?v=<?= esc(filemtime(__DIR__ . '/../../../css/main.css')) ?>" rel="stylesheet">
 </head>
 <body>
 

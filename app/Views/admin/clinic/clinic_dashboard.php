@@ -55,7 +55,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                   <i class="bi bi-heart-pulse fs-4"></i>
                 </div>
               </div>
-              <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['pending_medical'] ?></h2>
+              <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['pending_medical']) ?></h2>
               <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Pending Clearances</p>
             </div>
         </a>
@@ -69,7 +69,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <i class="bi bi-shield-check fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['total_verified'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['total_verified']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Total Verified</p>
         </div>
       </div>
@@ -120,7 +120,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     ?>
                   </td>
                   <td class="text-end pe-4">
-                    <a href="medical_detail.php?id=<?= $rec['id'] ?>" class="btn btn-sm btn-light border-0 shadow-sm rounded-pill px-3 fw-medium text-primary hover-lift">
+                    <a href="medical_detail.php?id=<?= esc($rec['id']) ?>" class="btn btn-sm btn-light border-0 shadow-sm rounded-pill px-3 fw-medium text-primary hover-lift">
                       Review <i class="bi bi-arrow-right ms-1"></i>
                     </a>
                   </td>

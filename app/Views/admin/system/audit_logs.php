@@ -147,7 +147,7 @@ $totalPages = ceil($totalLogs / $limit);
                                   default => 'bg-secondary'
                               };
                             ?>
-                            <span class="badge <?= $logBadge ?> ms-1" style="font-size: 0.6rem;"><?= strtoupper($log['role']) ?></span>
+                            <span class="badge <?= esc($logBadge) ?> ms-1" style="font-size: 0.6rem;"><?= strtoupper($log['role']) ?></span>
                             <?php if (!empty($log['department'])): ?>
                               <span class="badge bg-light text-dark border border-secondary-subtle ms-1" style="font-size: 0.6rem;"><i class="bi bi-building me-1"></i><?= htmlspecialchars(ucfirst($log['department']), ENT_QUOTES, 'UTF-8') ?></span>
                             <?php endif; ?>
@@ -173,7 +173,7 @@ $totalPages = ceil($totalLogs / $limit);
                     </td>
                     <td class="text-end pe-4">
                       <?php if ($log['old_value'] || $log['new_value']): ?>
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#logModal<?= $log['id'] ?>">
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#logModal<?= esc($log['id']) ?>">
                           View
                         </button>
 
@@ -192,11 +192,11 @@ $totalPages = ceil($totalLogs / $limit);
       <!-- Pagination Controls -->
       <?php if ($totalPages > 1): ?>
         <div class="island-body border-top border-light py-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.5s;">
-          <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?> (<?= $totalLogs ?> total entries)</span>
+          <span class="text-muted small">Showing page <?= esc($page) ?> of <?= esc($totalPages) ?> (<?= esc($totalLogs) ?> total entries)</span>
           <nav aria-label="Audit Log Pagination">
             <ul class="pagination pagination-sm mb-0">
-              <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?page=<?= $page - 1 ?>&search=<?= urlencode($searchQuery) ?>" tabindex="-1" aria-disabled="true">Previous</a>
+              <li class="page-item <?= esc(($page <= 1) ? 'disabled' : '') ?>">
+                <a class="page-link" href="?page=<?= esc($page - 1) ?>&search=<?= esc(urlencode($searchQuery)) ?>" tabindex="-1" aria-disabled="true">Previous</a>
               </li>
               
               <?php
@@ -208,8 +208,8 @@ $totalPages = ceil($totalLogs / $limit);
               }
               
               for ($i = $startPage; $i <= $endPage; $i++): ?>
-                <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
-                  <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($searchQuery) ?>"><?= $i ?></a>
+                <li class="page-item <?= esc(($i === $page) ? 'active' : '') ?>">
+                  <a class="page-link" href="?page=<?= esc($i) ?>&search=<?= esc(urlencode($searchQuery)) ?>"><?= esc($i) ?></a>
                 </li>
               <?php endfor; 
               
@@ -218,8 +218,8 @@ $totalPages = ceil($totalLogs / $limit);
               }
               ?>
               
-              <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?page=<?= $page + 1 ?>&search=<?= urlencode($searchQuery) ?>">Next</a>
+              <li class="page-item <?= esc(($page >= $totalPages) ? 'disabled' : '') ?>">
+                <a class="page-link" href="?page=<?= esc($page + 1) ?>&search=<?= esc(urlencode($searchQuery)) ?>">Next</a>
               </li>
             </ul>
           </nav>
@@ -236,7 +236,7 @@ $totalPages = ceil($totalLogs / $limit);
 <?php foreach ($logs as $log): ?>
   <?php if ($log['old_value'] || $log['new_value']): ?>
                         <!-- Log Details Modal -->
-                        <div class="modal fade" id="logModal<?= $log['id'] ?>" tabindex="-1" aria-hidden="true">
+                        <div class="modal fade" id="logModal<?= esc($log['id']) ?>" tabindex="-1" aria-hidden="true">
                           <div class="modal-dialog modal-lg modal-dialog-centered">
                             <div class="modal-content text-start">
                               <div class="modal-header border-bottom-0 pb-0">

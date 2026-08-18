@@ -30,11 +30,11 @@ foreach ($events as $event) {
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-header bg-white border-bottom p-4 d-flex justify-content-between align-items-center">
-            <h4 class="mb-0 fw-bold"><?= $monthName ?> <?= $year ?></h4>
+            <h4 class="mb-0 fw-bold"><?= esc($monthName) ?> <?= esc($year) ?></h4>
             <div class="btn-group">
-                <a href="/sia/lms/faculty/calendar?month=<?= $prevMonth ?>&year=<?= $prevYear ?>" class="btn btn-outline-secondary"><i class="bi bi-chevron-left"></i></a>
+                <a href="/sia/lms/faculty/calendar?month=<?= esc($prevMonth) ?>&year=<?= esc($prevYear) ?>" class="btn btn-outline-secondary"><i class="bi bi-chevron-left"></i></a>
                 <a href="/sia/lms/faculty/calendar?month=<?= date('m') ?>&year=<?= date('Y') ?>" class="btn btn-outline-secondary">Today</a>
-                <a href="/sia/lms/faculty/calendar?month=<?= $nextMonth ?>&year=<?= $nextYear ?>" class="btn btn-outline-secondary"><i class="bi bi-chevron-right"></i></a>
+                <a href="/sia/lms/faculty/calendar?month=<?= esc($nextMonth) ?>&year=<?= esc($nextYear) ?>" class="btn btn-outline-secondary"><i class="bi bi-chevron-right"></i></a>
             </div>
         </div>
         <div class="card-body p-0">

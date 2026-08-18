@@ -73,7 +73,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
               <i class="bi bi-hourglass-split fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['pending'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['pending']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Pending Apps</p>
         </div>
       </div>
@@ -86,7 +86,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
               <i class="bi bi-award fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['approved'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['approved']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Approved</p>
         </div>
       </div>
@@ -99,7 +99,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
               <i class="bi bi-x-circle fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['rejected'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['rejected']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Rejected</p>
         </div>
       </div>
@@ -112,7 +112,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
               <i class="bi bi-inbox fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['total'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['total']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Total Apps</p>
         </div>
       </div>
@@ -181,13 +181,13 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                             default => ucfirst($app['status'])
                         };
                       ?>
-                      <span class="badge <?= $badgeClass ?> rounded-pill px-3"><?= $statusLabel ?></span>
+                      <span class="badge <?= esc($badgeClass) ?> rounded-pill px-3"><?= esc($statusLabel) ?></span>
                     </td>
                     <td>
                       <?= date('M d, Y', strtotime($app['created_at'])) ?>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="scholarship_detail.php?id=<?= $app['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
+                      <a href="scholarship_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
                         Review <i class="bi bi-arrow-right ms-1"></i>
                       </a>
                     </td>

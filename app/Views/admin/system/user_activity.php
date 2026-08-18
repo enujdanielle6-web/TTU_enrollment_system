@@ -115,12 +115,12 @@ $totalPages = ceil($totalLogs / $limit);
                     </td>
                     <td class="text-end pe-4">
                       <?php if ($log['old_value'] || $log['new_value']): ?>
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#logModal<?= $log['id'] ?>">
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#logModal<?= esc($log['id']) ?>">
                           View
                         </button>
 
                         <!-- Log Details Modal -->
-                        <div class="modal fade" id="logModal<?= $log['id'] ?>" tabindex="-1" aria-hidden="true">
+                        <div class="modal fade" id="logModal<?= esc($log['id']) ?>" tabindex="-1" aria-hidden="true">
                           <div class="modal-dialog modal-lg modal-dialog-centered">
                             <div class="modal-content text-start">
                               <div class="modal-header border-bottom-0 pb-0">
@@ -181,21 +181,21 @@ $totalPages = ceil($totalLogs / $limit);
       <!-- Pagination Controls -->
       <?php if ($totalPages > 1): ?>
         <div class="island-body border-top border-light py-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.5s;">
-          <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?></span>
+          <span class="text-muted small">Showing page <?= esc($page) ?> of <?= esc($totalPages) ?></span>
           <nav aria-label="Activity Pagination">
             <ul class="pagination pagination-sm mb-0">
-              <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?id=<?= $userId ?>&page=<?= $page - 1 ?>">Previous</a>
+              <li class="page-item <?= esc(($page <= 1) ? 'disabled' : '') ?>">
+                <a class="page-link" href="?id=<?= esc($userId) ?>&page=<?= esc($page - 1) ?>">Previous</a>
               </li>
               
               <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
-                  <a class="page-link" href="?id=<?= $userId ?>&page=<?= $i ?>"><?= $i ?></a>
+                <li class="page-item <?= esc(($i === $page) ? 'active' : '') ?>">
+                  <a class="page-link" href="?id=<?= esc($userId) ?>&page=<?= esc($i) ?>"><?= esc($i) ?></a>
                 </li>
               <?php endfor; ?>
               
-              <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?id=<?= $userId ?>&page=<?= $page + 1 ?>">Next</a>
+              <li class="page-item <?= esc(($page >= $totalPages) ? 'disabled' : '') ?>">
+                <a class="page-link" href="?id=<?= esc($userId) ?>&page=<?= esc($page + 1) ?>">Next</a>
               </li>
             </ul>
           </nav>

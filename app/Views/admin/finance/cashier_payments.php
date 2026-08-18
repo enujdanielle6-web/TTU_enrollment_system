@@ -107,7 +107,7 @@ try {
                     <td class="text-end pe-4">
                       <?php if ($payment['status'] === 'pending'): ?>
                         <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 fw-semibold verify-btn shadow-sm"
-                                data-id="<?= $payment['id'] ?>"
+                                data-id="<?= esc($payment['id']) ?>"
                                 data-name="<?= htmlspecialchars($payment['student_first'] . ' ' . $payment['student_last'], ENT_QUOTES, 'UTF-8') ?>"
                                 data-amount="<?= number_format((float)$payment['amount'], 2) ?>"
                                 data-method="<?= htmlspecialchars($payment['payment_method'], ENT_QUOTES, 'UTF-8') ?>"
@@ -122,7 +122,7 @@ try {
                           <i class="bi bi-info-circle me-1"></i> Reason
                         </button>
                       <?php else: ?>
-                        <a href="cashier_receipt.php?id=<?= $payment['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
+                        <a href="cashier_receipt.php?id=<?= esc($payment['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
                           <i class="bi bi-printer"></i> View
                         </a>
                       <?php endif; ?>

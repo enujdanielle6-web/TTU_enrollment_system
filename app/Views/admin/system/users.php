@@ -93,15 +93,15 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         <!-- Search and Filter Form -->
         <form action="users.php" method="GET" class="d-flex gap-2 align-items-center flex-wrap">
           <select name="role" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
-            <option value="all" <?= $roleFilter === 'all' ? 'selected' : '' ?>>All Roles</option>
-            <option value="applicant" <?= $roleFilter === 'applicant' ? 'selected' : '' ?>>Applicants</option>
-            <option value="superadmin" <?= $roleFilter === 'superadmin' ? 'selected' : '' ?>>Super Administrators</option>
-            <option value="admin" <?= $roleFilter === 'admin' ? 'selected' : '' ?>>Registrars</option>
-            <option value="scheduler" <?= $roleFilter === 'scheduler' ? 'selected' : '' ?>>Schedulers</option>
-            <option value="admissions" <?= $roleFilter === 'admissions' ? 'selected' : '' ?>>Admissions Officers</option>
-            <option value="scholarship" <?= $roleFilter === 'scholarship' ? 'selected' : '' ?>>Scholarship Officers</option>
-            <option value="cashier" <?= $roleFilter === 'cashier' ? 'selected' : '' ?>>Cashiers</option>
-            <option value="clinic" <?= $roleFilter === 'clinic' ? 'selected' : '' ?>>Clinic Officers</option>
+            <option value="all" <?= esc($roleFilter === 'all' ? 'selected' : '') ?>>All Roles</option>
+            <option value="applicant" <?= esc($roleFilter === 'applicant' ? 'selected' : '') ?>>Applicants</option>
+            <option value="superadmin" <?= esc($roleFilter === 'superadmin' ? 'selected' : '') ?>>Super Administrators</option>
+            <option value="admin" <?= esc($roleFilter === 'admin' ? 'selected' : '') ?>>Registrars</option>
+            <option value="scheduler" <?= esc($roleFilter === 'scheduler' ? 'selected' : '') ?>>Schedulers</option>
+            <option value="admissions" <?= esc($roleFilter === 'admissions' ? 'selected' : '') ?>>Admissions Officers</option>
+            <option value="scholarship" <?= esc($roleFilter === 'scholarship' ? 'selected' : '') ?>>Scholarship Officers</option>
+            <option value="cashier" <?= esc($roleFilter === 'cashier' ? 'selected' : '') ?>>Cashiers</option>
+            <option value="clinic" <?= esc($roleFilter === 'clinic' ? 'selected' : '') ?>>Clinic Officers</option>
           </select>
           <div class="input-group input-group-sm shadow-sm" style="width: 250px;">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
@@ -180,7 +180,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                             default => 'Applicant'
                         };
                       ?>
-                      <span class="badge <?= $badgeClass ?> rounded-pill px-3"><?= $roleLabel ?></span>
+                      <span class="badge <?= esc($badgeClass) ?> rounded-pill px-3"><?= esc($roleLabel) ?></span>
                     </td>
                     <td>
                       <?php if ((int)$user['is_active'] === 1): ?>
@@ -206,11 +206,11 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                         <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
                           <li>
                             <button class="dropdown-item edit-user-btn" 
-                                    data-id="<?= $user['id'] ?>"
+                                    data-id="<?= esc($user['id']) ?>"
                                     data-fname="<?= htmlspecialchars($user['first_name'], ENT_QUOTES, 'UTF-8') ?>"
                                     data-lname="<?= htmlspecialchars($user['last_name'], ENT_QUOTES, 'UTF-8') ?>"
                                     data-email="<?= htmlspecialchars($user['email'], ENT_QUOTES, 'UTF-8') ?>"
-                                    data-role="<?= $user['role'] ?>"
+                                    data-role="<?= esc($user['role']) ?>"
                                     data-dept="<?= htmlspecialchars($user['department'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     data-perms="<?= htmlspecialchars($user['permissions'] ?? '[]', ENT_QUOTES, 'UTF-8') ?>"
                                     data-bs-toggle="modal" 
@@ -219,14 +219,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                             </button>
                           </li>
                           <li>
-                            <a href="user_activity.php?id=<?= $user['id'] ?>" class="dropdown-item">
+                            <a href="user_activity.php?id=<?= esc($user['id']) ?>" class="dropdown-item">
                               <i class="bi bi-clock-history me-2 text-info"></i> View Activity
                             </a>
                           </li>
                           <li>
                             <form action="user_process.php" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to reset this user\'s password to @Admin123?');">
                               <input type="hidden" name="action" value="reset_password">
-                              <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                              <input type="hidden" name="user_id" value="<?= esc($user['id']) ?>">
                               <?= getCsrfInput() ?>
                               <button type="submit" class="dropdown-item">
                                 <i class="bi bi-key-fill me-2 text-warning"></i> Reset Password
@@ -237,12 +237,12 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                           <li>
                             <form action="user_process.php" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to change the active status of this user?');">
                               <input type="hidden" name="action" value="toggle_status">
-                              <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
-                              <input type="hidden" name="current_status" value="<?= $user['is_active'] ?>">
+                              <input type="hidden" name="user_id" value="<?= esc($user['id']) ?>">
+                              <input type="hidden" name="current_status" value="<?= esc($user['is_active']) ?>">
                               <?= getCsrfInput() ?>
-                              <button type="submit" class="dropdown-item <?= (int)$user['is_active'] === 1 ? 'text-danger' : 'text-success' ?>">
-                                <i class="bi <?= (int)$user['is_active'] === 1 ? 'bi-lock-fill' : 'bi-unlock-fill' ?> me-2"></i> 
-                                <?= (int)$user['is_active'] === 1 ? 'Deactivate Account' : 'Activate Account' ?>
+                              <button type="submit" class="dropdown-item <?= esc((int)$user['is_active'] === 1 ? 'text-danger' : 'text-success') ?>">
+                                <i class="bi <?= esc((int)$user['is_active'] === 1 ? 'bi-lock-fill' : 'bi-unlock-fill') ?> me-2"></i> 
+                                <?= esc((int)$user['is_active'] === 1 ? 'Deactivate Account' : 'Activate Account') ?>
                               </button>
                             </form>
                           </li>
@@ -266,21 +266,21 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       <!-- Pagination Controls -->
       <?php if ($totalPages > 1): ?>
         <div class="island-body border-top border-light py-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.5s;">
-          <span class="text-muted small">Showing page <?= $page ?> of <?= $totalPages ?></span>
+          <span class="text-muted small">Showing page <?= esc($page) ?> of <?= esc($totalPages) ?></span>
           <nav aria-label="User Pagination">
             <ul class="pagination pagination-sm mb-0">
-              <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?page=<?= $page - 1 ?>&search=<?= urlencode($searchQuery) ?>&role=<?= urlencode($roleFilter) ?>">Previous</a>
+              <li class="page-item <?= esc(($page <= 1) ? 'disabled' : '') ?>">
+                <a class="page-link" href="?page=<?= esc($page - 1) ?>&search=<?= esc(urlencode($searchQuery)) ?>&role=<?= esc(urlencode($roleFilter)) ?>">Previous</a>
               </li>
               
               <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
-                  <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($searchQuery) ?>&role=<?= urlencode($roleFilter) ?>"><?= $i ?></a>
+                <li class="page-item <?= esc(($i === $page) ? 'active' : '') ?>">
+                  <a class="page-link" href="?page=<?= esc($i) ?>&search=<?= esc(urlencode($searchQuery)) ?>&role=<?= esc(urlencode($roleFilter)) ?>"><?= esc($i) ?></a>
                 </li>
               <?php endfor; ?>
               
-              <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                <a class="page-link" href="?page=<?= $page + 1 ?>&search=<?= urlencode($searchQuery) ?>&role=<?= urlencode($roleFilter) ?>">Next</a>
+              <li class="page-item <?= esc(($page >= $totalPages) ? 'disabled' : '') ?>">
+                <a class="page-link" href="?page=<?= esc($page + 1) ?>&search=<?= esc(urlencode($searchQuery)) ?>&role=<?= esc(urlencode($roleFilter)) ?>">Next</a>
               </li>
             </ul>
           </nav>
@@ -360,8 +360,8 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 foreach ($allPerms as $p): ?>
                 <div class="col-md-4">
                   <div class="form-check">
-                    <input class="form-check-input" type="checkbox" name="permissions[]" value="<?= $p ?>" id="perm_add_<?= str_replace('.', '_', $p) ?>">
-                    <label class="form-check-label text-muted" for="perm_add_<?= str_replace('.', '_', $p) ?>">
+                    <input class="form-check-input" type="checkbox" name="permissions[]" value="<?= esc($p) ?>" id="perm_add_<?= esc(str_replace('.', '_', $p)) ?>">
+                    <label class="form-check-label text-muted" for="perm_add_<?= esc(str_replace('.', '_', $p)) ?>">
                       <?= htmlspecialchars($p) ?>
                     </label>
                   </div>
@@ -438,8 +438,8 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 <?php foreach ($allPerms as $p): ?>
                 <div class="col-md-4">
                   <div class="form-check">
-                    <input class="form-check-input edit-perm-checkbox" type="checkbox" name="permissions[]" value="<?= $p ?>" id="perm_edit_<?= str_replace('.', '_', $p) ?>">
-                    <label class="form-check-label text-muted" for="perm_edit_<?= str_replace('.', '_', $p) ?>">
+                    <input class="form-check-input edit-perm-checkbox" type="checkbox" name="permissions[]" value="<?= esc($p) ?>" id="perm_edit_<?= esc(str_replace('.', '_', $p)) ?>">
+                    <label class="form-check-label text-muted" for="perm_edit_<?= esc(str_replace('.', '_', $p)) ?>">
                       <?= htmlspecialchars($p) ?>
                     </label>
                   </div>

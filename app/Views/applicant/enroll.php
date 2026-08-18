@@ -112,8 +112,8 @@ require_once __DIR__ . '/../components/header.php';
                   <label class="form-label text-muted small fw-semibold" for="gender">Sex (Gender)</label>
                   <select class="form-select" id="gender" name="gender" required>
                     <option value="" disabled selected>Select sex</option>
-                    <option value="male" <?= ($old['gender'] ?? '') === 'male' ? 'selected' : ''; ?>>Male</option>
-                    <option value="female" <?= ($old['gender'] ?? '') === 'female' ? 'selected' : ''; ?>>Female</option>
+                    <option value="male" <?= esc(($old['gender'] ?? '') === 'male' ? 'selected' : '';) ?>>Male</option>
+                    <option value="female" <?= esc(($old['gender'] ?? '') === 'female' ? 'selected' : '';) ?>>Female</option>
                   </select>
                   <div class="invalid-feedback">Please select a sex.</div>
                 </div>
@@ -131,10 +131,10 @@ require_once __DIR__ . '/../components/header.php';
                   <label class="form-label text-muted small fw-semibold" for="civilStatus">Civil Status</label>
                   <select class="form-select" id="civilStatus" name="civil_status" required>
                     <option value="" disabled selected>Select status</option>
-                    <option value="Single" <?= ($old['civil_status'] ?? '') === 'Single' ? 'selected' : ''; ?>>Single</option>
-                    <option value="Married" <?= ($old['civil_status'] ?? '') === 'Married' ? 'selected' : ''; ?>>Married</option>
-                    <option value="Separated" <?= ($old['civil_status'] ?? '') === 'Separated' ? 'selected' : ''; ?>>Separated</option>
-                    <option value="Widowed" <?= ($old['civil_status'] ?? '') === 'Widowed' ? 'selected' : ''; ?>>Widowed</option>
+                    <option value="Single" <?= esc(($old['civil_status'] ?? '') === 'Single' ? 'selected' : '';) ?>>Single</option>
+                    <option value="Married" <?= esc(($old['civil_status'] ?? '') === 'Married' ? 'selected' : '';) ?>>Married</option>
+                    <option value="Separated" <?= esc(($old['civil_status'] ?? '') === 'Separated' ? 'selected' : '';) ?>>Separated</option>
+                    <option value="Widowed" <?= esc(($old['civil_status'] ?? '') === 'Widowed' ? 'selected' : '';) ?>>Widowed</option>
                   </select>
                   <div class="invalid-feedback">Civil status is required.</div>
                 </div>
@@ -323,9 +323,9 @@ require_once __DIR__ . '/../components/header.php';
                   <label class="form-label text-muted small fw-semibold" for="previousSchoolLevel">Previous School Level</label>
                   <select class="form-select" id="previousSchoolLevel" name="previous_school_level" required>
                     <option value="" disabled selected>Select level</option>
-                    <option value="Junior High School" <?= ($old['previous_school_level'] ?? '') === 'Junior High School' ? 'selected' : ''; ?>>Junior High School</option>
-                    <option value="Senior High School" <?= ($old['previous_school_level'] ?? '') === 'Senior High School' ? 'selected' : ''; ?>>Senior High School</option>
-                    <option value="College" <?= ($old['previous_school_level'] ?? '') === 'College' ? 'selected' : ''; ?>>College</option>
+                    <option value="Junior High School" <?= esc(($old['previous_school_level'] ?? '') === 'Junior High School' ? 'selected' : '';) ?>>Junior High School</option>
+                    <option value="Senior High School" <?= esc(($old['previous_school_level'] ?? '') === 'Senior High School' ? 'selected' : '';) ?>>Senior High School</option>
+                    <option value="College" <?= esc(($old['previous_school_level'] ?? '') === 'College' ? 'selected' : '';) ?>>College</option>
                   </select>
                   <div class="invalid-feedback">Previous school level is required.</div>
                 </div>
@@ -338,10 +338,10 @@ require_once __DIR__ . '/../components/header.php';
                   <label class="form-label text-muted small fw-semibold" for="previousSchoolStatus">Status</label>
                   <select class="form-select" id="previousSchoolStatus" name="previous_school_status" required>
                     <option value="" disabled selected>Select status</option>
-                    <option value="Graduated" <?= ($old['previous_school_status'] ?? '') === 'Graduated' ? 'selected' : ''; ?>>Graduated</option>
-                    <option value="Currently Enrolled" <?= ($old['previous_school_status'] ?? '') === 'Currently Enrolled' ? 'selected' : ''; ?>>Currently Enrolled</option>
-                    <option value="Transferee" <?= ($old['previous_school_status'] ?? '') === 'Transferee' ? 'selected' : ''; ?>>Transferee</option>
-                    <option value="Undergraduate" <?= ($old['previous_school_status'] ?? '') === 'Undergraduate' ? 'selected' : ''; ?>>Undergraduate</option>
+                    <option value="Graduated" <?= esc(($old['previous_school_status'] ?? '') === 'Graduated' ? 'selected' : '';) ?>>Graduated</option>
+                    <option value="Currently Enrolled" <?= esc(($old['previous_school_status'] ?? '') === 'Currently Enrolled' ? 'selected' : '';) ?>>Currently Enrolled</option>
+                    <option value="Transferee" <?= esc(($old['previous_school_status'] ?? '') === 'Transferee' ? 'selected' : '';) ?>>Transferee</option>
+                    <option value="Undergraduate" <?= esc(($old['previous_school_status'] ?? '') === 'Undergraduate' ? 'selected' : '';) ?>>Undergraduate</option>
                   </select>
                   <div class="invalid-feedback">Status is required.</div>
                 </div>
@@ -385,9 +385,9 @@ require_once __DIR__ . '/../components/header.php';
                   <label class="form-label text-muted small fw-semibold" for="semester">Semester</label>
                   <select class="form-select" id="semester" name="semester">
                     <option value="" disabled selected>Select semester</option>
-                    <option value="First" <?= ($old['semester'] ?? '') === 'First' ? 'selected' : ''; ?>>First</option>
-                    <option value="Second" <?= ($old['semester'] ?? '') === 'Second' ? 'selected' : ''; ?>>Second</option>
-                    <option value="Summer" <?= ($old['semester'] ?? '') === 'Summer' ? 'selected' : ''; ?>>Summer</option>
+                    <option value="First" <?= esc(($old['semester'] ?? '') === 'First' ? 'selected' : '';) ?>>First</option>
+                    <option value="Second" <?= esc(($old['semester'] ?? '') === 'Second' ? 'selected' : '';) ?>>Second</option>
+                    <option value="Summer" <?= esc(($old['semester'] ?? '') === 'Summer' ? 'selected' : '';) ?>>Summer</option>
                   </select>
                   <div class="invalid-feedback">Semester is required for College.</div>
                 </div>
@@ -395,8 +395,8 @@ require_once __DIR__ . '/../components/header.php';
                   <label class="form-label text-muted small fw-semibold" for="academicLevel">Academic Level</label>
                   <select class="form-select" id="academicLevel" name="academic_level" required>
                     <option value="" disabled selected>Select level</option>
-                    <option value="Senior High School" <?= ($old['academic_level'] ?? '') === 'Senior High School' ? 'selected' : ''; ?>>Senior High School</option>
-                    <option value="College" <?= ($old['academic_level'] ?? '') === 'College' ? 'selected' : ''; ?>>College</option>
+                    <option value="Senior High School" <?= esc(($old['academic_level'] ?? '') === 'Senior High School' ? 'selected' : '';) ?>>Senior High School</option>
+                    <option value="College" <?= esc(($old['academic_level'] ?? '') === 'College' ? 'selected' : '';) ?>>College</option>
                   </select>
                   <div class="invalid-feedback">Academic level is required.</div>
                 </div>
@@ -418,8 +418,8 @@ require_once __DIR__ . '/../components/header.php';
                   <label class="form-label text-muted small fw-semibold" for="studentType">Student Type</label>
                   <select class="form-select" id="studentType" name="student_type" required>
                     <option value="" disabled selected>Select student type</option>
-                    <option value="Regular" <?= ($old['student_type'] ?? '') === 'Regular' ? 'selected' : ''; ?>>Regular</option>
-                    <option value="Irregular" <?= ($old['student_type'] ?? '') === 'Irregular' ? 'selected' : ''; ?>>Irregular</option>
+                    <option value="Regular" <?= esc(($old['student_type'] ?? '') === 'Regular' ? 'selected' : '';) ?>>Regular</option>
+                    <option value="Irregular" <?= esc(($old['student_type'] ?? '') === 'Irregular' ? 'selected' : '';) ?>>Irregular</option>
                   </select>
                   <div class="invalid-feedback">Student type is required.</div>
                 </div>
@@ -427,9 +427,9 @@ require_once __DIR__ . '/../components/header.php';
                   <label class="form-label text-muted small fw-semibold" for="nstp">NSTP Choice</label>
                   <select class="form-select" id="nstp" name="nstp">
                     <option value="" disabled selected>Select NSTP</option>
-                    <option value="CWTS" <?= ($old['nstp'] ?? '') === 'CWTS' ? 'selected' : ''; ?>>CWTS</option>
-                    <option value="ROTC" <?= ($old['nstp'] ?? '') === 'ROTC' ? 'selected' : ''; ?>>ROTC</option>
-                    <option value="LTS" <?= ($old['nstp'] ?? '') === 'LTS' ? 'selected' : ''; ?>>LTS</option>
+                    <option value="CWTS" <?= esc(($old['nstp'] ?? '') === 'CWTS' ? 'selected' : '';) ?>>CWTS</option>
+                    <option value="ROTC" <?= esc(($old['nstp'] ?? '') === 'ROTC' ? 'selected' : '';) ?>>ROTC</option>
+                    <option value="LTS" <?= esc(($old['nstp'] ?? '') === 'LTS' ? 'selected' : '';) ?>>LTS</option>
                   </select>
                   <div class="invalid-feedback">NSTP choice is required for First Year College.</div>
                 </div>
@@ -668,7 +668,7 @@ require_once __DIR__ . '/../components/header.php';
               <div class="mt-4">
                 <button type="button" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold me-2 btn-prev" data-step="7">Back to Review</button>
                 <button class="btn btn-primary px-5 py-2 rounded-pill fw-bold shadow-sm" type="submit" id="finalSubmitBtn">
-                  <i class="bi bi-send-fill me-1"></i> <?= (!empty($existingApp) && $existingApp['status'] === 'correction_required') ? 'Resubmit Application' : 'Submit Application' ?>
+                  <i class="bi bi-send-fill me-1"></i> <?= esc((!empty($existingApp) && $existingApp['status'] === 'correction_required') ? 'Resubmit Application' : 'Submit Application') ?>
                 </button>
               </div>
             </div>

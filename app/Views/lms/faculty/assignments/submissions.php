@@ -2,7 +2,7 @@
 
 <div class="container py-5">
     <div class="mb-4">
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/assignments" class="text-decoration-none">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="text-decoration-none">
             <i class="bi bi-arrow-left me-1"></i> Back to Assignments
         </a>
     </div>
@@ -10,7 +10,7 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4 bg-light border-bottom rounded-top-4">
             <h2 class="h4 fw-bold mb-1"><?= htmlspecialchars($assignment['title']) ?></h2>
-            <p class="text-muted mb-0">Submissions Overview &bull; Max Score: <?= $assignment['max_score'] ?></p>
+            <p class="text-muted mb-0">Submissions Overview &bull; Max Score: <?= esc($assignment['max_score']) ?></p>
         </div>
     </div>
 
@@ -55,32 +55,32 @@
                                         <?= date('M d, Y h:i A', strtotime($sub['submitted_at'])) ?>
                                     </td>
                                     <td>
-                                        <a href="/sia/lms/download/submission/<?= $sub['id'] ?>" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <a href="/sia/lms/download/submission/<?= esc($sub['id']) ?>" class="btn btn-sm btn-outline-primary" target="_blank">
                                             <i class="bi bi-download"></i> <?= htmlspecialchars($sub['file_name']) ?>
                                         </a>
                                     </td>
                                     <td>
-                                        <?= $sub['grade'] !== null ? $sub['grade'] . ' / ' . $assignment['max_score'] : '<span class="text-muted">Not graded</span>' ?>
+                                        <?= esc($sub['grade'] !== null ? $sub['grade'] . ' / ' . $assignment['max_score'] : '<span class="text-muted">Not graded</span>') ?>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#gradeModal<?= $sub['id'] ?>">
-                                            <?= $sub['grade'] !== null ? 'Update Grade' : 'Grade' ?>
+                                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#gradeModal<?= esc($sub['id']) ?>">
+                                            <?= esc($sub['grade'] !== null ? 'Update Grade' : 'Grade') ?>
                                         </button>
 
                                         <!-- Grading Modal -->
-                                        <div class="modal fade text-start" id="gradeModal<?= $sub['id'] ?>" tabindex="-1">
+                                        <div class="modal fade text-start" id="gradeModal<?= esc($sub['id']) ?>" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <form action="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/assignments/<?= $assignment['id'] ?>/grade" method="POST">
-                                                        <input type="hidden" name="submission_id" value="<?= $sub['id'] ?>">
+                                                    <form action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/grade" method="POST">
+                                                        <input type="hidden" name="submission_id" value="<?= esc($sub['id']) ?>">
                                                         <div class="modal-header">
                                                             <h5 class="modal-title">Grade Submission: <?= htmlspecialchars($sub['first_name'] . ' ' . $sub['last_name']) ?></h5>
                                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                         </div>
                                                         <div class="modal-body">
                                                             <div class="mb-3">
-                                                                <label class="form-label fw-bold">Score (out of <?= $assignment['max_score'] ?>)</label>
-                                                                <input type="number" step="0.01" name="grade" class="form-control" value="<?= $sub['grade'] ?>" required max="<?= $assignment['max_score'] ?>" min="0">
+                                                                <label class="form-label fw-bold">Score (out of <?= esc($assignment['max_score']) ?>)</label>
+                                                                <input type="number" step="0.01" name="grade" class="form-control" value="<?= esc($sub['grade']) ?>" required max="<?= esc($assignment['max_score']) ?>" min="0">
                                                             </div>
                                                             <div class="mb-3">
                                                                 <label class="form-label fw-bold">Feedback / Comments (Optional)</label>

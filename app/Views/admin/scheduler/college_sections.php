@@ -88,9 +88,9 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                           $pct = $cap > 0 ? ($enrolled / $cap) * 100 : 0;
                           $bg = $pct >= 100 ? 'bg-danger' : ($pct > 80 ? 'bg-warning' : 'bg-primary');
                         ?>
-                        <div class="fw-medium <?= $pct >= 100 ? 'text-danger' : 'text-dark' ?>"><?= $enrolled ?>/<?= $cap ?></div>
+                        <div class="fw-medium <?= esc($pct >= 100 ? 'text-danger' : 'text-dark') ?>"><?= esc($enrolled) ?>/<?= esc($cap) ?></div>
                         <div class="progress flex-grow-1" style="height: 6px; width: 60px;">
-                          <div class="progress-bar <?= $bg ?>" style="width: <?= min(100, $pct) ?>%"></div>
+                          <div class="progress-bar <?= esc($bg) ?>" style="width: <?= esc(min(100, $pct)) ?>%"></div>
                         </div>
                       </div>
                     </td>
@@ -102,20 +102,20 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       <?php endif; ?>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="schedule_builder.php?type=college&id=<?= $s['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Manage Schedule">
+                      <a href="schedule_builder.php?type=college&id=<?= esc($s['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Manage Schedule">
                         <i class="bi bi-calendar-range"></i>
                       </a>
                       <form method="POST" class="d-inline">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                        <input type="hidden" name="section_id" value="<?= $s['id'] ?>">
+                        <input type="hidden" name="section_id" value="<?= esc($s['id']) ?>">
                         <input type="hidden" name="action" value="toggle_status">
-                        <button type="submit" class="btn btn-sm <?= (int)$s['status'] === 1 ? 'btn-outline-danger' : 'btn-outline-success' ?> rounded-pill me-1" title="Toggle Status">
-                          <i class="bi <?= (int)$s['status'] === 1 ? 'bi-lock' : 'bi-unlock' ?>"></i>
+                        <button type="submit" class="btn btn-sm <?= esc((int)$s['status'] === 1 ? 'btn-outline-danger' : 'btn-outline-success') ?> rounded-pill me-1" title="Toggle Status">
+                          <i class="bi <?= esc((int)$s['status'] === 1 ? 'bi-lock' : 'bi-unlock') ?>"></i>
                         </button>
                       </form>
                       <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" 
                               data-bs-toggle="modal" data-bs-target="#deleteSectionModal" 
-                              onclick="setDeleteSection(<?= $s['id'] ?>, '<?= htmlspecialchars($s['section_code'], ENT_QUOTES, 'UTF-8') ?>')" title="Delete Section">
+                              onclick="setDeleteSection(<?= esc($s['id']) ?>, '<?= htmlspecialchars($s['section_code'], ENT_QUOTES, 'UTF-8') ?>')" title="Delete Section">
                         <i class="bi bi-trash-fill"></i>
                       </button>
                     </td>
@@ -150,7 +150,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <select class="form-select" name="program_id" id="programSelect" required>
                   <option value="" selected disabled>Select a program...</option>
                   <?php foreach ($programs as $prog): ?>
-                    <option value="<?= $prog['id'] ?>" data-category="College">
+                    <option value="<?= esc($prog['id']) ?>" data-category="College">
                       <?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?>
                     </option>
                   <?php endforeach; ?>

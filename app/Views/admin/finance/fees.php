@@ -96,16 +96,16 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                     <td class="text-end pe-4">
                       <!-- Edit Button -->
                       <button class="btn btn-sm btn-outline-secondary rounded-pill edit-template-btn" 
-                              data-id="<?= $template['id'] ?>"
+                              data-id="<?= esc($template['id']) ?>"
                               data-name="<?= htmlspecialchars($template['name'], ENT_QUOTES, 'UTF-8') ?>"
                               data-level="<?= htmlspecialchars($template['academic_level'] ?? 'Senior High School', ENT_QUOTES, 'UTF-8') ?>"
                               data-grade="<?= htmlspecialchars($template['grade_level'], ENT_QUOTES, 'UTF-8') ?>"
                               data-strand="<?= htmlspecialchars($template['strand'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                              data-tuition="<?= $template['tuition_fee'] ?>"
-                              data-misc="<?= $template['miscellaneous_fee'] ?>"
-                              data-reg="<?= $template['registration_fee'] ?>"
-                              data-lab="<?= $template['laboratory_fee'] ?>"
-                              data-other="<?= $template['other_fees'] ?>"
+                              data-tuition="<?= esc($template['tuition_fee']) ?>"
+                              data-misc="<?= esc($template['miscellaneous_fee']) ?>"
+                              data-reg="<?= esc($template['registration_fee']) ?>"
+                              data-lab="<?= esc($template['laboratory_fee']) ?>"
+                              data-other="<?= esc($template['other_fees']) ?>"
                               data-bs-toggle="modal" 
                               data-bs-target="#editFeeTemplateModal">
                         <i class="bi bi-pencil-square"></i> Edit

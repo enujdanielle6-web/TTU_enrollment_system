@@ -25,10 +25,10 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               ? htmlspecialchars($_SESSION['app_detail_back_url'], ENT_QUOTES, 'UTF-8') 
               : 'review.php';
         ?>
-        <a href="<?= $backUrl ?>" class="text-decoration-none text-muted small fw-medium"><i class="bi bi-arrow-left"></i> Back to List</a>
+        <a href="<?= esc($backUrl) ?>" class="text-decoration-none text-muted small fw-medium"><i class="bi bi-arrow-left"></i> Back to List</a>
         <h1 class="h3 fw-bold text-dark mt-2 mb-1">
           Review Application 
-          <span class="badge <?= $badgeClass ?> ms-2 fs-6 align-middle"><?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?></span>
+          <span class="badge <?= esc($badgeClass) ?> ms-2 fs-6 align-middle"><?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?></span>
         </h1>
         <p class="text-muted mb-0">Ref: <span class="fw-medium text-dark"><?= htmlspecialchars($app['reference_number'], ENT_QUOTES, 'UTF-8') ?></span></p>
       </div>
@@ -42,8 +42,8 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
     <?php endif; ?>
 
     <form action="application_process.php" method="POST">
-      <input type="hidden" name="application_id" value="<?= $app['id'] ?>">
-      <input type="hidden" name="user_id" value="<?= $app['user_id'] ?>">
+      <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
+      <input type="hidden" name="user_id" value="<?= esc($app['user_id']) ?>">
       <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
       
       <div class="row g-4">
@@ -190,7 +190,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                         <?php if ($sub['section_code']): ?>
                             <span class="badge bg-secondary mb-1"><?= htmlspecialchars($sub['section_code'], ENT_QUOTES, 'UTF-8') ?></span><br>
                         <?php endif; ?>
-                        <?= $sub['schedule_text'] ?: '<span class="text-muted fst-italic">No schedule</span>' ?>
+                        <?= esc($sub['schedule_text'] ?: '<span class="text-muted fst-italic">No schedule</span>') ?>
                     </td>
                     <td>
                       <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
@@ -204,7 +204,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <tfoot class="table-light">
                   <tr>
                     <td colspan="3" class="text-end fw-bold text-dark">Total Units:</td>
-                    <td class="text-end pe-4 fw-bold text-dark fs-5"><?= $totalUnits ?></td>
+                    <td class="text-end pe-4 fw-bold text-dark fs-5"><?= esc($totalUnits) ?></td>
                   </tr>
                 </tfoot>
               </table>
@@ -383,7 +383,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                          <div class="small text-muted mt-1">Uploaded: <?= date('M j, Y g:i A', strtotime($doc['created_at'])) ?></div>
                        </div>
                        <div>
-                         <a href="document_view.php?id=<?= $doc['id'] ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                         <a href="document_view.php?id=<?= esc($doc['id']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                            <i class="bi bi-eye"></i> View
                          </a>
                        </div>
@@ -392,15 +392,15 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                      <div class="row g-2 mt-2 align-items-center bg-light p-2 rounded-3 border">
                        <div class="col-md-4">
                          <label class="small text-muted fw-bold mb-1">Verify Status</label>
-                         <select name="doc_status[<?= $doc['id'] ?>]" class="form-select form-select-sm">
-                           <option value="pending" <?= $doc['status'] === 'pending' ? 'selected' : '' ?>>Pending / Awaiting</option>
-                           <option value="verified" <?= $doc['status'] === 'verified' ? 'selected' : '' ?>>Verified / Approved</option>
-                           <option value="rejected" <?= $doc['status'] === 'rejected' ? 'selected' : '' ?>>Rejected / Needs Reupload</option>
+                         <select name="doc_status[<?= esc($doc['id']) ?>]" class="form-select form-select-sm">
+                           <option value="pending" <?= esc($doc['status'] === 'pending' ? 'selected' : '') ?>>Pending / Awaiting</option>
+                           <option value="verified" <?= esc($doc['status'] === 'verified' ? 'selected' : '') ?>>Verified / Approved</option>
+                           <option value="rejected" <?= esc($doc['status'] === 'rejected' ? 'selected' : '') ?>>Rejected / Needs Reupload</option>
                          </select>
                        </div>
                        <div class="col-md-8">
                          <label class="small text-muted fw-bold mb-1">Feedback Comment</label>
-                         <input type="text" name="doc_feedback[<?= $doc['id'] ?>]" class="form-control form-control-sm" placeholder="e.g. Please upload clear copy of LRN card..." value="<?= htmlspecialchars($doc['feedback'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                         <input type="text" name="doc_feedback[<?= esc($doc['id']) ?>]" class="form-control form-control-sm" placeholder="e.g. Please upload clear copy of LRN card..." value="<?= htmlspecialchars($doc['feedback'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                        </div>
                      </div>
                    </li>
@@ -431,9 +431,9 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                           $remaining = (int)$sec['capacity'] - (int)$sec['current_enrollment'];
                           $isFull = $remaining <= 0;
                   ?>
-                    <option value="<?= $sec['id'] ?>" <?= $isFull ? 'disabled' : '' ?>>
+                    <option value="<?= esc($sec['id']) ?>" <?= esc($isFull ? 'disabled' : '') ?>>
                       <?= htmlspecialchars($sec['section_code'], ENT_QUOTES, 'UTF-8') ?> 
-                      (<?= $sec['schedule_type'] ?> | <?= $remaining ?> slots left) <?= $isFull ? '[FULL]' : '' ?>
+                      (<?= esc($sec['schedule_type']) ?> | <?= esc($remaining) ?> slots left) <?= esc($isFull ? '[FULL]' : '') ?>
                     </option>
                   <?php endforeach; ?>
                 </select>
@@ -457,14 +457,14 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
               <div class="mb-3">
                 <label for="status" class="form-label fw-semibold small text-dark">Update Status</label>
-                <select name="status" id="status" class="form-select form-select-sm" required <?= $app['status'] === 'enrolled' ? 'disabled' : '' ?>>
+                <select name="status" id="status" class="form-select form-select-sm" required <?= esc($app['status'] === 'enrolled' ? 'disabled' : '') ?>>
                   <?php if ($app['status'] === 'enrolled'): ?>
                     <option value="enrolled" selected>Officially Enrolled</option>
                   <?php else: ?>
-                    <option value="under_review" <?= $app['status'] === 'under_review' ? 'selected' : '' ?> <?= $app['status'] === 'approved' ? 'disabled' : '' ?>>Under Review</option>
-                    <option value="correction_required" <?= $app['status'] === 'correction_required' ? 'selected' : '' ?> <?= $app['status'] === 'approved' ? 'disabled' : '' ?>>Correction Required</option>
-                    <option value="approved" <?= $app['status'] === 'approved' ? 'selected' : '' ?>>Approved</option>
-                    <option value="rejected" <?= $app['status'] === 'rejected' ? 'selected' : '' ?> <?= $app['status'] === 'approved' ? 'disabled' : '' ?>>Rejected</option>
+                    <option value="under_review" <?= esc($app['status'] === 'under_review' ? 'selected' : '') ?> <?= esc($app['status'] === 'approved' ? 'disabled' : '') ?>>Under Review</option>
+                    <option value="correction_required" <?= esc($app['status'] === 'correction_required' ? 'selected' : '') ?> <?= esc($app['status'] === 'approved' ? 'disabled' : '') ?>>Correction Required</option>
+                    <option value="approved" <?= esc($app['status'] === 'approved' ? 'selected' : '') ?>>Approved</option>
+                    <option value="rejected" <?= esc($app['status'] === 'rejected' ? 'selected' : '') ?> <?= esc($app['status'] === 'approved' ? 'disabled' : '') ?>>Rejected</option>
                     <?php if (hasPermission('enrollment.finalize')): ?>
                     <option value="enrolled">Officially Enrolled</option>
                     <?php endif; ?>
@@ -526,7 +526,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <form class="modal-content border-0 shadow" method="POST" action="application_process.php">
       <input type="hidden" name="action" value="update_subjects">
-      <input type="hidden" name="application_id" value="<?= $app['id'] ?>">
+      <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
       
       <div class="modal-header border-bottom-0 bg-primary bg-opacity-10">
         <h5 class="modal-title fw-bold text-primary-emphasis" id="editSubjectsModalLabel"><i class="bi bi-pencil-square me-2"></i>Edit Irregular Subjects</h5>
@@ -544,8 +544,8 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             <select class="form-select" id="subjectSelect">
               <option value="" disabled selected>Select a subject to add...</option>
               <?php foreach ($allSubjects as $sub): ?>
-                <option value="<?= $sub['id'] ?>" data-code="<?= htmlspecialchars($sub['subject_code'], ENT_QUOTES) ?>" data-name="<?= htmlspecialchars($sub['subject_name'], ENT_QUOTES) ?>" data-units="<?= $sub['units'] ?>">
-                  <?= htmlspecialchars($sub['subject_code'] . ' - ' . $sub['subject_name'], ENT_QUOTES) ?> (<?= $sub['units'] ?> Units)
+                <option value="<?= esc($sub['id']) ?>" data-code="<?= htmlspecialchars($sub['subject_code'], ENT_QUOTES) ?>" data-name="<?= htmlspecialchars($sub['subject_name'], ENT_QUOTES) ?>" data-units="<?= esc($sub['units']) ?>">
+                  <?= htmlspecialchars($sub['subject_code'] . ' - ' . $sub['subject_name'], ENT_QUOTES) ?> (<?= esc($sub['units']) ?> Units)
                 </option>
               <?php endforeach; ?>
             </select>
@@ -574,13 +574,13 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <tr>
                   <td class="ps-3 fw-bold text-dark align-middle">
                     <?= htmlspecialchars($sub['subject_code'], ENT_QUOTES) ?>
-                    <input type="hidden" name="subjects[<?= $sub['subject_id'] ?>]" value="<?= $sub['section_id'] ?? '' ?>">
+                    <input type="hidden" name="subjects[<?= esc($sub['subject_id']) ?>]" value="<?= esc($sub['section_id'] ?? '') ?>">
                   </td>
                   <td class="align-middle">
                     <?= htmlspecialchars($sub['subject_name'], ENT_QUOTES) ?>
-                    <div class="text-primary mt-1" style="font-size: 0.65rem;"><?= $sub['schedule_text'] ?></div>
+                    <div class="text-primary mt-1" style="font-size: 0.65rem;"><?= esc($sub['schedule_text']) ?></div>
                   </td>
-                  <td class="text-center align-middle unit-val" data-units="<?= $sub['units'] ?>"><?= $sub['units'] ?></td>
+                  <td class="text-center align-middle unit-val" data-units="<?= esc($sub['units']) ?>"><?= esc($sub['units']) ?></td>
                   <td class="text-center pe-3 align-middle">
                     <button type="button" class="btn btn-sm btn-outline-danger border-0 rounded-circle remove-sub-btn"><i class="bi bi-trash"></i></button>
                   </td>
@@ -723,7 +723,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       previewEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary spinner-border-sm" role="status"></div><span class="ms-2 small text-muted">Retrieving curriculum...</span></div>';
 
-      fetch(`../ajax/get_enrollment_summary.php?section_id=${sectionId}&app_id=<?= $appId ?>`)
+      fetch(`../ajax/get_enrollment_summary.php?section_id=${sectionId}&app_id=<?= esc($appId) ?>`)
         .then(response => response.text())
         .then(html => {
           previewEl.innerHTML = html;

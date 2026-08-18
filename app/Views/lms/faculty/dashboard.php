@@ -20,7 +20,7 @@
         <?php else: ?>
             <?php foreach ($faculty_courses as $course): ?>
                 <div class="col-md-6 col-xl-4">
-                    <a href="/sia/lms/faculty/course.php?id=<?= $course['lms_course_id'] ?>" class="text-decoration-none">
+                    <a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none">
                         <div class="lms-card p-0 border-0 shadow-sm rounded-4 overflow-hidden h-100 position-relative transition-all hover-lift">
                             <div class="bg-primary p-4 text-white d-flex flex-column justify-content-between" style="min-height: 140px; position: relative;">
                                 <div class="position-absolute top-0 end-0 p-3">

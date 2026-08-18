@@ -24,7 +24,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                   <i class="bi bi-hourglass-split fs-4"></i>
                 </div>
               </div>
-              <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['pending_apps'] ?></h2>
+              <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['pending_apps']) ?></h2>
               <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Pending Apps</p>
             </div>
         </a>
@@ -39,7 +39,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                   <i class="bi bi-file-earmark-text fs-4"></i>
                 </div>
               </div>
-              <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['pending_docs'] ?></h2>
+              <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['pending_docs']) ?></h2>
               <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Pending Documents</p>
             </div>
         </a>
@@ -90,12 +90,12 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                           default => 'bg-secondary'
                       };
                     ?>
-                    <span class="badge <?= $statusBadge ?> px-2 py-1 rounded-pill small">
+                    <span class="badge <?= esc($statusBadge) ?> px-2 py-1 rounded-pill small">
                       <?= htmlspecialchars(ucwords(str_replace('_', ' ', $app['status'])), ENT_QUOTES, 'UTF-8') ?>
                     </span>
                   </td>
                   <td class="text-end pe-4">
-                    <a href="application_detail.php?id=<?= $app['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">View</a>
+                    <a href="application_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">View</a>
                   </td>
                 </tr>
                 <?php endforeach; ?>

@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         <a href="scholarship_review.php" class="text-decoration-none text-muted small fw-medium"><i class="bi bi-arrow-left"></i> Back to Queue</a>
         <h1 class="h3 fw-bold text-dark mt-2 mb-1">
           Review Scholarship Application 
-          <span class="badge <?= $badgeClass ?> ms-2 fs-6 align-middle"><?= $statusLabel ?></span>
+          <span class="badge <?= esc($badgeClass) ?> ms-2 fs-6 align-middle"><?= esc($statusLabel) ?></span>
         </h1>
         <p class="text-muted mb-0">Applicant: <span class="fw-medium text-dark"><?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8') ?></span></p>
       </div>
@@ -26,9 +26,9 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
     <form action="scholarship_process.php" method="POST">
       <input type="hidden" name="action" value="process_application">
-      <input type="hidden" name="application_id" value="<?= $app['id'] ?>">
-      <input type="hidden" name="user_id" value="<?= $app['user_id'] ?>">
-      <input type="hidden" name="scholarship_id" value="<?= $app['scholarship_id'] ?>">
+      <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
+      <input type="hidden" name="user_id" value="<?= esc($app['user_id']) ?>">
+      <input type="hidden" name="scholarship_id" value="<?= esc($app['scholarship_id']) ?>">
       <?= getCsrfInput() ?>
       
       <div class="row g-4">
@@ -114,10 +114,10 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <div class="mb-3">
                 <label for="status" class="form-label fw-semibold small text-dark">Decision</label>
                 <select name="status" id="status" class="form-select form-select-sm" required>
-                  <option value="pending" <?= $app['status'] === 'pending' ? 'selected' : '' ?>>Pending</option>
-                  <option value="under_review" <?= $app['status'] === 'under_review' ? 'selected' : '' ?>>Under Review</option>
-                  <option value="approved" <?= $app['status'] === 'approved' ? 'selected' : '' ?>>Approve Scholarship</option>
-                  <option value="rejected" <?= $app['status'] === 'rejected' ? 'selected' : '' ?>>Reject Scholarship</option>
+                  <option value="pending" <?= esc($app['status'] === 'pending' ? 'selected' : '') ?>>Pending</option>
+                  <option value="under_review" <?= esc($app['status'] === 'under_review' ? 'selected' : '') ?>>Under Review</option>
+                  <option value="approved" <?= esc($app['status'] === 'approved' ? 'selected' : '') ?>>Approve Scholarship</option>
+                  <option value="rejected" <?= esc($app['status'] === 'rejected' ? 'selected' : '') ?>>Reject Scholarship</option>
                 </select>
                 <?php if ($app['status'] === 'approved'): ?>
                   <div class="form-text text-danger mt-1" style="font-size: 0.7rem;">

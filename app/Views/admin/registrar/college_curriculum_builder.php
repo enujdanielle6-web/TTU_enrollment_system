@@ -55,15 +55,15 @@ require_once __DIR__ . '/../../components/header.php';
                     </div>
                     <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                         <span class="text-muted">Total Units</span>
-                        <span class="fw-bold text-primary fs-5"><?= $totalUnits ?></span>
+                        <span class="fw-bold text-primary fs-5"><?= esc($totalUnits) ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                         <span class="text-muted">Lecture Units</span>
-                        <span class="fw-bold text-dark"><?= $lectureUnits ?></span>
+                        <span class="fw-bold text-dark"><?= esc($lectureUnits) ?></span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="text-muted">Lab Units</span>
-                        <span class="fw-bold text-dark"><?= $labUnits ?></span>
+                        <span class="fw-bold text-dark"><?= esc($labUnits) ?></span>
                     </div>
                 </div>
             </div>
@@ -126,35 +126,35 @@ require_once __DIR__ . '/../../components/header.php';
                                                         <td class="ps-4 fw-bold text-dark searchable-code"><?= htmlspecialchars($sub['subject_code']) ?></td>
                                                         <td class="searchable-name"><?= htmlspecialchars($sub['subject_name']) ?></td>
                                                         <td><span class="badge bg-light text-secondary border"><?= htmlspecialchars($sub['subject_type'] ?? 'Lecture') ?></span></td>
-                                                        <td class="fw-medium text-success"><?= $sub['units'] ?></td>
+                                                        <td class="fw-medium text-success"><?= esc($sub['units']) ?></td>
                                                         <td class="text-end pe-4">
                                                             <div class="btn-group btn-group-sm me-2 shadow-sm rounded-pill">
                                                                 <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0">
                                                                     <?= getCsrfInput() ?>
                                                                     <input type="hidden" name="action" value="move_subject">
-                                                                    <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
-                                                                    <input type="hidden" name="subject_mapping_id" value="<?= $sub['mapping_id'] ?>">
+                                                                    <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
+                                                                    <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
                                                                     <input type="hidden" name="direction" value="up">
-                                                                    <button type="submit" class="btn btn-light border-end py-1 px-2" title="Move Up" <?= $index === 0 ? 'disabled' : '' ?>><i class="bi bi-arrow-up text-secondary"></i></button>
+                                                                    <button type="submit" class="btn btn-light border-end py-1 px-2" title="Move Up" <?= esc($index === 0 ? 'disabled' : '') ?>><i class="bi bi-arrow-up text-secondary"></i></button>
                                                                 </form>
                                                                 <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0">
                                                                     <?= getCsrfInput() ?>
                                                                     <input type="hidden" name="action" value="move_subject">
-                                                                    <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
-                                                                    <input type="hidden" name="subject_mapping_id" value="<?= $sub['mapping_id'] ?>">
+                                                                    <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
+                                                                    <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
                                                                     <input type="hidden" name="direction" value="down">
-                                                                    <button type="submit" class="btn btn-light py-1 px-2" title="Move Down" <?= $index === count($subjects[$yl][$sem]) - 1 ? 'disabled' : '' ?>><i class="bi bi-arrow-down text-secondary"></i></button>
+                                                                    <button type="submit" class="btn btn-light py-1 px-2" title="Move Down" <?= esc($index === count($subjects[$yl][$sem]) - 1 ? 'disabled' : '') ?>><i class="bi bi-arrow-down text-secondary"></i></button>
                                                                 </form>
                                                             </div>
                                                             <button class="btn btn-sm btn-outline-primary rounded-circle px-2 py-1" title="Edit Assignment"
-                                                                    onclick="openEditSubject(<?= $sub['mapping_id'] ?>, '<?= htmlspecialchars(addslashes($sub['subject_code']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($yl), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($sem), ENT_QUOTES, 'UTF-8') ?>')">
+                                                                    onclick="openEditSubject(<?= esc($sub['mapping_id']) ?>, '<?= htmlspecialchars(addslashes($sub['subject_code']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($yl), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($sem), ENT_QUOTES, 'UTF-8') ?>')">
                                                                 <i class="bi bi-pencil-fill"></i>
                                                             </button>
                                                             <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Remove <?= htmlspecialchars(addslashes($sub['subject_code'])) ?> from this curriculum?');">
                                                                 <?= getCsrfInput() ?>
                                                                 <input type="hidden" name="action" value="delete_subject">
-                                                                <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
-                                                                <input type="hidden" name="subject_mapping_id" value="<?= $sub['mapping_id'] ?>">
+                                                                <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
+                                                                <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
                                                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle px-2 py-1 ms-1" title="Remove Subject">
                                                                     <i class="bi bi-trash-fill"></i>
                                                                 </button>
@@ -183,7 +183,7 @@ require_once __DIR__ . '/../../components/header.php';
       <form action="college_curriculum_process.php" method="POST">
         <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="add_subject">
-        <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
+        <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
         <div class="modal-header bg-light border-bottom-0 pb-3">
           <h5 class="modal-title fw-bold text-dark"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Add Subject to Curriculum</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -194,7 +194,7 @@ require_once __DIR__ . '/../../components/header.php';
                 <select class="form-select bg-light" name="subject_id" required>
                     <option value="" disabled selected>Select from global subjects</option>
                     <?php foreach ($globalSubjects as $gsub): ?>
-                        <option value="<?= $gsub['id'] ?>"><?= htmlspecialchars($gsub['subject_code'] . ' - ' . $gsub['subject_name']) ?> (<?= $gsub['units'] ?> units)</option>
+                        <option value="<?= esc($gsub['id']) ?>"><?= htmlspecialchars($gsub['subject_code'] . ' - ' . $gsub['subject_name']) ?> (<?= esc($gsub['units']) ?> units)</option>
                     <?php endforeach; ?>
                 </select>
             </div>
@@ -235,7 +235,7 @@ require_once __DIR__ . '/../../components/header.php';
       <form action="college_curriculum_process.php" method="POST">
         <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="edit_subject">
-        <input type="hidden" name="curriculum_id" value="<?= $currId ?>">
+        <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
         <input type="hidden" name="subject_mapping_id" id="edit_sub_mapping_id" value="">
         
         <div class="modal-header bg-light border-bottom-0 pb-3">

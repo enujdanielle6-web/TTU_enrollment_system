@@ -91,14 +91,14 @@ require_once __DIR__ . '/../components/header.php';
                           <tr>
                             <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($sub['subject_code'], ENT_QUOTES, 'UTF-8') ?></td>
                             <td><?= htmlspecialchars($sub['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                            <td class="text-end pe-4"><?= (int)$sub['units'] ?></td>
+                            <td class="text-end pe-4"><?= esc((int)$sub['units']) ?></td>
                           </tr>
                         <?php endforeach; ?>
                       </tbody>
                       <tfoot class="table-light">
                         <tr>
                           <td colspan="2" class="text-end fw-bold text-dark">Total Units:</td>
-                          <td class="text-end pe-4 fw-bold text-dark fs-5"><?= $totalUnits ?></td>
+                          <td class="text-end pe-4 fw-bold text-dark fs-5"><?= esc($totalUnits) ?></td>
                         </tr>
                       </tfoot>
                     </table>
@@ -118,7 +118,7 @@ require_once __DIR__ . '/../components/header.php';
                         <span class="text-muted fw-medium">Tuition Fee</span>
                         <?php if ($assessment['academic_level'] === 'College' && isset($totalUnits) && $totalUnits > 0): ?>
                           <?php $inferredCost = (float)$assessment['tuition_fee'] / $totalUnits; ?>
-                          <small class="text-secondary d-block mt-1"><?= $totalUnits ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
+                          <small class="text-secondary d-block mt-1"><?= esc($totalUnits) ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
                         <?php endif; ?>
                       </div>
                       <span class="fw-semibold text-dark">₱<?= number_format((float)$assessment['tuition_fee'], 2) ?></span>
@@ -170,7 +170,7 @@ require_once __DIR__ . '/../components/header.php';
                 <div class="island-body p-4 p-md-5 fade-in-up" style="animation-delay: 1s;">
                   <div class="d-flex justify-content-between align-items-center mb-4">
                     <span class="text-muted small text-uppercase fw-bold tracking-wide">Financial Status</span>
-                    <span class="badge <?= $statusBadge ?> px-3 py-1.5 rounded-pill fs-7 fw-semibold tracking-wide text-uppercase shadow-sm"><?= $statusLabel ?></span>
+                    <span class="badge <?= esc($statusBadge) ?> px-3 py-1.5 rounded-pill fs-7 fw-semibold tracking-wide text-uppercase shadow-sm"><?= esc($statusLabel) ?></span>
                   </div>
                   
                   <div class="text-center my-4">
@@ -182,10 +182,10 @@ require_once __DIR__ . '/../components/header.php';
                   <div class="mb-4">
                     <div class="d-flex justify-content-between text-muted small fw-semibold mb-1">
                       <span>Payment Progress</span>
-                      <span><?= $paidPercent ?>% Paid</span>
+                      <span><?= esc($paidPercent) ?>% Paid</span>
                     </div>
                     <div class="progress rounded-pill" style="height: 8px; background-color: #e9ecef;">
-                      <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: <?= $paidPercent ?>%;" aria-valuenow="<?= $paidPercent ?>" aria-valuemin="0" aria-valuemax="100"></div>
+                      <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: <?= esc($paidPercent) ?>%;" aria-valuenow="<?= esc($paidPercent) ?>" aria-valuemin="0" aria-valuemax="100"></div>
                     </div>
                   </div>
 
@@ -294,7 +294,7 @@ require_once __DIR__ . '/../components/header.php';
       </div>
       <form action="payment_process.php" method="POST" enctype="multipart/form-data">
         <div class="modal-body p-4 bg-light">
-          <input type="hidden" name="assessment_id" value="<?= $assessment['id'] ?>">
+          <input type="hidden" name="assessment_id" value="<?= esc($assessment['id']) ?>">
           <input type="hidden" name="action" value="submit_payment_proof">
           <?= getCsrfInput() ?>
 
@@ -312,7 +312,7 @@ require_once __DIR__ . '/../components/header.php';
           <div class="mb-3">
             <?php $minPayment = min(3000.0, (float)$allowablePayment); ?>
             <label class="form-label small fw-semibold text-dark">Amount Paid (₱)</label>
-            <input type="number" step="0.01" min="<?= $minPayment ?>" max="<?= $allowablePayment ?>" name="amount" class="form-control bg-white" required placeholder="e.g. <?= number_format($allowablePayment, 2, '.', '') ?>" value="<?= number_format($allowablePayment, 2, '.', '') ?>">
+            <input type="number" step="0.01" min="<?= esc($minPayment) ?>" max="<?= esc($allowablePayment) ?>" name="amount" class="form-control bg-white" required placeholder="e.g. <?= number_format($allowablePayment, 2, '.', '') ?>" value="<?= number_format($allowablePayment, 2, '.', '') ?>">
             <div class="form-text" style="font-size: 0.7rem;">You can pay partially (Minimum: ₱<?= number_format($minPayment, 2) ?>). Allowable Payment: ₱<?= number_format($allowablePayment, 2) ?> <?php if($pendingAmount > 0) echo "(Pending: ₱" . number_format($pendingAmount, 2) . ")"; ?></div>
           </div>
           

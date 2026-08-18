@@ -4,7 +4,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= $course['lms_course_id'] ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
             <li class="breadcrumb-item active" aria-current="page">Attendance</li>
         </ol>
     </nav>
@@ -14,9 +14,9 @@
             <div class="lms-card p-4 border-0 shadow-sm rounded-4 mb-4 text-center">
                 <h5 class="fw-bold text-dark mb-4">Overall Attendance</h5>
                 
-                <div class="d-inline-block border border-3 rounded-circle p-5 mb-4 shadow-sm <?= $percentage >= 80 ? 'border-success' : ($percentage >= 60 ? 'border-warning' : 'border-danger') ?>" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div class="d-inline-block border border-3 rounded-circle p-5 mb-4 shadow-sm <?= esc($percentage >= 80 ? 'border-success' : ($percentage >= 60 ? 'border-warning' : 'border-danger')) ?>" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
                     <div>
-                        <div class="fs-1 fw-bold <?= $percentage >= 80 ? 'text-success' : ($percentage >= 60 ? 'text-warning text-dark' : 'text-danger') ?>">
+                        <div class="fs-1 fw-bold <?= esc($percentage >= 80 ? 'text-success' : ($percentage >= 60 ? 'text-warning text-dark' : 'text-danger')) ?>">
                             <?= number_format($percentage, 0) ?>%
                         </div>
                         <div class="text-muted small">Presence</div>
@@ -25,12 +25,12 @@
 
                 <div class="d-flex justify-content-center gap-3 text-start">
                     <div>
-                        <div class="text-success fw-bold"><i class="bi bi-circle-fill small me-1"></i> <?= $stats['present'] ?> Present</div>
-                        <div class="text-secondary fw-bold"><i class="bi bi-circle-fill small me-1"></i> <?= $stats['excused'] ?> Excused</div>
+                        <div class="text-success fw-bold"><i class="bi bi-circle-fill small me-1"></i> <?= esc($stats['present']) ?> Present</div>
+                        <div class="text-secondary fw-bold"><i class="bi bi-circle-fill small me-1"></i> <?= esc($stats['excused']) ?> Excused</div>
                     </div>
                     <div>
-                        <div class="text-danger fw-bold"><i class="bi bi-circle-fill small me-1"></i> <?= $stats['absent'] ?> Absent</div>
-                        <div class="text-warning text-dark fw-bold"><i class="bi bi-circle-fill small me-1"></i> <?= $stats['late'] ?> Late</div>
+                        <div class="text-danger fw-bold"><i class="bi bi-circle-fill small me-1"></i> <?= esc($stats['absent']) ?> Absent</div>
+                        <div class="text-warning text-dark fw-bold"><i class="bi bi-circle-fill small me-1"></i> <?= esc($stats['late']) ?> Late</div>
                     </div>
                 </div>
             </div>
@@ -40,7 +40,7 @@
             <div class="lms-card p-0 border-0 shadow-sm rounded-4 overflow-hidden">
                 <div class="bg-light p-3 border-bottom d-flex justify-content-between align-items-center">
                     <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-calendar3 me-2"></i>Attendance History</h5>
-                    <span class="badge bg-secondary"><?= $stats['total'] ?> Sessions</span>
+                    <span class="badge bg-secondary"><?= esc($stats['total']) ?> Sessions</span>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">

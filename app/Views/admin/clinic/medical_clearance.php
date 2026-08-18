@@ -15,11 +15,11 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
       <div>
         <form action="" method="GET" class="d-flex gap-2">
             <select name="status" class="form-select bg-white border-0 shadow-sm" onchange="this.form.submit()">
-                <option value="all" <?= $statusFilter === 'all' ? 'selected' : '' ?>>All Statuses</option>
-                <option value="pending" <?= $statusFilter === 'pending' ? 'selected' : '' ?>>Pending Review</option>
-                <option value="verified" <?= $statusFilter === 'verified' ? 'selected' : '' ?>>Verified</option>
-                <option value="correction_required" <?= $statusFilter === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
-                <option value="rejected" <?= $statusFilter === 'rejected' ? 'selected' : '' ?>>Rejected</option>
+                <option value="all" <?= esc($statusFilter === 'all' ? 'selected' : '') ?>>All Statuses</option>
+                <option value="pending" <?= esc($statusFilter === 'pending' ? 'selected' : '') ?>>Pending Review</option>
+                <option value="verified" <?= esc($statusFilter === 'verified' ? 'selected' : '') ?>>Verified</option>
+                <option value="correction_required" <?= esc($statusFilter === 'correction_required' ? 'selected' : '') ?>>Correction Required</option>
+                <option value="rejected" <?= esc($statusFilter === 'rejected' ? 'selected' : '') ?>>Rejected</option>
             </select>
         </form>
       </div>
@@ -89,13 +89,13 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                             default => 'bg-secondary'
                         };
                       ?>
-                      <span class="badge <?= $badgeClass ?> rounded-pill px-3"><?= formatApplicationStatus($record['status']) ?></span>
+                      <span class="badge <?= esc($badgeClass) ?> rounded-pill px-3"><?= formatApplicationStatus($record['status']) ?></span>
                     </td>
                     <td class="text-muted small">
                         <?= formatDisplayDate($record['updated_at']) ?>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="medical_detail.php?id=<?= $record['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
+                      <a href="medical_detail.php?id=<?= esc($record['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
                         Review <i class="bi bi-arrow-right ms-1"></i>
                       </a>
                     </td>

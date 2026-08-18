@@ -28,27 +28,27 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           </div>
           <div class="col-md-2">
             <select name="status" class="form-select form-select-sm bg-light filter-select">
-              <option value="all" <?= $statusFilter === 'all' ? 'selected' : '' ?>>All Statuses</option>
-              <option value="pending" <?= $statusFilter === 'pending' ? 'selected' : '' ?>>Pending</option>
-              <option value="under_review" <?= $statusFilter === 'under_review' ? 'selected' : '' ?>>Under Review</option>
-              <option value="correction_required" <?= $statusFilter === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
-              <option value="approved" <?= $statusFilter === 'approved' ? 'selected' : '' ?>>Approved</option>
-              <option value="rejected" <?= $statusFilter === 'rejected' ? 'selected' : '' ?>>Rejected</option>
-              <option value="enrolled" <?= $statusFilter === 'enrolled' ? 'selected' : '' ?>>Officially Enrolled</option>
+              <option value="all" <?= esc($statusFilter === 'all' ? 'selected' : '') ?>>All Statuses</option>
+              <option value="pending" <?= esc($statusFilter === 'pending' ? 'selected' : '') ?>>Pending</option>
+              <option value="under_review" <?= esc($statusFilter === 'under_review' ? 'selected' : '') ?>>Under Review</option>
+              <option value="correction_required" <?= esc($statusFilter === 'correction_required' ? 'selected' : '') ?>>Correction Required</option>
+              <option value="approved" <?= esc($statusFilter === 'approved' ? 'selected' : '') ?>>Approved</option>
+              <option value="rejected" <?= esc($statusFilter === 'rejected' ? 'selected' : '') ?>>Rejected</option>
+              <option value="enrolled" <?= esc($statusFilter === 'enrolled' ? 'selected' : '') ?>>Officially Enrolled</option>
             </select>
           </div>
           <div class="col-md-2">
             <select name="level" class="form-select form-select-sm bg-light filter-select">
-              <option value="all" <?= $levelFilter === 'all' ? 'selected' : '' ?>>All Levels</option>
-              <option value="Senior High School" <?= $levelFilter === 'Senior High School' ? 'selected' : '' ?>>Senior High School</option>
-              <option value="College" <?= $levelFilter === 'College' ? 'selected' : '' ?>>College</option>
+              <option value="all" <?= esc($levelFilter === 'all' ? 'selected' : '') ?>>All Levels</option>
+              <option value="Senior High School" <?= esc($levelFilter === 'Senior High School' ? 'selected' : '') ?>>Senior High School</option>
+              <option value="College" <?= esc($levelFilter === 'College' ? 'selected' : '') ?>>College</option>
             </select>
           </div>
           <div class="col-md-2">
             <select name="strand" class="form-select form-select-sm bg-light filter-select">
-              <option value="all" <?= $strandFilter === 'all' ? 'selected' : '' ?>>All Programs</option>
+              <option value="all" <?= esc($strandFilter === 'all' ? 'selected' : '') ?>>All Programs</option>
               <?php foreach ($programs as $prog): ?>
-                <option value="<?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?>" <?= $strandFilter === $prog['code'] ? 'selected' : '' ?>>
+                <option value="<?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?>" <?= esc($strandFilter === $prog['code'] ? 'selected' : '') ?>>
                   <?= htmlspecialchars(strtoupper($prog['code']), ENT_QUOTES, 'UTF-8') ?>
                 </option>
               <?php endforeach; ?>
@@ -56,15 +56,15 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           </div>
           <div class="col-md-2">
             <select name="grade" class="form-select form-select-sm bg-light filter-select">
-              <option value="all" <?= $gradeFilter === 'all' ? 'selected' : '' ?>>All Grades</option>
-              <option value="Grade 11" <?= $gradeFilter === 'Grade 11' ? 'selected' : '' ?>>Grade 11</option>
-              <option value="Grade 12" <?= $gradeFilter === 'Grade 12' ? 'selected' : '' ?>>Grade 12</option>
+              <option value="all" <?= esc($gradeFilter === 'all' ? 'selected' : '') ?>>All Grades</option>
+              <option value="Grade 11" <?= esc($gradeFilter === 'Grade 11' ? 'selected' : '') ?>>Grade 11</option>
+              <option value="Grade 12" <?= esc($gradeFilter === 'Grade 12' ? 'selected' : '') ?>>Grade 12</option>
             </select>
           </div>
           <div class="col-md-1">
             <select name="sort" class="form-select form-select-sm bg-light filter-select">
-              <option value="newest" <?= $sortOrder === 'newest' ? 'selected' : '' ?>>Newest</option>
-              <option value="oldest" <?= $sortOrder === 'oldest' ? 'selected' : '' ?>>Oldest</option>
+              <option value="newest" <?= esc($sortOrder === 'newest' ? 'selected' : '') ?>>Newest</option>
+              <option value="oldest" <?= esc($sortOrder === 'oldest' ? 'selected' : '') ?>>Oldest</option>
             </select>
           </div>
           <div class="col-md-auto ms-auto">
@@ -120,7 +120,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     ?>
                     <tr>
                       <td class="ps-4">
-                        <input type="checkbox" name="selected_apps[]" value="<?= $app['id'] ?>" class="form-check-input app-checkbox">
+                        <input type="checkbox" name="selected_apps[]" value="<?= esc($app['id']) ?>" class="form-check-input app-checkbox">
                       </td>
                       <td class="fw-semibold text-dark"><?= htmlspecialchars($app['reference_number'], ENT_QUOTES, 'UTF-8'); ?></td>
                       <td>
@@ -130,14 +130,14 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       <td><span class="text-muted small"><?= htmlspecialchars($app['grade_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?></span></td>
                       <td><span class="text-muted small"><?= htmlspecialchars(strtoupper($app['strand'] ?? 'N/A'), ENT_QUOTES, 'UTF-8'); ?></span></td>
                       <td><span class="text-muted small"><?= date('M j, Y g:i A', strtotime($app['created_at'])); ?></span></td>
-                      <td><?= $docBadge; ?></td>
+                      <td><?= $docBadge ?></td>
                       <td>
-                        <span class="badge <?= $badgeClass; ?> px-2 py-1 rounded-pill small">
+                        <span class="badge <?= esc($badgeClass) ?> px-2 py-1 rounded-pill small">
                           <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </span>
                       </td>
                       <td class="pe-4 text-end">
-                        <a href="application_detail.php?id=<?= $app['id']; ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        <a href="application_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                           Review <i class="bi bi-arrow-right-short"></i>
                         </a>
                       </td>
@@ -162,18 +162,18 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             <?php if ($totalPages > 1): ?>
               <nav aria-label="Review Pagination">
                 <ul class="pagination pagination-sm mb-0">
-                  <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($statusFilter) ?>&strand=<?= urlencode($strandFilter) ?>&grade=<?= urlencode($gradeFilter) ?>&sort=<?= urlencode($sortOrder) ?>">Previous</a>
+                  <li class="page-item <?= esc(($page <= 1) ? 'disabled' : '') ?>">
+                    <a class="page-link" href="?page=<?= esc($page - 1) ?>&search=<?= esc(urlencode($search)) ?>&status=<?= esc(urlencode($statusFilter)) ?>&strand=<?= esc(urlencode($strandFilter)) ?>&grade=<?= esc(urlencode($gradeFilter)) ?>&sort=<?= esc(urlencode($sortOrder)) ?>">Previous</a>
                   </li>
                   
                   <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
-                      <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($statusFilter) ?>&strand=<?= urlencode($strandFilter) ?>&grade=<?= urlencode($gradeFilter) ?>&sort=<?= urlencode($sortOrder) ?>"><?= $i ?></a>
+                    <li class="page-item <?= esc(($i === $page) ? 'active' : '') ?>">
+                      <a class="page-link" href="?page=<?= esc($i) ?>&search=<?= esc(urlencode($search)) ?>&status=<?= esc(urlencode($statusFilter)) ?>&strand=<?= esc(urlencode($strandFilter)) ?>&grade=<?= esc(urlencode($gradeFilter)) ?>&sort=<?= esc(urlencode($sortOrder)) ?>"><?= esc($i) ?></a>
                     </li>
                   <?php endfor; ?>
                   
-                  <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                    <a class="page-link" href="?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&status=<?= urlencode($statusFilter) ?>&strand=<?= urlencode($strandFilter) ?>&grade=<?= urlencode($gradeFilter) ?>&sort=<?= urlencode($sortOrder) ?>">Next</a>
+                  <li class="page-item <?= esc(($page >= $totalPages) ? 'disabled' : '') ?>">
+                    <a class="page-link" href="?page=<?= esc($page + 1) ?>&search=<?= esc(urlencode($search)) ?>&status=<?= esc(urlencode($statusFilter)) ?>&strand=<?= esc(urlencode($strandFilter)) ?>&grade=<?= esc(urlencode($gradeFilter)) ?>&sort=<?= esc(urlencode($sortOrder)) ?>">Next</a>
                   </li>
                 </ul>
               </nav>

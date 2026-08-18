@@ -274,7 +274,7 @@ require_once __DIR__ . '/../components/header.php';
                            <?php endif; ?>
                         <?php endif; ?>
                       </td>
-                      <td class="text-center fw-medium"><?= (int)($sub['units'] ?? 0) ?></td>
+                      <td class="text-center fw-medium"><?= esc((int)($sub['units'] ?? 0)) ?></td>
                       
                       <?php if (!$hasSchedule): ?>
                         <td colspan="3" class="text-muted fst-italic text-center">Schedule Not Assigned</td>
@@ -315,7 +315,7 @@ require_once __DIR__ . '/../components/header.php';
                 <tfoot class="table-light">
                   <tr>
                     <td colspan="2" class="text-end fw-bold">Total Units:</td>
-                    <td class="text-center fw-bold fs-6"><?= $totalUnits ?></td>
+                    <td class="text-center fw-bold fs-6"><?= esc($totalUnits) ?></td>
                     <td colspan="3"></td>
                   </tr>
                 </tfoot>
@@ -338,7 +338,7 @@ require_once __DIR__ . '/../components/header.php';
                     <?php 
                     $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                     foreach ($days as $day): ?>
-                      <th><?= $day ?></th>
+                      <th><?= esc($day) ?></th>
                     <?php endforeach; ?>
                   </tr>
                 </thead>

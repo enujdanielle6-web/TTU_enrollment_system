@@ -80,23 +80,23 @@ $isApprovedOrEnrolled = $hasApplication && in_array($navAppStatus, ['approved', 
     <div class="small text-muted fw-bold text-uppercase mb-2" style="letter-spacing: 0.05em;">Main Menu</div>
     <ul class="nav flex-column gap-2 mb-4">
       <li class="nav-item">
-        <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= $currentPage === 'dashboard.php' ? 'bg-primary text-white fw-medium shadow-sm' : 'text-dark hover-bg-light' ?>" href="dashboard.php">
-          <i class="bi bi-grid-1x2 me-3 <?= $currentPage === 'dashboard.php' ? '' : 'text-muted' ?>"></i> Dashboard
+        <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= esc($currentPage === 'dashboard.php' ? 'bg-primary text-white fw-medium shadow-sm' : 'text-dark hover-bg-light') ?>" href="dashboard.php">
+          <i class="bi bi-grid-1x2 me-3 <?= esc($currentPage === 'dashboard.php' ? '' : 'text-muted') ?>"></i> Dashboard
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= $currentPage === 'scholarships.php' ? 'bg-primary text-white fw-medium shadow-sm' : 'text-dark hover-bg-light' ?>" href="scholarships.php">
-          <i class="bi bi-award me-3 <?= $currentPage === 'scholarships.php' ? '' : 'text-muted' ?>"></i> Scholarships
+        <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= esc($currentPage === 'scholarships.php' ? 'bg-primary text-white fw-medium shadow-sm' : 'text-dark hover-bg-light') ?>" href="scholarships.php">
+          <i class="bi bi-award me-3 <?= esc($currentPage === 'scholarships.php' ? '' : 'text-muted') ?>"></i> Scholarships
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= $currentPage === 'assessment.php' ? 'bg-primary text-white fw-medium shadow-sm' : 'text-dark hover-bg-light' ?>" href="assessment.php">
-          <i class="bi bi-receipt me-3 <?= $currentPage === 'assessment.php' ? '' : 'text-muted' ?>"></i> Assessment
+        <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= esc($currentPage === 'assessment.php' ? 'bg-primary text-white fw-medium shadow-sm' : 'text-dark hover-bg-light') ?>" href="assessment.php">
+          <i class="bi bi-receipt me-3 <?= esc($currentPage === 'assessment.php' ? '' : 'text-muted') ?>"></i> Assessment
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= $currentPage === 'profile.php' ? 'bg-primary text-white fw-medium shadow-sm' : 'text-dark hover-bg-light' ?>" href="profile.php">
-          <i class="bi bi-person-gear me-3 <?= $currentPage === 'profile.php' ? '' : 'text-muted' ?>"></i> Profile
+        <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center <?= esc($currentPage === 'profile.php' ? 'bg-primary text-white fw-medium shadow-sm' : 'text-dark hover-bg-light') ?>" href="profile.php">
+          <i class="bi bi-person-gear me-3 <?= esc($currentPage === 'profile.php' ? '' : 'text-muted') ?>"></i> Profile
         </a>
       </li>
     </ul>

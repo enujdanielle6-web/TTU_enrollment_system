@@ -6,7 +6,7 @@
             <h1 class="h3 fw-bold text-dark mb-1">Quizzes: <?= htmlspecialchars($course['subject_code']) ?></h1>
             <p class="text-muted mb-0"><?= htmlspecialchars($course['subject_name']) ?> &bull; Section <?= htmlspecialchars($course['section_code']) ?></p>
         </div>
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/quizzes/create" class="btn btn-primary shadow-sm">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary shadow-sm">
             <i class="bi bi-plus-circle me-1"></i> Create Quiz
         </a>
     </div>
@@ -46,7 +46,7 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?= $quiz['time_limit'] ? $quiz['time_limit'] . ' mins' : '<span class="text-muted">Unlimited</span>' ?>
+                                        <?= esc($quiz['time_limit'] ? $quiz['time_limit'] . ' mins' : '<span class="text-muted">Unlimited</span>') ?>
                                     </td>
                                     <td class="small">
                                         <?php if ($quiz['start_date']): ?>
@@ -60,9 +60,9 @@
                                         <?php endif; ?>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $quiz['id'] ?>/edit" class="btn btn-sm btn-outline-secondary" title="Edit Settings"><i class="bi bi-gear"></i></a>
-                                        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $quiz['id'] ?>/questions" class="btn btn-sm btn-outline-primary ms-1" title="Manage Questions"><i class="bi bi-list-check"></i> Questions</a>
-                                        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $quiz['id'] ?>/results" class="btn btn-sm btn-info text-white ms-1" title="View Results"><i class="bi bi-bar-chart"></i> Results</a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/edit" class="btn btn-sm btn-outline-secondary" title="Edit Settings"><i class="bi bi-gear"></i></a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions" class="btn btn-sm btn-outline-primary ms-1" title="Manage Questions"><i class="bi bi-list-check"></i> Questions</a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/results" class="btn btn-sm btn-info text-white ms-1" title="View Results"><i class="bi bi-bar-chart"></i> Results</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

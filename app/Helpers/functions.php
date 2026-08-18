@@ -2,6 +2,19 @@
 
 declare(strict_types=1);
 
+/**
+ * Escapes HTML characters in a string to prevent XSS.
+ * 
+ * @param mixed $string
+ * @return string
+ */
+function esc($string): string
+{
+    if ($string === null) {
+        return '';
+    }
+    return htmlspecialchars((string)$string, ENT_QUOTES, 'UTF-8');
+}
 function formatApplicationStatus(string $status): string
 {
     $labels = [

@@ -2,7 +2,7 @@
 
 <div class="container py-5">
     <div class="mb-4">
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/quizzes" class="text-decoration-none">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="text-decoration-none">
             <i class="bi bi-arrow-left me-1"></i> Back to Quizzes
         </a>
     </div>
@@ -32,28 +32,28 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <h5 class="fw-bold mb-0">
-                                    <span class="text-primary me-2"><?= $index + 1 ?>.</span>
+                                    <span class="text-primary me-2"><?= esc($index + 1) ?>.</span>
                                     <?= nl2br(htmlspecialchars($q['question_text'])) ?>
                                 </h5>
-                                <span class="badge bg-secondary"><?= $q['points'] ?> pts</span>
+                                <span class="badge bg-secondary"><?= esc($q['points']) ?> pts</span>
                             </div>
                             
                             <div class="ps-4 ms-2">
                                 <?php if ($q['question_type'] === 'multiple_choice'): ?>
                                     <ul class="list-unstyled mb-0">
                                         <?php foreach ($q['choices'] as $c): ?>
-                                            <li class="mb-2 <?= $c['is_correct'] ? 'text-success fw-bold' : 'text-muted' ?>">
-                                                <i class="bi <?= $c['is_correct'] ? 'bi-check-circle-fill' : 'bi-circle' ?> me-2"></i>
+                                            <li class="mb-2 <?= esc($c['is_correct'] ? 'text-success fw-bold' : 'text-muted') ?>">
+                                                <i class="bi <?= esc($c['is_correct'] ? 'bi-check-circle-fill' : 'bi-circle') ?> me-2"></i>
                                                 <?= htmlspecialchars($c['choice_text']) ?>
-                                                <?= $c['is_correct'] ? ' <span class="badge bg-success ms-1">Correct Answer</span>' : '' ?>
+                                                <?= esc($c['is_correct'] ? ' <span class="badge bg-success ms-1">Correct Answer</span>' : '') ?>
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>
                                 <?php elseif ($q['question_type'] === 'true_false'): ?>
                                     <ul class="list-unstyled mb-0">
                                         <?php foreach ($q['choices'] as $c): ?>
-                                            <li class="mb-2 <?= $c['is_correct'] ? 'text-success fw-bold' : 'text-muted' ?>">
-                                                <i class="bi <?= $c['is_correct'] ? 'bi-check-circle-fill' : 'bi-circle' ?> me-2"></i>
+                                            <li class="mb-2 <?= esc($c['is_correct'] ? 'text-success fw-bold' : 'text-muted') ?>">
+                                                <i class="bi <?= esc($c['is_correct'] ? 'bi-check-circle-fill' : 'bi-circle') ?> me-2"></i>
                                                 <?= htmlspecialchars($c['choice_text']) ?>
                                             </li>
                                         <?php endforeach; ?>
@@ -72,7 +72,7 @@
 <div class="modal fade" id="addQuestionModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content rounded-4 border-0 shadow">
-            <form action="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $quiz['id'] ?>/questions/store" method="POST">
+            <form action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions/store" method="POST">
                 <div class="modal-header border-bottom px-4 py-3">
                     <h5 class="modal-title fw-bold">Add Question</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -105,9 +105,9 @@
                         <?php for ($i = 1; $i <= 4; $i++): ?>
                             <div class="input-group mb-2">
                                 <div class="input-group-text bg-white">
-                                    <input class="form-check-input mt-0" type="radio" name="correct_mc" value="<?= $i ?>" <?= $i===1 ? 'checked' : '' ?> title="Mark as correct answer">
+                                    <input class="form-check-input mt-0" type="radio" name="correct_mc" value="<?= esc($i) ?>" <?= esc($i===1 ? 'checked' : '') ?> title="Mark as correct answer">
                                 </div>
-                                <input type="text" name="mc_choice_<?= $i ?>" class="form-control" placeholder="Choice <?= $i ?> text" <?= $i <= 2 ? 'required' : '' ?>>
+                                <input type="text" name="mc_choice_<?= esc($i) ?>" class="form-control" placeholder="Choice <?= esc($i) ?> text" <?= esc($i <= 2 ? 'required' : '') ?>>
                             </div>
                         <?php endfor; ?>
                         <div class="form-text mt-2">Select the radio button next to the correct answer. At least 2 choices are required.</div>

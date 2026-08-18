@@ -69,7 +69,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center p-3 border-top border-2 border-dark">
                     <span class="text-dark fw-bold text-uppercase">Remaining Balance</span>
-                    <span class="fw-bold fs-4 <?= $balance > 0 ? 'text-danger' : 'text-success' ?>">₱<?= number_format($balance, 2) ?></span>
+                    <span class="fw-bold fs-4 <?= esc($balance > 0 ? 'text-danger' : 'text-success') ?>">₱<?= number_format($balance, 2) ?></span>
                 </li>
             </ul>
           </div>
@@ -89,7 +89,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       <span class="text-muted d-block">Tuition Fee</span>
                       <?php if ($assessment['academic_level'] === 'College' && isset($totalUnits) && $totalUnits > 0): ?>
                         <?php $inferredCost = (float)$assessment['tuition_fee'] / $totalUnits; ?>
-                        <small class="text-secondary"><?= $totalUnits ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
+                        <small class="text-secondary"><?= esc($totalUnits) ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
                       <?php endif; ?>
                     </div>
                     <span class="fw-medium">₱<?= number_format((float)$assessment['tuition_fee'], 2) ?></span>
@@ -142,14 +142,14 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     <tr>
                       <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($sub['subject_code'], ENT_QUOTES, 'UTF-8') ?></td>
                       <td><?= htmlspecialchars($sub['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                      <td class="text-end pe-4"><?= (int)$sub['units'] ?></td>
+                      <td class="text-end pe-4"><?= esc((int)$sub['units']) ?></td>
                     </tr>
                   <?php endforeach; ?>
                 </tbody>
                 <tfoot class="table-light">
                   <tr>
                     <td colspan="2" class="text-end fw-bold text-dark">Total Units:</td>
-                    <td class="text-end pe-4 fw-bold text-dark fs-5"><?= $totalUnits ?></td>
+                    <td class="text-end pe-4 fw-bold text-dark fs-5"><?= esc($totalUnits) ?></td>
                   </tr>
                 </tfoot>
               </table>
@@ -228,7 +228,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                               <i class="bi bi-info-circle me-1"></i> Reason
                             </button>
                           <?php else: ?>
-                            <a href="cashier_receipt.php?id=<?= $payment['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
+                            <a href="cashier_receipt.php?id=<?= esc($payment['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" target="_blank">
                               <i class="bi bi-printer"></i> View
                             </a>
                           <?php endif; ?>
@@ -258,9 +258,9 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
       <form action="cashier_process.php" method="POST">
         <div class="modal-body">
           <input type="hidden" name="action" value="record_payment">
-          <input type="hidden" name="assessment_id" value="<?= $assessmentId ?>">
-          <input type="hidden" name="user_id" value="<?= $assessment['user_id'] ?>">
-          <input type="hidden" name="application_id" value="<?= $assessment['application_id'] ?>">
+          <input type="hidden" name="assessment_id" value="<?= esc($assessmentId) ?>">
+          <input type="hidden" name="user_id" value="<?= esc($assessment['user_id']) ?>">
+          <input type="hidden" name="application_id" value="<?= esc($assessment['application_id']) ?>">
           <?= getCsrfInput() ?>
           
           <div class="alert alert-info py-2 small mb-3">
@@ -269,7 +269,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
           <div class="mb-3">
             <label class="form-label small fw-semibold text-dark">Payment Amount (₱)</label>
-            <input type="number" step="0.01" min="<?= min(3000, $balance) ?>" max="<?= $balance ?>" name="amount" class="form-control form-control-lg bg-light text-success fw-bold" required value="<?= $balance ?>">
+            <input type="number" step="0.01" min="<?= esc(min(3000, $balance)) ?>" max="<?= esc($balance) ?>" name="amount" class="form-control form-control-lg bg-light text-success fw-bold" required value="<?= esc($balance) ?>">
             <div class="form-text small">Cannot exceed remaining balance.</div>
           </div>
           

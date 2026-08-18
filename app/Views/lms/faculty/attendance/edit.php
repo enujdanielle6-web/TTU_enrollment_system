@@ -2,7 +2,7 @@
 
 <div class="container py-5">
     <div class="mb-4">
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/attendance" class="text-decoration-none">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="text-decoration-none">
             <i class="bi bi-arrow-left me-1"></i> Back to Attendance
         </a>
     </div>
@@ -13,7 +13,7 @@
                 <div>
                     <h2 class="h4 fw-bold mb-1">Roll Call: <?= date('l, M d, Y', strtotime($session['session_date'])) ?></h2>
                     <p class="text-muted mb-0">
-                        <?= $session['start_time'] ? date('h:i A', strtotime($session['start_time'])) . ' - ' : '' ?>
+                        <?= esc($session['start_time'] ? date('h:i A', strtotime($session['start_time'])) . ' - ' : '') ?>
                         <?= htmlspecialchars($session['notes'] ?? 'No notes') ?>
                     </p>
                 </div>
@@ -25,7 +25,7 @@
     </div>
 
     <div class="card border-0 shadow-sm rounded-4">
-        <form action="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/attendance/<?= $session['id'] ?>/update" method="POST">
+        <form action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/<?= esc($session['id']) ?>/update" method="POST">
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
@@ -56,21 +56,21 @@
                                         </td>
                                         <td class="text-center">
                                             <div class="btn-group" role="group">
-                                                <input type="radio" class="btn-check status-radio" name="attendance[<?= $sId ?>][status]" id="status_<?= $sId ?>_present" value="present" <?= $status === 'present' ? 'checked' : '' ?>>
-                                                <label class="btn btn-outline-success" for="status_<?= $sId ?>_present">Present</label>
+                                                <input type="radio" class="btn-check status-radio" name="attendance[<?= esc($sId) ?>][status]" id="status_<?= esc($sId) ?>_present" value="present" <?= esc($status === 'present' ? 'checked' : '') ?>>
+                                                <label class="btn btn-outline-success" for="status_<?= esc($sId) ?>_present">Present</label>
 
-                                                <input type="radio" class="btn-check status-radio" name="attendance[<?= $sId ?>][status]" id="status_<?= $sId ?>_late" value="late" <?= $status === 'late' ? 'checked' : '' ?>>
-                                                <label class="btn btn-outline-warning" for="status_<?= $sId ?>_late">Late</label>
+                                                <input type="radio" class="btn-check status-radio" name="attendance[<?= esc($sId) ?>][status]" id="status_<?= esc($sId) ?>_late" value="late" <?= esc($status === 'late' ? 'checked' : '') ?>>
+                                                <label class="btn btn-outline-warning" for="status_<?= esc($sId) ?>_late">Late</label>
 
-                                                <input type="radio" class="btn-check status-radio" name="attendance[<?= $sId ?>][status]" id="status_<?= $sId ?>_absent" value="absent" <?= $status === 'absent' ? 'checked' : '' ?>>
-                                                <label class="btn btn-outline-danger" for="status_<?= $sId ?>_absent">Absent</label>
+                                                <input type="radio" class="btn-check status-radio" name="attendance[<?= esc($sId) ?>][status]" id="status_<?= esc($sId) ?>_absent" value="absent" <?= esc($status === 'absent' ? 'checked' : '') ?>>
+                                                <label class="btn btn-outline-danger" for="status_<?= esc($sId) ?>_absent">Absent</label>
 
-                                                <input type="radio" class="btn-check status-radio" name="attendance[<?= $sId ?>][status]" id="status_<?= $sId ?>_excused" value="excused" <?= $status === 'excused' ? 'checked' : '' ?>>
-                                                <label class="btn btn-outline-secondary" for="status_<?= $sId ?>_excused">Excused</label>
+                                                <input type="radio" class="btn-check status-radio" name="attendance[<?= esc($sId) ?>][status]" id="status_<?= esc($sId) ?>_excused" value="excused" <?= esc($status === 'excused' ? 'checked' : '') ?>>
+                                                <label class="btn btn-outline-secondary" for="status_<?= esc($sId) ?>_excused">Excused</label>
                                             </div>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <input type="text" name="attendance[<?= $sId ?>][remarks]" class="form-control form-control-sm" placeholder="Reason/Notes" value="<?= htmlspecialchars($rec['remarks'] ?? '') ?>">
+                                            <input type="text" name="attendance[<?= esc($sId) ?>][remarks]" class="form-control form-control-sm" placeholder="Reason/Notes" value="<?= htmlspecialchars($rec['remarks'] ?? '') ?>">
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

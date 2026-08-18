@@ -2,7 +2,7 @@
 
 <div class="container py-5">
     <div class="mb-4">
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/quizzes" class="text-decoration-none">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="text-decoration-none">
             <i class="bi bi-arrow-left me-1"></i> Back to Quizzes
         </a>
     </div>
@@ -41,7 +41,7 @@
                                     <td class="ps-4 fw-medium text-dark">
                                         <?= htmlspecialchars($attempt['first_name'] . ' ' . $attempt['last_name']) ?>
                                     </td>
-                                    <td><?= $attempt['attempt_number'] ?></td>
+                                    <td><?= esc($attempt['attempt_number']) ?></td>
                                     <td>
                                         <?php if ($attempt['status'] === 'graded'): ?>
                                             <span class="badge bg-success">Graded</span>
@@ -52,10 +52,10 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?= $attempt['submitted_at'] ? date('M d, Y h:i A', strtotime($attempt['submitted_at'])) : '<span class="text-muted">-</span>' ?>
+                                        <?= esc($attempt['submitted_at'] ? date('M d, Y h:i A', strtotime($attempt['submitted_at'])) : '<span class="text-muted">-</span>') ?>
                                     </td>
                                     <td class="text-end pe-4 fw-bold">
-                                        <?= $attempt['score'] !== null ? $attempt['score'] . ' pts' : '<span class="text-muted">-</span>' ?>
+                                        <?= esc($attempt['score'] !== null ? $attempt['score'] . ' pts' : '<span class="text-muted">-</span>') ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

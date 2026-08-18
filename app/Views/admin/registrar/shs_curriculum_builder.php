@@ -53,19 +53,19 @@ require_once __DIR__ . '/../../components/header.php';
                 <div class="island-body p-4 fade-in-up" style="animation-delay: 0.4s;">
                     <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                         <span class="text-muted">Total Subjects</span>
-                        <span class="fw-bold text-dark fs-5"><?= $totalSubjects ?></span>
+                        <span class="fw-bold text-dark fs-5"><?= esc($totalSubjects) ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                         <span class="text-muted">Total Units</span>
-                        <span class="fw-bold text-primary fs-5"><?= $totalUnits ?></span>
+                        <span class="fw-bold text-primary fs-5"><?= esc($totalUnits) ?></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                         <span class="text-muted">Lecture Units</span>
-                        <span class="fw-bold text-dark"><?= $lectureUnits ?></span>
+                        <span class="fw-bold text-dark"><?= esc($lectureUnits) ?></span>
                     </div>
                     <div class="d-flex justify-content-between">
                         <span class="text-muted">Lab Units</span>
-                        <span class="fw-bold text-dark"><?= $labUnits ?></span>
+                        <span class="fw-bold text-dark"><?= esc($labUnits) ?></span>
                     </div>
                 </div>
             </div>
@@ -117,13 +117,13 @@ require_once __DIR__ . '/../../components/header.php';
                                                         <td class="ps-4 fw-bold text-dark searchable-code"><?= htmlspecialchars($sub['subject_code']) ?></td>
                                                         <td class="searchable-name"><?= htmlspecialchars($sub['subject_name']) ?></td>
                                                         <td><span class="badge bg-light text-secondary border"><?= htmlspecialchars($sub['subject_type'] ?? 'Lecture') ?></span></td>
-                                                        <td class="fw-medium text-success"><?= $sub['units'] ?></td>
+                                                        <td class="fw-medium text-success"><?= esc($sub['units']) ?></td>
                                                         <td class="text-end pe-4">
                                                             <form action="shs_curriculum_process.php" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Remove <?= htmlspecialchars(addslashes($sub['subject_code'])) ?> from this curriculum?');">
                                                                 <?= getCsrfInput() ?>
                                                                 <input type="hidden" name="action" value="delete_subject">
-                                                                <input type="hidden" name="curriculum_id" value="<?= $curriculumId ?>">
-                                                                <input type="hidden" name="mapping_id" value="<?= $sub['mapping_id'] ?>">
+                                                                <input type="hidden" name="curriculum_id" value="<?= esc($curriculumId) ?>">
+                                                                <input type="hidden" name="mapping_id" value="<?= esc($sub['mapping_id']) ?>">
                                                                 <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle px-2 py-1 ms-1" title="Remove Subject">
                                                                     <i class="bi bi-trash-fill"></i>
                                                                 </button>
@@ -152,7 +152,7 @@ require_once __DIR__ . '/../../components/header.php';
       <form action="shs_curriculum_process.php" method="POST">
         <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="add">
-        <input type="hidden" name="curriculum_id" value="<?= $curriculumId ?>">
+        <input type="hidden" name="curriculum_id" value="<?= esc($curriculumId) ?>">
         
         <div class="modal-header bg-light border-bottom-0 pb-3">
           <div>
@@ -189,14 +189,14 @@ require_once __DIR__ . '/../../components/header.php';
              <div class="list-group list-group-flush" id="modalSubjectList">
                 <?php foreach ($globalSubjects as $sub): ?>
                   <label class="list-group-item list-group-item-action d-flex align-items-center gap-3 py-3 global-subject-item border-bottom">
-                     <input class="form-check-input flex-shrink-0 fs-5 mt-0" type="checkbox" name="subject_ids[]" value="<?= $sub['id'] ?>">
+                     <input class="form-check-input flex-shrink-0 fs-5 mt-0" type="checkbox" name="subject_ids[]" value="<?= esc($sub['id']) ?>">
                      <div class="w-100">
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="fw-bold text-dark modal-sub-code"><?= htmlspecialchars($sub['subject_code']) ?></div>
                             <span class="badge bg-light text-secondary border"><?= htmlspecialchars($sub['subject_type'] ?? 'Lecture') ?></span>
                         </div>
                         <div class="modal-sub-name text-muted small"><?= htmlspecialchars($sub['subject_name']) ?></div>
-                        <div class="small fw-medium text-success mt-1"><?= $sub['units'] ?> units</div>
+                        <div class="small fw-medium text-success mt-1"><?= esc($sub['units']) ?> units</div>
                      </div>
                   </label>
                 <?php endforeach; ?>

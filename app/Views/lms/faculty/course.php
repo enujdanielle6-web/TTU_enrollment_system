@@ -31,7 +31,7 @@
                     <div class="card border-0 shadow-sm rounded-4 mb-3">
                         <div class="card-header bg-white border-bottom p-3 d-flex justify-content-between align-items-center">
                             <h5 class="mb-0 fw-bold"><i class="bi bi-folder me-2 text-primary"></i> <?= htmlspecialchars($module['title']) ?></h5>
-                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploadMaterialModal<?= $module['id'] ?>">
+                            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploadMaterialModal<?= esc($module['id']) ?>">
                                 <i class="bi bi-cloud-arrow-up me-1"></i> Upload Material
                             </button>
                         </div>
@@ -49,13 +49,13 @@
                                                     if (in_array($mat['file_type'], ['doc', 'docx'])) $icon = 'bi-file-earmark-word text-primary';
                                                     if (in_array($mat['file_type'], ['ppt', 'pptx'])) $icon = 'bi-file-earmark-slides text-warning';
                                                 ?>
-                                                <i class="bi <?= $icon ?> fs-4"></i>
+                                                <i class="bi <?= esc($icon) ?> fs-4"></i>
                                                 <div>
                                                     <span class="d-block fw-semibold text-dark"><?= htmlspecialchars($mat['title']) ?></span>
                                                     <small class="text-muted"><?= strtoupper($mat['file_type']) ?> Document</small>
                                                 </div>
                                             </div>
-                                            <a href="/sia/lms/download/material/<?= $mat['id'] ?>" class="btn btn-light btn-sm text-primary" target="_blank">
+                                            <a href="/sia/lms/download/material/<?= esc($mat['id']) ?>" class="btn btn-light btn-sm text-primary" target="_blank">
                                                 <i class="bi bi-download"></i> Download
                                             </a>
                                         </li>
@@ -67,7 +67,7 @@
                 </div>
 
                 <!-- Upload Material Modal -->
-                <div class="modal fade" id="uploadMaterialModal<?= $module['id'] ?>" tabindex="-1">
+                <div class="modal fade" id="uploadMaterialModal<?= esc($module['id']) ?>" tabindex="-1">
                     <div class="modal-dialog">
                         <form class="modal-content border-0 shadow" method="POST" action="/sia/lms/faculty/material_upload.php" enctype="multipart/form-data">
                             <div class="modal-header border-bottom-0 pb-0">
@@ -75,8 +75,8 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body py-4">
-                                <input type="hidden" name="lms_course_id" value="<?= $course['lms_course_id'] ?>">
-                                <input type="hidden" name="lms_module_id" value="<?= $module['id'] ?>">
+                                <input type="hidden" name="lms_course_id" value="<?= esc($course['lms_course_id']) ?>">
+                                <input type="hidden" name="lms_module_id" value="<?= esc($module['id']) ?>">
                                 <div class="mb-3">
                                     <label class="form-label fw-bold">Material Title</label>
                                     <input type="text" name="title" class="form-control" required>
@@ -108,7 +108,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body py-4">
-                <input type="hidden" name="lms_course_id" value="<?= $course['lms_course_id'] ?>">
+                <input type="hidden" name="lms_course_id" value="<?= esc($course['lms_course_id']) ?>">
                 <div class="mb-3">
                     <label class="form-label fw-bold">Module Title</label>
                     <input type="text" name="title" class="form-control" placeholder="e.g. Week 1: Introduction" required>

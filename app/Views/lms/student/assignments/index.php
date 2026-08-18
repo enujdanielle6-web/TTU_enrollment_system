@@ -6,7 +6,7 @@
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
                     <li class="breadcrumb-item"><a href="/sia/lms/student/my_courses.php" class="text-decoration-none">Courses</a></li>
-                    <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= $course['lms_course_id'] ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+                    <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
                     <li class="breadcrumb-item active" aria-current="page">Assignments</li>
                 </ol>
             </nav>
@@ -25,15 +25,15 @@
             <?php else: ?>
                 <div class="list-group list-group-flush">
                     <?php foreach ($assignments as $a): ?>
-                        <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/assignments/<?= $a['id'] ?>" class="list-group-item list-group-item-action p-4">
+                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($a['id']) ?>" class="list-group-item list-group-item-action p-4">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <h5 class="mb-1 text-primary fw-bold">
                                         <i class="bi bi-journal-text me-2"></i><?= htmlspecialchars($a['title']) ?>
                                     </h5>
                                     <p class="mb-1 text-muted small">
-                                        <strong>Due:</strong> <?= $a['due_date'] ? date('F j, Y, g:i a', strtotime($a['due_date'])) : 'No Due Date' ?> &bull; 
-                                        <strong>Points:</strong> <?= $a['max_score'] ?>
+                                        <strong>Due:</strong> <?= esc($a['due_date'] ? date('F j, Y, g:i a', strtotime($a['due_date'])) : 'No Due Date') ?> &bull; 
+                                        <strong>Points:</strong> <?= esc($a['max_score']) ?>
                                     </p>
                                 </div>
                                 <?php if ($a['submission']): ?>

@@ -75,15 +75,15 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                             default => 'bg-secondary'
                         };
                       ?>
-                      <span class="badge <?= $statusClass ?> rounded-pill px-3"><?= htmlspecialchars($recipient['status'], ENT_QUOTES, 'UTF-8') ?></span>
+                      <span class="badge <?= esc($statusClass) ?> rounded-pill px-3"><?= htmlspecialchars($recipient['status'], ENT_QUOTES, 'UTF-8') ?></span>
                       <?php if ($recipient['remarks']): ?>
                         <div class="text-muted small mt-1"><i class="bi bi-chat-text me-1"></i><?= htmlspecialchars($recipient['remarks'], ENT_QUOTES, 'UTF-8') ?></div>
                       <?php endif; ?>
                     </td>
                     <td class="text-end pe-4">
                       <button class="btn btn-sm btn-outline-primary rounded-pill px-3 update-status-btn" 
-                              data-id="<?= $recipient['id'] ?>"
-                              data-status="<?= $recipient['status'] ?>"
+                              data-id="<?= esc($recipient['id']) ?>"
+                              data-status="<?= esc($recipient['status']) ?>"
                               data-remarks="<?= htmlspecialchars($recipient['remarks'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                               data-bs-toggle="modal" data-bs-target="#updateStatusModal">
                         Update Status

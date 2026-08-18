@@ -42,7 +42,7 @@
         <div class="row g-4">
             <?php foreach ($enrolled_courses as $course): ?>
                 <div class="col-md-4 col-lg-3">
-                    <a href="/sia/lms/student/course.php?id=<?= $course['lms_course_id'] ?>" class="text-decoration-none text-dark d-block h-100">
+                    <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-dark d-block h-100">
                         <div class="lms-card h-100 transition-all shadow-sm-hover overflow-hidden border bg-white rounded">
                             <div class="card-img-top bg-light d-flex align-items-center justify-content-center border-bottom" style="height: 160px;">
                                 <i class="bi bi-image text-muted opacity-25" style="font-size: 3rem;"></i>

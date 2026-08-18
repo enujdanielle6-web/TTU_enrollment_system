@@ -24,7 +24,7 @@ class Database
     {
         if (self::$connection === null) {
             $dbConfig = [
-                'host' => getenv('DB_HOST') ?: '127.0.0.1',
+                'host' => getenv('DB_HOST') ?: 'localhost',
                 'port' => getenv('DB_PORT') ?: '3306',
                 'database' => getenv('DB_DATABASE') ?: 'sia',
                 'username' => getenv('DB_USERNAME') ?: 'root',

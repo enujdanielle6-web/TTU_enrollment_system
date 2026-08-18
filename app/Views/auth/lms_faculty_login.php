@@ -14,6 +14,7 @@
           </div>
 
           <form action="lms_login_process.php" method="post" novalidate>
+            <?= getCsrfInput() ?>
             <input type="hidden" name="role" value="faculty">
             <div class="mb-3">
               <label class="form-label text-muted small fw-semibold" for="employee_id">Employee ID</label>

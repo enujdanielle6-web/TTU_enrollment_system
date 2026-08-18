@@ -47,8 +47,8 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <div class="mb-4">
                 <label for="enrollment_status" class="form-label fw-semibold text-dark small">Enrollment Gateway Status</label>
                 <select id="enrollment_status" name="enrollment_status" class="form-select bg-light">
-                  <option value="open" <?= ($settings['enrollment_status'] ?? 'open') === 'open' ? 'selected' : '' ?>>Open for Applications</option>
-                  <option value="closed" <?= ($settings['enrollment_status'] ?? '') === 'closed' ? 'selected' : '' ?>>Closed / Paused</option>
+                  <option value="open" <?= esc(($settings['enrollment_status'] ?? 'open') === 'open' ? 'selected' : '') ?>>Open for Applications</option>
+                  <option value="closed" <?= esc(($settings['enrollment_status'] ?? '') === 'closed' ? 'selected' : '') ?>>Closed / Paused</option>
                 </select>
                 <div class="form-text">If closed, applicants cannot submit new enrollment forms.</div>
               </div>
@@ -113,10 +113,10 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                         <form action="settings_process.php" method="POST" class="d-inline">
                           <input type="hidden" name="action" value="toggle_announcement">
                           <?= getCsrfInput() ?>
-                          <input type="hidden" name="id" value="<?= $ann['id'] ?>">
-                          <input type="hidden" name="status" value="<?= (int)$ann['is_active'] ? '0' : '1' ?>">
-                          <button type="submit" class="btn btn-sm btn-outline-secondary rounded-circle" style="width:32px; height:32px; padding:0;" title="<?= (int)$ann['is_active'] ? 'Deactivate' : 'Activate' ?>">
-                            <i class="bi <?= (int)$ann['is_active'] ? 'bi-eye-slash-fill' : 'bi-eye-fill' ?>"></i>
+                          <input type="hidden" name="id" value="<?= esc($ann['id']) ?>">
+                          <input type="hidden" name="status" value="<?= esc((int)$ann['is_active'] ? '0' : '1') ?>">
+                          <button type="submit" class="btn btn-sm btn-outline-secondary rounded-circle" style="width:32px; height:32px; padding:0;" title="<?= esc((int)$ann['is_active'] ? 'Deactivate' : 'Activate') ?>">
+                            <i class="bi <?= esc((int)$ann['is_active'] ? 'bi-eye-slash-fill' : 'bi-eye-fill') ?>"></i>
                           </button>
                         </form>
                       </div>

@@ -161,7 +161,7 @@ if (empty($semesters)) $semesters = ['1'];
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <h1 class="h3 fw-bold text-dark mb-1">
-                        <a href="<?= $type === 'shs' ? 'shs_sections.php' : 'college_sections.php' ?>" class="text-decoration-none text-muted me-2"><i class="bi bi-arrow-left"></i></a>
+                        <a href="<?= esc($type === 'shs' ? 'shs_sections.php' : 'college_sections.php') ?>" class="text-decoration-none text-muted me-2"><i class="bi bi-arrow-left"></i></a>
                         Schedule Builder
                     </h1>
                     <p class="text-muted mb-0">
@@ -192,7 +192,7 @@ if (empty($semesters)) $semesters = ['1'];
                     <ul class="nav nav-pills mb-3" id="semTab" role="tablist">
                         <?php foreach ($semesters as $i => $sem): ?>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link <?= $i===0?'active':'' ?>" data-bs-toggle="pill" data-bs-target="#sem<?= htmlspecialchars($sem) ?>" type="button" onclick="switchSemester('<?= htmlspecialchars($sem) ?>')">
+                            <button class="nav-link <?= esc($i===0?'active':'') ?>" data-bs-toggle="pill" data-bs-target="#sem<?= htmlspecialchars($sem) ?>" type="button" onclick="switchSemester('<?= htmlspecialchars($sem) ?>')">
                                 Semester <?= htmlspecialchars($sem) ?>
                             </button>
                         </li>
@@ -202,7 +202,7 @@ if (empty($semesters)) $semesters = ['1'];
 
                     <div class="tab-content">
                         <?php foreach ($semesters as $i => $sem): ?>
-                        <div class="tab-pane fade <?= $i===0?'show active':'' ?>" id="sem<?= htmlspecialchars($sem) ?>" role="tabpanel">
+                        <div class="tab-pane fade <?= esc($i===0?'show active':'') ?>" id="sem<?= htmlspecialchars($sem) ?>" role="tabpanel">
                             <div class="unscheduled-list" id="unscheduledList_<?= htmlspecialchars($sem) ?>" ondragover="allowDrop(event)" ondrop="dropToUnscheduled(event, '<?= htmlspecialchars($sem) ?>')">
                                 <!-- Populated by JS -->
                             </div>
@@ -242,7 +242,7 @@ if (empty($semesters)) $semesters = ['1'];
                         <?php 
                         $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
                         foreach ($days as $d): ?>
-                            <div class="day-col" id="col_<?= $d ?>" ondragover="allowDrop(event)" ondrop="dropToCalendar(event, '<?= $d ?>')">
+                            <div class="day-col" id="col_<?= esc($d) ?>" ondragover="allowDrop(event)" ondrop="dropToCalendar(event, '<?= esc($d) ?>')">
                                 <!-- Blocks appended by JS -->
                             </div>
                         <?php endforeach; ?>
@@ -321,11 +321,11 @@ if (empty($semesters)) $semesters = ['1'];
 </div>
 
 <script>
-const type = '<?= $type ?>';
-const sectionId = <?= $sectionId ?>;
+const type = '<?= esc($type) ?>';
+const sectionId = <?= esc($sectionId) ?>;
 let subjects = <?= json_encode($jsSubjects) ?>;
 const CAL_START_HOUR = 7;
-let currentSemester = '<?= $semesters[0] ?? "1" ?>';
+let currentSemester = '<?= esc($semesters[0] ?? "1") ?>';
 let deleted_ids = [];
 let newIdCounter = -1;
 
@@ -744,7 +744,7 @@ function saveSchedule() {
     
     const payload = new URLSearchParams();
     payload.append('action', 'save_schedule');
-    payload.append('csrf_token', '<?= $_SESSION['csrf_token'] ?>');
+    payload.append('csrf_token', '<?= esc($_SESSION['csrf_token']) ?>');
     payload.append('type', type);
     payload.append('section_id', sectionId);
     payload.append('schedules', JSON.stringify(subjects));

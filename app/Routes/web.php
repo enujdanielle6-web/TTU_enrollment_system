@@ -9,7 +9,7 @@ use App\Core\Response;
 $router->get('/', ['App\Controllers\HomeController', 'index']);
 $router->get('/demo_landing.php', ['App\Controllers\HomeController', 'demo']);
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware']], function (Router $router) {
     // Backward Compatibility routes (Strangler Fig Pattern)
     $router->get('/auth/login.php', ['App\Controllers\AuthController', 'showLogin']);
     $router->post('/auth/login_process.php', ['App\Controllers\AuthController', 'login']);
@@ -23,7 +23,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware']], f
     $router->post('/auth/lms_login_process.php', ['App\Controllers\Lms\LmsAuthController', 'loginProcess']);
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {
     // Applicant Portal Legacy Routes
     $router->get('/applicant/dashboard.php', ['App\Controllers\ApplicantController', 'dashboard']);
     $router->get('/applicant/application_form.php', ['App\Controllers\ApplicantController', 'applicationForm']);
@@ -54,7 +54,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->post('/applicant/health_process.php', ['App\Controllers\HealthController', 'process']);
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:admin']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:admin']], function (Router $router) {
     // Admin Admissions
     $router->get('/admin/admissions/admissions_dashboard.php', ['App\Controllers\Admin\Admissions\AdmissionsController', 'index']);
     $router->get('/admin/admissions/review.php', ['App\Controllers\Admin\Admissions\AdmissionsController', 'review']);
@@ -136,7 +136,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/admin/dashboard.php', ['App\Controllers\Admin\System\DashboardController', 'index']);
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:scheduler']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:scheduler']], function (Router $router) {
     // Admin Scheduler
     $router->get('/admin/scheduler/scheduler_dashboard.php', ['App\Controllers\Admin\Scheduler\SchedulerController', 'dashboard']);
     
@@ -151,7 +151,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->post('/admin/scheduler/schedule_builder_process.php', ['App\Controllers\Admin\Scheduler\SchedulerController', 'process']);
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {
     // Applicant API Routes
     $router->get('/applicant/api_get_curriculum.php', ['App\Controllers\Api\ApplicantApiController', 'getCurriculum']);
     $router->get('/applicant/api_get_full_curriculum.php', ['App\Controllers\Api\ApplicantApiController', 'getFullCurriculum']);
@@ -162,7 +162,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
 
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\AuthMiddleware']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware']], function (Router $router) {
     // LMS Student Portal
     $router->get('/lms/student/dashboard.php', ['App\Controllers\Lms\StudentController', 'dashboard']);
     $router->get('/lms/student/course.php', ['App\Controllers\Lms\StudentController', 'course']);

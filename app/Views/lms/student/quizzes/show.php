@@ -4,7 +4,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= $course['lms_course_id'] ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
             <li class="breadcrumb-item active" aria-current="page">Quiz</li>
         </ol>
     </nav>
@@ -23,14 +23,14 @@
                         <div class="text-muted small fw-bold text-uppercase mb-1">Time Limit</div>
                         <div class="fs-5 fw-bold text-dark">
                             <i class="bi bi-stopwatch text-primary me-1"></i>
-                            <?= $quiz['time_limit'] ? $quiz['time_limit'] . ' minutes' : 'Unlimited' ?>
+                            <?= esc($quiz['time_limit'] ? $quiz['time_limit'] . ' minutes' : 'Unlimited') ?>
                         </div>
                     </div>
                     <div class="bg-light p-3 rounded-3 border">
                         <div class="text-muted small fw-bold text-uppercase mb-1">Attempts</div>
                         <div class="fs-5 fw-bold text-dark">
                             <i class="bi bi-arrow-repeat text-primary me-1"></i>
-                            <?= count($attempts) ?> / <?= $quiz['max_attempts'] ?: '&infin;' ?>
+                            <?= count($attempts) ?> / <?= esc($quiz['max_attempts'] ?: '&infin;') ?>
                         </div>
                     </div>
                 </div>
@@ -39,11 +39,11 @@
                     <div class="alert alert-warning mb-4">
                         You have an attempt in progress.
                     </div>
-                    <form action="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $quiz['id'] ?>/start" method="POST">
+                    <form action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/start" method="POST">
                         <button type="submit" class="btn btn-warning btn-lg px-5 shadow-sm fw-bold">Resume Attempt</button>
                     </form>
                 <?php elseif ($can_attempt): ?>
-                    <form action="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $quiz['id'] ?>/start" method="POST">
+                    <form action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/start" method="POST">
                         <button type="submit" class="btn btn-primary btn-lg px-5 shadow-sm fw-bold">Start Quiz</button>
                     </form>
                 <?php else: ?>
@@ -68,7 +68,7 @@
                             <tbody>
                                 <?php foreach ($attempts as $attempt): ?>
                                     <tr>
-                                        <td>#<?= $attempt['attempt_number'] ?></td>
+                                        <td>#<?= esc($attempt['attempt_number']) ?></td>
                                         <td>
                                             <?php if ($attempt['status'] === 'graded'): ?>
                                                 <span class="badge bg-success">Graded</span>
@@ -79,11 +79,11 @@
                                             <?php endif; ?>
                                         </td>
                                         <td class="fw-bold">
-                                            <?= $attempt['score'] !== null ? $attempt['score'] : '-' ?>
+                                            <?= esc($attempt['score'] !== null ? $attempt['score'] : '-') ?>
                                         </td>
                                         <td>
                                             <?php if ($attempt['status'] !== 'in_progress'): ?>
-                                                <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $quiz['id'] ?>/result/<?= $attempt['id'] ?>" class="btn btn-sm btn-outline-primary">View Results</a>
+                                                <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/result/<?= esc($attempt['id']) ?>" class="btn btn-sm btn-outline-primary">View Results</a>
                                             <?php endif; ?>
                                         </td>
                                     </tr>

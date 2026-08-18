@@ -92,7 +92,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                     <td class="text-end pe-4">
                       <!-- Edit Button -->
                       <button class="btn btn-sm btn-outline-secondary rounded-pill edit-strand-btn" 
-                              data-id="<?= $strand['id'] ?>"
+                              data-id="<?= esc($strand['id']) ?>"
                               data-code="<?= htmlspecialchars($strand['code'], ENT_QUOTES, 'UTF-8') ?>"
                               data-name="<?= htmlspecialchars($strand['name'], ENT_QUOTES, 'UTF-8') ?>"
                               data-bs-toggle="modal" 
@@ -104,10 +104,10 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                       <form action="shs_strand_process.php" method="POST" class="d-inline">
                         <input type="hidden" name="action" value="toggle_strand">
                         <?= getCsrfInput() ?>
-                        <input type="hidden" name="id" value="<?= $strand['id'] ?>">
-                        <input type="hidden" name="status" value="<?= $strand['is_active'] ? '0' : '1' ?>">
-                        <button type="submit" class="btn btn-sm <?= $strand['is_active'] ? 'btn-outline-danger' : 'btn-outline-success' ?> rounded-pill" title="<?= $strand['is_active'] ? 'Disable' : 'Enable' ?>">
-                          <i class="bi <?= $strand['is_active'] ? 'bi-eye-slash' : 'bi-eye' ?>"></i>
+                        <input type="hidden" name="id" value="<?= esc($strand['id']) ?>">
+                        <input type="hidden" name="status" value="<?= esc($strand['is_active'] ? '0' : '1') ?>">
+                        <button type="submit" class="btn btn-sm <?= esc($strand['is_active'] ? 'btn-outline-danger' : 'btn-outline-success') ?> rounded-pill" title="<?= esc($strand['is_active'] ? 'Disable' : 'Enable') ?>">
+                          <i class="bi <?= esc($strand['is_active'] ? 'bi-eye-slash' : 'bi-eye') ?>"></i>
                         </button>
                       </form>
                     </td>

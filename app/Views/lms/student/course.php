@@ -19,14 +19,14 @@
                     <?= htmlspecialchars($course['section_code'] ?? 'Global Section') ?>
                 </span>
                 <h1 class="display-5 fw-bold mb-2 text-white"><?= htmlspecialchars($course['subject_name']) ?></h1>
-                <p class="fs-5 mb-0 opacity-75 fw-semibold"><?= htmlspecialchars($course['subject_code']) ?> &bull; <?= (int)$course['units'] ?> Units</p>
+                <p class="fs-5 mb-0 opacity-75 fw-semibold"><?= htmlspecialchars($course['subject_code']) ?> &bull; <?= esc((int)$course['units']) ?> Units</p>
             </div>
             <div class="col-md-4 text-md-end mt-4 mt-md-0 d-none d-md-block">
                  <div class="bg-white text-dark p-3 rounded-4 shadow-sm d-inline-block text-start">
                      <p class="small text-muted fw-bold text-uppercase mb-1">Instructor</p>
                      <div class="d-flex align-items-center gap-3">
                          <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
-                             <?= substr($instructor_name, 0, 1) ?>
+                             <?= esc(substr($instructor_name, 0, 1)) ?>
                          </div>
                          <div>
                              <h6 class="mb-0 fw-bold"><?= htmlspecialchars($instructor_name) ?></h6>
@@ -63,16 +63,16 @@
                     <?php foreach ($modules as $index => $module): ?>
                         <div class="accordion-item border-0 mb-3 rounded-4 shadow-sm overflow-hidden lms-card">
                             <h2 class="accordion-header">
-                                <button class="accordion-button <?= $index === 0 ? '' : 'collapsed' ?> bg-white fw-bold text-dark p-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMod<?= $module['id'] ?>">
+                                <button class="accordion-button <?= esc($index === 0 ? '' : 'collapsed') ?> bg-white fw-bold text-dark p-4" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMod<?= esc($module['id']) ?>">
                                     <div class="d-flex align-items-center gap-3 w-100">
                                         <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; flex-shrink: 0;">
-                                            <?= $index + 1 ?>
+                                            <?= esc($index + 1) ?>
                                         </div>
                                         <?= htmlspecialchars($module['title']) ?>
                                     </div>
                                 </button>
                             </h2>
-                            <div id="collapseMod<?= $module['id'] ?>" class="accordion-collapse collapse <?= $index === 0 ? 'show' : '' ?>" data-bs-parent="#modulesAccordion">
+                            <div id="collapseMod<?= esc($module['id']) ?>" class="accordion-collapse collapse <?= esc($index === 0 ? 'show' : '') ?>" data-bs-parent="#modulesAccordion">
                                 <div class="accordion-body p-4 pt-0 text-secondary bg-white">
                                     <p class="mb-3"><?= nl2br(htmlspecialchars($module['description'] ?? 'No description provided.')) ?></p>
                                     
@@ -87,11 +87,11 @@
                                             </div>
                                         <?php else: ?>
                                             <?php foreach ($module['materials'] as $material): ?>
-                                                <a href="/sia/lms/download/material/<?= $material['id'] ?>" class="list-group-item list-group-item-action px-0 py-3 d-flex align-items-center gap-3 border-bottom-0 text-dark">
+                                                <a href="/sia/lms/download/material/<?= esc($material['id']) ?>" class="list-group-item list-group-item-action px-0 py-3 d-flex align-items-center gap-3 border-bottom-0 text-dark">
                                                     <i class="bi bi-file-earmark-arrow-down fs-4 text-primary"></i>
                                                     <div>
                                                         <span class="d-block fw-bold"><?= htmlspecialchars($material['file_name']) ?></span>
-                                                        <small class="text-muted"><?= round($material['file_size'] / 1024, 2) ?> KB &bull; Uploaded <?= date('M d, Y', strtotime($material['created_at'])) ?></small>
+                                                        <small class="text-muted"><?= esc(round($material['file_size'] / 1024, 2)) ?> KB &bull; Uploaded <?= date('M d, Y', strtotime($material['created_at'])) ?></small>
                                                     </div>
                                                 </a>
                                             <?php endforeach; ?>

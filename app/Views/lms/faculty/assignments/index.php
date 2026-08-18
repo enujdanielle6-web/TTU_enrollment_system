@@ -6,7 +6,7 @@
             <h1 class="h3 fw-bold text-dark mb-1">Assignments: <?= htmlspecialchars($course['subject_code']) ?></h1>
             <p class="text-muted mb-0"><?= htmlspecialchars($course['subject_name']) ?> &bull; Section <?= htmlspecialchars($course['section_code']) ?></p>
         </div>
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/assignments/create" class="btn btn-primary shadow-sm">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/create" class="btn btn-primary shadow-sm">
             <i class="bi bi-plus-circle me-1"></i> New Assignment
         </a>
     </div>
@@ -46,12 +46,12 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?= $assignment['due_date'] ? date('M d, Y h:i A', strtotime($assignment['due_date'])) : '<span class="text-muted">No due date</span>' ?>
+                                        <?= esc($assignment['due_date'] ? date('M d, Y h:i A', strtotime($assignment['due_date'])) : '<span class="text-muted">No due date</span>') ?>
                                     </td>
-                                    <td><?= $assignment['max_score'] ?> pts</td>
+                                    <td><?= esc($assignment['max_score']) ?> pts</td>
                                     <td class="text-end pe-4">
-                                        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/assignments/<?= $assignment['id'] ?>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/assignments/<?= $assignment['id'] ?>/submissions" class="btn btn-sm btn-info text-white ms-1">View Submissions</a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submissions" class="btn btn-sm btn-info text-white ms-1">View Submissions</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

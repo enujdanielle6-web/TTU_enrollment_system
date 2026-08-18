@@ -96,7 +96,7 @@ require_once __DIR__ . '/../components/header.php';
                                             </div>
                                             <div class="mt-2 text-md-end">
                                                 <button type="button" class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm apply-btn" 
-                                                        data-id="<?= $scholarship['id'] ?>"
+                                                        data-id="<?= esc($scholarship['id']) ?>"
                                                         data-name="<?= htmlspecialchars($scholarship['name'], ENT_QUOTES, 'UTF-8') ?>"
                                                         data-req="<?= htmlspecialchars($scholarship['requirements'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                                         data-bs-toggle="modal" data-bs-target="#applyModal">
@@ -141,7 +141,7 @@ require_once __DIR__ . '/../components/header.php';
                                     <li class="list-group-item p-3">
                                         <div class="fw-bold text-dark small mb-1"><?= htmlspecialchars($myApp['scholarship_name'], ENT_QUOTES, 'UTF-8') ?></div>
                                         <div class="d-flex justify-content-between align-items-center">
-                                            <span class="badge <?= $badgeClass ?> rounded-pill"><?= $statusLabel ?></span>
+                                            <span class="badge <?= esc($badgeClass) ?> rounded-pill"><?= esc($statusLabel) ?></span>
                                             <span class="text-muted" style="font-size: 0.75rem;"><?= date('M d, Y', strtotime($myApp['created_at'])) ?></span>
                                         </div>
                                         <?php if (!empty($myApp['admin_feedback'])): ?>

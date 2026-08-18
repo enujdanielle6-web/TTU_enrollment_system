@@ -17,8 +17,8 @@ $baseAdminUrl = '/sia/admin/';
     </button>
     <!-- Brand / Logo Area -->
     <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
-      <a class="text-decoration-none d-flex align-items-center" href="<?= $baseAdminUrl ?>dashboard.php" aria-label="Admin portal home">
-        <img src="<?= $baseAdminUrl ?>../images/TTU_LOGO.png" alt="TTU Logo" style="height: 36px; width: auto; object-fit: contain;">
+      <a class="text-decoration-none d-flex align-items-center" href="<?= esc($baseAdminUrl) ?>dashboard.php" aria-label="Admin portal home">
+        <img src="<?= esc($baseAdminUrl) ?>../images/TTU_LOGO.png" alt="TTU Logo" style="height: 36px; width: auto; object-fit: contain;">
         <span class="text-dark fw-bold ms-3 fs-5 nav-text">Admin Portal</span>
       </a>
       <button class="btn btn-sm btn-light d-lg-none" id="sidebarClose" onclick="document.getElementById('adminSidebar').classList.remove('show'); document.getElementById('sidebarBackdrop').classList.add('d-none');">
@@ -42,16 +42,16 @@ $baseAdminUrl = '/sia/admin/';
   ?>
 
   <?php if (hasPermission(['applications.view_queue'])): ?>
-  <button title="Admissions" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isAdmissions ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseAdmissions" aria-expanded="<?= $isAdmissions ? 'true' : 'false' ?>">
+  <button title="Admissions" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isAdmissions ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseAdmissions" aria-expanded="<?= esc($isAdmissions ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-folder2-open fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">Admissions</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isAdmissions ? 'show' : '' ?>" id="collapseAdmissions">
+  <div class="collapse <?= esc($isAdmissions ? 'show' : '') ?>" id="collapseAdmissions">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'admissions_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>admissions/admissions_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'admissions_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>admissions/admissions_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'review.php' || $current_page === 'application_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>admissions/review.php">
+      <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'review.php' || $current_page === 'application_detail.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>admissions/review.php">
         <i class="bi bi-inbox fs-5"></i> <span class="nav-text">Applications</span>
       </a>
     </div>
@@ -59,16 +59,16 @@ $baseAdminUrl = '/sia/admin/';
   <?php endif; ?>
 
   <?php if (hasPermission('medical.review')): ?>
-  <button title="University Clinic" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isClinic ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseClinic" aria-expanded="<?= $isClinic ? 'true' : 'false' ?>">
+  <button title="University Clinic" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isClinic ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseClinic" aria-expanded="<?= esc($isClinic ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-bandaid fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">University Clinic</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isClinic ? 'show' : '' ?>" id="collapseClinic">
+  <div class="collapse <?= esc($isClinic ? 'show' : '') ?>" id="collapseClinic">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Clinic Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'clinic_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>clinic/clinic_dashboard.php">
+      <a title="Clinic Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'clinic_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>clinic/clinic_dashboard.php">
         <i class="bi bi-heart-pulse fs-5"></i> <span class="nav-text">Clinic Dashboard</span>
       </a>
-      <a title="Medical Clearance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'medical_clearance.php' || $current_page === 'medical_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>clinic/medical_clearance.php">
+      <a title="Medical Clearance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'medical_clearance.php' || $current_page === 'medical_detail.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>clinic/medical_clearance.php">
         <i class="bi bi-file-medical fs-5"></i> <span class="nav-text">Medical Clearance</span>
       </a>
     </div>
@@ -76,55 +76,55 @@ $baseAdminUrl = '/sia/admin/';
   <?php endif; ?>
 
   <?php if (hasPermission(['students.view', 'programs.manage'])): ?>
-  <button title="Registrar" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isRegistrarCore ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseRegistrar" aria-expanded="<?= $isRegistrarCore ? 'true' : 'false' ?>">
+  <button title="Registrar" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isRegistrarCore ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseRegistrar" aria-expanded="<?= esc($isRegistrarCore ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-journal-bookmark fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">Registrar</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isRegistrarCore ? 'show' : '' ?>" id="collapseRegistrar">
+  <div class="collapse <?= esc($isRegistrarCore ? 'show' : '') ?>" id="collapseRegistrar">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'registrar_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/registrar_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'registrar_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/registrar_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="Students" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'students.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/students.php">
+      <a title="Students" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'students.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/students.php">
         <i class="bi bi-people fs-5"></i> <span class="nav-text">Students</span>
       </a>
-      <a title="Global Subjects" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'subjects.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/subjects.php">
+      <a title="Global Subjects" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'subjects.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/subjects.php">
         <i class="bi bi-journal-text fs-5"></i> <span class="nav-text">Global Subjects</span>
       </a>
     </div>
   </div>
 
-  <button title="Senior High School" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isShs ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseShs" aria-expanded="<?= $isShs ? 'true' : 'false' ?>">
+  <button title="Senior High School" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isShs ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseShs" aria-expanded="<?= esc($isShs ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-backpack fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">Senior High School</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isShs ? 'show' : '' ?>" id="collapseShs">
+  <div class="collapse <?= esc($isShs ? 'show' : '') ?>" id="collapseShs">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Strands" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'shs_strands.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/shs_strands.php">
+      <a title="Strands" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_strands.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_strands.php">
         <i class="bi bi-mortarboard fs-5"></i> <span class="nav-text">Strands</span>
       </a>
-      <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'shs_curriculum.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/shs_curriculum.php">
+      <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_curriculum.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_curriculum.php">
         <i class="bi bi-diagram-3 fs-5"></i> <span class="nav-text">Curriculum</span>
       </a>
-      <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'shs_enrollment_queue.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/shs_enrollment_queue.php">
+      <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_enrollment_queue.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_enrollment_queue.php">
         <i class="bi bi-person-lines-fill fs-5"></i> <span class="nav-text">Enrollments</span>
       </a>
     </div>
   </div>
 
-  <button title="College" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.3s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isCollege ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseCollege" aria-expanded="<?= $isCollege ? 'true' : 'false' ?>">
+  <button title="College" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.3s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isCollege ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseCollege" aria-expanded="<?= esc($isCollege ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-bank fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">College</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isCollege ? 'show' : '' ?>" id="collapseCollege">
+  <div class="collapse <?= esc($isCollege ? 'show' : '') ?>" id="collapseCollege">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Programs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'college_programs.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/college_programs.php">
+      <a title="Programs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_programs.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_programs.php">
         <i class="bi bi-mortarboard fs-5"></i> <span class="nav-text">Programs</span>
       </a>
-      <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'college_curriculum.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/college_curriculum.php">
+      <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_curriculum.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_curriculum.php">
         <i class="bi bi-diagram-3 fs-5"></i> <span class="nav-text">Curriculum</span>
       </a>
-      <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'college_enrollment_queue.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>registrar/college_enrollment_queue.php">
+      <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_enrollment_queue.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_enrollment_queue.php">
         <i class="bi bi-person-lines-fill fs-5"></i> <span class="nav-text">Enrollments</span>
       </a>
     </div>
@@ -132,19 +132,19 @@ $baseAdminUrl = '/sia/admin/';
   <?php endif; ?>
 
   <?php if (hasPermission(['sections.manage', 'schedules.manage'])): ?>
-  <button title="Scheduler" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.35s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isScheduler ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseScheduler" aria-expanded="<?= $isScheduler ? 'true' : 'false' ?>">
+  <button title="Scheduler" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.35s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isScheduler ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseScheduler" aria-expanded="<?= esc($isScheduler ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-calendar-week fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">Scheduler</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isScheduler ? 'show' : '' ?>" id="collapseScheduler">
+  <div class="collapse <?= esc($isScheduler ? 'show' : '') ?>" id="collapseScheduler">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'scheduler_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scheduler/scheduler_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'scheduler_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scheduler/scheduler_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="SHS Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'shs_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'shs') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scheduler/shs_sections.php">
+      <a title="SHS Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'shs') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scheduler/shs_sections.php">
         <i class="bi bi-diagram-3-fill fs-5"></i> <span class="nav-text">SHS Sections & Scheds</span>
       </a>
-      <a title="College Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'college_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'college') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scheduler/college_sections.php">
+      <a title="College Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'college') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scheduler/college_sections.php">
         <i class="bi bi-diagram-3-fill fs-5"></i> <span class="nav-text">College Sections & Scheds</span>
       </a>
     </div>
@@ -152,22 +152,22 @@ $baseAdminUrl = '/sia/admin/';
   <?php endif; ?>
 
   <?php if (hasPermission(['scholarships.manage', 'scholarship_applications.review'])): ?>
-  <button title="Scholarship" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.35s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isScholarship ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseScholarship" aria-expanded="<?= $isScholarship ? 'true' : 'false' ?>">
+  <button title="Scholarship" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.35s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isScholarship ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseScholarship" aria-expanded="<?= esc($isScholarship ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-award fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">Scholarship</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isScholarship ? 'show' : '' ?>" id="collapseScholarship">
+  <div class="collapse <?= esc($isScholarship ? 'show' : '') ?>" id="collapseScholarship">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'scholarship_dashboard.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scholarship/scholarship_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarship_dashboard.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarship_dashboard.php">
         <i class="bi bi-pie-chart fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="Scholarships" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'scholarships.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scholarship/scholarships.php">
+      <a title="Scholarships" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarships.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarships.php">
         <i class="bi bi-award fs-5"></i> <span class="nav-text">Scholarships</span>
       </a>
-      <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'scholarship_review.php' || $current_page === 'scholarship_detail.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scholarship/scholarship_review.php">
+      <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarship_review.php' || $current_page === 'scholarship_detail.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarship_review.php">
         <i class="bi bi-file-earmark-text fs-5"></i> <span class="nav-text">Applications</span>
       </a>
-      <a title="Active Scholars" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'scholars.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>scholarship/scholars.php">
+      <a title="Active Scholars" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholars.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholars.php">
         <i class="bi bi-people-fill fs-5"></i> <span class="nav-text">Active Scholars</span>
       </a>
     </div>
@@ -175,19 +175,19 @@ $baseAdminUrl = '/sia/admin/';
   <?php endif; ?>
 
   <?php if (hasPermission(['fees.manage', 'assessments.generate', 'payments.record'])): ?>
-  <button title="Finance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.4s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isFinance ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseFinance" aria-expanded="<?= $isFinance ? 'true' : 'false' ?>">
+  <button title="Finance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.4s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isFinance ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseFinance" aria-expanded="<?= esc($isFinance ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-cash-coin fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">Finance</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isFinance ? 'show' : '' ?>" id="collapseFinance">
+  <div class="collapse <?= esc($isFinance ? 'show' : '') ?>" id="collapseFinance">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard / Accounts" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= ($current_page === 'cashier_dashboard.php' || $current_page === 'cashier_assessment.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>finance/cashier_dashboard.php">
+      <a title="Dashboard / Accounts" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'cashier_dashboard.php' || $current_page === 'cashier_assessment.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>finance/cashier_dashboard.php">
         <i class="bi bi-grid fs-5"></i> <span class="nav-text">Dashboard / Accounts</span>
       </a>
-      <a title="Payment History" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'cashier_payments.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>finance/cashier_payments.php">
+      <a title="Payment History" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'cashier_payments.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>finance/cashier_payments.php">
         <i class="bi bi-cash-stack fs-5"></i> <span class="nav-text">Payment History</span>
       </a>
-      <a title="Fee Templates" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'fees.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>finance/fees.php">
+      <a title="Fee Templates" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'fees.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>finance/fees.php">
         <i class="bi bi-tags fs-5"></i> <span class="nav-text">Fee Templates</span>
       </a>
     </div>
@@ -195,25 +195,25 @@ $baseAdminUrl = '/sia/admin/';
   <?php endif; ?>
 
   <?php if (hasPermission(['*'])): ?>
-  <button title="System Admin" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.45s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= $isSysAdmin ? '' : 'collapsed' ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseSysAdmin" aria-expanded="<?= $isSysAdmin ? 'true' : 'false' ?>">
+  <button title="System Admin" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.45s;" class="nav-link w-100 fade-in-left text-start d-flex align-items-center justify-content-between sidebar-toggle <?= esc($isSysAdmin ? '' : 'collapsed') ?> mb-2" data-bs-toggle="collapse" data-bs-target="#collapseSysAdmin" aria-expanded="<?= esc($isSysAdmin ? 'true' : 'false') ?>">
     <div class="d-flex align-items-center gap-3 toggle-content"><i class="bi bi-shield-lock fs-5 text-muted"></i><span class="small fw-bold text-muted text-uppercase nav-text">System Admin</span></div>
     <i class="bi bi-chevron-down transition-transform text-muted"></i>
   </button>
-  <div class="collapse <?= $isSysAdmin ? 'show' : '' ?>" id="collapseSysAdmin">
+  <div class="collapse <?= esc($isSysAdmin ? 'show' : '') ?>" id="collapseSysAdmin">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= ($current_page === 'dashboard.php' || $current_page === 'sysadmin_dashboard.php') ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>system/sysadmin_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'sysadmin_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/sysadmin_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="User Management" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'users.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>system/users.php">
+      <a title="User Management" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'users.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/users.php">
         <i class="bi bi-person-badge fs-5"></i> <span class="nav-text">User Management</span>
       </a>
-      <a title="Reports" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'reports.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>system/reports.php">
+      <a title="Reports" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'reports.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/reports.php">
         <i class="bi bi-bar-chart fs-5"></i> <span class="nav-text">Reports</span>
       </a>
-      <a title="System Settings" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'settings.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>system/settings.php">
+      <a title="System Settings" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'settings.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/settings.php">
         <i class="bi bi-sliders fs-5"></i> <span class="nav-text">System Settings</span>
       </a>
-      <a title="Audit Logs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.3s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= $current_page === 'audit_logs.php' ? 'active' : ''; ?>" href="<?= $baseAdminUrl ?>system/audit_logs.php">
+      <a title="Audit Logs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.3s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'audit_logs.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/audit_logs.php">
         <i class="bi bi-shield-check fs-5"></i> <span class="nav-text">Audit Logs</span>
       </a>
     </div>
@@ -248,7 +248,7 @@ $baseAdminUrl = '/sia/admin/';
           </span>
         </div>
       </div>
-      <a class="btn btn-outline-danger w-100 btn-sm rounded-pill fw-medium shadow-sm" href="<?= $baseAdminUrl ?>../auth/logout.php">
+      <a class="btn btn-outline-danger w-100 btn-sm rounded-pill fw-medium shadow-sm" href="<?= esc($baseAdminUrl) ?>../auth/logout.php">
         <i class="bi bi-box-arrow-right"></i> <span class="nav-text">Sign Out</span>
       </a>
     </div>

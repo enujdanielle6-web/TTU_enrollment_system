@@ -4,7 +4,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= $course['lms_course_id'] ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
             <li class="breadcrumb-item active" aria-current="page">Grades</li>
         </ol>
     </nav>
@@ -19,12 +19,12 @@
                     $totalScore = $data['my_grades'] ? $data['my_grades']['total'] : 0;
                 ?>
 
-                <div class="d-inline-block border border-3 rounded-circle p-5 mb-3 shadow-sm <?= $percentage >= 75 ? 'border-success' : 'border-danger' ?>" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
+                <div class="d-inline-block border border-3 rounded-circle p-5 mb-3 shadow-sm <?= esc($percentage >= 75 ? 'border-success' : 'border-danger') ?>" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
                     <div>
-                        <div class="fs-1 fw-bold <?= $percentage >= 75 ? 'text-success' : 'text-danger' ?>">
+                        <div class="fs-1 fw-bold <?= esc($percentage >= 75 ? 'text-success' : 'text-danger') ?>">
                             <?= number_format($percentage, 1) ?>%
                         </div>
-                        <div class="text-muted small"><?= $totalScore ?> / <?= $data['total_possible'] ?> pts</div>
+                        <div class="text-muted small"><?= esc($totalScore) ?> / <?= esc($data['total_possible']) ?> pts</div>
                     </div>
                 </div>
 
@@ -56,12 +56,12 @@
                                 ?>
                                     <tr>
                                         <td class="ps-4 fw-medium text-dark">
-                                            <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/assignments/<?= $a['id'] ?>" class="text-decoration-none">
+                                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($a['id']) ?>" class="text-decoration-none">
                                                 <?= htmlspecialchars($a['title']) ?>
                                             </a>
                                         </td>
                                         <td class="text-end pe-4 fw-bold">
-                                            <?= $score !== null ? $score : '<span class="text-muted fw-normal">Not graded</span>' ?> / <?= $a['max_score'] ?>
+                                            <?= esc($score !== null ? $score : '<span class="text-muted fw-normal">Not graded</span>') ?> / <?= esc($a['max_score']) ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -93,12 +93,12 @@
                                 ?>
                                     <tr>
                                         <td class="ps-4 fw-medium text-dark">
-                                            <a href="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $q['id'] ?>" class="text-decoration-none text-info">
+                                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="text-decoration-none text-info">
                                                 <?= htmlspecialchars($q['title']) ?>
                                             </a>
                                         </td>
                                         <td class="text-end pe-4 fw-bold">
-                                            <?= $score !== null ? $score : '<span class="text-muted fw-normal">Not graded</span>' ?> / <?= $maxPts ?>
+                                            <?= esc($score !== null ? $score : '<span class="text-muted fw-normal">Not graded</span>') ?> / <?= esc($maxPts) ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

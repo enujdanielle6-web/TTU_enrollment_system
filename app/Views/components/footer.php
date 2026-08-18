@@ -6,7 +6,7 @@
 
 <script src="/sia/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 <script src="/sia/public/js/spa-router.js"></script>
-<script src="/sia/js/main.js?v=<?= filemtime(__DIR__ . '/../../../js/main.js') ?>"></script>
+<script src="/sia/js/main.js?v=<?= esc(filemtime(__DIR__ . '/../../../js/main.js')) ?>"></script>
 </body>
 </html>
 

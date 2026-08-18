@@ -77,19 +77,19 @@ require_once __DIR__ . '/../../components/header.php';
                         <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2"><i class="bi bi-x-circle-fill me-1"></i>Inactive</span>
                       <?php endif; ?>
                     </td>
-                    <td><span class="badge bg-secondary rounded-pill px-3"><?= $curr['subject_count'] ?></span></td>
+                    <td><span class="badge bg-secondary rounded-pill px-3"><?= esc($curr['subject_count']) ?></span></td>
                     <td class="text-end pe-4">
-                      <a href="college_curriculum_builder.php?id=<?= $curr['id'] ?>" class="btn btn-sm btn-primary rounded-pill px-3">
+                      <a href="college_curriculum_builder.php?id=<?= esc($curr['id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3">
                         <i class="bi bi-tools me-1"></i> Builder
                       </a>
                       <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 ms-1" 
-                              onclick="openEditCurriculum(<?= $curr['id'] ?>, <?= $curr['program_id'] ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['version']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['effective_academic_year'] ?? ''), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?>', '<?= $curr['status'] ?>')">
+                              onclick="openEditCurriculum(<?= esc($curr['id']) ?>, <?= esc($curr['program_id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['version']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['effective_academic_year'] ?? ''), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?>', '<?= esc($curr['status']) ?>')">
                         <i class="bi bi-pencil-fill me-1"></i> Edit
                       </button>
                       <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1" 
                               data-bs-toggle="modal" 
                               data-bs-target="#deleteCurriculumModal"
-                              onclick="setDeleteCurriculum(<?= $curr['id'] ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>')"
+                              onclick="setDeleteCurriculum(<?= esc($curr['id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>')"
                               title="Delete Curriculum">
                         <i class="bi bi-trash-fill"></i>
                       </button>
@@ -128,7 +128,7 @@ require_once __DIR__ . '/../../components/header.php';
                 <select class="form-select bg-light" name="program_id" required>
                 <option value="" disabled selected>Select Program</option>
                 <?php foreach ($programs as $prog): ?>
-                    <option value="<?= $prog['id'] ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?></option>
+                    <option value="<?= esc($prog['id']) ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?></option>
                 <?php endforeach; ?>
                 </select>
             </div>
@@ -185,7 +185,7 @@ require_once __DIR__ . '/../../components/header.php';
                 <label class="form-label small fw-semibold text-dark">Program <span class="text-danger">*</span></label>
                 <select class="form-select bg-light" name="program_id" id="edit_curr_program_id" required>
                 <?php foreach ($programs as $prog): ?>
-                    <option value="<?= $prog['id'] ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?></option>
+                    <option value="<?= esc($prog['id']) ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?></option>
                 <?php endforeach; ?>
                 </select>
             </div>

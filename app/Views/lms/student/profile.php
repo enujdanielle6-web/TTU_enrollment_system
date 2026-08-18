@@ -16,7 +16,7 @@
                 <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 100px; opacity: 0.1;"></div>
                 <div class="position-relative mt-4 mb-3">
                     <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto shadow-sm" style="width: 100px; height: 100px; font-size: 2.5rem; border: 4px solid #fff;">
-                        <?= substr($_SESSION['lms_name'] ?? 'S', 0, 1) ?>
+                        <?= esc(substr($_SESSION['lms_name'] ?? 'S', 0, 1)) ?>
                     </div>
                 </div>
                 <h4 class="fw-bold mb-1"><?= htmlspecialchars($_SESSION['lms_name'] ?? 'Student Name') ?></h4>

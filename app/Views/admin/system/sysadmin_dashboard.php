@@ -69,7 +69,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                   <i class="bi bi-people-fill fs-4"></i>
                 </div>
               </div>
-              <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['total_users'] ?></h2>
+              <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['total_users']) ?></h2>
               <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Total System Users</p>
             </div>
         </a>
@@ -83,7 +83,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <i class="bi bi-file-earmark-bar-graph fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['total_apps'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['total_apps']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Total App Records</p>
         </div>
       </div>
@@ -96,7 +96,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <i class="bi bi-person-plus fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['today_regs'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['today_regs']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">New Users Today</p>
         </div>
       </div>
@@ -109,7 +109,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <i class="bi bi-graph-up fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['week_regs'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['week_regs']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">New Users This Week</p>
         </div>
       </div>
@@ -196,7 +196,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                           default => 'bg-secondary'
                       };
                     ?>
-                    <span class="badge <?= $roleBadge ?> px-2 py-1 rounded-pill small">
+                    <span class="badge <?= esc($roleBadge) ?> px-2 py-1 rounded-pill small">
                       <?= htmlspecialchars(ucfirst($reg['role']), ENT_QUOTES, 'UTF-8') ?>
                     </span>
                   </td>

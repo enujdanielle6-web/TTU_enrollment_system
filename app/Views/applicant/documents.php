@@ -168,7 +168,7 @@ require_once __DIR__ . '/../components/header.php';
                 
                 <div class="d-flex flex-column flex-md-row gap-3 mt-2">
                   <div class="method-option">
-                    <input type="radio" name="submission_method" id="methodOnline" value="online" <?= $method === 'online' ? 'checked' : ''; ?> <?= $isLocked ? 'disabled' : ''; ?>>
+                    <input type="radio" name="submission_method" id="methodOnline" value="online" <?= esc($method === 'online' ? 'checked' : '';) ?> <?= esc($isLocked ? 'disabled' : '';) ?>>
                     <label class="method-label flex-column align-items-start p-4 h-100" for="methodOnline">
                       <div class="d-flex align-items-center gap-2 mb-3 w-100 border-bottom pb-2">
                         <i class="bi bi-cloud-arrow-up fs-4 text-primary"></i> 
@@ -181,7 +181,7 @@ require_once __DIR__ . '/../components/header.php';
                     </label>
                   </div>
                   <div class="method-option">
-                    <input type="radio" name="submission_method" id="methodOnCampus" value="on_campus" <?= $method === 'on_campus' ? 'checked' : ''; ?> <?= $isLocked ? 'disabled' : ''; ?>>
+                    <input type="radio" name="submission_method" id="methodOnCampus" value="on_campus" <?= esc($method === 'on_campus' ? 'checked' : '';) ?> <?= esc($isLocked ? 'disabled' : '';) ?>>
                     <label class="method-label flex-column align-items-start p-4 h-100" for="methodOnCampus">
                       <div class="d-flex align-items-center gap-2 mb-3 w-100 border-bottom pb-2">
                         <i class="bi bi-building fs-4 text-primary"></i> 
@@ -225,13 +225,13 @@ require_once __DIR__ . '/../components/header.php';
                   $docStatus = $hasDoc ? $documents[$docName]['status'] : null;
                   $docId = $hasDoc ? $documents[$docName]['id'] : null;
               ?>
-                <div class="col-12 fade-in-up" style="animation-delay: <?= $delay ?>s;">
-                  <div class="doc-card <?= $hasDoc ? 'border-success' : '' ?> fade-in-up" style="animation-delay: 0.3s;">
+                <div class="col-12 fade-in-up" style="animation-delay: <?= esc($delay) ?>s;">
+                  <div class="doc-card <?= esc($hasDoc ? 'border-success' : '') ?> fade-in-up" style="animation-delay: 0.3s;">
                     <div class="p-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-4">
                       
                       <div class="d-flex align-items-center gap-3">
                         <div class="doc-icon">
-                           <i class="bi <?= $hasDoc ? 'bi-file-earmark-check-fill' : 'bi-file-earmark-text' ?>"></i>
+                           <i class="bi <?= esc($hasDoc ? 'bi-file-earmark-check-fill' : 'bi-file-earmark-text') ?>"></i>
                         </div>
                         <div>
                           <div class="d-flex align-items-center gap-2 mb-1">
@@ -244,7 +244,7 @@ require_once __DIR__ . '/../components/header.php';
                                   default => 'bg-warning text-dark'
                                 };
                               ?>
-                              <span class="badge badge-status <?= $badgeClass ?> rounded-pill"><?= ucfirst(htmlspecialchars($docStatus, ENT_QUOTES, 'UTF-8')); ?></span>
+                              <span class="badge badge-status <?= esc($badgeClass) ?> rounded-pill"><?= ucfirst(htmlspecialchars($docStatus, ENT_QUOTES, 'UTF-8')); ?></span>
                             <?php else: ?>
                               <span class="badge badge-status bg-secondary bg-opacity-25 text-secondary rounded-pill">Missing</span>
                             <?php endif; ?>
@@ -264,7 +264,7 @@ require_once __DIR__ . '/../components/header.php';
                       <div class="text-md-end custom-file-upload">
                         <?php if ($hasDoc): ?>
                           <div class="mb-2">
-                            <a href="document_view.php?id=<?= $docId ?>" target="_blank" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm btn-sm">
+                            <a href="document_view.php?id=<?= esc($docId) ?>" target="_blank" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm btn-sm">
                               <i class="bi bi-eye me-1"></i> View Current File
                             </a>
                           </div>
@@ -276,7 +276,7 @@ require_once __DIR__ . '/../components/header.php';
                             <input type="hidden" name="document_name" value="<?= htmlspecialchars($docName, ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="file" name="document_file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" required>
                             <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm flex-shrink-0">
-                               <i class="bi bi-upload me-1"></i> <?= $hasDoc ? 'Replace' : 'Upload' ?>
+                               <i class="bi bi-upload me-1"></i> <?= esc($hasDoc ? 'Replace' : 'Upload') ?>
                             </button>
                           </form>
                         <?php elseif ($isLocked || $docStatus === 'verified'): ?>

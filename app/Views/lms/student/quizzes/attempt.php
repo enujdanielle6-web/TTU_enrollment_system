@@ -5,7 +5,7 @@
         <div class="col-lg-9">
             
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h4 fw-bold text-dark mb-0"><?= htmlspecialchars($quiz['title']) ?> - Attempt #<?= $attempt['attempt_number'] ?></h1>
+                <h1 class="h4 fw-bold text-dark mb-0"><?= htmlspecialchars($quiz['title']) ?> - Attempt #<?= esc($attempt['attempt_number']) ?></h1>
                 <?php if ($quiz['time_limit']): ?>
                     <div class="badge bg-danger bg-opacity-10 text-danger border border-danger p-2 fs-6" id="timer">
                         <i class="bi bi-clock me-1"></i> <span id="timeDisplay">--:--</span>
@@ -13,23 +13,23 @@
                 <?php endif; ?>
             </div>
 
-            <form id="quizForm" action="/sia/lms/student/course/<?= $course['lms_course_id'] ?>/quizzes/<?= $quiz['id'] ?>/attempt/<?= $attempt['id'] ?>/submit" method="POST">
+            <form id="quizForm" action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/attempt/<?= esc($attempt['id']) ?>/submit" method="POST">
                 
                 <?php foreach ($questions as $index => $q): ?>
                     <div class="lms-card p-4 border-0 shadow-sm rounded-4 mb-4">
                         <div class="d-flex justify-content-between align-items-start mb-4">
                             <h5 class="fw-bold mb-0 lh-base">
-                                <span class="text-primary me-2"><?= $index + 1 ?>.</span>
+                                <span class="text-primary me-2"><?= esc($index + 1) ?>.</span>
                                 <?= nl2br(htmlspecialchars($q['question_text'])) ?>
                             </h5>
-                            <span class="badge bg-light text-secondary border"><?= $q['points'] ?> pts</span>
+                            <span class="badge bg-light text-secondary border"><?= esc($q['points']) ?> pts</span>
                         </div>
                         
                         <div class="ps-4 ms-2">
                             <?php foreach ($q['choices'] as $c): ?>
                                 <div class="form-check mb-3">
-                                    <input class="form-check-input" type="radio" name="answers[<?= $q['id'] ?>]" id="choice_<?= $c['id'] ?>" value="<?= $c['id'] ?>">
-                                    <label class="form-check-label fs-5" style="cursor: pointer;" for="choice_<?= $c['id'] ?>">
+                                    <input class="form-check-input" type="radio" name="answers[<?= esc($q['id']) ?>]" id="choice_<?= esc($c['id']) ?>" value="<?= esc($c['id']) ?>">
+                                    <label class="form-check-label fs-5" style="cursor: pointer;" for="choice_<?= esc($c['id']) ?>">
                                         <?= htmlspecialchars($c['choice_text']) ?>
                                     </label>
                                 </div>
@@ -51,8 +51,8 @@
 
 <?php if ($quiz['time_limit']): ?>
 <script>
-    const startedAt = new Date("<?= $attempt['started_at'] ?>").getTime();
-    const timeLimitMs = <?= $quiz['time_limit'] ?> * 60 * 1000;
+    const startedAt = new Date("<?= esc($attempt['started_at']) ?>").getTime();
+    const timeLimitMs = <?= esc($quiz['time_limit']) ?> * 60 * 1000;
     const endTime = startedAt + timeLimitMs;
 
     function updateTimer() {

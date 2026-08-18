@@ -37,8 +37,8 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           </div>
           <div class="col-md-2">
             <select name="sort" class="form-select form-select-sm bg-light">
-              <option value="newest" <?= $sortOrder === 'newest' ? 'selected' : '' ?>>Newest First</option>
-              <option value="oldest" <?= $sortOrder === 'oldest' ? 'selected' : '' ?>>Oldest First</option>
+              <option value="newest" <?= esc($sortOrder === 'newest' ? 'selected' : '') ?>>Newest First</option>
+              <option value="oldest" <?= esc($sortOrder === 'oldest' ? 'selected' : '') ?>>Oldest First</option>
             </select>
           </div>
           <div class="col-md-auto">
@@ -98,7 +98,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small">Needs Finalization</span>
                     </td>
                     <td class="pe-4 text-end">
-                      <a href="../admissions/application_detail.php?id=<?= $app['id']; ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                      <a href="../admissions/application_detail.php?id=<?= esc($app['id'];) ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
                         Finalize <i class="bi bi-arrow-right-short"></i>
                       </a>
                     </td>
@@ -114,16 +114,16 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         <div class="border-top border-light py-3 px-4 d-flex justify-content-end align-items-center">
             <nav aria-label="Review Pagination">
               <ul class="pagination pagination-sm mb-0">
-                <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                  <a class="page-link" href="?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&sort=<?= urlencode($sortOrder) ?>">Previous</a>
+                <li class="page-item <?= esc(($page <= 1) ? 'disabled' : '') ?>">
+                  <a class="page-link" href="?page=<?= esc($page - 1) ?>&search=<?= esc(urlencode($search)) ?>&sort=<?= esc(urlencode($sortOrder)) ?>">Previous</a>
                 </li>
                 <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                  <li class="page-item <?= ($i === $page) ? 'active' : '' ?>">
-                    <a class="page-link" href="?page=<?= $i ?>&search=<?= urlencode($search) ?>&sort=<?= urlencode($sortOrder) ?>"><?= $i ?></a>
+                  <li class="page-item <?= esc(($i === $page) ? 'active' : '') ?>">
+                    <a class="page-link" href="?page=<?= esc($i) ?>&search=<?= esc(urlencode($search)) ?>&sort=<?= esc(urlencode($sortOrder)) ?>"><?= esc($i) ?></a>
                   </li>
                 <?php endfor; ?>
-                <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                  <a class="page-link" href="?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&sort=<?= urlencode($sortOrder) ?>">Next</a>
+                <li class="page-item <?= esc(($page >= $totalPages) ? 'disabled' : '') ?>">
+                  <a class="page-link" href="?page=<?= esc($page + 1) ?>&search=<?= esc(urlencode($search)) ?>&sort=<?= esc(urlencode($sortOrder)) ?>">Next</a>
                 </li>
               </ul>
             </nav>

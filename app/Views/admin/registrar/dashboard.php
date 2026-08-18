@@ -58,7 +58,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <i class="bi bi-mortarboard fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['enrolled'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['enrolled']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Total Enrolled</p>
         </div>
       </div>
@@ -71,7 +71,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <i class="bi bi-person-lines-fill fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['ready_to_enroll'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['ready_to_enroll']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Enrollment Queue</p>
         </div>
       </div>
@@ -84,7 +84,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <i class="bi bi-diagram-3-fill fs-4"></i>
             </div>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['active_sections'] ?></h2>
+          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['active_sections']) ?></h2>
           <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Active Sections</p>
         </div>
       </div>
@@ -98,7 +98,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                   <i class="bi bi-people-fill fs-4"></i>
                 </div>
               </div>
-              <h2 class="display-6 fw-bold text-dark mb-1"><?= $stats['total_students'] ?></h2>
+              <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['total_students']) ?></h2>
               <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Registered Students</p>
             </div>
         </a>

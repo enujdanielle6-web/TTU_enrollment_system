@@ -6,7 +6,7 @@
             <h1 class="h3 fw-bold text-dark mb-1">Attendance: <?= htmlspecialchars($course['subject_code']) ?></h1>
             <p class="text-muted mb-0"><?= htmlspecialchars($course['subject_name']) ?> &bull; Section <?= htmlspecialchars($course['section_code']) ?></p>
         </div>
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/attendance/create" class="btn btn-primary shadow-sm">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/create" class="btn btn-primary shadow-sm">
             <i class="bi bi-plus-circle me-1"></i> New Session
         </a>
     </div>
@@ -40,7 +40,7 @@
                                     <td>
                                         <?php if ($session['start_time']): ?>
                                             <?= date('h:i A', strtotime($session['start_time'])) ?> 
-                                            <?= $session['end_time'] ? '- ' . date('h:i A', strtotime($session['end_time'])) : '' ?>
+                                            <?= esc($session['end_time'] ? '- ' . date('h:i A', strtotime($session['end_time'])) : '') ?>
                                         <?php else: ?>
                                             <span class="text-muted">-</span>
                                         <?php endif; ?>
@@ -51,7 +51,7 @@
                                         </span>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/attendance/<?= $session['id'] ?>/edit" class="btn btn-sm btn-outline-primary">
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/<?= esc($session['id']) ?>/edit" class="btn btn-sm btn-outline-primary">
                                             <i class="bi bi-pencil-square me-1"></i> Mark / View Attendance
                                         </a>
                                     </td>

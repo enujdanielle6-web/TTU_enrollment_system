@@ -2,7 +2,7 @@
 
 <div class="container py-5">
     <div class="mb-4">
-        <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/attendance" class="text-decoration-none">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="text-decoration-none">
             <i class="bi bi-arrow-left me-1"></i> Back to Attendance
         </a>
     </div>
@@ -14,7 +14,7 @@
                     <h4 class="mb-0 fw-bold">Create Attendance Session</h4>
                 </div>
                 <div class="card-body p-4">
-                    <form action="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/attendance/store" method="POST">
+                    <form action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/store" method="POST">
                         
                         <div class="mb-3">
                             <label class="form-label fw-bold">Session Date</label>
@@ -38,7 +38,7 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
-                            <a href="/sia/lms/faculty/course/<?= $course['lms_course_id'] ?>/attendance" class="btn btn-light">Cancel</a>
+                            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="btn btn-light">Cancel</a>
                             <button type="submit" class="btn btn-primary px-4">Create & Proceed to Roll Call</button>
                         </div>
                     </form>

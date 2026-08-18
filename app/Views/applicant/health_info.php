@@ -109,7 +109,7 @@ require_once __DIR__ . '/../components/applicant_navbar.php';
                         <select name="blood_type" class="form-select bg-light" required>
                             <option value="" disabled <?= empty($health['blood_type']) ? 'selected' : '' ?>>Select Blood Type</option>
                             <?php foreach(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'] as $type): ?>
-                                <option value="<?= $type ?>" <?= ($health['blood_type'] ?? '') === $type ? 'selected' : '' ?>><?= $type ?></option>
+                                <option value="<?= esc($type) ?>" <?= esc(($health['blood_type'] ?? '') === $type ? 'selected' : '') ?>><?= esc($type) ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -143,9 +143,9 @@ require_once __DIR__ . '/../components/applicant_navbar.php';
                     ?>
                     <div class="col-md-6 col-lg-4">
                         <div class="form-check custom-checkbox">
-                            <input class="form-check-input" type="checkbox" name="<?= $field ?>" id="<?= $field ?>" value="1" <?= $isChecked ? 'checked' : '' ?>>
-                            <label class="form-check-label text-dark fw-medium" for="<?= $field ?>">
-                                <?= $label ?>
+                            <input class="form-check-input" type="checkbox" name="<?= esc($field) ?>" id="<?= esc($field) ?>" value="1" <?= esc($isChecked ? 'checked' : '') ?>>
+                            <label class="form-check-label text-dark fw-medium" for="<?= esc($field) ?>">
+                                <?= esc($label) ?>
                             </label>
                         </div>
                     </div>
