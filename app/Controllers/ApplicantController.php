@@ -327,10 +327,11 @@ $assessment = null;
 $payments = [];
 try {
     $stmt = $pdo->prepare('
-        SELECT sa.*, a.reference_number, a.academic_level, a.grade_level, a.strand, a.school_year, s.name as scholarship_name
+        SELECT sa.*, a.reference_number, a.academic_level, a.grade_level, a.strand, a.school_year, s.name as scholarship_name, ft.is_per_unit
         FROM student_assessments sa
         INNER JOIN applications a ON sa.application_id = a.id
         LEFT JOIN scholarships s ON sa.scholarship_id = s.id
+        LEFT JOIN fee_templates ft ON sa.fee_template_id = ft.id
         WHERE sa.user_id = :user_id
         ORDER BY sa.created_at DESC LIMIT 1
     ');
@@ -342,12 +343,21 @@ try {
         $payStmt->execute(['assessment_id' => $assessment['id']]);
         $payments = $payStmt->fetchAll();
         
-        // Fetch Enrolled Subjects for College Students
+        // Fetch Enrolled Subjects
         $enrolledSubjects = [];
         if ($assessment['academic_level'] === 'College') {
             $subStmt = $pdo->prepare('
                 SELECT s.subject_code, s.subject_name, s.units 
                 FROM college_enrollments es
+                JOIN subjects s ON es.subject_id = s.id
+                WHERE es.application_id = :app_id
+            ');
+            $subStmt->execute(['app_id' => $assessment['application_id']]);
+            $enrolledSubjects = $subStmt->fetchAll();
+        } elseif ($assessment['academic_level'] === 'Senior High School') {
+            $subStmt = $pdo->prepare('
+                SELECT s.subject_code, s.subject_name, s.units 
+                FROM shs_enrollments es
                 JOIN subjects s ON es.subject_id = s.id
                 WHERE es.application_id = :app_id
             ');

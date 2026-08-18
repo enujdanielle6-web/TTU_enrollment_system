@@ -92,6 +92,9 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                     </td>
                     <td class="fw-bold text-success">
                       ₱<?= number_format((float)$template['total_amount'], 2) ?>
+                      <?php if (!empty($template['is_per_unit'])): ?>
+                        <span class="text-muted small fw-normal">+ Tuition</span>
+                      <?php endif; ?>
                     </td>
                     <td class="text-end pe-4">
                       <!-- Edit Button -->
@@ -192,10 +195,11 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
           <div class="row g-3">
             <div class="col-md-6 mb-2">
-              <label class="form-label small fw-semibold text-dark">Tuition Fee</label>
+              <label class="form-label small fw-semibold text-dark">Tuition Rate per Unit</label>
               <div class="input-group">
                 <span class="input-group-text bg-light">₱</span>
                 <input type="number" step="0.01" min="0" name="tuition_fee" class="form-control bg-light" required value="0.00">
+                <span class="input-group-text bg-light">/ unit</span>
               </div>
             </div>
             <div class="col-md-6 mb-2">
@@ -295,10 +299,11 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
           <div class="row g-3">
             <div class="col-md-6 mb-2">
-              <label class="form-label small fw-semibold text-dark">Tuition Fee</label>
+              <label class="form-label small fw-semibold text-dark">Tuition Rate per Unit</label>
               <div class="input-group">
                 <span class="input-group-text bg-light">₱</span>
                 <input type="number" step="0.01" min="0" name="tuition_fee" id="editTemplateTuition" class="form-control bg-light" required>
+                <span class="input-group-text bg-light">/ unit</span>
               </div>
             </div>
             <div class="col-md-6 mb-2">

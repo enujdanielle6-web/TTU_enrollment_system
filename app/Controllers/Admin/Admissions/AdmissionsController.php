@@ -775,26 +775,34 @@ try {
 
 
                 $tuitionFee = (float)$template['tuition_fee'];
+                $isPerUnit = !empty($template['is_per_unit']);
 
-                // Dynamic Tuition Calculation for College Students
-                if ($academicLevel === 'College') {
-                    // Fetch configured cost per unit
-                    $settingStmt = $pdo->query("SELECT setting_value FROM system_settings WHERE setting_key = 'college_cost_per_unit' LIMIT 1");
-                    $costPerUnitStr = $settingStmt->fetchColumn();
-                    $costPerUnit = $costPerUnitStr !== false ? (float)$costPerUnitStr : 500.00;
-
-                    // Fetch total enrolled units
-                    $unitsStmt = $pdo->prepare('
-                        SELECT SUM(s.units) 
-                        FROM college_enrollments ce 
-                        JOIN subjects s ON ce.subject_id = s.id 
-                        WHERE ce.application_id = :app_id
-                    ');
-                    $unitsStmt->execute(['app_id' => $appId]);
-                    $totalUnits = (int)$unitsStmt->fetchColumn();
+                if ($isPerUnit) {
+                    $totalUnits = 0;
+                    if ($academicLevel === 'College') {
+                        $unitsStmt = $pdo->prepare('
+                            SELECT SUM(s.units) 
+                            FROM college_enrollments ce 
+                            JOIN subjects s ON ce.subject_id = s.id 
+                            WHERE ce.application_id = :app_id
+                        ');
+                        $unitsStmt->execute(['app_id' => $appId]);
+                        $totalUnits = (int)$unitsStmt->fetchColumn();
+                    } elseif ($academicLevel === 'Senior High School') {
+                        $unitsStmt = $pdo->prepare('
+                            SELECT SUM(s.units) 
+                            FROM shs_enrollments se 
+                            JOIN subjects s ON se.subject_id = s.id 
+                            WHERE se.application_id = :app_id
+                        ');
+                        $unitsStmt->execute(['app_id' => $appId]);
+                        $totalUnits = (int)$unitsStmt->fetchColumn();
+                    }
 
                     if ($totalUnits > 0) {
-                        $tuitionFee = $totalUnits * $costPerUnit;
+                        $tuitionFee = $totalUnits * (float)$template['tuition_fee'];
+                    } else {
+                        $tuitionFee = 0;
                     }
                 }
 

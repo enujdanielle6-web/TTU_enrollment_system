@@ -55,13 +55,13 @@ try {
             throw new Exception('Fee amounts cannot be negative.');
         }
 
-        $totalAmount = $tuition + $misc + $reg + $lab + $other;
+        $totalAmount = $misc + $reg + $lab + $other;
 
         $insertStmt = $pdo->prepare('
             INSERT INTO fee_templates 
-            (name, academic_level, grade_level, strand, tuition_fee, miscellaneous_fee, registration_fee, laboratory_fee, other_fees, total_amount) 
+            (name, academic_level, grade_level, strand, is_per_unit, tuition_fee, miscellaneous_fee, registration_fee, laboratory_fee, other_fees, total_amount) 
             VALUES 
-            (:name, :academic_level, :grade, :strand, :tuition, :misc, :reg, :lab, :other, :total)
+            (:name, :academic_level, :grade, :strand, 1, :tuition, :misc, :reg, :lab, :other, :total)
         ');
         
         $insertStmt->execute([
@@ -114,7 +114,7 @@ try {
             throw new Exception('Fee amounts cannot be negative.');
         }
 
-        $totalAmount = $tuition + $misc + $reg + $lab + $other;
+        $totalAmount = $misc + $reg + $lab + $other;
 
         // Fetch old data
         $stmtOld = $pdo->prepare('SELECT * FROM fee_templates WHERE id = :id');
@@ -126,7 +126,8 @@ try {
             SET name = :name, 
                 academic_level = :academic_level,
                 grade_level = :grade, 
-                strand = :strand, 
+                strand = :strand,
+                is_per_unit = 1,
                 tuition_fee = :tuition, 
                 miscellaneous_fee = :misc, 
                 registration_fee = :reg, 

@@ -87,7 +87,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <li class="list-group-item d-flex justify-content-between p-3">
                     <div>
                       <span class="text-muted d-block">Tuition Fee</span>
-                      <?php if ($assessment['academic_level'] === 'College' && isset($totalUnits) && $totalUnits > 0): ?>
+                      <?php if (!empty($assessment['is_per_unit']) && isset($totalUnits) && $totalUnits > 0): ?>
                         <?php $inferredCost = (float)$assessment['tuition_fee'] / $totalUnits; ?>
                         <small class="text-secondary"><?= $totalUnits ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
                       <?php endif; ?>
