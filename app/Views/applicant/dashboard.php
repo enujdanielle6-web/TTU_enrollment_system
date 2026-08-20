@@ -526,7 +526,7 @@ require_once __DIR__ . '/../components/header.php';
               <?php else: ?>
                 <?php foreach ($announcements as $index => $ann): ?>
                   <div class="<?= esc($index > 0 ? 'mb-3 border-top pt-3 border-light' : 'mb-3') ?>">
-                    <span class="badge bg-<?= htmlspecialchars($ann['badge_color'], ENT_QUOTES, 'UTF-8'); ?><?= esc(in_array($ann['badge_color'], ['warning', 'info']) ? ' text-dark' : '';) ?> mb-1 small"><?= htmlspecialchars($ann['badge_label'], ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="badge bg-<?= htmlspecialchars($ann['badge_color'], ENT_QUOTES, 'UTF-8'); ?><?= esc(in_array($ann['badge_color'], ['warning', 'info']) ? ' text-dark' : '') ?> mb-1 small"><?= htmlspecialchars($ann['badge_label'], ENT_QUOTES, 'UTF-8'); ?></span>
                     <h6 class="fw-bold mb-1 small text-dark"><?= htmlspecialchars($ann['title'], ENT_QUOTES, 'UTF-8'); ?></h6>
                     <p class="text-muted mb-0" style="font-size: 0.8rem;"><?= nl2br(htmlspecialchars($ann['content'], ENT_QUOTES, 'UTF-8')); ?></p>
                   </div>

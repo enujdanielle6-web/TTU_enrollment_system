@@ -160,7 +160,7 @@ require_once __DIR__ . '/../components/header.php';
 
                     <div class="col-md-6 col-lg-4">
                       <p class="text-muted small mb-1">Document Submission</p>
-                      <p class="mb-0 fw-semibold text-dark"><?= esc($docMethod === 'on_campus' ? 'On-Campus Verification' : 'Online Upload';) ?></p>
+                      <p class="mb-0 fw-semibold text-dark"><?= esc($docMethod === 'on_campus' ? 'On-Campus Verification' : 'Online Upload') ?></p>
                     </div>
 
                     <div class="col-md-6 col-lg-4">

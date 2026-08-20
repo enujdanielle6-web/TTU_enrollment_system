@@ -11,18 +11,20 @@ Every agent must:
 - Think step by step.
 - Produce production-quality work.
 
-# MVC Standards
+# Hybrid MVC Standards
 
-Strict separation of concerns.
+The system uses a Hybrid MVC pattern heavily reliant on "Fat Controllers."
 
-Controllers:
-- Request handling
+Controllers MUST handle:
+- Request routing and handling
 - Validation
+- Business logic and rules
 - Coordination
+- Raw PDO SQL queries and data access
 
-Models:
-- Data access
-- Business logic
+Models MUST:
+- Act primarily as basic data containers.
+- Avoid abstracting or hiding SQL logic meant for controllers.
 
 Views:
 - Presentation only

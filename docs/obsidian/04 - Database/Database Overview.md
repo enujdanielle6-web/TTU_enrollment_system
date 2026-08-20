@@ -14,13 +14,15 @@ There is **no** `students` table.
 - **`users`**: Identity, login, roles (`enum`).
 - **`applications`**: The anchor for a student's semester enrollment, containing demographic data, program/strand choices, and status.
 - **`application_documents`**: Stores files and verification statuses for admission requirements tied to an application. See [[Application Documents Table]].
+- **`health_records`**: Clinic health data linked to applications.
 - **`college_curricula` / `shs_curricula`**: Defines the required subjects per program/strand. See [[Curriculum Architecture]].
 - **`college_sections` / `shs_sections`**: Timetabled instances of curricula.
-- **`student_assessments` & `payment_records`**: Financial tracking. See [[Assessment and Payment Workflow]].
+- **`fee_templates` & `payment_records` & `student_assessments`**: Financial assessment and payment tracking. See [[Assessment and Payment Workflow]].
+- **`scholarships` & `scholarship_applications`**: Manages financial aid applications and programs.
+- **LMS Tables**: (`lms_courses`, `lms_modules`, `lms_assignments`, `lms_submissions`, `lms_quizzes`, etc.) handling academic course delivery, grading, and files.
 - **`activity_logs`**: System-wide audit trail.
 
 ## Missing / Planned Structures
-- `Missing`: A centralized `academic_records` or `grades` table to track final outcomes across applications.
 - `Missing`: A robust `prerequisites` table mapping subject dependencies.
 
 ## Important Constraints

@@ -506,9 +506,9 @@ return;
 
         // Fetch user's application status
         $stmt = $pdo->prepare('
-            SELECT a.status, a.id, a.college_curriculum_id, a.grade_level, c.college_program_id
+            SELECT a.status, a.id, a.college_curriculum_id, a.grade_level, c.program_id AS college_program_id
             FROM applications a 
-            LEFT JOIN college_curriculums c ON a.college_curriculum_id = c.id
+            LEFT JOIN college_curricula c ON a.college_curriculum_id = c.id
             WHERE a.user_id = :user_id LIMIT 1
         ');
         $stmt->execute(['user_id' => $userId]);

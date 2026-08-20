@@ -38,7 +38,12 @@ The TTU system is divided into several logical modules mapped to specific user r
 **Controllers:** `ClinicController`
 
 ## 8. [[LMS Module]]
-**Purpose:** Basic learning management (modules, assignments, submissions).
+**Purpose:** Comprehensive learning management including course modules, assignments, quizzes, gradebook, attendance, and secure file delivery.
 **Users:** `faculty`, `applicant`
-**Controllers:** `Lms\StudentController`, `Lms\FacultyController`
-**Status:** `Partially Implemented` / `Unknown depth of usage`
+**Controllers:** `Lms\StudentController`, `Lms\FacultyController`, `Lms\StudentAssignmentController`, `Lms\FacultyAssignmentController`, `Lms\StudentQuizController`, `Lms\FacultyQuizController`, `Lms\StudentGradebookController`, `Lms\FacultyGradebookController`, `Lms\StudentAttendanceController`, `Lms\FacultyAttendanceController`
+**Status:** `Fully Implemented`
+
+## 9. [[System Module]]
+**Purpose:** Global settings, user management, audit logs, system backups, and LMS course generation.
+**Users:** `admin`
+**Controllers:** `SystemController`, `LmsAdminController`, `DashboardController`, `ReportController`

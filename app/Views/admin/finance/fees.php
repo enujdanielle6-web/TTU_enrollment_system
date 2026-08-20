@@ -89,6 +89,9 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                     </td>
                     <td>
                       <?= htmlspecialchars($template['strand'] ?? 'All', ENT_QUOTES, 'UTF-8') ?>
+                      <?php if (!empty($template['semester'])): ?>
+                        <br><small class="text-muted"><?= htmlspecialchars($template['semester'], ENT_QUOTES, 'UTF-8') ?> Semester</small>
+                      <?php endif; ?>
                     </td>
                     <td class="fw-bold text-success">
                       ₱<?= number_format((float)$template['total_amount'], 2) ?>
@@ -104,6 +107,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                               data-level="<?= htmlspecialchars($template['academic_level'] ?? 'Senior High School', ENT_QUOTES, 'UTF-8') ?>"
                               data-grade="<?= htmlspecialchars($template['grade_level'], ENT_QUOTES, 'UTF-8') ?>"
                               data-strand="<?= htmlspecialchars($template['strand'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                              data-semester="<?= htmlspecialchars($template['semester'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                               data-tuition="<?= esc($template['tuition_fee']) ?>"
                               data-misc="<?= esc($template['miscellaneous_fee']) ?>"
                               data-reg="<?= esc($template['registration_fee']) ?>"
@@ -113,6 +117,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                               data-bs-target="#editFeeTemplateModal">
                         <i class="bi bi-pencil-square"></i> Edit
                       </button>
+                      <form action="fee_process.php" method="POST" class="d-inline-block m-0 p-0 ms-1" onsubmit="return confirm('Are you sure you want to delete this fee template?');">
+                        <?= getCsrfInput() ?>
+                        <input type="hidden" name="action" value="delete_fee_template">
+                        <input type="hidden" name="id" value="<?= esc($template['id']) ?>">
+                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill">
+                          <i class="bi bi-trash"></i> Delete
+                        </button>
+                      </form>
                     </td>
                   </tr>
                 <?php endforeach; ?>
@@ -152,14 +164,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
           </div>
           
           <div class="row g-3 mb-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
               <label class="form-label small fw-semibold text-dark">Academic Level</label>
               <select name="academic_level" id="addTemplateLevel" class="form-select bg-light" required>
                 <option value="Senior High School">Senior High School</option>
                 <option value="College">College</option>
               </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
               <label class="form-label small fw-semibold text-dark">Grade/Year Level</label>
               <select name="grade_level" id="addTemplateGrade" class="form-select bg-light" required>
                 <option value="" disabled selected>Select Level</option>
@@ -171,10 +183,10 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 <option value="4th Year">4th Year</option>
               </select>
             </div>
-            <div class="col-md-4">
-              <label class="form-label small fw-semibold text-dark">Academic Program (Optional)</label>
-              <select name="strand" id="addTemplateStrand" class="form-select bg-light">
-                <option value="">Applies to All Strands</option>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold text-dark">Academic Program</label>
+              <select name="strand" id="addTemplateStrand" class="form-select bg-light" required>
+                <option value="" disabled selected>Select Program</option>
                 <?php
                   $strands = $pdo->query('
                     SELECT code, name, "College" as level FROM college_programs WHERE is_active = 1 
@@ -186,6 +198,15 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                       echo '<option value="' . htmlspecialchars($strand['code'], ENT_QUOTES, 'UTF-8') . '" data-level="' . htmlspecialchars($strand['level'], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($strand['code'] . ' - ' . $strand['name'], ENT_QUOTES, 'UTF-8') . '</option>';
                   }
                 ?>
+              </select>
+            </div>
+            <div class="col-md-3" id="addTemplateSemesterContainer" style="display: none;">
+              <label class="form-label small fw-semibold text-dark">Semester</label>
+              <select name="semester" id="addTemplateSemester" class="form-select bg-light">
+                <option value="" disabled selected>Select Semester</option>
+                <option value="First">First Semester</option>
+                <option value="Second">Second Semester</option>
+                <option value="Summer">Summer</option>
               </select>
             </div>
           </div>
@@ -263,14 +284,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
           </div>
           
           <div class="row g-3 mb-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
               <label class="form-label small fw-semibold text-dark">Academic Level</label>
               <select name="academic_level" id="editTemplateLevel" class="form-select bg-light" required>
                 <option value="Senior High School">Senior High School</option>
                 <option value="College">College</option>
               </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
               <label class="form-label small fw-semibold text-dark">Grade/Year Level</label>
               <select name="grade_level" id="editTemplateGrade" class="form-select bg-light" required>
                 <option value="Grade 11">Grade 11</option>
@@ -281,15 +302,24 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 <option value="4th Year">4th Year</option>
               </select>
             </div>
-            <div class="col-md-4">
-              <label class="form-label small fw-semibold text-dark">Academic Program (Optional)</label>
-              <select name="strand" id="editTemplateStrand" class="form-select bg-light">
-                <option value="">Applies to All Strands</option>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold text-dark">Academic Program</label>
+              <select name="strand" id="editTemplateStrand" class="form-select bg-light" required>
+                <option value="" disabled selected>Select Program</option>
                 <?php
                   foreach ($strands as $strand) {
                       echo '<option value="' . htmlspecialchars($strand['code'], ENT_QUOTES, 'UTF-8') . '">' . htmlspecialchars($strand['code'] . ' - ' . $strand['name'], ENT_QUOTES, 'UTF-8') . '</option>';
                   }
                 ?>
+              </select>
+            </div>
+            <div class="col-md-3" id="editTemplateSemesterContainer" style="display: none;">
+              <label class="form-label small fw-semibold text-dark">Semester</label>
+              <select name="semester" id="editTemplateSemester" class="form-select bg-light">
+                <option value="" disabled selected>Select Semester</option>
+                <option value="First">First Semester</option>
+                <option value="Second">Second Semester</option>
+                <option value="Summer">Summer</option>
               </select>
             </div>
           </div>
@@ -356,6 +386,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
       $('#editTemplateLevel').val($(this).data('level'));
       $('#editTemplateGrade').val($(this).data('grade'));
       $('#editTemplateStrand').val($(this).data('strand'));
+      $('#editTemplateSemester').val($(this).data('semester'));
       $('#editTemplateTuition').val($(this).data('tuition'));
       $('#editTemplateMisc').val($(this).data('misc'));
       $('#editTemplateReg').val($(this).data('reg'));
@@ -391,10 +422,12 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         });
     }
   
-    function filterLevelsAndStrands(levelSelectId, gradeSelectId, strandSelectId) {
+    function filterLevelsAndStrands(levelSelectId, gradeSelectId, strandSelectId, semesterContainerId, semesterSelectId) {
         const levelSelect = document.getElementById(levelSelectId);
         const gradeSelect = document.getElementById(gradeSelectId);
         const strandSelect = document.getElementById(strandSelectId);
+        const semContainer = document.getElementById(semesterContainerId);
+        const semSelect = document.getElementById(semesterSelectId);
 
         if (!levelSelect || !gradeSelect || !strandSelect) return;
 
@@ -421,6 +454,18 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 }
             });
             
+            // Toggle Semester
+            if (selectedLevel === 'College') {
+                if (semContainer) semContainer.style.display = 'block';
+                if (semSelect) semSelect.required = true;
+            } else {
+                if (semContainer) semContainer.style.display = 'none';
+                if (semSelect) {
+                    semSelect.required = false;
+                    semSelect.value = '';
+                }
+            }
+            
             // Only reset if the current selection is now hidden
             if (gradeSelect.options[gradeSelect.selectedIndex]?.hidden) {
                 gradeSelect.value = "";
@@ -431,13 +476,13 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         });
 
         // Trigger change initially to set correct state (only for add modal)
-        if(levelSelectId === 'addTemplateLevel') {
+        if(levelSelectId === 'addTemplateLevel' || levelSelectId === 'editTemplateLevel') {
            levelSelect.dispatchEvent(new Event('change'));
         }
     }
 
-    filterLevelsAndStrands('addTemplateLevel', 'addTemplateGrade', 'addTemplateStrand');
-    filterLevelsAndStrands('editTemplateLevel', 'editTemplateGrade', 'editTemplateStrand');
+    filterLevelsAndStrands('addTemplateLevel', 'addTemplateGrade', 'addTemplateStrand', 'addTemplateSemesterContainer', 'addTemplateSemester');
+    filterLevelsAndStrands('editTemplateLevel', 'editTemplateGrade', 'editTemplateStrand', 'editTemplateSemesterContainer', 'editTemplateSemester');
 });
 </script>
 

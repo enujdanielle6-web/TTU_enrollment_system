@@ -116,9 +116,12 @@ require_once __DIR__ . '/../components/header.php';
                     <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom-dashed">
                       <div>
                         <span class="text-muted fw-medium">Tuition Fee</span>
-                        <?php if (!empty($assessment['is_per_unit']) && isset($totalUnits) && $totalUnits > 0): ?>
-                          <?php $inferredCost = (float)$assessment['tuition_fee'] / $totalUnits; ?>
-                          <small class="text-secondary d-block mt-1"><?= esc($totalUnits) ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
+                        <?php 
+                          $calcTotalUnits = array_sum(array_column($enrolledSubjects ?? [], 'units'));
+                          if (!empty($assessment['is_per_unit']) && $calcTotalUnits > 0): 
+                            $inferredCost = (float)$assessment['tuition_fee'] / $calcTotalUnits; 
+                        ?>
+                          <small class="text-secondary d-block mt-1"><?= esc($calcTotalUnits) ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
                         <?php endif; ?>
                       </div>
                       <span class="fw-semibold text-dark">₱<?= number_format((float)$assessment['tuition_fee'], 2) ?></span>
@@ -282,7 +285,6 @@ require_once __DIR__ . '/../components/header.php';
       </div>
     </div>
   </div>
-</main>
 
 <!-- Payment Modal -->
 <div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
@@ -392,6 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+</main>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
 

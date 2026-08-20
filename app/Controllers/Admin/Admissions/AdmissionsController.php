@@ -756,17 +756,27 @@ try {
         
         if (!$assCheckStmt->fetch()) {
             // Fetch applicant details to find matching template
-            $appStmt = $pdo->prepare('SELECT academic_level, grade_level, strand FROM applications WHERE id = :id LIMIT 1');
+            $appStmt = $pdo->prepare('SELECT academic_level, grade_level, strand, semester FROM applications WHERE id = :id LIMIT 1');
             $appStmt->execute(['id' => $appId]);
             $appData = $appStmt->fetch();
 
             if ($appData) {
-                // Fetch the exact template matching grade level and strand
-                $ftStmt = $pdo->prepare('SELECT * FROM fee_templates WHERE grade_level = :grade_level AND strand = :strand LIMIT 1');
-                $ftStmt->execute([
+                // Fetch the exact template matching grade level, strand, and optionally semester
+                $sql = 'SELECT * FROM fee_templates WHERE grade_level = :grade_level AND (strand = :strand OR (strand IS NULL AND :strand_null IS NULL))';
+                $params = [
                     'grade_level' => $appData['grade_level'],
-                    'strand' => $appData['strand']
-                ]);
+                    'strand' => $appData['strand'],
+                    'strand_null' => $appData['strand']
+                ];
+                
+                if ($appData['academic_level'] === 'College') {
+                    $sql .= ' AND semester = :semester';
+                    $params['semester'] = $appData['semester'];
+                }
+                $sql .= ' LIMIT 1';
+
+                $ftStmt = $pdo->prepare($sql);
+                $ftStmt->execute($params);
                 $template = $ftStmt->fetch();
                 
                 if ($template) {

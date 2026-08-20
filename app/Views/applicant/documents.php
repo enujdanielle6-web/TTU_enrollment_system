@@ -168,7 +168,7 @@ require_once __DIR__ . '/../components/header.php';
                 
                 <div class="d-flex flex-column flex-md-row gap-3 mt-2">
                   <div class="method-option">
-                    <input type="radio" name="submission_method" id="methodOnline" value="online" <?= esc($method === 'online' ? 'checked' : '';) ?> <?= esc($isLocked ? 'disabled' : '';) ?>>
+                    <input type="radio" name="submission_method" id="methodOnline" value="online" <?= esc($method === 'online' ? 'checked' : '') ?> <?= esc($isLocked ? 'disabled' : '') ?>>
                     <label class="method-label flex-column align-items-start p-4 h-100" for="methodOnline">
                       <div class="d-flex align-items-center gap-2 mb-3 w-100 border-bottom pb-2">
                         <i class="bi bi-cloud-arrow-up fs-4 text-primary"></i> 
@@ -181,7 +181,7 @@ require_once __DIR__ . '/../components/header.php';
                     </label>
                   </div>
                   <div class="method-option">
-                    <input type="radio" name="submission_method" id="methodOnCampus" value="on_campus" <?= esc($method === 'on_campus' ? 'checked' : '';) ?> <?= esc($isLocked ? 'disabled' : '';) ?>>
+                    <input type="radio" name="submission_method" id="methodOnCampus" value="on_campus" <?= esc($method === 'on_campus' ? 'checked' : '') ?> <?= esc($isLocked ? 'disabled' : '') ?>>
                     <label class="method-label flex-column align-items-start p-4 h-100" for="methodOnCampus">
                       <div class="d-flex align-items-center gap-2 mb-3 w-100 border-bottom pb-2">
                         <i class="bi bi-building fs-4 text-primary"></i> 

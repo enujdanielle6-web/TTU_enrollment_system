@@ -35,6 +35,7 @@ Procedural scripts like `cleanup.php` and `patch_shs_sections.php` still exist i
 1. **Presentation:** Handled by `app/Views/` and frontend JS.
 2. **Business & DB Logic:** Tightly coupled inside `app/Controllers/`.
 3. **Infrastructure:** Handled by `App\Core\` (Request, Response, Router).
+4. **LMS Segregation:** LMS features are segregated into distinct `Lms\FacultyController` and `Lms\StudentController` with dedicated authentication (`LmsAuthController`) and route grouping.
 
 **Related:**
 - [[MVC Strangler Fig Migration]]

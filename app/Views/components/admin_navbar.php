@@ -48,10 +48,10 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isAdmissions ? 'show' : '') ?>" id="collapseAdmissions">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'admissions_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>admissions/admissions_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'admissions_dashboard.php') ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>admissions/admissions_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'review.php' || $current_page === 'application_detail.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>admissions/review.php">
+      <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'review.php' || $current_page === 'application_detail.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>admissions/review.php">
         <i class="bi bi-inbox fs-5"></i> <span class="nav-text">Applications</span>
       </a>
     </div>
@@ -65,10 +65,10 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isClinic ? 'show' : '') ?>" id="collapseClinic">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Clinic Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'clinic_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>clinic/clinic_dashboard.php">
+      <a title="Clinic Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'clinic_dashboard.php') ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>clinic/clinic_dashboard.php">
         <i class="bi bi-heart-pulse fs-5"></i> <span class="nav-text">Clinic Dashboard</span>
       </a>
-      <a title="Medical Clearance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'medical_clearance.php' || $current_page === 'medical_detail.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>clinic/medical_clearance.php">
+      <a title="Medical Clearance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'medical_clearance.php' || $current_page === 'medical_detail.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>clinic/medical_clearance.php">
         <i class="bi bi-file-medical fs-5"></i> <span class="nav-text">Medical Clearance</span>
       </a>
     </div>
@@ -82,13 +82,13 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isRegistrarCore ? 'show' : '') ?>" id="collapseRegistrar">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'registrar_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/registrar_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'registrar_dashboard.php') ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/registrar_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="Students" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'students.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/students.php">
+      <a title="Students" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'students.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/students.php">
         <i class="bi bi-people fs-5"></i> <span class="nav-text">Students</span>
       </a>
-      <a title="Global Subjects" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'subjects.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/subjects.php">
+      <a title="Global Subjects" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'subjects.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/subjects.php">
         <i class="bi bi-journal-text fs-5"></i> <span class="nav-text">Global Subjects</span>
       </a>
     </div>
@@ -100,13 +100,13 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isShs ? 'show' : '') ?>" id="collapseShs">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Strands" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_strands.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_strands.php">
+      <a title="Strands" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_strands.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_strands.php">
         <i class="bi bi-mortarboard fs-5"></i> <span class="nav-text">Strands</span>
       </a>
-      <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_curriculum.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_curriculum.php">
+      <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_curriculum.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_curriculum.php">
         <i class="bi bi-diagram-3 fs-5"></i> <span class="nav-text">Curriculum</span>
       </a>
-      <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_enrollment_queue.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_enrollment_queue.php">
+      <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_enrollment_queue.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/shs_enrollment_queue.php">
         <i class="bi bi-person-lines-fill fs-5"></i> <span class="nav-text">Enrollments</span>
       </a>
     </div>
@@ -118,13 +118,13 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isCollege ? 'show' : '') ?>" id="collapseCollege">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Programs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_programs.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_programs.php">
+      <a title="Programs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_programs.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_programs.php">
         <i class="bi bi-mortarboard fs-5"></i> <span class="nav-text">Programs</span>
       </a>
-      <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_curriculum.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_curriculum.php">
+      <a title="Curriculum" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_curriculum.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_curriculum.php">
         <i class="bi bi-diagram-3 fs-5"></i> <span class="nav-text">Curriculum</span>
       </a>
-      <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_enrollment_queue.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_enrollment_queue.php">
+      <a title="Enrollments" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_enrollment_queue.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>registrar/college_enrollment_queue.php">
         <i class="bi bi-person-lines-fill fs-5"></i> <span class="nav-text">Enrollments</span>
       </a>
     </div>
@@ -138,13 +138,13 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isScheduler ? 'show' : '') ?>" id="collapseScheduler">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'scheduler_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scheduler/scheduler_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'scheduler_dashboard.php') ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>scheduler/scheduler_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="SHS Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'shs') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scheduler/shs_sections.php">
+      <a title="SHS Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'shs_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'shs') ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>scheduler/shs_sections.php">
         <i class="bi bi-diagram-3-fill fs-5"></i> <span class="nav-text">SHS Sections & Scheds</span>
       </a>
-      <a title="College Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'college') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scheduler/college_sections.php">
+      <a title="College Sections" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'college_sections.php' || (strpos($current_page, 'schedule_builder.php') !== false && isset($_GET['type']) && $_GET['type'] === 'college') ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>scheduler/college_sections.php">
         <i class="bi bi-diagram-3-fill fs-5"></i> <span class="nav-text">College Sections & Scheds</span>
       </a>
     </div>
@@ -158,16 +158,16 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isScholarship ? 'show' : '') ?>" id="collapseScholarship">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarship_dashboard.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarship_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarship_dashboard.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarship_dashboard.php">
         <i class="bi bi-pie-chart fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="Scholarships" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarships.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarships.php">
+      <a title="Scholarships" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarships.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarships.php">
         <i class="bi bi-award fs-5"></i> <span class="nav-text">Scholarships</span>
       </a>
-      <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarship_review.php' || $current_page === 'scholarship_detail.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarship_review.php">
+      <a title="Applications" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholarship_review.php' || $current_page === 'scholarship_detail.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholarship_review.php">
         <i class="bi bi-file-earmark-text fs-5"></i> <span class="nav-text">Applications</span>
       </a>
-      <a title="Active Scholars" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholars.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholars.php">
+      <a title="Active Scholars" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'scholars.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>scholarship/scholars.php">
         <i class="bi bi-people-fill fs-5"></i> <span class="nav-text">Active Scholars</span>
       </a>
     </div>
@@ -181,13 +181,13 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isFinance ? 'show' : '') ?>" id="collapseFinance">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard / Accounts" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'cashier_dashboard.php' || $current_page === 'cashier_assessment.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>finance/cashier_dashboard.php">
+      <a title="Dashboard / Accounts" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'cashier_dashboard.php' || $current_page === 'cashier_assessment.php') ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>finance/cashier_dashboard.php">
         <i class="bi bi-grid fs-5"></i> <span class="nav-text">Dashboard / Accounts</span>
       </a>
-      <a title="Payment History" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'cashier_payments.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>finance/cashier_payments.php">
+      <a title="Payment History" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'cashier_payments.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>finance/cashier_payments.php">
         <i class="bi bi-cash-stack fs-5"></i> <span class="nav-text">Payment History</span>
       </a>
-      <a title="Fee Templates" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'fees.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>finance/fees.php">
+      <a title="Fee Templates" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'fees.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>finance/fees.php">
         <i class="bi bi-tags fs-5"></i> <span class="nav-text">Fee Templates</span>
       </a>
     </div>
@@ -201,19 +201,19 @@ $baseAdminUrl = '/sia/admin/';
   </button>
   <div class="collapse <?= esc($isSysAdmin ? 'show' : '') ?>" id="collapseSysAdmin">
     <div class="ms-3 mb-3 border-start border-2 ps-3">
-      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'sysadmin_dashboard.php') ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/sysadmin_dashboard.php">
+      <a title="Dashboard" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.1s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(($current_page === 'dashboard.php' || $current_page === 'sysadmin_dashboard.php') ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>system/sysadmin_dashboard.php">
         <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
       </a>
-      <a title="User Management" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'users.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/users.php">
+      <a title="User Management" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'users.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>system/users.php">
         <i class="bi bi-person-badge fs-5"></i> <span class="nav-text">User Management</span>
       </a>
-      <a title="Reports" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'reports.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/reports.php">
+      <a title="Reports" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'reports.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>system/reports.php">
         <i class="bi bi-bar-chart fs-5"></i> <span class="nav-text">Reports</span>
       </a>
-      <a title="System Settings" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'settings.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/settings.php">
+      <a title="System Settings" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.25s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'settings.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>system/settings.php">
         <i class="bi bi-sliders fs-5"></i> <span class="nav-text">System Settings</span>
       </a>
-      <a title="Audit Logs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.3s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'audit_logs.php' ? 'active' : '';) ?>" href="<?= esc($baseAdminUrl) ?>system/audit_logs.php">
+      <a title="Audit Logs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.3s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'audit_logs.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>system/audit_logs.php">
         <i class="bi bi-shield-check fs-5"></i> <span class="nav-text">Audit Logs</span>
       </a>
     </div>

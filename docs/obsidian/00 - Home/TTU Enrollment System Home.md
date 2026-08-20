@@ -21,5 +21,7 @@ This Obsidian vault contains the reverse-engineered documentation of the current
 ## High-Level System Overview
 The TTU system manages both **College** and **Senior High School (SHS)** enrollments. It is currently mid-migration from procedural PHP to a custom MVC architecture. It uses MariaDB, standard web frontends (Bootstrap/jQuery), and a unified `users` table to manage all actors.
 
+Beyond core enrollment, the system features a fully integrated **Learning Management System (LMS)** for academic course delivery, a **Clinic** module for medical clearances, and a **Scholarship** module for managing financial aid programs.
+
 > **Developer Note:**
 > Always refer to the [[Known Issues]] and [[System Architecture]] before refactoring. The system uses "Fat Controllers" and lacks a robust ORM, meaning database schemas are tightly coupled to controller logic.

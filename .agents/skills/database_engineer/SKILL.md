@@ -16,5 +16,7 @@ Review every query and validate:
 - Performance
 - Prepared statements
 
-**Constraints**:
+**Constraints & Architecture Knowledge**:
 - Never approve destructive schema changes.
+- Understand the "Application as Term" paradigm: The system has no `students` table. All users exist in `users`. Enrollments and subjects are linked to the `applications` table, which acts as the enrollment record for a specific term.
+- Be aware of the extensive table ecosystems for LMS (`lms_courses`, `lms_submissions`, etc.), Clinic (`health_records`), and Scholarships.

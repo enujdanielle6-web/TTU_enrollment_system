@@ -322,6 +322,7 @@ CREATE TABLE `fee_templates` (
   `academic_level` enum('Senior High School','College') DEFAULT NULL,
   `grade_level` varchar(50) NOT NULL,
   `strand` varchar(50) DEFAULT NULL,
+  `is_per_unit` tinyint(1) NOT NULL DEFAULT 0,
   `tuition_fee` decimal(10,2) NOT NULL DEFAULT 0.00,
   `miscellaneous_fee` decimal(10,2) NOT NULL DEFAULT 0.00,
   `registration_fee` decimal(10,2) NOT NULL DEFAULT 0.00,

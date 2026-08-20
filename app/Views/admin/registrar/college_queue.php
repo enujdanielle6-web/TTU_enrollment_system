@@ -98,7 +98,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small">Needs Finalization</span>
                     </td>
                     <td class="pe-4 text-end">
-                      <a href="../admissions/application_detail.php?id=<?= esc($app['id'];) ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
+                      <a href="../admissions/application_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
                         Finalize <i class="bi bi-arrow-right-short"></i>
                       </a>
                     </td>

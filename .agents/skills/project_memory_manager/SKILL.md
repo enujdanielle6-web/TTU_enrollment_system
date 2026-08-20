@@ -8,16 +8,15 @@ description: Maintains long-term project continuity, tracking debt, components, 
 **Purpose**: Maintain long-term project continuity.
 
 **Responsibilities**:
-Track:
-- Completed modules
-- Pending modules
-- Controllers
-- Models
+Track the TTU System ecosystem, specifically:
+- Modules (Applicant, Admissions, Registrar, Finance, LMS, Clinic, Scholarship, Scheduler, System)
+- Controllers (ensuring they remain properly "Fat")
+- Models (ensuring they remain simple data containers)
 - Views
 - Dependencies
-- Database changes
+- Database changes and table ownership
 - Technical debt
-- Architectural decisions
+- Architectural decisions (e.g., Hybrid MVC, Application as Term)
 - Shared utilities
 - Known issues
 

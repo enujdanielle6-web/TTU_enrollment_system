@@ -138,7 +138,7 @@ require_once __DIR__ . '/../../components/header.php';
                     $idDisplay = !empty($student['student_number']) ? htmlspecialchars($student['student_number'], ENT_QUOTES, 'UTF-8') : (!empty($student['lrn']) ? htmlspecialchars($student['lrn'], ENT_QUOTES, 'UTF-8') : htmlspecialchars($student['reference_number'], ENT_QUOTES, 'UTF-8'));
                   ?>
                   <tr class="student-row" data-level="<?= htmlspecialchars($student['academic_level'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" data-grade="<?= htmlspecialchars($student['grade_level'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" data-strand="<?= htmlspecialchars($student['strand'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" data-status="<?= htmlspecialchars($student['status'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" data-name="<?= htmlspecialchars(strtolower($student['last_name'] . ' ' . $student['first_name'] . ' ' . $idDisplay), ENT_QUOTES, 'UTF-8'); ?>">
-                    <td class="ps-4 fw-medium text-dark small"><?= esc($idDisplay;) ?></td>
+                    <td class="ps-4 fw-medium text-dark small"><?= esc($idDisplay) ?></td>
                     <td>
                       <div class="fw-semibold text-dark"><?= htmlspecialchars($student['last_name'] . ', ' . $student['first_name'], ENT_QUOTES, 'UTF-8'); ?></div>
                     </td>
@@ -147,12 +147,12 @@ require_once __DIR__ . '/../../components/header.php';
                     <td><span class="text-muted small"><?= htmlspecialchars(strtoupper($student['strand'] ?? ''), ENT_QUOTES, 'UTF-8'); ?></span></td>
                     <td><span class="text-muted small"><?= htmlspecialchars(ucfirst($student['gender'] ?? 'N/A'), ENT_QUOTES, 'UTF-8'); ?></span></td>
                     <td>
-                      <span class="badge <?= esc($badgeClass;) ?> px-2 py-1 rounded-pill small">
+                      <span class="badge <?= esc($badgeClass) ?> px-2 py-1 rounded-pill small">
                         <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?>
                       </span>
                     </td>
                     <td class="pe-4 text-end no-print">
-                      <a href="../admissions/application_detail.php?id=<?= esc($student['id'];) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+                      <a href="../admissions/application_detail.php?id=<?= esc($student['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
                         <i class="bi bi-person-vcard me-1"></i> View
                       </a>
                     </td>

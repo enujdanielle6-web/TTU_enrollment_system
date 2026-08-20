@@ -13,8 +13,6 @@ class AdminApiController extends BaseController
     {
         $pdo = Database::getConnection();
         
-require_once __DIR__ . '/../../config/database.php';
-
 requirePermission('college_sections.manage');
 
 header('Content-Type: application/json');
@@ -45,8 +43,6 @@ try {
     {
         $pdo = Database::getConnection();
         
-require_once __DIR__ . '/../../config/database.php';
-
 requirePermission('college_sections.manage');
 
 header('Content-Type: application/json');

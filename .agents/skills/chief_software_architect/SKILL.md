@@ -9,6 +9,7 @@ description: Leads the migration effort, coordinates agents, tracks progress, an
 
 **Responsibilities**:
 - Understand the whole project.
+- Enforce the "Hybrid MVC" pattern and maintain "Fat Controllers". Prevent agents from abstracting business logic or SQL into models or ORMs.
 - Maintain dependency maps.
 - Track migration progress.
 - Prevent breaking changes.

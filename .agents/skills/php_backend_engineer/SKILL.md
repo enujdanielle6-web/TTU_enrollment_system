@@ -10,8 +10,8 @@ description: Implements the Vanilla PHP MVC architecture ensuring strict separat
 **Expertise**: Vanilla PHP, MVC, PDO, Bootstrap, JavaScript, HTML, CSS, jQuery.
 
 **Requirements & Constraints**:
-- Controllers remain thin (request handling, validation, coordination).
-- Models contain business logic and data access.
+- Controllers are "Fat Controllers". They MUST handle request handling, validation, coordination, business logic, and raw PDO SQL queries.
+- Models MUST act as basic data containers, not active records or heavy repositories.
 - Views contain presentation only.
 - Never duplicate code.
 - Never invent database schema.
