@@ -1,42 +1,61 @@
-# Developer Handoff: Recent Architecture & Bug Fixes
-*Date: August 18, 2026*
+# Developer Handoff: System Architecture, Workflows & Recent Implementations
+*Last Updated: August 20, 2026*
 
-This document outlines the recent changes made to the system architecture and bug fixes applied to the administrative modules. Please review these changes before continuing development.
-
----
-
-## 1. Finance Module: "Tuition Rate per Unit" Refactoring
-The "Tuition Fee" logic has been decoupled from a static fixed amount and transitioned into a dynamic, unit-based multiplier while preserving backward compatibility for older fee templates.
-
-### Database Changes
-- **Table:** `fee_templates`
-- **Addition:** Added a new `is_per_unit` (TINYINT(1), DEFAULT 0) column to distinguish between old fixed-tuition templates and new unit-rate templates.
-- **Schema Updated:** `schema_dump.sql` has been freshly updated via `mysqldump` to reflect this change natively.
-
-### Controller & Logic Changes
-- **`FeeController.php`**: Now hardcodes `is_per_unit = 1` for newly created or updated fee templates. The total static amount calculation (Misc + Reg + Lab + Other) was explicitly adjusted to exclude the tuition rate, preventing massive inaccuracies on the frontend.
-- **`AdmissionsController.php`**: The tuition assessment logic was rewritten. The system now fetches total enrolled units (via `college_enrollments` or `shs_enrollments` joined with `subjects`) and multiplies that by the template's `tuition_fee` (which now acts as a *rate*) **IF** `is_per_unit` is true. Otherwise, it safely falls back to evaluating `tuition_fee` as a static total.
-- **`ApplicantController.php` & `FinanceController.php`**: Updated the core assessment query to `LEFT JOIN fee_templates` to fetch the `is_per_unit` flag, and expanded the `enrolledSubjects` fetching logic to natively support Senior High School (SHS) students, not just College students.
-
-### UI & View Changes
-- **`fees.php`**: Relabeled all "Tuition Fee" input fields to "Tuition Rate per Unit" with a clear `/ unit` suffix in both the Add and Edit modals.
-- **`assessment.php` & `cashier_assessment.php`**: Updated the financial breakdown logic. If a student is using an `is_per_unit` template, the view explicitly details the math (e.g., `18 units @ ₱500.00/unit`). 
+This document summarizes the current state of the TTU Enrollment System and LMS architecture, recent feature releases, schema migrations, and critical developer guidelines.
 
 ---
 
-## 2. Registrar Module: Global Subjects Bug Fix
-- **File Fixed:** `subjects.php`
-- **Issue:** Opening the "Edit Subject" modal was causing the screen to turn black and freeze.
-- **Fix:** The HTML structure was invalid because the `<!-- Edit Subject Modal -->` loop was incorrectly placed *inside* the `<tbody>` tag. Bootstrap's backdrop layer cannot calculate z-index correctly inside nested table bodies. The modal generation loop was extracted and moved entirely outside of the `<table>` and placed at the bottom of the document hierarchy.
+## 1. Authentication & Email OTP Verification System
+Newly registered applicants must verify their email before accessing the portal.
+
+### Implementation Details
+- **Tables Modified:** `users` table expanded with `email_verified` (TINYINT(1) DEFAULT 1), `verification_code` (VARCHAR(10) NULL), and `verification_expires_at` (DATETIME NULL). Existing users default to `email_verified = 1`.
+- **OTP Generation & Expiry:** 6-digit cryptographic random code (`random_int(100000, 999999)`), valid for **15 minutes**.
+- **Email Delivery Helper:** [`sendVerificationCodeEmail()`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php) uses PHPMailer with embedded university logo and campus hero image. Automatically loads `.env` SMTP variables.
+- **Verification UI:** [`app/Views/auth/verify_email.php`](file:///c:/xampp/htdocs/sia/app/Views/auth/verify_email.php) features 6 auto-tabbing input boxes, clipboard paste support, 60s resend cooldown timer, and error/warning feedback.
+- **Authentication Gating:** Unverified applicants attempting login via `/sia/auth/login.php` are intercepted, issued a fresh OTP, and redirected to `/sia/auth/verify_email.php`.
+- **LMS Logout Routing:** Dedicated endpoints (`/sia/auth/lms_student_logout.php`, `/sia/auth/lms_faculty_logout.php`) redirect students and faculty directly back to their respective LMS login portals.
 
 ---
 
-## 3. Scholarship Module: Routing & Redirect Fixes
-- **Missing Route Fixed:** Navigating to "Active Scholars" threw a 404. Added `$router->get('/admin/scholarship/scholars.php', ...)` directly into `web.php` to properly map the sidebar link to the `ScholarshipController@scholars` method.
-- **Inconsistent Redirect Fixed:** Inside `ScholarshipController.php`, the form handler for processing applications was using a raw PHP `header('Location: ...')` which bypassed the central routing infrastructure. This was rewritten to use the framework's native `$response->redirect(...)` to prevent blank screens or routing loop errors post-submission.
+## 2. Dynamic LMS & Dual Enrollment Engine (College + SHS)
+Replaced static dummy LMS courses with dynamic auto-provisioning across both academic tiers.
+
+### Implementation Details
+- **Repositories:**
+  - [`CollegeEnrollmentRepository.php`](file:///c:/xampp/htdocs/sia/app/Repositories/CollegeEnrollmentRepository.php): Queries active enrolled subjects from `college_enrollments` linked to `applications.status = 'enrolled'`. Auto-provisions `lms_courses` records.
+  - [`ShsEnrollmentRepository.php`](file:///c:/xampp/htdocs/sia/app/Repositories/ShsEnrollmentRepository.php): Queries active enrolled subjects from `shs_enrollments` and maps adviser/instructor details.
+- **LMS Service Layer:** [`app/Services/LmsService.php`](file:///c:/xampp/htdocs/sia/app/Services/LmsService.php) provides:
+  - `getStudentUpcomingDeadlines()`: Live assignments and quizzes from `lms_assignments` and `lms_quizzes`.
+  - `getStudentAnnouncements()`: Course and university announcements.
+  - `getStudentNextEvent()`: Computes next schedule block.
+  - `getStudentStreak()`: Calculates real student activity streak.
+- **Student LMS Login:** Students log in via their **Student Number** (e.g., `2026-000003`) and their unified account password.
 
 ---
 
-## 4. Environment Cleanup
-- A temporary SQL migration script that was used to test the `fee_templates` database injection has been permanently deleted.
-- The root `schema_dump.sql` was completely overwritten with a clean `--no-data` export directly from the live MySQL database, ensuring the schema file is an exact 1-to-1 reflection of production.
+## 3. Automated Student Credentials & Email Dispatch
+Upon finalizing enrollment in Admissions:
+- **Trigger:** [`AdmissionsController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Admin/Admissions/AdmissionsController.php) updates application to `enrolled`.
+- **Generation:** Generates official Student Number (`YYYY-XXXXXX`) and institutional TTU email (`firstname.lastname@ttu.edu.ph`).
+- **Dispatch:** Calls [`sendStudentCredentialsEmail()`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php) to send a branded welcome email with temporary LMS/Portal credentials.
+
+---
+
+## 4. Finance Module: "Tuition Rate per Unit" Refactoring
+- **Table:** `fee_templates` (`is_per_unit` TINYINT(1) DEFAULT 0).
+- **Assessment Math:** `Total Tuition = Enrolled Units × tuition_fee (rate) + Misc Fees`.
+- **UI:** Assessment breakdown displays unit calculation (e.g. `18 units @ ₱500.00/unit`) and supports bank payment proof upload with cashier verification.
+
+---
+
+## 5. Health Information & Clinic Clearance Subsystem
+- **Table:** `health_records` (linked to `applications.id` and `users.id`).
+- **Validation Rule:** Post-approval, an applicant must submit their Health Information via `/applicant/health_info.php` before proceeding to subject enrollment and assessment.
+- **Admin Verification:** Reviewed by the Clinic staff via `/admin/clinic/clinic_dashboard.php` (`ClinicController`).
+
+---
+
+## 6. Environment & Schema Reference
+- **Active Schema Dump:** [`schema_dump.sql`](file:///c:/xampp/htdocs/sia/schema_dump.sql) contains the complete 41-table structure.
+- **Configuration:** Copy `.env.example` or edit `.env` for database and Google SMTP credentials.

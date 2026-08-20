@@ -4,11 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "6eef5969bf0a3fb7",
+        "id": "aea1abb6bc2ccd9a",
         "type": "tabs",
         "children": [
           {
-            "id": "2e298a9c509e9a03",
+            "id": "094ecf3ffec287db",
             "type": "leaf",
             "state": {
               "type": "graph",
@@ -181,8 +181,20 @@
       "bases:Create new base": false
     }
   },
-  "active": "2e298a9c509e9a03",
+  "active": "094ecf3ffec287db",
   "lastOpenFiles": [
+    "06 - Business Rules/Business Rules.md",
+    "15 - Operations/Troubleshooting Runbook.md",
+    "15 - Operations/Installation & Setup Guide.md",
+    "15 - Operations",
+    "11 - Development Guide/AI Development Context.md",
+    "11 - Development Guide/Project Structure & Code Map.md",
+    "03 - Workflows/Student Lifecycle Workflow.md",
+    "03 - Workflows/Payment & Assessment Workflow.md",
+    "03 - Workflows/Health Submission & Clearance Workflow.md",
+    "07 - Security/Email & Notification System.md",
+    "07 - Security/Authentication & Email Verification.md",
+    "04 - Database/Data Dictionary.md",
     "00 - Home/TTU Enrollment System Home.md",
     "02 - Modules/LMS Profile and Messages UI.md",
     "10 - Bugs & Issues/LMS Navigation and Render Bugs Fixed.md",

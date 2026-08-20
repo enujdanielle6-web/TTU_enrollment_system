@@ -1,27 +1,25 @@
 # Workflow Index
 
-Understanding how data moves through the TTU system is critical. Below are the primary workflows, representing the lifecycle of a student from registration to full enrollment.
+This directory documents the end-to-end operational workflows of the TTU Enrollment System and LMS.
 
-## Core Workflows
-1. **[[Applicant Registration Workflow]]**: Account creation and login.
-2. **[[Application Review Workflow]]**: Submitting data and admissions evaluation.
-3. **[[Enrollment and Scheduling Workflow]]**: Selecting subjects, matching sections based on the [[Curriculum Architecture]].
-4. **[[Assessment and Payment Workflow]]**: Generating fees via templates and cashier receipting.
+---
 
-## Diagram Overview
-```mermaid
-flowchart TD
-    A[Registration] --> B[Application Submission]
-    B --> C[Clinic Clearance]
-    B --> D[Admissions Review]
-    D --> E{Approved?}
-    E -->|Yes| F[Enrollment / Subject Selection]
-    E -->|No| G[Correction Required]
-    F --> H[Assessment Generation]
-    H --> I[Cashier Payment]
-    I --> J[Enrolled Status]
-```
+## Master Workflow Directory
 
-## Related
+### 1. [[Student Lifecycle Workflow]]
+* **Overview:** The overarching student progression across all departments: Registration $\rightarrow$ Email Verification $\rightarrow$ Application $\rightarrow$ Document Review $\rightarrow$ Health Clearance $\rightarrow$ Admissions Approval $\rightarrow$ Section Selection $\rightarrow$ Assessment $\rightarrow$ Payment $\rightarrow$ Credential Dispatch $\rightarrow$ LMS Access.
+
+### 2. [[Applicant Registration Workflow]]
+* **Overview:** Account creation on `/auth/register.php`, 6-digit OTP generation, PHPMailer SMTP transmission, verification gating on `/auth/verify_email.php`, and session authentication.
+
+### 3. [[Health Submission & Clearance Workflow]]
+* **Overview:** Post-approval health declaration submission via `/applicant/health_info.php`, clinic evaluation via `/admin/clinic/medical_clearance.php`, and clearance gating rules.
+
+### 4. [[Payment & Assessment Workflow]]
+* **Overview:** Dynamic tuition rate-per-unit evaluation, scholarship deduction, online bank proof of payment upload, cashier verification, and official receipt issuance.
+
+---
+**Related:**
+- [[Module Index]]
 - [[Business Rules]]
-- [[Database Overview]]
+- [[System Architecture]]

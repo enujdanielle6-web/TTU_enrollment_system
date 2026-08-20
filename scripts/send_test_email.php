@@ -1,6 +1,6 @@
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
-require_once __DIR__ . '/config/database.php'; // Loads the .env
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../config/database.php'; // Loads the .env
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -30,7 +30,9 @@ try {
     $mail->addAddress('enujdanielle6@gmail.com', 'Test User');
 
     // Embed Logo
-    $mail->addEmbeddedImage(__DIR__ . '/images/TTU_LOGO.png', 'ttu_logo');
+    $logo = __DIR__ . '/../public/images/TTU_LOGO.png';
+    if (!file_exists($logo)) $logo = __DIR__ . '/../images/TTU_LOGO.png';
+    if (file_exists($logo)) $mail->addEmbeddedImage($logo, 'ttu_logo');
 
     // Content
     $mail->isHTML(true);
@@ -43,7 +45,7 @@ try {
     $studentNumber = '2026-99999';
     $tempPassword = '2026-99999';
     $portalLink = 'http://localhost/sia/public/index.php';
-    require __DIR__ . '/app/Views/emails/welcome_credentials.php';
+    require __DIR__ . '/../app/Views/emails/welcome_credentials.php';
     $mail->Body = ob_get_clean();
 
     $mail->send();

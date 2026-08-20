@@ -65,7 +65,13 @@ require_once __DIR__ . '/../components/header.php';
                       </a>
                     </div>
                   <?php elseif (in_array($application['status'], ['approved', 'enrolled'], true)): ?>
-                    <div class="mt-4">
+                    <?php if ($application['status'] === 'enrolled'): ?>
+                      <div class="mt-3 p-3 bg-light border border-info rounded-3 text-start">
+                        <p class="text-dark fw-bold mb-1 small"><i class="bi bi-envelope-check-fill text-primary me-1"></i> LMS & TTU Email Sent</p>
+                        <p class="text-muted small mb-0">Check your registered email inbox for your institutional login credentials.</p>
+                      </div>
+                    <?php endif; ?>
+                    <div class="mt-3">
                       <a href="print_slip.php" class="btn btn-success fw-medium shadow-sm w-100">
                         <i class="bi bi-printer me-2"></i> View Admission Slip
                       </a>
@@ -98,11 +104,21 @@ require_once __DIR__ . '/../components/header.php';
                           <i class="bi <?= htmlspecialchars($stepIcon, ENT_QUOTES, 'UTF-8'); ?>"></i>
                         </div>
                         <div class="status-step-content py-2 px-3">
-                          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                            <h3 class="h6 mb-1 fw-bold"><?= htmlspecialchars($step['label'], ENT_QUOTES, 'UTF-8'); ?></h3>
-                            <?php if (!empty($step['timestamp'])): ?>
-                              <span class="text-muted small"><i class="bi bi-clock me-1"></i><?= formatDisplayDate($step['timestamp']); ?></span>
-                            <?php endif; ?>
+                          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                            <h3 class="h6 mb-0 fw-bold"><?= htmlspecialchars($step['label'], ENT_QUOTES, 'UTF-8'); ?></h3>
+                            <div class="d-flex align-items-center gap-2">
+                              <?php if (!empty($step['timestamp'])): ?>
+                                <span class="text-muted small"><i class="bi bi-clock me-1"></i><?= formatDisplayDate($step['timestamp']); ?></span>
+                              <?php endif; ?>
+                              <?php 
+                                $stepAction = getStepAction($step, $application, $healthStatus ?? null);
+                                if ($stepAction):
+                              ?>
+                                <a href="<?= esc($stepAction['url']) ?>" class="btn <?= esc($stepAction['class']) ?> btn-sm rounded-pill px-3 py-1 fw-semibold shadow-sm text-nowrap d-inline-flex align-items-center" style="font-size: 0.78rem;">
+                                  <i class="bi <?= esc($stepAction['icon']) ?> me-1.5"></i> <?= esc($stepAction['label']) ?>
+                                </a>
+                              <?php endif; ?>
+                            </div>
                           </div>
                           <p class="text-muted small mb-0"><?= htmlspecialchars($step['description'], ENT_QUOTES, 'UTF-8'); ?></p>
                         </div>

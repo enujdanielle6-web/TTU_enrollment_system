@@ -16,12 +16,42 @@ require_once __DIR__ . '/../components/header.php';
           </div>
         </div>
 
+        <?php if (!empty($_SESSION['error_msg'])): ?>
+          <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-4 border-0 p-3 mb-4 d-flex align-items-center gap-3" role="alert">
+            <div class="bg-danger text-white rounded-circle p-2 flex-shrink-0 d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="fw-bold mb-0 text-danger">Payment Submission Error</h6>
+              <div class="small"><?= htmlspecialchars($_SESSION['error_msg'], ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <?php unset($_SESSION['error_msg']); ?>
+        <?php endif; ?>
+
+        <?php if (!empty($_SESSION['success_msg'])): ?>
+          <div class="alert alert-success alert-dismissible fade show shadow-sm rounded-4 border-0 p-3 mb-4 d-flex align-items-center gap-3" role="alert">
+            <div class="bg-success text-white rounded-circle p-2 flex-shrink-0 d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+              <i class="bi bi-check-circle-fill fs-5"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="fw-bold mb-0 text-success">Success</h6>
+              <div class="small"><?= htmlspecialchars($_SESSION['success_msg'], ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <?php unset($_SESSION['success_msg']); ?>
+        <?php endif; ?>
+
         <?php if (!$assessment): ?>
           <?php
-             // Fetch application status if assessment doesn't exist
-             $appStmt = $pdo->prepare('SELECT status FROM applications WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 1');
-             $appStmt->execute(['user_id' => $userId]);
-             $appStatus = $appStmt->fetchColumn();
+             $appStatus = $userAppStatus ?? null;
+             if (!$appStatus && isset($pdo) && is_object($pdo)) {
+                 $appStmt = $pdo->prepare('SELECT status FROM applications WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 1');
+                 $appStmt->execute(['user_id' => $userId]);
+                 $appStatus = $appStmt->fetchColumn();
+             }
           ?>
           <div class="island text-center py-5 fade-in-up" style="animation-delay: 0.2s;">
             <div class="status-empty-icon mx-auto mb-3">
@@ -294,54 +324,82 @@ require_once __DIR__ . '/../components/header.php';
         <h5 class="modal-title fw-bold" id="paymentModalLabel"><i class="bi bi-wallet2 me-2"></i> Submit Proof of Payment</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="payment_process.php" method="POST" enctype="multipart/form-data">
+      <form id="paymentProofForm" action="payment_process.php" method="POST" enctype="multipart/form-data">
         <div class="modal-body p-4 bg-light">
-          <input type="hidden" name="assessment_id" value="<?= esc($assessment['id']) ?>">
+          <input type="hidden" name="assessment_id" value="<?= esc($assessment['id'] ?? 0) ?>">
           <input type="hidden" name="action" value="submit_payment_proof">
           <?= getCsrfInput() ?>
 
+          <div id="paymentFormAlert" class="alert alert-danger d-none rounded-3 py-2 px-3 small mb-3"></div>
+
           <!-- Payment Instructions -->
-          <div class="alert alert-info border-0 rounded-3 mb-4 shadow-sm">
+          <div class="alert alert-info border-0 rounded-3 mb-3 shadow-sm">
             <h6 class="fw-bold mb-2"><i class="bi bi-info-circle-fill me-1"></i> Payment Instructions</h6>
-            <p class="small mb-2">Please transfer the amount to any of the following accounts and upload a screenshot of your successful transaction.</p>
+            <p class="small mb-2 text-muted">Please transfer the amount to any of the accounts below and upload a clear screenshot of your transaction.</p>
             <ul class="small mb-0 list-unstyled fw-medium text-dark">
-              <li><i class="bi bi-phone text-primary me-2"></i><strong>GCash:</strong> 0912 345 6789 (SIA Finance)</li>
-              <li><i class="bi bi-phone text-primary me-2"></i><strong>Maya:</strong> 0998 765 4321 (SIA Finance)</li>
-              <li><i class="bi bi-bank text-primary me-2"></i><strong>BDO:</strong> 0012 3456 7890 (SIA Academy)</li>
+              <li class="mb-1"><i class="bi bi-phone text-primary me-2"></i><strong>GCash:</strong> 0912 345 6789 <span class="text-muted">(SIA Finance)</span></li>
+              <li class="mb-1"><i class="bi bi-phone text-primary me-2"></i><strong>Maya:</strong> 0998 765 4321 <span class="text-muted">(SIA Finance)</span></li>
+              <li><i class="bi bi-bank text-primary me-2"></i><strong>BDO:</strong> 0012 3456 7890 <span class="text-muted">(SIA Academy)</span></li>
             </ul>
           </div>
 
           <div class="mb-3">
-            <?php $minPayment = min(3000.0, (float)$allowablePayment); ?>
-            <label class="form-label small fw-semibold text-dark">Amount Paid (₱)</label>
-            <input type="number" step="0.01" min="<?= esc($minPayment) ?>" max="<?= esc($allowablePayment) ?>" name="amount" class="form-control bg-white" required placeholder="e.g. <?= number_format($allowablePayment, 2, '.', '') ?>" value="<?= number_format($allowablePayment, 2, '.', '') ?>">
-            <div class="form-text" style="font-size: 0.7rem;">You can pay partially (Minimum: ₱<?= number_format($minPayment, 2) ?>). Allowable Payment: ₱<?= number_format($allowablePayment, 2) ?> <?php if($pendingAmount > 0) echo "(Pending: ₱" . number_format($pendingAmount, 2) . ")"; ?></div>
+            <?php 
+              $minPayment = min(500.0, (float)($allowablePayment ?? 0)); 
+            ?>
+            <label class="form-label small fw-semibold text-dark">Amount Paid (₱) <span class="text-danger">*</span></label>
+            <input type="number" step="0.01" min="<?= esc($minPayment) ?>" max="<?= esc($allowablePayment ?? 0) ?>" name="amount" id="payAmountInput" class="form-control bg-white" required placeholder="e.g. <?= number_format($allowablePayment ?? 0, 2, '.', '') ?>" value="<?= number_format($allowablePayment ?? 0, 2, '.', '') ?>">
+            <div class="form-text" style="font-size: 0.72rem;">
+              Minimum allowed: <strong>₱<?= number_format($minPayment, 2) ?></strong>. Max allowable: <strong>₱<?= number_format($allowablePayment ?? 0, 2) ?></strong>
+              <?php if (($pendingAmount ?? 0) > 0): ?>
+                <span class="text-warning d-block mt-0.5">(Pending verification: ₱<?= number_format($pendingAmount, 2) ?>)</span>
+              <?php endif; ?>
+            </div>
           </div>
           
           <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Payment Method Used</label>
-            <select name="payment_method" class="form-select bg-white" required>
+            <label class="form-label small fw-semibold text-dark">Payment Method Used <span class="text-danger">*</span></label>
+            <select name="payment_method" id="payMethodInput" class="form-select bg-white" required>
               <option value="GCash">GCash</option>
               <option value="Maya">Maya</option>
-              <option value="Bank Transfer">Bank Transfer (BDO, BPI, etc.)</option>
+              <option value="Bank Transfer">Bank Transfer (BDO / BPI / UnionBank)</option>
+              <option value="Other">Other Electronic Payment</option>
             </select>
           </div>
 
           <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Reference Number</label>
-            <input type="text" name="reference_number" class="form-control bg-white" required placeholder="e.g. 100294828192">
+            <label class="form-label small fw-semibold text-dark">Transaction Reference Number <span class="text-danger">*</span></label>
+            <input type="text" name="reference_number" id="payRefInput" class="form-control bg-white" required placeholder="e.g. 100294828192" minlength="4" maxlength="100">
+            <div class="form-text" style="font-size: 0.72rem;">Enter the exact reference or confirmation code from your receipt.</div>
           </div>
 
           <div class="mb-2">
-            <label class="form-label small fw-semibold text-dark">Upload Screenshot / Receipt</label>
-            <input type="file" name="proof_image" class="form-control bg-white" accept="image/png, image/jpeg, image/jpg" required>
-            <div class="form-text" style="font-size: 0.7rem;">Accepted formats: JPG, PNG. Max size: 2MB.</div>
+            <label class="form-label small fw-semibold text-dark">Upload Receipt / Screenshot <span class="text-danger">*</span></label>
+            <input type="file" name="proof_image" id="payFileInput" class="form-control bg-white" accept="image/png, image/jpeg, image/jpg, image/webp" required>
+            <div class="form-text" style="font-size: 0.72rem;">Accepted formats: JPG, PNG, WEBP. Max file size: 5MB.</div>
+            
+            <!-- Live Preview -->
+            <div id="proofPreviewBox" class="mt-2 p-2 bg-white rounded-3 border d-none">
+              <div class="d-flex align-items-center gap-3">
+                <img id="proofPreviewImg" src="" alt="Receipt Preview" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;">
+                <div class="flex-grow-1 text-truncate">
+                  <div id="proofFileName" class="fw-semibold text-dark small text-truncate">file.jpg</div>
+                  <div id="proofFileSize" class="text-muted" style="font-size: 0.7rem;">0 KB</div>
+                </div>
+                <button type="button" id="proofRemoveBtn" class="btn btn-outline-danger btn-sm rounded-circle p-1" style="width: 28px; height: 28px;" title="Remove image">
+                  <i class="bi bi-x"></i>
+                </button>
+              </div>
+            </div>
           </div>
 
         </div>
         <div class="modal-footer border-top-0 pt-0 bg-light">
           <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold">Submit Payment</button>
+          <button type="submit" id="paySubmitBtn" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold">
+            <span class="spinner-border spinner-border-sm me-1.5 d-none" id="paySubmitSpinner" role="status" aria-hidden="true"></span>
+            <span id="paySubmitText">Submit Payment</span>
+          </button>
         </div>
       </form>
     </div>
@@ -373,26 +431,130 @@ require_once __DIR__ . '/../components/header.php';
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const proofInput = document.querySelector('input[name="proof_image"]');
-    if (proofInput) {
-        proofInput.addEventListener('change', function() {
-            const file = this.files[0];
-            if (file) {
-                if (file.size > 2 * 1024 * 1024) {
-                    alert('The uploaded file exceeds the 2MB size limit. Please choose a smaller file.');
-                    this.value = '';
+(function() {
+    function initPaymentModal() {
+        const form = document.getElementById('paymentProofForm');
+        const fileInput = document.getElementById('payFileInput');
+        const previewBox = document.getElementById('proofPreviewBox');
+        const previewImg = document.getElementById('proofPreviewImg');
+        const fileNameEl = document.getElementById('proofFileName');
+        const fileSizeEl = document.getElementById('proofFileSize');
+        const removeBtn = document.getElementById('proofRemoveBtn');
+        const alertEl = document.getElementById('paymentFormAlert');
+        const submitBtn = document.getElementById('paySubmitBtn');
+        const spinner = document.getElementById('paySubmitSpinner');
+        const submitText = document.getElementById('paySubmitText');
+        const amountInput = document.getElementById('payAmountInput');
+
+        if (!form) return;
+
+        function showAlert(msg) {
+            if (alertEl) {
+                alertEl.textContent = msg;
+                alertEl.classList.remove('d-none');
+            }
+        }
+
+        function hideAlert() {
+            if (alertEl) {
+                alertEl.classList.add('d-none');
+            }
+        }
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                hideAlert();
+                const file = this.files[0];
+                if (!file) {
+                    if (previewBox) previewBox.classList.add('d-none');
                     return;
                 }
-                if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
-                    alert('Invalid file format. Only JPG and PNG are allowed.');
+
+                // Size check: Max 5MB
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('File exceeds the 5MB size limit. Please choose a smaller image.');
                     this.value = '';
+                    if (previewBox) previewBox.classList.add('d-none');
                     return;
                 }
+
+                // Type check
+                const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+                if (!allowed.includes(file.type.toLowerCase()) && !file.name.match(/\.(jpg|jpeg|png|webp)$/i)) {
+                    showAlert('Invalid file format. Only JPG, PNG, and WEBP images are allowed.');
+                    this.value = '';
+                    if (previewBox) previewBox.classList.add('d-none');
+                    return;
+                }
+
+                // Show preview
+                if (previewBox && previewImg) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        previewImg.src = e.target.result;
+                        if (fileNameEl) fileNameEl.textContent = file.name;
+                        if (fileSizeEl) fileSizeEl.textContent = (file.size / 1024).toFixed(1) + ' KB';
+                        previewBox.classList.remove('d-none');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        if (removeBtn && fileInput) {
+            removeBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                if (previewBox) previewBox.classList.add('d-none');
+                hideAlert();
+            });
+        }
+
+        form.addEventListener('submit', function(e) {
+            hideAlert();
+            const amount = parseFloat(amountInput ? amountInput.value : 0);
+            const minAmt = parseFloat(amountInput ? amountInput.min : 0);
+            const maxAmt = parseFloat(amountInput ? amountInput.max : 0);
+
+            if (isNaN(amount) || amount <= 0) {
+                e.preventDefault();
+                showAlert('Please enter a valid payment amount.');
+                return;
+            }
+
+            if (minAmt > 0 && amount < minAmt) {
+                e.preventDefault();
+                showAlert('Minimum payment allowed is ₱' + minAmt.toFixed(2));
+                return;
+            }
+
+            if (maxAmt > 0 && amount > maxAmt + 0.01) {
+                e.preventDefault();
+                showAlert('Amount cannot exceed your allowable balance of ₱' + maxAmt.toFixed(2));
+                return;
+            }
+
+            if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+                e.preventDefault();
+                showAlert('Please attach your proof of payment screenshot.');
+                return;
+            }
+
+            // Show loading spinner on submit
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                if (spinner) spinner.classList.remove('d-none');
+                if (submitText) submitText.textContent = 'Uploading...';
             }
         });
     }
-});
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPaymentModal);
+    } else {
+        initPaymentModal();
+    }
+    document.addEventListener('spa:navigated', initPaymentModal);
+})();
 </script>
 </main>
 

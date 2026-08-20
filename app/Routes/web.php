@@ -15,12 +15,19 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->post('/auth/login_process.php', ['App\Controllers\AuthController', 'login']);
     $router->get('/auth/register.php', ['App\Controllers\AuthController', 'showRegister']);
     $router->post('/auth/register_process.php', ['App\Controllers\AuthController', 'register']);
+    $router->get('/auth/verify_email.php', ['App\Controllers\AuthController', 'showVerifyEmail']);
+    $router->post('/auth/verify_email_process.php', ['App\Controllers\AuthController', 'processVerifyEmail']);
+    $router->post('/auth/resend_verification.php', ['App\Controllers\AuthController', 'resendVerification']);
     $router->get('/auth/logout.php', ['App\Controllers\AuthController', 'logout']);
     
-    // LMS Auth
+    // LMS Auth & Logout
     $router->get('/auth/lms_faculty_login.php', ['App\Controllers\Lms\LmsAuthController', 'showFacultyLogin']);
     $router->get('/auth/lms_student_login.php', ['App\Controllers\Lms\LmsAuthController', 'showStudentLogin']);
     $router->post('/auth/lms_login_process.php', ['App\Controllers\Lms\LmsAuthController', 'loginProcess']);
+    $router->get('/auth/lms_student_logout.php', ['App\Controllers\Lms\LmsAuthController', 'logoutStudent']);
+    $router->get('/auth/lms_faculty_logout.php', ['App\Controllers\Lms\LmsAuthController', 'logoutFaculty']);
+    $router->get('/lms/student/logout', ['App\Controllers\Lms\LmsAuthController', 'logoutStudent']);
+    $router->get('/lms/faculty/logout', ['App\Controllers\Lms\LmsAuthController', 'logoutFaculty']);
 });
 
 $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {

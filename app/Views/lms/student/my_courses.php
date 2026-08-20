@@ -40,19 +40,31 @@
         </div>
     <?php else: ?>
         <div class="row g-4">
-            <?php foreach ($enrolled_courses as $course): ?>
-                <div class="col-md-4 col-lg-3">
+            <?php 
+                $gradients = [
+                    'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                    'linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%)',
+                    'linear-gradient(135deg, #059669 0%, #10b981 100%)',
+                    'linear-gradient(135deg, #d97706 0%, #f59e0b 100%)',
+                    'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)'
+                ];
+                foreach ($enrolled_courses as $idx => $course): 
+                    $grad = $gradients[$idx % count($gradients)];
+            ?>
+                <div class="col-md-6 col-lg-4">
                     <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-dark d-block h-100">
-                        <div class="lms-card h-100 transition-all shadow-sm-hover overflow-hidden border bg-white rounded">
-                            <div class="card-img-top bg-light d-flex align-items-center justify-content-center border-bottom" style="height: 160px;">
-                                <i class="bi bi-image text-muted opacity-25" style="font-size: 3rem;"></i>
+                        <div class="lms-card h-100 transition-all shadow-sm-hover overflow-hidden border bg-white rounded-4">
+                            <div class="p-3 text-white d-flex justify-content-between align-items-center" style="background: <?= $grad ?>;">
+                                <span class="badge bg-white bg-opacity-25 text-white fw-bold px-3 py-1 rounded-pill small"><?= htmlspecialchars($course['code']) ?></span>
+                                <span class="small fw-semibold opacity-90"><i class="bi bi-journal-text me-1"></i><?= htmlspecialchars($course['units'] ?? 3) ?> Units</span>
                             </div>
-                            <div class="p-4 text-center">
+                            <div class="p-4">
                                 <h4 class="h6 fw-bold text-dark text-truncate mb-1" title="<?= htmlspecialchars($course['name']) ?>">
                                     <?= htmlspecialchars($course['name']) ?>
                                 </h4>
-                                <div class="text-muted small fw-semibold">
-                                    <?= htmlspecialchars($course['code']) ?>
+                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top text-muted small">
+                                    <span class="text-truncate" style="max-width: 150px;"><i class="bi bi-person-badge me-1"></i> <?= htmlspecialchars(trim(($course['first_name'] ?? '') . ' ' . ($course['last_name'] ?? ''))) ?></span>
+                                    <span class="badge bg-light text-dark border"><?= htmlspecialchars($course['section_name'] ?? 'Section') ?></span>
                                 </div>
                             </div>
                         </div>

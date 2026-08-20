@@ -326,4 +326,165 @@ class LmsService
             'id' => $submissionId
         ]);
     }
+
+    public function getStudentUpcomingDeadlines(int $userId, int $limit = 5): array
+    {
+        $courses = $this->getStudentCourses($userId);
+        if (empty($courses)) return [];
+
+        $courseIds = array_column($courses, 'lms_course_id');
+        $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
+
+        $deadlines = [];
+
+        // 1. Assignments
+        $assignStmt = $this->pdo->prepare("
+            SELECT 
+                a.id,
+                a.title,
+                a.due_date,
+                a.lms_course_id,
+                'assignment' as type,
+                s.subject_code,
+                s.subject_name
+            FROM lms_assignments a
+            JOIN lms_courses lc ON a.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            WHERE a.lms_course_id IN ($placeholders)
+              AND a.status = 'published'
+              AND a.due_date IS NOT NULL
+            ORDER BY a.due_date ASC
+            LIMIT $limit
+        ");
+        $assignStmt->execute($courseIds);
+        $assigns = $assignStmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($assigns as $asg) {
+            $deadlines[] = [
+                'id' => $asg['id'],
+                'title' => $asg['title'],
+                'due_date' => $asg['due_date'],
+                'type' => 'Assignment',
+                'course_code' => $asg['subject_code'],
+                'course_name' => $asg['subject_name'],
+                'url' => "/sia/lms/student/assignments.php?course_id=" . $asg['lms_course_id']
+            ];
+        }
+
+        // 2. Quizzes
+        $quizStmt = $this->pdo->prepare("
+            SELECT 
+                q.id,
+                q.title,
+                q.end_date as due_date,
+                q.lms_course_id,
+                'quiz' as type,
+                s.subject_code,
+                s.subject_name
+            FROM lms_quizzes q
+            JOIN lms_courses lc ON q.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            WHERE q.lms_course_id IN ($placeholders)
+              AND q.status = 'published'
+              AND q.end_date IS NOT NULL
+            ORDER BY q.end_date ASC
+            LIMIT $limit
+        ");
+        $quizStmt->execute($courseIds);
+        $quizzes = $quizStmt->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($quizzes as $qz) {
+            $deadlines[] = [
+                'id' => $qz['id'],
+                'title' => $qz['title'],
+                'due_date' => $qz['due_date'],
+                'type' => 'Quiz',
+                'course_code' => $qz['subject_code'],
+                'course_name' => $qz['subject_name'],
+                'url' => "/sia/lms/student/quizzes.php?course_id=" . $qz['lms_course_id']
+            ];
+        }
+
+        // Sort combined deadlines by due date
+        usort($deadlines, function ($a, $b) {
+            return strtotime($a['due_date']) <=> strtotime($b['due_date']);
+        });
+
+        return array_slice($deadlines, 0, $limit);
+    }
+
+    public function getStudentAnnouncements(int $userId, int $limit = 5): array
+    {
+        $courses = $this->getStudentCourses($userId);
+        if (empty($courses)) return [];
+
+        $courseIds = array_column($courses, 'lms_course_id');
+        $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
+
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                ann.id,
+                ann.title,
+                ann.content,
+                ann.created_at,
+                ann.lms_course_id,
+                s.subject_code,
+                u.first_name as author_first,
+                u.last_name as author_last
+            FROM lms_announcements ann
+            JOIN lms_courses lc ON ann.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            LEFT JOIN users u ON ann.author_user_id = u.id
+            WHERE ann.lms_course_id IN ($placeholders)
+              AND ann.status = 'published'
+            ORDER BY ann.created_at DESC
+            LIMIT $limit
+        ");
+        $stmt->execute($courseIds);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getStudentNextEvent(int $userId): ?array
+    {
+        $deadlines = $this->getStudentUpcomingDeadlines($userId, 1);
+        if (!empty($deadlines)) {
+            $next = $deadlines[0];
+            $ts = strtotime($next['due_date']);
+            return [
+                'month' => date('M', $ts),
+                'day' => date('d', $ts),
+                'title' => $next['title'] . ' (' . $next['type'] . ')',
+                'time' => date('h:i A', $ts),
+                'course' => $next['course_code'] . ' - ' . $next['course_name'],
+                'url' => $next['url']
+            ];
+        }
+
+        $courses = $this->getStudentCourses($userId);
+        if (!empty($courses)) {
+            $firstCourse = $courses[0];
+            return [
+                'month' => date('M'),
+                'day' => date('d'),
+                'title' => 'Class Session: ' . $firstCourse['code'],
+                'time' => 'Upcoming Semester Session',
+                'course' => $firstCourse['name'] . ' (' . $firstCourse['section_name'] . ')',
+                'url' => '/sia/lms/student/course.php?id=' . $firstCourse['lms_course_id']
+            ];
+        }
+
+        return null;
+    }
+
+    public function getStudentStreak(int $userId): int
+    {
+        // Compute streak based on recent activity logs or submissions
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(DISTINCT DATE(created_at)) 
+            FROM activity_logs 
+            WHERE user_id = :uid 
+              AND created_at >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
+        ");
+        $stmt->execute(['uid' => $userId]);
+        $count = (int)$stmt->fetchColumn();
+        return max(1, $count);
+    }
 }

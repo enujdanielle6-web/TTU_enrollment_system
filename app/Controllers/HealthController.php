@@ -63,8 +63,8 @@ class HealthController extends BaseController
         }
         $appId = (int) $application['id'];
 
-        $heightRaw = trim((string) $request->input('height', ''));
-        $weightRaw = trim((string) $request->input('weight', ''));
+        $heightVal = (float) $heightRaw;
+        $weightVal = (float) $weightRaw;
         $height = $heightRaw !== '' ? $heightRaw . ' cm' : '';
         $weight = $weightRaw !== '' ? $weightRaw . ' kg' : '';
         $bloodType = trim((string) $request->input('blood_type', ''));
@@ -89,14 +89,57 @@ class HealthController extends BaseController
         $emergencyRelationship = trim((string) $request->input('emergency_relationship', ''));
         $emergencyContact = trim((string) $request->input('emergency_contact', ''));
 
-        if (empty($height) || empty($weight) || empty($bloodType) || empty($emergencyName) || empty($emergencyRelationship) || empty($emergencyContact)) {
-            $_SESSION['error_msg'] = 'Please fill out all required fields.';
+        if (empty($heightRaw) || empty($weightRaw) || empty($bloodType) || empty($emergencyName) || empty($emergencyRelationship) || empty($emergencyContact)) {
+            $_SESSION['error_msg'] = 'Please fill out all required physical and emergency contact fields.';
+            $response->redirect('/sia/applicant/health_info.php');
+            return;
+        }
+
+        if ($heightVal < 30 || $heightVal > 300) {
+            $_SESSION['error_msg'] = 'Please enter a realistic height between 30 cm and 300 cm.';
+            $response->redirect('/sia/applicant/health_info.php');
+            return;
+        }
+
+        if ($weightVal < 10 || $weightVal > 500) {
+            $_SESSION['error_msg'] = 'Please enter a realistic weight between 10 kg and 500 kg.';
+            $response->redirect('/sia/applicant/health_info.php');
+            return;
+        }
+
+        $validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
+        if (!in_array($bloodType, $validBloodTypes, true)) {
+            $_SESSION['error_msg'] = 'Please select a valid blood type from the list.';
+            $response->redirect('/sia/applicant/health_info.php');
+            return;
+        }
+
+        if ($hasAllergies && empty($allergiesDetails)) {
+            $_SESSION['error_msg'] = 'Please specify your allergy details in the Additional Information section.';
+            $response->redirect('/sia/applicant/health_info.php');
+            return;
+        }
+
+        if ($hasExistingCondition && empty($medicalConditions)) {
+            $_SESSION['error_msg'] = 'Please specify your existing medical conditions in the Additional Information section.';
+            $response->redirect('/sia/applicant/health_info.php');
+            return;
+        }
+
+        if ($hasMaintenanceMedication && empty($currentMedications)) {
+            $_SESSION['error_msg'] = 'Please specify your current maintenance medications in the Additional Information section.';
+            $response->redirect('/sia/applicant/health_info.php');
+            return;
+        }
+
+        if (strlen($emergencyName) < 2) {
+            $_SESSION['error_msg'] = 'Please enter a valid emergency contact name.';
             $response->redirect('/sia/applicant/health_info.php');
             return;
         }
 
         if (!preg_match('/^(09\d{9}|(\+639)\d{9})$/', $emergencyContact)) {
-            $_SESSION['error_msg'] = 'Emergency contact number must be a valid 11-digit number starting with 09.';
+            $_SESSION['error_msg'] = 'Emergency contact number must be a valid 11-digit Philippine mobile number starting with 09 (e.g. 09123456789).';
             $response->redirect('/sia/applicant/health_info.php');
             return;
         }

@@ -1,20 +1,35 @@
 # Reports Overview
 
-Reports are managed by the `App\Controllers\Admin\ReportController.php`.
+**Path**: `admin/system/reports.php`  
+**Required Roles**: `admin`, `superadmin`  
+**Controller**: [`ReportController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Admin/System/ReportController.php)
 
-## Generation Workflow
-1. The admin selects a date range and report type.
-2. The controller executes aggregate queries using raw SQL.
-3. The results are parsed and pushed to a CSV generator or a printable HTML view.
+The Reports engine generates administrative summaries, demographic statistics, financial collection reports, and downloadable CSV exports.
 
-## Export Capability
-- `POST /admin/system/reports_export.php` generates a CSV file via setting headers:
+---
+
+## 1. Available System Reports
+
+| Report Category | Description | Data Source Tables |
+|---|---|---|
+| **Enrollment Demographics** | Enrollment distribution by academic level (College / SHS), program/strand, year level, and gender breakdown. | `applications`, `college_programs`, `shs_strands` |
+| **Financial Collections** | Cashier collections, payment channel distribution (Cash, Bank Transfer, GCash), daily totals, and verified receipts. | `payment_records`, `student_assessments`, `users` |
+| **Scholarship Impact** | Total tuition discounts awarded, active scholars count, and budget allocation per scholarship program. | `scholarships`, `student_scholarships`, `applications` |
+| **Medical / Clinic Clearance** | Compliance status of student health records (verified vs. pending medical evaluation). | `health_records`, `applications` |
+| **Academic Performance & LMS** | LMS course enrollment totals and active student participation metrics. | `lms_courses`, `college_enrollments`, `shs_enrollments` |
+
+---
+
+## 2. Export Endpoints
+- **CSV Export Endpoint:** `POST /admin/system/reports_export.php`
+- **Mechanism:** Direct stream generation setting CSV headers:
   ```php
-  header('Content-Type: text/csv');
-  header('Content-Disposition: attachment; filename="report.csv"');
+  header('Content-Type: text/csv; charset=utf-8');
+  header('Content-Disposition: attachment; filename="ttu_report_' . date('Y-m-d') . '.csv"');
   ```
 
-## Current Reports Available
-- **Enrollment Summary:** Counts of enrolled students per program/strand.
-- **Financial Collection:** Aggregate totals from `payment_records` grouped by day/cashier.
-- **Scholarship Disbursement:** List of active `student_scholarships` and their financial impact.
+---
+**Related:**
+- [[Finance]]
+- [[Registrar]]
+- [[Module Index]]

@@ -1,6 +1,11 @@
 <?php
 require_once __DIR__ . '/../components/header.php';
 ?>
+<div class="no-print">
+<?php require_once __DIR__ . '/../components/applicant_navbar.php'; ?>
+</div>
+
+<main id="spa-main" class="py-5 bg-light min-vh-100">
 <style>
 @media print {
     .no-print, .no-print * {
@@ -67,12 +72,6 @@ require_once __DIR__ . '/../components/header.php';
     border-left: 3px solid #0d6efd;
 }
 </style>
-
-<div class="no-print">
-<?php require_once __DIR__ . '/../components/applicant_navbar.php'; ?>
-</div>
-
-<main id="spa-main" class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
     <div class="no-print d-flex justify-content-between align-items-center mb-4">
@@ -188,43 +187,55 @@ require_once __DIR__ . '/../components/header.php';
             <?php if (!$assessment): ?>
               <div class="alert alert-warning small mb-0">Assessment pending.</div>
             <?php else: 
-                $breakdown = json_decode($assessment['breakdown'] ?? '{}', true) ?: [];
-                $tuition = $breakdown['tuition'] ?? 0;
-                $misc = $breakdown['miscellaneous'] ?? 0;
-                $lab = $breakdown['laboratory'] ?? 0;
-                $other = $breakdown['other'] ?? 0;
-                $discount = $breakdown['scholarship_discount'] ?? 0;
+                $tuition = (float)($assessment['tuition_fee'] ?? 0);
+                $misc = (float)($assessment['miscellaneous_fee'] ?? 0);
+                $reg = (float)($assessment['registration_fee'] ?? 0);
+                $lab = (float)($assessment['laboratory_fee'] ?? 0);
+                $other = (float)($assessment['other_fees'] ?? 0);
+                $discount = (float)($assessment['discount_amount'] ?? 0);
+                $total = (float)($assessment['total_amount'] ?? 0);
+                $net = (float)($assessment['net_amount'] ?? 0);
             ?>
               <table class="table table-sm table-borderless mb-2">
                 <tbody>
                   <tr>
                     <td class="text-muted">Tuition Fee</td>
-                    <td class="text-end fw-medium">₱<?= number_format((float)$tuition, 2) ?></td>
+                    <td class="text-end fw-medium">₱<?= number_format($tuition, 2) ?></td>
                   </tr>
                   <tr>
                     <td class="text-muted">Miscellaneous</td>
-                    <td class="text-end fw-medium">₱<?= number_format((float)$misc, 2) ?></td>
+                    <td class="text-end fw-medium">₱<?= number_format($misc, 2) ?></td>
                   </tr>
+                  <?php if ($reg > 0): ?>
+                  <tr>
+                    <td class="text-muted">Registration</td>
+                    <td class="text-end fw-medium">₱<?= number_format($reg, 2) ?></td>
+                  </tr>
+                  <?php endif; ?>
                   <tr>
                     <td class="text-muted">Laboratory</td>
-                    <td class="text-end fw-medium">₱<?= number_format((float)$lab, 2) ?></td>
+                    <td class="text-end fw-medium">₱<?= number_format($lab, 2) ?></td>
                   </tr>
                   <tr>
                     <td class="text-muted">Other Fees</td>
-                    <td class="text-end fw-medium">₱<?= number_format((float)$other, 2) ?></td>
+                    <td class="text-end fw-medium">₱<?= number_format($other, 2) ?></td>
                   </tr>
                   <?php if ($discount > 0): ?>
                   <tr>
                     <td class="text-success">Scholarship Discount</td>
-                    <td class="text-end fw-bold text-success">-₱<?= number_format((float)$discount, 2) ?></td>
+                    <td class="text-end fw-bold text-success">-₱<?= number_format($discount, 2) ?></td>
                   </tr>
                   <?php endif; ?>
                 </tbody>
               </table>
               <hr class="my-2 border-secondary">
               <div class="d-flex justify-content-between align-items-center mt-2">
-                <span class="fw-bold text-dark text-uppercase">Total Amount</span>
-                <span class="fw-bold text-primary fs-5">₱<?= number_format((float)($assessment['total_amount'] ?? 0), 2) ?></span>
+                <span class="fw-bold text-dark text-uppercase small">Gross Total</span>
+                <span class="fw-semibold text-dark">₱<?= number_format($total, 2) ?></span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-1">
+                <span class="fw-bold text-primary text-uppercase">Net Payable</span>
+                <span class="fw-bold text-primary fs-5">₱<?= number_format($net, 2) ?></span>
               </div>
             <?php endif; ?>
           </div>
@@ -347,20 +358,53 @@ require_once __DIR__ . '/../components/header.php';
                   $startHour = 7;
                   $endHour = 20;
                   
+                  if (!function_exists('expandScheduleDays')) {
+                      function expandScheduleDays(string $dayStr): array {
+                          $dayStr = trim($dayStr);
+                          if (empty($dayStr) || strtoupper($dayStr) === 'TBA') {
+                              return [];
+                          }
+                          $upper = strtoupper($dayStr);
+                          if ($upper === 'MWF') return ['Monday', 'Wednesday', 'Friday'];
+                          if ($upper === 'TTH' || $upper === 'T-TH' || $upper === 'TTHS') return ['Tuesday', 'Thursday'];
+                          if ($upper === 'MW' || $upper === 'M-W') return ['Monday', 'Wednesday'];
+                          if ($upper === 'FS' || $upper === 'F-S') return ['Friday', 'Saturday'];
+                          if ($upper === 'MTWTHF' || $upper === 'DAILY') return ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+                          
+                          $daysList = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+                          foreach ($daysList as $d) {
+                              if (strcasecmp($dayStr, $d) === 0) return [$d];
+                          }
+                          
+                          $abbrevs = [
+                              'MON' => 'Monday', 'TUE' => 'Tuesday', 'WED' => 'Wednesday', 
+                              'THU' => 'Thursday', 'FRI' => 'Friday', 'SAT' => 'Saturday', 'SUN' => 'Sunday'
+                          ];
+                          if (isset($abbrevs[$upper])) return [$abbrevs[$upper]];
+
+                          return [];
+                      }
+                  }
+
                   // Group schedules by day and block
                   $grid = [];
                   foreach ($days as $d) { $grid[$d] = []; }
 
                   foreach ($enrolledSubjects as $sub) {
                       foreach ($sub['schedules'] as $sc) {
-                          if (!empty($sc['day']) && $sc['day'] !== 'TBA' && in_array($sc['day'], $days) && !empty($sc['start_time']) && !empty($sc['end_time'])) {
-                              $grid[$sc['day']][] = [
-                                  'code' => $sub['subject_code'],
-                                  'name' => $sub['subject_name'],
-                                  'room' => $sc['room'] ?: 'TBA',
-                                  'start' => strtotime($sc['start_time']),
-                                  'end' => strtotime($sc['end_time'])
-                              ];
+                          if (!empty($sc['day']) && $sc['day'] !== 'TBA' && !empty($sc['start_time']) && !empty($sc['end_time']) && $sc['start_time'] !== '00:00:00') {
+                              $matchedDays = expandScheduleDays((string)$sc['day']);
+                              foreach ($matchedDays as $targetDay) {
+                                  if (isset($grid[$targetDay])) {
+                                      $grid[$targetDay][] = [
+                                          'code' => $sub['subject_code'],
+                                          'name' => $sub['subject_name'],
+                                          'room' => $sc['room'] ?: 'TBA',
+                                          'start' => strtotime($sc['start_time']),
+                                          'end' => strtotime($sc['end_time'])
+                                      ];
+                                  }
+                              }
                           }
                       }
                   }

@@ -214,6 +214,112 @@ function getApplicationTimelineSteps(string $status, string $docMethod = 'online
     return $steps;
 }
 
+/**
+ * Returns the contextual Quick Action button for a timeline step.
+ *
+ * @param array $step
+ * @param array|null $application
+ * @param string|null $healthStatus
+ * @return array{url: string, label: string, icon: string, class: string}|null
+ */
+function getStepAction(array $step, ?array $application = null, ?string $healthStatus = null): ?array
+{
+    $key = $step['key'] ?? '';
+    $state = $step['state'] ?? 'pending';
+
+    if ($state === 'active') {
+        return match ($key) {
+            'submitted' => [
+                'url' => 'enroll.php',
+                'label' => 'Start Enrollment',
+                'icon' => 'bi-pencil-square',
+                'class' => 'btn-primary'
+            ],
+            'documents' => [
+                'url' => 'documents.php',
+                'label' => ($application['document_submission_method'] ?? '') === 'on_campus' ? 'View Details' : 'Upload Documents',
+                'icon' => ($application['document_submission_method'] ?? '') === 'on_campus' ? 'bi-building' : 'bi-cloud-arrow-up-fill',
+                'class' => 'btn-primary'
+            ],
+            'review' => [
+                'url' => 'status.php',
+                'label' => 'Track Status',
+                'icon' => 'bi-search',
+                'class' => 'btn-outline-primary'
+            ],
+            'correction' => [
+                'url' => 'enroll.php',
+                'label' => 'Update Application',
+                'icon' => 'bi-pencil-fill',
+                'class' => 'btn-danger'
+            ],
+            'approved' => [
+                'url' => 'print_slip.php',
+                'label' => 'View Slip',
+                'icon' => 'bi-file-earmark-text',
+                'class' => 'btn-success'
+            ],
+            'health_info' => [
+                'url' => 'health_info.php',
+                'label' => 'Submit Health Info',
+                'icon' => 'bi-heart-pulse-fill',
+                'class' => 'btn-primary'
+            ],
+            'medical_clearance' => [
+                'url' => 'health_info.php',
+                'label' => 'View Clearance',
+                'icon' => 'bi-file-medical-fill',
+                'class' => 'btn-outline-primary'
+            ],
+            'scholarship' => [
+                'url' => 'scholarships.php',
+                'label' => 'Apply Scholarship',
+                'icon' => 'bi-mortarboard-fill',
+                'class' => 'btn-primary'
+            ],
+            'cashier' => [
+                'url' => 'assessment.php',
+                'label' => 'Pay Assessment',
+                'icon' => 'bi-credit-card-2-front-fill',
+                'class' => 'btn-primary'
+            ],
+            'enrolled' => [
+                'url' => 'print_slip.php',
+                'label' => 'Print Summary',
+                'icon' => 'bi-printer-fill',
+                'class' => 'btn-success'
+            ],
+            default => null
+        };
+    }
+
+    if ($state === 'completed') {
+        return match ($key) {
+            'approved' => [
+                'url' => 'print_slip.php',
+                'label' => 'View Slip',
+                'icon' => 'bi-file-earmark-text',
+                'class' => 'btn-outline-success'
+            ],
+            'cashier' => [
+                'url' => 'assessment.php',
+                'label' => 'Assessment',
+                'icon' => 'bi-receipt',
+                'class' => 'btn-outline-primary'
+            ],
+            'enrolled' => [
+                'url' => 'print_slip.php',
+                'label' => 'Print Summary',
+                'icon' => 'bi-printer',
+                'class' => 'btn-outline-success'
+            ],
+            default => null
+        };
+    }
+
+    return null;
+}
+
 function formatDisplayDate(?string $date): string
 {
     if ($date === null || $date === '') {
@@ -485,6 +591,42 @@ function generateStudentNumber(PDO $pdo): string
 }
 
 /**
+ * Finalizes enrollment for an applicant once payment is confirmed.
+ * Sets application status to 'enrolled' and assigns an official student number.
+ */
+function finalizeStudentEnrollment(PDO $pdo, int $userId, int $applicationId): void
+{
+    // 1. Update Application status to 'enrolled'
+    $updApp = $pdo->prepare('UPDATE applications SET status = "enrolled" WHERE id = :id');
+    $updApp->execute(['id' => $applicationId]);
+
+    // 2. Generate and assign Student Number if empty
+    $uStmt = $pdo->prepare('SELECT student_number, first_name, last_name, email FROM users WHERE id = :id LIMIT 1');
+    $uStmt->execute(['id' => $userId]);
+    $userRow = $uStmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$userRow) return;
+
+    $studentNumber = $userRow['student_number'] ?? '';
+    if (empty($studentNumber)) {
+        $studentNumber = generateStudentNumber($pdo);
+        $updUser = $pdo->prepare('UPDATE users SET student_number = :student_number WHERE id = :id');
+        $updUser->execute(['student_number' => $studentNumber, 'id' => $userId]);
+
+        // Activity log
+        $logStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, "bi-person-vcard-fill text-success", "Student Number Assigned", :description)');
+        $logStmt->execute([
+            'user_id' => $userId,
+            'description' => "Your official student number is {$studentNumber}."
+        ]);
+    }
+
+    // 3. Activity log for Enrollment Complete
+    $logEnrolled = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, "bi-patch-check-fill text-success", "Enrollment Complete", "Congratulations! You are officially enrolled as a student at Triple T University.")');
+    $logEnrolled->execute(['user_id' => $userId]);
+}
+
+/**
  * Retrieves a single system setting value by key.
  */
 function getSystemSetting(PDO $pdo, string $key, $default = null)
@@ -706,4 +848,218 @@ function recalculateStudentAssessment(int $userId, \PDO $pdo): void
         'status' => $paymentStatus,
         'id' => $assessmentId
     ]);
+}
+
+/**
+ * Sends a 6-digit email verification OTP to an applicant.
+ * 
+ * @param string $recipientEmail
+ * @param string $recipientName
+ * @param string $code
+ * @param string|null &$errorMessage
+ * @return bool
+ */
+function sendVerificationCodeEmail(string $recipientEmail, string $recipientName, string $code, ?string &$errorMessage = null): bool
+{
+    $recipientEmail = trim($recipientEmail);
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        $errorMessage = "Invalid recipient email address format: {$recipientEmail}";
+        error_log($errorMessage);
+        return false;
+    }
+
+    if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
+        $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+        if (file_exists($autoloadPath)) {
+            require_once $autoloadPath;
+        }
+    }
+
+    if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
+        $errorMessage = "PHPMailer library is not available.";
+        error_log("{$errorMessage} Verification code for {$recipientEmail}: {$code}");
+        return false;
+    }
+
+    // Ensure .env is loaded if not already in environment
+    if (!getenv('SMTP_USERNAME')) {
+        $envFile = __DIR__ . '/../../.env';
+        if (file_exists($envFile)) {
+            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (strpos(trim($line), '#') === 0) continue;
+                if (strpos($line, '=') === false) continue;
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim(trim($value), '"\'');
+                putenv(sprintf('%s=%s', $name, $value));
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
+        }
+    }
+
+    try {
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = getenv('SMTP_USERNAME') ?: '';
+        $mail->Password   = getenv('SMTP_PASSWORD') ?: '';
+
+        $enc = getenv('SMTP_ENCRYPTION') ?: 'tls';
+        if (strtolower((string)$enc) === 'ssl') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
+        $mail->Timeout = 10;
+
+        $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
+        $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
+        $mail->setFrom($fromAddress, $fromName);
+        $mail->addAddress($recipientEmail, $recipientName);
+
+        $logoPath = __DIR__ . '/../../public/images/TTU_LOGO.png';
+        if (!file_exists($logoPath)) {
+            $logoPath = __DIR__ . '/../../images/TTU_LOGO.png';
+        }
+        if (file_exists($logoPath)) {
+            $mail->addEmbeddedImage($logoPath, 'ttu_logo');
+        }
+
+        $campusPath = __DIR__ . '/../../images/ttu_campus.jpg';
+        if (!file_exists($campusPath)) {
+            $campusPath = __DIR__ . '/../../public/images/ttu_campus.jpg';
+        }
+        if (file_exists($campusPath)) {
+            $mail->addEmbeddedImage($campusPath, 'ttu_campus');
+        }
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Verify Your Email Address - Triple T University';
+
+        ob_start();
+        $firstName = $recipientName;
+        require __DIR__ . '/../Views/emails/email_verification.php';
+        $mail->Body = ob_get_clean();
+
+        $sent = $mail->send();
+        if ($sent) {
+            return true;
+        }
+
+        $errorMessage = $mail->ErrorInfo ?: 'Unknown mailer error.';
+        return false;
+    } catch (\Throwable $e) {
+        $errorMessage = $e->getMessage();
+        error_log('Verification Mailer Error: ' . $errorMessage . " | Code was: {$code}");
+        return false;
+    }
+}
+
+/**
+ * Sends the official Student & LMS Credentials email to an enrolled student.
+ */
+function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, string $ttuEmail, string $studentNumber, string $tempPassword, ?string &$errorMessage = null): bool
+{
+    $recipientEmail = trim($recipientEmail);
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        $errorMessage = "Invalid recipient email address format: {$recipientEmail}";
+        error_log($errorMessage);
+        return false;
+    }
+
+    if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
+        $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+        if (file_exists($autoloadPath)) {
+            require_once $autoloadPath;
+        }
+    }
+
+    if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
+        $errorMessage = "PHPMailer library is not available.";
+        error_log($errorMessage);
+        return false;
+    }
+
+    // Ensure .env is loaded
+    if (!getenv('SMTP_USERNAME')) {
+        $envFile = __DIR__ . '/../../.env';
+        if (file_exists($envFile)) {
+            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (strpos(trim($line), '#') === 0) continue;
+                if (strpos($line, '=') === false) continue;
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim(trim($value), '"\'');
+                putenv(sprintf('%s=%s', $name, $value));
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
+        }
+    }
+
+    try {
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = getenv('SMTP_USERNAME') ?: '';
+        $mail->Password   = getenv('SMTP_PASSWORD') ?: '';
+
+        $enc = getenv('SMTP_ENCRYPTION') ?: 'tls';
+        if (strtolower((string)$enc) === 'ssl') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
+        $mail->Timeout = 10;
+
+        $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
+        $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
+        $mail->setFrom($fromAddress, $fromName);
+        $mail->addAddress($recipientEmail, $firstName);
+
+        $logoPath = __DIR__ . '/../../public/images/TTU_LOGO.png';
+        if (!file_exists($logoPath)) {
+            $logoPath = __DIR__ . '/../../images/TTU_LOGO.png';
+        }
+        if (file_exists($logoPath)) {
+            $mail->addEmbeddedImage($logoPath, 'ttu_logo');
+        }
+
+        $campusPath = __DIR__ . '/../../images/ttu_campus.jpg';
+        if (!file_exists($campusPath)) {
+            $campusPath = __DIR__ . '/../../public/images/ttu_campus.jpg';
+        }
+        if (file_exists($campusPath)) {
+            $mail->addEmbeddedImage($campusPath, 'ttu_campus');
+        }
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Welcome to Triple T University - Official Student & LMS Credentials';
+
+        $portalLink = 'http://localhost/sia/public/index.php';
+        ob_start();
+        require __DIR__ . '/../Views/emails/welcome_credentials.php';
+        $mail->Body = ob_get_clean();
+
+        $sent = $mail->send();
+        if ($sent) {
+            return true;
+        }
+
+        $errorMessage = $mail->ErrorInfo ?: 'Unknown mailer error.';
+        return false;
+    } catch (\Throwable $e) {
+        $errorMessage = $e->getMessage();
+        error_log('Credentials Mailer Error: ' . $errorMessage);
+        return false;
+    }
 }

@@ -1,34 +1,57 @@
 # Learning Management System (LMS)
 
-The LMS is a new module added to the TTU Enrollment System to allow students to access course materials, assignments, and grades, and for faculty to manage their classes.
+**Portal Paths**: `/lms/student/*` (Student) and `/lms/faculty/*` (Faculty)  
+**Authentication**: Dedicated endpoints (`/auth/lms_student_login.php`, `/auth/lms_faculty_login.php`)  
+**Repositories**: [`CollegeEnrollmentRepository.php`](file:///c:/xampp/htdocs/sia/app/Repositories/CollegeEnrollmentRepository.php), [`ShsEnrollmentRepository.php`](file:///c:/xampp/htdocs/sia/app/Repositories/ShsEnrollmentRepository.php)  
+**Service**: [`LmsService.php`](file:///c:/xampp/htdocs/sia/app/Services/LmsService.php)
 
-## Features (16-Module Architecture)
-1. **Authentication**: Login, Forgot Password, Profile Management, 2FA (Optional).
-2. **Dashboard**: Welcome Page, Current Semester, Enrolled Courses, Upcoming Activities, Announcements, Calendar, Recent Grades, Progress Overview.
-3. **My Courses**: View Enrolled Courses, Course Overview, Course Materials, Instructor Information, Course Progress.
-4. **Learning Materials**: Modules, Lessons, PDFs, PPTs, Videos, External Resources, Downloadable Content.
-5. **Assignments**: View Assignments, Instructions, Due Dates, Upload Submission, Resubmit, Submission History.
-6. **Online Quizzes**: Available Quizzes, Timed Exams, Multiple Choice, True/False, Identification, Essay, Auto-save, Instant Results.
-7. **Grades**: Activity Scores, Quiz Scores, Assignment Scores, Midterm/Final Grades, Grade Breakdown.
-8. **Attendance**: Attendance Record, Percentage, Present/Absent Status.
-*(Additional modules as per full specification)*
+The TTU Learning Management System (LMS) is a comprehensive online learning platform integrated into the enrollment system.
 
-## Database Integration & Schema Notes
-The LMS integrates directly with the main enrollment database (`sia`).
-During development, note the following non-standard column names in the existing schema that are critical for LMS queries:
+---
 
-- **`subjects` Table:**
-  - Code column: `subject_code` (NOT `code`)
-  - Name column: `subject_name` (NOT `name`)
-- **`college_sections` Table:**
-  - Name column: `section_code` (NOT `section_name` or `name`)
+## 1. Dual Enrollment Integration (College + SHS)
+The LMS is parasitic on the Enrollment System:
+- **Enrollment Sources:**
+  - **College Students:** Courses are derived from `college_enrollments` linked to active `applications` where `status = 'enrolled'`.
+  - **Senior High School Students:** Courses are derived from `shs_enrollments` linked to active `applications`.
+- **Dynamic Auto-Provisioning:** When a student logs in, the repository automatically provisions active records in `lms_courses` for every enrolled subject and maps the instructor from section advisers. If a subject is added or dropped by the Registrar, the LMS courses update dynamically.
 
-### Key LMS Tables (New)
-- `lms_modules`: Stores file paths and descriptions for course materials.
-- `lms_assignments`: Stores assignment details, due dates, and max points.
-- `lms_submissions`: Stores student file uploads and faculty grades for assignments.
+---
 
-## Authentication Flow
-- The LMS shares the `users` table.
-- Students log in via `auth/lms_student_login.php`. The backend verifies they have an active enrollment record in `college_enrollments` via their `application_id`.
-- Faculty log in via `auth/lms_faculty_login.php` (Requires `role` = 'faculty').
+## 2. Authentication & Separate Portal Access
+- **Student Login (`/auth/lms_student_login.php`):** Students authenticate using their **Student Number** (`2026-000003`) and unified account password.
+- **Faculty Login (`/auth/lms_faculty_login.php`):** Faculty authenticate using their Employee ID / Faculty ID.
+- **Dedicated Logout Endpoints:**
+  - `/auth/lms_student_logout.php` (or `/lms/student/logout`) securely terminates the session and redirects to the Student LMS Login.
+  - `/auth/lms_faculty_logout.php` (or `/lms/faculty/logout`) redirects to the Faculty LMS Login.
+
+---
+
+## 3. Implemented LMS Subsystems & Features
+
+### 3.1 Student Portal (`app/Controllers/Lms/`)
+- **Dynamic Dashboard (`StudentController`):** Real-time course cards with custom gradients, instructor information, live deadlines counter, dynamic announcements, next scheduled class event, and active study streak tracker.
+- **My Courses (`StudentController@myCourses`):** Interactive enrolled courses view.
+- **Learning Modules (`StudentController@course`):** Downloadable module PDFs, lesson materials, and lecture notes.
+- **Assignments (`StudentAssignmentController`):** Assignment instructions, deadlines, submission status, file upload, and faculty grade view.
+- **Online Quizzes (`StudentQuizController`):** Timed multiple-choice/true-false quizzes, question navigation, answer submission, and immediate score feedback.
+- **Gradebook (`StudentGradebookController`):** Grade breakdown across assignments, quizzes, and midterm/finals.
+- **Attendance (`StudentAttendanceController`):** Attendance history, percentage, and present/absent logs.
+- **Announcements & Calendar (`StudentAnnouncementController`, `StudentCalendarController`):** Course updates and timetable events.
+
+### 3.2 Faculty Portal (`app/Controllers/Lms/`)
+- **Faculty Dashboard (`FacultyController`):** Class rosters, active assigned sections, and pending grading queue.
+- **Course Management:** Upload learning modules, lecture files, and syllabus documents.
+- **Assignment Manager (`FacultyAssignmentController`):** Create/edit assignments, view student submissions, and submit grades with feedback.
+- **Quiz Authoring Engine (`FacultyQuizController`):** Create timed quizzes, author question banks with choices, set correct answers, and review student attempt scores.
+- **Gradebook & Attendance (`FacultyGradebookController`, `FacultyAttendanceController`):** Record class attendance sessions and manage overall course grades.
+
+### 3.3 Secure File Delivery (`DownloadController`)
+File downloads are routed through authenticated controller actions (`/lms/download/material/{id}` and `/lms/download/submission/{id}`) to prevent Insecure Direct Object Reference (IDOR) attacks.
+
+---
+**Related:**
+- [[LMS_Database_Architecture]]
+- [[LMS_Phase_2_Foundation]]
+- [[LMS Profile and Messages UI]]
+- [[ADR-003 Hybrid SPA Navigation Design]]

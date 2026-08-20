@@ -117,7 +117,15 @@ class ApplicantController extends BaseController
         $healthStatus = null;
         if ($application && in_array($application['status'], ['approved', 'enrolled'])) {
             $healthStatus = HealthRecord::getStatus($userId);
-            if ($application['status'] === 'approved') {
+            if ($application['status'] === 'enrolled') {
+                $completionPercentage = 100;
+                foreach ($timelineSteps as &$step) {
+                    if ($step['key'] !== 'correction') {
+                        $step['state'] = 'completed';
+                    }
+                }
+                unset($step);
+            } elseif ($application['status'] === 'approved') {
                 foreach ($timelineSteps as &$step) {
                     if ($step['key'] === 'health_info') {
                         $step['state'] = $healthStatus ? 'completed' : 'active';
@@ -144,9 +152,18 @@ class ApplicantController extends BaseController
                                     $innerStep['state'] = 'completed';
                                 }
                             }
+                            if (in_array($assessment['payment_status'], ['paid', 'partial'])) {
+                                foreach ($timelineSteps as &$enrolledStep) {
+                                    if ($enrolledStep['key'] === 'enrolled') {
+                                        $enrolledStep['state'] = 'completed';
+                                    }
+                                }
+                                unset($enrolledStep);
+                            }
                         }
                     }
                 }
+                unset($step);
             }
         }
 
@@ -322,6 +339,20 @@ class ApplicantController extends BaseController
 
 $userId = (int) $_SESSION['user_id'];
 
+// Check if user application is approved and enforce Health Information submission first
+$appCheckStmt = $pdo->prepare('SELECT status FROM applications WHERE user_id = :user_id ORDER BY created_at DESC LIMIT 1');
+$appCheckStmt->execute(['user_id' => $userId]);
+$userAppStatus = $appCheckStmt->fetchColumn();
+
+if ($userAppStatus && in_array($userAppStatus, ['approved', 'enrolled'], true)) {
+    $healthStatus = HealthRecord::getStatus($userId);
+    if ($healthStatus === null) {
+        $_SESSION['error_msg'] = 'Action Required: You must submit your Health Information before proceeding to your financial assessment.';
+        $response->redirect('/sia/applicant/health_info.php');
+        return;
+    }
+}
+
 // Fetch the applicant's assessment
 $assessment = null;
 $payments = [];
@@ -354,6 +385,22 @@ try {
             ');
             $subStmt->execute(['app_id' => $assessment['application_id']]);
             $enrolledSubjects = $subStmt->fetchAll();
+
+            if (empty($enrolledSubjects)) {
+                $appSecStmt = $pdo->prepare('SELECT section_id FROM applications WHERE id = :app_id');
+                $appSecStmt->execute(['app_id' => $assessment['application_id']]);
+                $secId = $appSecStmt->fetchColumn();
+                if ($secId) {
+                    $secSubStmt = $pdo->prepare('
+                        SELECT s.subject_code, s.subject_name, s.units
+                        FROM college_section_subjects css
+                        JOIN subjects s ON css.subject_id = s.id
+                        WHERE css.college_section_id = :sec_id
+                    ');
+                    $secSubStmt->execute(['sec_id' => $secId]);
+                    $enrolledSubjects = $secSubStmt->fetchAll();
+                }
+            }
         } elseif ($assessment['academic_level'] === 'Senior High School') {
             $subStmt = $pdo->prepare('
                 SELECT s.subject_code, s.subject_name, s.units 
@@ -363,6 +410,22 @@ try {
             ');
             $subStmt->execute(['app_id' => $assessment['application_id']]);
             $enrolledSubjects = $subStmt->fetchAll();
+
+            if (empty($enrolledSubjects)) {
+                $appSecStmt = $pdo->prepare('SELECT section_id FROM applications WHERE id = :app_id');
+                $appSecStmt->execute(['app_id' => $assessment['application_id']]);
+                $secId = $appSecStmt->fetchColumn();
+                if ($secId) {
+                    $secSubStmt = $pdo->prepare('
+                        SELECT s.subject_code, s.subject_name, s.units
+                        FROM shs_section_subjects ss
+                        JOIN subjects s ON ss.subject_id = s.id
+                        WHERE ss.shs_section_id = :sec_id
+                    ');
+                    $secSubStmt->execute(['sec_id' => $secId]);
+                    $enrolledSubjects = $secSubStmt->fetchAll();
+                }
+            }
         }
     }
 } catch (PDOException $e) {
@@ -391,11 +454,29 @@ try {
     if ($action === 'submit_payment_proof') {
         $assessmentId = (int)($_POST['assessment_id'] ?? 0);
         $amount = (float)($_POST['amount'] ?? 0);
-        $method = trim($_POST['payment_method'] ?? '');
-        $refNo = trim($_POST['reference_number'] ?? '');
+        $method = trim((string)($_POST['payment_method'] ?? ''));
+        $refNo = trim((string)($_POST['reference_number'] ?? ''));
 
-        if ($assessmentId <= 0 || $amount <= 0 || empty($method) || empty($refNo)) {
-            throw new \Exception("Invalid payment details provided.");
+        if ($assessmentId <= 0) {
+            throw new \Exception("Invalid assessment selected. Please refresh the page and try again.");
+        }
+
+        if ($amount <= 0) {
+            throw new \Exception("Please enter a valid payment amount greater than ₱0.00.");
+        }
+
+        if (empty($method)) {
+            throw new \Exception("Please select the payment method you used (GCash, Maya, or Bank Transfer).");
+        }
+
+        if (empty($refNo) || strlen($refNo) < 4) {
+            throw new \Exception("Please enter a valid transaction reference number (at least 4 characters).");
+        }
+
+        // Enforce Health Information submission check
+        $healthStatus = HealthRecord::getStatus($userId);
+        if ($healthStatus === null) {
+            throw new \Exception("Action Required: You must submit your Health Information before submitting payments.");
         }
 
         // Verify Assessment belongs to user
@@ -409,65 +490,88 @@ try {
         $assessment = $assStmt->fetch();
 
         if (!$assessment) {
-            throw new \Exception("Assessment not found or unauthorized.");
+            throw new \Exception("Assessment record not found or you are not authorized to submit payment for this account.");
         }
 
-        $pendingStmt = $pdo->prepare('SELECT SUM(amount) FROM payment_records WHERE assessment_id = :id AND status = "pending"');
+        $pendingStmt = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM payment_records WHERE assessment_id = :id AND status = "pending"');
         $pendingStmt->execute(['id' => $assessmentId]);
         $pendingAmount = (float)$pendingStmt->fetchColumn();
 
         $balance = (float)$assessment['net_amount'] - (float)$assessment['total_paid'] - $pendingAmount;
         
         if ($balance <= 0) {
-            throw new \Exception("You have fully paid or have enough pending payments to cover your balance.");
+            throw new \Exception("You have fully settled your balance or already have pending payments covering your full assessment.");
         }
 
-        if ($amount > $balance) {
-            throw new \Exception("Payment amount cannot exceed your remaining balance of ₱" . number_format($balance, 2));
+        if ($amount > ($balance + 0.01)) {
+            throw new \Exception("The payment amount (₱" . number_format($amount, 2) . ") exceeds your allowable remaining balance of ₱" . number_format($balance, 2) . ".");
         }
 
-        $minPayment = min(3000.0, $balance);
-        
+        $minPayment = min(500.0, $balance);
         if ($amount < $minPayment) {
-            throw new \Exception("The minimum allowed payment is ₱" . number_format($minPayment, 2));
+            throw new \Exception("The minimum payment allowed is ₱" . number_format($minPayment, 2) . ".");
         }
 
         // Handle File Upload
         if (!isset($_FILES['proof_image']) || $_FILES['proof_image']['error'] !== UPLOAD_ERR_OK) {
-            throw new \Exception("Proof of payment screenshot is required.");
+            $errCode = $_FILES['proof_image']['error'] ?? UPLOAD_ERR_NO_FILE;
+            $msg = match ($errCode) {
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => "The uploaded screenshot exceeds the maximum allowed file size (5MB).",
+                UPLOAD_ERR_PARTIAL => "The file was only partially uploaded. Please re-select your file and try again.",
+                UPLOAD_ERR_NO_FILE => "Please attach a screenshot or photo of your payment receipt.",
+                default => "Upload failed (Error Code: $errCode). Please try again."
+            };
+            throw new \Exception($msg);
         }
 
         $fileTmpPath = $_FILES['proof_image']['tmp_name'];
         $fileName = $_FILES['proof_image']['name'];
-        $fileSize = $_FILES['proof_image']['size'];
-        $fileType = $_FILES['proof_image']['type'];
+        $fileSize = (int)$_FILES['proof_image']['size'];
+        $fileType = $_FILES['proof_image']['type'] ?? '';
 
-        // Max 2MB
-        if ($fileSize > 2 * 1024 * 1024) {
-            throw new \Exception("The uploaded file exceeds the 2MB size limit.");
+        // Max 5MB limit
+        if ($fileSize > 5 * 1024 * 1024) {
+            throw new \Exception("The receipt image exceeds the 5MB size limit. Please upload a smaller image.");
         }
 
-        $allowedMimeTypes = ['image/jpeg', 'image/png'];
-        if (!in_array($fileType, $allowedMimeTypes)) {
-            throw new \Exception("Invalid file format. Only JPG and PNG are allowed.");
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        $allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+        if (!in_array($ext, $allowedExts, true)) {
+            throw new \Exception("Invalid file format (.$ext). Only JPG, PNG, and WEBP image screenshots are accepted.");
         }
 
-        $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+        // MIME validation
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $detectedMime = $finfo ? finfo_file($finfo, $fileTmpPath) : $fileType;
+        if ($finfo) {
+            finfo_close($finfo);
+        }
+
+        $allowedMimes = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp'];
+        if (!in_array($detectedMime, $allowedMimes, true) && !in_array($fileType, $allowedMimes, true)) {
+            throw new \Exception("The selected file is not a valid image format. Please upload a clear JPG, PNG, or WEBP receipt screenshot.");
+        }
+
         $newFileName = 'proof_' . $userId . '_' . time() . '.' . $ext;
-        $uploadDir = __DIR__ . '/../../uploads/payments/';
         
+        // Primary upload target: root uploads/payments/
+        $uploadDir = __DIR__ . '/../../uploads/payments/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
 
         $destPath = $uploadDir . $newFileName;
-        
         if (!move_uploaded_file($fileTmpPath, $destPath)) {
-            throw new \Exception("Failed to upload the file. Please try again.");
+            throw new \Exception("Server could not save the uploaded receipt image. Please check server permissions and try again.");
+        }
+
+        // Secondary sync: app/uploads/payments/ if it exists
+        $altUploadDir = __DIR__ . '/../uploads/payments/';
+        if (is_dir($altUploadDir)) {
+            copy($destPath, $altUploadDir . $newFileName);
         }
 
         // Insert into payment_records as "pending"
-        // Note: receipt_number and cashier_id are NULL until verified
         $stmt = $pdo->prepare('
             INSERT INTO payment_records (assessment_id, user_id, amount, payment_date, payment_method, reference_number, proof_image, status)
             VALUES (:ass_id, :user_id, :amount, CURDATE(), :method, :ref, :proof, "pending")
@@ -482,9 +586,9 @@ try {
             'proof' => $newFileName
         ]);
 
-        logActivity($userId, 'bi-cloud-upload', 'Payment Proof Uploaded', "Submitted proof of payment (Ref: $refNo) for ₱" . number_format($amount, 2));
+        logActivity($userId, 'bi-cloud-upload', 'Payment Proof Uploaded', "Submitted proof of payment (Ref: $refNo, Method: $method) for ₱" . number_format($amount, 2));
 
-        $_SESSION['success_msg'] = "Proof of payment submitted successfully! Please wait for the cashier's verification.";
+        $_SESSION['success_msg'] = "Proof of payment for ₱" . number_format($amount, 2) . " (Ref: {$refNo}) was submitted successfully! The Cashier's office will review and verify your payment shortly.";
         $response->redirect("/sia/applicant/assessment.php");
         return;
     }
@@ -518,6 +622,15 @@ return;
         $appId = $app ? $app['id'] : 0;
         $userProgramId = $app ? $app['college_program_id'] : null;
         $userYearLevel = $app ? $app['grade_level'] : null;
+
+        if ($isApproved) {
+            $healthStatus = HealthRecord::getStatus($userId);
+            if ($healthStatus === null) {
+                $_SESSION['error_msg'] = 'Action Required: You must submit your Health Information before applying for scholarships.';
+                $response->redirect('/sia/applicant/health_info.php');
+                return;
+            }
+        }
 
         // Check if an assessment exists
         $hasAssessment = false;
@@ -730,6 +843,14 @@ try {
         throw new \App\Core\HttpException(404, 'No active application found or your application is not yet approved.');
     }
     
+    // Check Health Information gate
+    $healthStatus = HealthRecord::getStatus($userId);
+    if ($healthStatus === null) {
+        $_SESSION['error_msg'] = 'Action Required: You must submit your Health Information before accessing your enrollment summary.';
+        $response->redirect('/sia/applicant/health_info.php');
+        return;
+    }
+    
     $appId = (int)$app['id'];
 
     // 2. Fetch Documents (Requirements)
@@ -752,6 +873,28 @@ try {
             WHERE es.application_id = :app_id
             ORDER BY s.subject_code ASC
         ');
+        $esStmt->execute(['app_id' => $appId]);
+        $enrolledSubjects = $esStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (empty($enrolledSubjects) && !empty($app['section_id'])) {
+            $secSubStmt = $pdo->prepare('
+                SELECT s.id as subject_id, s.subject_code, s.subject_name, s.units, s.subject_type, ss.shs_section_id as section_id, sec.section_code
+                FROM shs_section_subjects ss
+                INNER JOIN subjects s ON s.id = ss.subject_id
+                LEFT JOIN shs_sections sec ON sec.id = ss.shs_section_id
+                WHERE ss.shs_section_id = :sec_id
+                ORDER BY s.subject_code ASC
+            ');
+            $secSubStmt->execute(['sec_id' => $app['section_id']]);
+            $enrolledSubjects = $secSubStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (!empty($enrolledSubjects)) {
+                $insStmt = $pdo->prepare('INSERT IGNORE INTO shs_enrollments (application_id, subject_id, shs_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                foreach ($enrolledSubjects as $sub) {
+                    $insStmt->execute(['app_id' => $appId, 'sub_id' => $sub['subject_id'], 'sec_id' => $app['section_id']]);
+                }
+            }
+        }
     } else {
         $esStmt = $pdo->prepare('
             SELECT s.id as subject_id, s.subject_code, s.subject_name, s.units, s.subject_type, es.college_section_id as section_id, sec.section_code
@@ -761,9 +904,29 @@ try {
             WHERE es.application_id = :app_id
             ORDER BY s.subject_code ASC
         ');
+        $esStmt->execute(['app_id' => $appId]);
+        $enrolledSubjects = $esStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        if (empty($enrolledSubjects) && !empty($app['section_id'])) {
+            $secSubStmt = $pdo->prepare('
+                SELECT s.id as subject_id, s.subject_code, s.subject_name, s.units, s.subject_type, css.college_section_id as section_id, sec.section_code
+                FROM college_section_subjects css
+                INNER JOIN subjects s ON s.id = css.subject_id
+                LEFT JOIN college_sections sec ON sec.id = css.college_section_id
+                WHERE css.college_section_id = :sec_id
+                ORDER BY s.subject_code ASC
+            ');
+            $secSubStmt->execute(['sec_id' => $app['section_id']]);
+            $enrolledSubjects = $secSubStmt->fetchAll(\PDO::FETCH_ASSOC);
+
+            if (!empty($enrolledSubjects)) {
+                $insStmt = $pdo->prepare('INSERT IGNORE INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                foreach ($enrolledSubjects as $sub) {
+                    $insStmt->execute(['app_id' => $appId, 'sub_id' => $sub['subject_id'], 'sec_id' => $app['section_id']]);
+                }
+            }
+        }
     }
-    $esStmt->execute(['app_id' => $appId]);
-    $enrolledSubjects = $esStmt->fetchAll(\PDO::FETCH_ASSOC);
     
     // Attach schedules using a single query
     $sectionIds = array_unique(array_filter(array_map(function($sub) use ($app) {

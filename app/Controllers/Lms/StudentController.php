@@ -13,9 +13,13 @@ class StudentController extends BaseController
     public function dashboard(Request $request, Response $response)
     {
         $lmsService = new \App\Services\LmsService();
-        $userId = $_SESSION['user_id'] ?? 0;
+        $userId = (int)($_SESSION['user_id'] ?? 0);
 
         $enrolled_courses = $lmsService->getStudentCourses($userId);
+        $upcoming_deadlines = $lmsService->getStudentUpcomingDeadlines($userId, 4);
+        $recent_announcements = $lmsService->getStudentAnnouncements($userId, 3);
+        $next_event = $lmsService->getStudentNextEvent($userId);
+        $streak_count = $lmsService->getStudentStreak($userId);
         
         $pageTitle = 'Dashboard - TTU LMS';
 

@@ -1,19 +1,32 @@
 # Scheduler Module
 
-**Path**: `admin/scheduler/`
-**Role Required**: `scheduler` or `superadmin`
+**Path**: `admin/scheduler/`  
+**Required Roles**: `scheduler`, `admin`, `superadmin`  
+**Controller**: [`SchedulerController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Admin/Scheduler/SchedulerController.php)
 
-The Scheduler module was spun out of the Registrar module to handle the dedicated task of creating class sections and timetables.
+The Scheduler module translates curriculum subjects into timetabled, scheduled class sections with assigned faculty instructors and physical/virtual classrooms.
 
-## Core Responsibilities
-1. **Section Management**: Creating class sections for Senior High School and College.
-2. **Schedule Building**: Using `schedule_builder.php` to automatically or manually generate timetables for sections, ensuring there are no room/time conflicts for students and faculty.
-3. **Capacity Management**: Setting and monitoring the capacity limits of each section.
+---
 
-## Key Files
-- `scheduler_dashboard.php`: The main entry point displaying active section counts.
-- `shs_sections.php` / `college_sections.php`: Interfaces for managing blocks of students.
-- `schedule_builder.php`: The conflict-detection timetable generator.
+## 1. Core Responsibilities
+1. **Section Creation:** Creates structured class blocks in `college_sections` and `shs_sections` (e.g. `BSIT 1-A`, `STEM 11-1`).
+2. **Subject Scheduling & Matrix:** Attaches curriculum subjects to sections via `college_section_subjects` and `shs_section_subjects` with designated days (M/T/W/Th/F/S), start/end times, and room numbers.
+3. **Faculty Assignment:** Assigns faculty instructors to class sections. (The section's faculty adviser dynamically determines instructor assignments in the LMS).
+4. **Capacity Controls:** Sets maximum enrollment limits per section to prevent classroom overcrowding.
 
-## Data Flow
-The Scheduler interacts directly with the `college_sections` and `shs_sections` tables in the [[Database Schema]]. When creating schedules, it queries `college_curriculum` to ensure the correct subjects are being scheduled for a given block.
+---
+
+## 2. Core Endpoints & Actions
+| Endpoint | Method | Action | Description |
+|---|---|---|---|
+| `/admin/scheduler/scheduler_dashboard.php` | GET | `dashboard` | Timetable metrics, section counts, room utilization stats. |
+| `/admin/scheduler/college_sections.php` | GET/POST | `collegeSections` | Manages college section list, advisers, and year levels. |
+| `/admin/scheduler/shs_sections.php` | GET/POST | `shsSections` | Manages senior high school section list and strand links. |
+| `/admin/scheduler/schedule_builder.php` | GET/POST | `builder` | Visual timetable schedule builder for mapping timeslots and rooms. |
+| `/admin/scheduler/schedule_builder_process.php` | POST | `process` | Saves section subject schedule blocks into the database. |
+
+---
+**Related:**
+- [[Registrar]]
+- [[Curriculum Architecture]]
+- [[LMS]]

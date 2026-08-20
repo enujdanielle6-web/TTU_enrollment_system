@@ -1,30 +1,42 @@
 # Database Overview
 
-The TTU MariaDB database relies heavily on relational constraints but employs a unique approach to user and student identity.
+The TTU MariaDB database (`sia`) is a relational database containing **41 structured tables** governing admissions, academic catalogs, class scheduling, financial ledgers, clinic health records, and the Learning Management System.
 
-## Key Architectural Paradigm: The Application as Term
+---
+
+## 1. Key Architectural Paradigm: The Application as Term
 See: [[ADR-001 The Application as Term Concept]]
 
-There is **no** `students` table.
-- All users (admins, faculty, students) exist in the **[[Users Table]]**.
-- A student's enrollment data for a specific academic term is stored in the **[[Applications Table]]**. 
-- Enrollment subjects (`college_enrollments`, `shs_enrollments`) and financial records (`student_assessments`) are linked to the `application_id`, not the `user_id`.
+There is **no separate `students` table**.
+- All human identities (applicants, students, faculty, admins, clinic, cashiers) exist in the **[[Users Table]]**.
+- A student's enrollment record for an academic term is anchored to the **[[Applications Table]]**.
+- Enrolled subjects (`college_enrollments`, `shs_enrollments`), clinic health data (`health_records`), and financial assessments (`student_assessments`) are linked to the `application_id`.
+- A user becomes an officially enrolled student when their application transitions to `status = 'enrolled'` and they are assigned a `student_number` in `users`.
 
-## Core Tables
-- **`users`**: Identity, login, roles (`enum`).
-- **`applications`**: The anchor for a student's semester enrollment, containing demographic data, program/strand choices, and status.
-- **`application_documents`**: Stores files and verification statuses for admission requirements tied to an application. See [[Application Documents Table]].
-- **`health_records`**: Clinic health data linked to applications.
-- **`college_curricula` / `shs_curricula`**: Defines the required subjects per program/strand. See [[Curriculum Architecture]].
-- **`college_sections` / `shs_sections`**: Timetabled instances of curricula.
-- **`fee_templates` & `payment_records` & `student_assessments`**: Financial assessment and payment tracking. See [[Assessment and Payment Workflow]].
-- **`scholarships` & `scholarship_applications`**: Manages financial aid applications and programs.
-- **LMS Tables**: (`lms_courses`, `lms_modules`, `lms_assignments`, `lms_submissions`, `lms_quizzes`, etc.) handling academic course delivery, grading, and files.
-- **`activity_logs`**: System-wide audit trail.
+---
 
-## Missing / Planned Structures
-- `Missing`: A robust `prerequisites` table mapping subject dependencies.
+## 2. Table Classification Matrix (41 Tables)
 
-## Important Constraints
-- `applications.reference_number` is UNIQUE.
-- Heavy use of `ON DELETE CASCADE` implies that deleting a user or application will aggressively wipe historical records. Care must be taken.
+| Category | Table Names | Purpose |
+|---|---|---|
+| **Core & Security** | `users`, `activity_logs`, `login_attempts`, `system_settings`, `announcements` | Central identity, role permissions, OTP verification, security audit trail, and system parameters. |
+| **Admission & Applicant** | `applications`, `application_documents`, `health_records` | Term applications, uploaded PSA/Form 137 files, medical history declarations. |
+| **College Catalog** | `college_programs`, `college_curricula`, `college_curriculum_subjects`, `college_sections`, `college_section_subjects`, `college_enrollments` | Degrees, versioned curricula, curriculum subjects, class sections, timetables, and student course enrollments. |
+| **Senior High Catalog** | `shs_strands`, `shs_curricula`, `shs_curriculum_subjects`, `shs_sections`, `shs_section_subjects`, `shs_enrollments` | Tracks, strands, versioned curricula, class sections, and student subject enrollments. |
+| **Master Subjects** | `subjects` | Master registry of all teachable subjects with lecture/lab hours and unit values. |
+| **Finance & Cashier** | `fee_templates`, `student_assessments`, `payment_records` | Standard fee templates (with `is_per_unit`), student assessment statements, payment transaction ledger, and proof uploads. |
+| **Scholarships** | `scholarships`, `scholarship_applications`, `scholarship_recipients`, `student_scholarships` | Financial grant programs, student applications, awards, and discount percentages. |
+| **Learning Management (LMS)** | `lms_courses`, `lms_modules`, `lms_materials`, `lms_assignments`, `lms_submissions`, `lms_quizzes`, `lms_questions`, `lms_question_choices`, `lms_quiz_attempts`, `lms_quiz_answers`, `lms_attendance_sessions`, `lms_attendance_records`, `lms_announcements` | Course provision records, weekly modules, downloadable files, assignments, submissions & grading, timed quizzes, student attempts, and attendance logs. |
+
+---
+
+## 3. Relational Schema Reference
+For full column definitions, data types, default values, primary/foreign keys, and indexes, refer to the **[[Data Dictionary]]**.
+
+---
+**Related:**
+- [[Data Dictionary]]
+- [[Users Table]]
+- [[Applications Table]]
+- [[Curriculum Architecture]]
+- [[ADR-001 The Application as Term Concept]]

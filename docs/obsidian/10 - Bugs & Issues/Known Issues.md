@@ -1,29 +1,46 @@
-# Known Issues
+# Known Issues & Resolution Log
 
-This index tracks architectural debt and critical bugs discovered during system analysis.
+This document tracks architectural debt, bugs discovered during development, and their verified resolutions.
 
-## 1. The 14MB Fat Controller Anomaly
-- **Status:** RESOLVED
-- **Module:** [[Admissions Module]]
-- **File:** `app/Controllers/Admin/AdmissionsController_clean.php`
-- **Description:** This file was approximately 13.9 MB in size due to a script loop anomaly.
-- **Resolution:** The unused file has been completely deleted.
+---
 
-## 2. Fat Controller Architecture
-- **Status:** RESOLVED (Proof of Concept Implemented)
-- **Description:** Controllers bypassed the Model layer using raw SQL.
-- **Resolution:** A robust `BaseModel` was implemented using the Active Record pattern. `User` and `Application` models now extend it, and a Proof of Concept refactor was completed in `ApplicantController`.
+## 1. Resolved Issues Log
 
-## 3. Missing Central Academic Records
-- **Status:** RESOLVED
-- **Description:** Student history was scattered across multiple term-based `applications` records.
-- **Resolution:** The `student_academic_records_view` MySQL View was created to unify the complete transcript history.
+### Issue 1: Environment Variables Not Loading in Front Controller
+- **Module:** [[Architecture]] / [[Security Overview]]
+- **Symptoms:** SMTP authentication failed during applicant registration and email dispatch because `getenv('SMTP_USERNAME')` returned empty strings.
+- **Root Cause:** `public/index.php` was initialized without loading the `.env` file into PHP environment superglobals.
+- **Resolution:** Added an automated `.env` parser directly into `public/index.php` and added fallback environment loading inside `app/Helpers/functions.php`.
 
-## 4. Legacy Root Scripts
-- **Status:** RESOLVED
-- **Description:** Utility scripts were dangerously exposed in the root folder.
-- **Resolution:** All 14 utility scripts were securely moved to a new `/scripts` directory.
+### Issue 2: LMS Sign-out Incorrect Redirection
+- **Module:** [[LMS]]
+- **Symptoms:** Clicking "Sign out" inside the Student or Faculty LMS redirected users to the general Admissions portal login (`/sia/auth/login.php`).
+- **Resolution:** Implemented dedicated endpoints (`/auth/lms_student_logout.php` and `/auth/lms_faculty_logout.php`) in `LmsAuthController` and updated `AuthController::logout` to detect LMS sessions.
 
-## Related
+### Issue 3: Senior High School (SHS) LMS Course Isolation
+- **Module:** [[LMS]]
+- **Symptoms:** LMS initially only queried `college_enrollments`, causing SHS students to see zero courses.
+- **Resolution:** Created `ShsEnrollmentRepository` alongside `CollegeEnrollmentRepository` in `app/Repositories/`, enabling dynamic course auto-provisioning for both academic levels.
+
+### Issue 4: Registrar Subject Edit Modal Freeze
+- **Module:** [[Registrar]]
+- **Symptoms:** Clicking "Edit Subject" caused the screen to black out and freeze.
+- **Root Cause:** Modal HTML markup was nested inside a table `<tbody>` tag, breaking Bootstrap's z-index backdrop calculation.
+- **Resolution:** Extracted modal loops outside the `<table>` element to the bottom of the view template.
+
+### Issue 5: Missing Active Scholars Route
+- **Module:** [[Scholarship]]
+- **Symptoms:** Navigating to "Active Scholars" returned a 404 Not Found error.
+- **Resolution:** Registered `$router->get('/admin/scholarship/scholars.php', ...)` in `app/Routes/web.php` mapping to `ScholarshipController@scholars`.
+
+---
+
+## 2. Active Technical Debt & Planned Improvements
+1. **Fat Controller Complexity:** While `BaseModel`, `CollegeEnrollmentRepository`, and `LmsService` have reduced duplication, administrative controllers still handle multi-faceted responsibilities. Gradual service extraction is planned.
+2. **Automated E2E Test Suite:** Implement continuous CI test runners to validate multi-step enrollment workflows.
+
+---
+**Related:**
 - [[System Architecture]]
-- [[MVC Strangler Fig Migration]]
+- [[LMS Navigation and Render Bugs Fixed]]
+- [[Development Guide]]

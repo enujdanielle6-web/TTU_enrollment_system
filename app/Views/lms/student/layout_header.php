@@ -98,7 +98,7 @@ $current_page = isset($current_page) ? $current_page : basename($_SERVER['PHP_SE
             <i class="bi bi-bell text-muted ms-auto nav-text"></i>
         </div>
         
-        <a href="/sia/auth/logout.php" class="btn btn-light w-100 text-danger fw-semibold d-flex align-items-center justify-content-center gap-2 border lms-logout-btn">
+        <a href="/sia/auth/lms_student_logout.php" class="btn btn-light w-100 text-danger fw-semibold d-flex align-items-center justify-content-center gap-2 border lms-logout-btn">
             <i class="bi bi-box-arrow-right"></i> <span class="nav-text">Sign out</span>
         </a>
     </div>

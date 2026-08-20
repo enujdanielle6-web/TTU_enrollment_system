@@ -475,6 +475,10 @@ try {
 
     // 0. Process Section Assignment
     $assignSectionId = (int)($_POST['assign_section'] ?? 0);
+    if ($assignSectionId === 0 && !empty($oldApp['section_id'])) {
+        $assignSectionId = (int)$oldApp['section_id'];
+    }
+
     if ($assignSectionId > 0) {
         $stmt = $pdo->prepare('UPDATE applications SET section_id = :section_id WHERE id = :id');
         $stmt->execute(['section_id' => $assignSectionId, 'id' => $appId]);
@@ -515,8 +519,8 @@ try {
             $secStmt = $pdo->prepare('SELECT curriculum_id, year_level, semester, section_code FROM college_sections WHERE id = :id');
             $secStmt->execute(['id' => $assignSectionId]);
             $sectionData = $secStmt->fetch(PDO::FETCH_ASSOC);
-            $secCode = $sectionData['section_code'];
-            $sectionCurriculumId = $sectionData['curriculum_id'];
+            $secCode = $sectionData['section_code'] ?? '';
+            $sectionCurriculumId = $sectionData['curriculum_id'] ?? null;
 
             if (!$studentCurriculumId) {
                 // Determine the Active Curriculum for the student's program
@@ -566,6 +570,13 @@ try {
                 'semester' => $sectionData['semester']
             ]);
             $subjectsToEnroll = $subStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Fallback to Section's subjects if curriculum subjects returned empty
+            if (empty($subjectsToEnroll)) {
+                $secSubStmt = $pdo->prepare('SELECT subject_id FROM college_section_subjects WHERE college_section_id = :sec_id');
+                $secSubStmt->execute(['sec_id' => $assignSectionId]);
+                $subjectsToEnroll = $secSubStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
 
             if (!empty($subjectsToEnroll)) {
                 $insSubStmt = $pdo->prepare('INSERT INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
@@ -656,50 +667,13 @@ try {
 
             // SEND EMAIL VIA PHPMAILER
             $autoloadPath = __DIR__ . '/../../../vendor/autoload.php';
-            if (file_exists($autoloadPath)) {
-                require_once $autoloadPath;
-                $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
-                try {
-                    $mail->isSMTP();
-                    $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
-                    $mail->SMTPAuth   = true;
-                    $mail->Username   = getenv('SMTP_USERNAME');
-                    $mail->Password   = getenv('SMTP_PASSWORD');
-                    
-                    // Handle TLS vs SSL
-                    $enc = getenv('SMTP_ENCRYPTION') ?: 'tls';
-                    if (strtolower($enc) === 'ssl') {
-                        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
-                    } else {
-                        $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
-                    }
-                    
-                    $mail->Port       = getenv('SMTP_PORT') ?: 587;
-
-                    $mail->setFrom(getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph', getenv('MAIL_FROM_NAME') ?: 'Triple T University');
-                    $mail->addAddress($userRow['email'], $userRow['first_name'] . ' ' . $userRow['last_name']);
-
-                    // Embed Logo
-                    $mail->addEmbeddedImage(__DIR__ . '/../../../../images/TTU_LOGO.png', 'ttu_logo');
-
-                    $mail->isHTML(true);
-                    $mail->Subject = 'Welcome to Triple T University - Enrollment Finalized';
-                    
-                    ob_start();
-                    extract([
-                        'firstName' => $userRow['first_name'],
-                        'ttuEmail' => $ttuEmail,
-                        'studentNumber' => $existingNumber,
-                        'tempPassword' => $tempPassword
-                    ]);
-                    require __DIR__ . '/../../Views/emails/welcome_credentials.php';
-                    $mail->Body = ob_get_clean();
-
-                    $mail->send();
-                } catch (\Exception $e) {
-                    error_log('Mailer Error: ' . $mail->ErrorInfo);
-                }
-            }
+            sendStudentCredentialsEmail(
+                $userRow['email'],
+                $userRow['first_name'],
+                $ttuEmail,
+                $existingNumber,
+                $tempPassword
+            );
         }
     }
 
@@ -798,6 +772,17 @@ try {
                         ');
                         $unitsStmt->execute(['app_id' => $appId]);
                         $totalUnits = (int)$unitsStmt->fetchColumn();
+
+                        if ($totalUnits === 0 && !empty($appData['section_id'])) {
+                            $unitsStmt = $pdo->prepare('
+                                SELECT SUM(s.units) 
+                                FROM college_section_subjects css 
+                                JOIN subjects s ON css.subject_id = s.id 
+                                WHERE css.college_section_id = :sec_id
+                            ');
+                            $unitsStmt->execute(['sec_id' => $appData['section_id']]);
+                            $totalUnits = (int)$unitsStmt->fetchColumn();
+                        }
                     } elseif ($academicLevel === 'Senior High School') {
                         $unitsStmt = $pdo->prepare('
                             SELECT SUM(s.units) 
@@ -807,6 +792,17 @@ try {
                         ');
                         $unitsStmt->execute(['app_id' => $appId]);
                         $totalUnits = (int)$unitsStmt->fetchColumn();
+
+                        if ($totalUnits === 0 && !empty($appData['section_id'])) {
+                            $unitsStmt = $pdo->prepare('
+                                SELECT SUM(s.units) 
+                                FROM shs_section_subjects ss 
+                                JOIN subjects s ON ss.subject_id = s.id 
+                                WHERE ss.shs_section_id = :sec_id
+                            ');
+                            $unitsStmt->execute(['sec_id' => $appData['section_id']]);
+                            $totalUnits = (int)$unitsStmt->fetchColumn();
+                        }
                     }
 
                     if ($totalUnits > 0) {

@@ -200,6 +200,88 @@ try {
             'id' => $id
         ]);
 
+        // Auto-recalculate any UNPAID student assessments using this template
+        $assStmt = $pdo->prepare('SELECT id, application_id, discount_amount FROM student_assessments WHERE fee_template_id = :id AND payment_status = "unpaid"');
+        $assStmt->execute(['id' => $id]);
+        $unpaidAssessments = $assStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($unpaidAssessments as $ua) {
+            $uAppId = (int)$ua['application_id'];
+            $calcTuition = $tuition;
+
+            if ($academicLevel === 'College') {
+                $unitsStmt = $pdo->prepare('
+                    SELECT SUM(s.units) 
+                    FROM college_enrollments ce 
+                    JOIN subjects s ON ce.subject_id = s.id 
+                    WHERE ce.application_id = :app_id
+                ');
+                $unitsStmt->execute(['app_id' => $uAppId]);
+                $uUnits = (int)$unitsStmt->fetchColumn();
+
+                if ($uUnits === 0) {
+                    $secUnitsStmt = $pdo->prepare('
+                        SELECT SUM(s.units) 
+                        FROM applications a
+                        JOIN college_section_subjects css ON css.college_section_id = a.section_id
+                        JOIN subjects s ON css.subject_id = s.id
+                        WHERE a.id = :app_id
+                    ');
+                    $secUnitsStmt->execute(['app_id' => $uAppId]);
+                    $uUnits = (int)$secUnitsStmt->fetchColumn();
+                }
+                $calcTuition = $uUnits * $tuition;
+            } elseif ($academicLevel === 'Senior High School') {
+                $unitsStmt = $pdo->prepare('
+                    SELECT SUM(s.units) 
+                    FROM shs_enrollments se 
+                    JOIN subjects s ON se.subject_id = s.id 
+                    WHERE se.application_id = :app_id
+                ');
+                $unitsStmt->execute(['app_id' => $uAppId]);
+                $uUnits = (int)$unitsStmt->fetchColumn();
+
+                if ($uUnits === 0) {
+                    $secUnitsStmt = $pdo->prepare('
+                        SELECT SUM(s.units) 
+                        FROM applications a
+                        JOIN shs_section_subjects ss ON ss.shs_section_id = a.section_id
+                        JOIN subjects s ON ss.subject_id = s.id
+                        WHERE a.id = :app_id
+                    ');
+                    $secUnitsStmt->execute(['app_id' => $uAppId]);
+                    $uUnits = (int)$secUnitsStmt->fetchColumn();
+                }
+                $calcTuition = $uUnits * $tuition;
+            }
+
+            $uTotal = $calcTuition + $misc + $reg + $lab + $other;
+            $uDiscount = (float)$ua['discount_amount'];
+            $uNet = max(0, $uTotal - $uDiscount);
+
+            $updAssStmt = $pdo->prepare('
+                UPDATE student_assessments 
+                SET tuition_fee = :tuition,
+                    miscellaneous_fee = :misc,
+                    registration_fee = :reg,
+                    laboratory_fee = :lab,
+                    other_fees = :other,
+                    total_amount = :total,
+                    net_amount = :net
+                WHERE id = :id
+            ');
+            $updAssStmt->execute([
+                'tuition' => $calcTuition,
+                'misc' => $misc,
+                'reg' => $reg,
+                'lab' => $lab,
+                'other' => $other,
+                'total' => $uTotal,
+                'net' => $uNet,
+                'id' => $ua['id']
+            ]);
+        }
+
         logActivity(
             (int)$_SESSION['user_id'], 
             'bi-pencil', 

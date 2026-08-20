@@ -24,7 +24,10 @@
             <div class="mb-4">
               <label class="form-label text-muted small fw-semibold" for="password">Password</label>
               <div class="input-group" style="border-radius: 10px; overflow: hidden; border: 1px solid #dee2e6;">
-                <input class="form-control border-0" style="padding: 0.75rem 1rem;" type="password" id="password" name="password" required placeholder="••••••••">
+                <input class="form-control border-0 shadow-none" style="padding: 0.75rem 1rem;" type="password" id="password" name="password" required placeholder="••••••••">
+                <button class="btn btn-light border-0 px-3 text-muted" type="button" id="togglePassword" tabindex="-1" title="Toggle password visibility">
+                  <i class="bi bi-eye"></i>
+                </button>
               </div>
             </div>
 
@@ -49,6 +52,26 @@
     </div>
   </div>
 </main>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const togglePassword = document.getElementById("togglePassword");
+    const passwordInput = document.getElementById("password");
+
+    if (togglePassword && passwordInput) {
+      togglePassword.addEventListener("click", function() {
+        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
+        passwordInput.setAttribute("type", type);
+        
+        const icon = this.querySelector("i");
+        if (icon) {
+          icon.classList.toggle("bi-eye");
+          icon.classList.toggle("bi-eye-slash");
+        }
+      });
+    }
+  });
+</script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
 

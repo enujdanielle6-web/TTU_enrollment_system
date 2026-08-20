@@ -243,11 +243,9 @@ try {
                 'id' => $assessmentId
             ]);
 
-            // Removed auto-enrollment logic. Registrar must now explicitly finalize enrollment.
-            if ($currentPaid == 0 && ($newStatus === 'paid' || $newStatus === 'partial')) {
-                // This is their first payment, meaning they are now ready for final enrollment.
-                $logAppStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, ip_address, affected_record, icon, title, description) VALUES (:user_id, :ip_address, :affected_record, "bi-hourglass-split text-warning", "Awaiting Enrollment Finalization", "Your payment has been verified. Your application has been forwarded to the Registrar for final enrollment processing.")');
-                $logAppStmt->execute(['user_id' => $userId, 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null, 'affected_record' => "Application #$appId"]);
+            // Auto-finalize enrollment upon initial/full payment confirmation
+            if ($newStatus === 'paid' || $newStatus === 'partial') {
+                finalizeStudentEnrollment($pdo, $userId, (int)$assessment['application_id']);
             }
 
             // Log payment activity for student
@@ -379,10 +377,9 @@ try {
                 'id' => $assessmentId
             ]);
 
-            if ($currentPaid == 0 && ($newStatus === 'paid' || $newStatus === 'partial')) {
-                // Application ID might be needed for the log message. We can just say "Your application" if we don't have it.
-                $logAppStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, ip_address, affected_record, icon, title, description) VALUES (:user_id, :ip_address, "Application", "bi-hourglass-split text-warning", "Awaiting Enrollment Finalization", "Your online payment has been verified. Your application has been forwarded to the Registrar for final enrollment processing.")');
-                $logAppStmt->execute(['user_id' => $userId, 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null]);
+            // Auto-finalize enrollment upon payment verification
+            if ($newStatus === 'paid' || $newStatus === 'partial') {
+                finalizeStudentEnrollment($pdo, $userId, (int)$assessment['application_id']);
             }
 
             // Log payment activity for student
