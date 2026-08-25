@@ -18,6 +18,11 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/auth/verify_email.php', ['App\Controllers\AuthController', 'showVerifyEmail']);
     $router->post('/auth/verify_email_process.php', ['App\Controllers\AuthController', 'processVerifyEmail']);
     $router->post('/auth/resend_verification.php', ['App\Controllers\AuthController', 'resendVerification']);
+    $router->get('/auth/forgot_password.php', ['App\Controllers\AuthController', 'showForgotPassword']);
+    $router->post('/auth/forgot_password_process.php', ['App\Controllers\AuthController', 'processForgotPassword']);
+    $router->get('/auth/reset_password.php', ['App\Controllers\AuthController', 'showResetPassword']);
+    $router->post('/auth/reset_password_process.php', ['App\Controllers\AuthController', 'processResetPassword']);
+    $router->post('/auth/resend_reset_otp.php', ['App\Controllers\AuthController', 'resendResetOtp']);
     $router->get('/auth/logout.php', ['App\Controllers\AuthController', 'logout']);
     
     // LMS Auth & Logout

@@ -68,7 +68,11 @@ In `AuthController::login`:
 ## 4. Dedicated Sign-out Endpoints
 - **Student LMS Logout:** `/auth/lms_student_logout.php` (or `/lms/student/logout`) $\rightarrow$ redirects to `/auth/lms_student_login.php`.
 - **Faculty LMS Logout:** `/auth/lms_faculty_logout.php` (or `/lms/faculty/logout`) $\rightarrow$ redirects to `/auth/lms_faculty_login.php`.
-- **General Logout:** `/auth/logout.php` $\rightarrow$ smart detector redirects LMS users to their respective LMS portal and admins/applicants to `/auth/login.php`.
+## 5. Password Recovery & 6-Digit Reset OTP
+- **Applicant Reset:** `/auth/forgot_password.php?portal=applicant` $\rightarrow$ prompts for registered email $\rightarrow$ sends 6-digit OTP code to applicant email $\rightarrow$ redirects to `/auth/reset_password.php?portal=applicant`.
+- **Faculty LMS Reset:** `/auth/forgot_password.php?portal=faculty` $\rightarrow$ prompts for **Employee ID** or **TTU Email** $\rightarrow$ verifies faculty role $\rightarrow$ dispatches 6-digit OTP code to official institutional TTU email address (`faculty@ttu.edu.ph`) $\rightarrow$ redirects to `/auth/reset_password.php?portal=faculty`.
+- **Student LMS Reset:** `/auth/forgot_password.php?portal=student` $\rightarrow$ prompts for **Student ID** (e.g. `2026-000002`) or **TTU Email** $\rightarrow$ dispatches 6-digit OTP code to student's institutional/registered email address $\rightarrow$ redirects to `/auth/reset_password.php?portal=student`.
+- **Reset Processing:** `/auth/reset_password_process.php` verifies the 6-digit OTP matches `users.reset_password_code` within the 15-minute window (`reset_password_expires_at > NOW()`), updates `users.password` with `password_hash()`, clears reset code, and redirects back to the respective portal with success banner.
 
 ---
 **Related:**
@@ -76,3 +80,4 @@ In `AuthController::login`:
 - [[Applicant Registration Workflow]]
 - [[Security Overview]]
 - [[Users Table]]
+

@@ -1063,3 +1063,121 @@ function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, 
         return false;
     }
 }
+
+/**
+ * Sends a 6-digit Password Reset OTP email.
+ * 
+ * @param string $recipientEmail
+ * @param string $recipientName
+ * @param string $code
+ * @param string $portalType 'applicant' or 'faculty'
+ * @param string|null $resetUrl
+ * @param string|null &$errorMessage
+ * @return bool
+ */
+function sendPasswordResetOtpEmail(
+    string $recipientEmail,
+    string $recipientName,
+    string $code,
+    string $portalType = 'applicant',
+    ?string $resetUrl = null,
+    ?string &$errorMessage = null
+): bool {
+    $recipientEmail = trim($recipientEmail);
+    if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {
+        $errorMessage = "Invalid recipient email address format: {$recipientEmail}";
+        error_log($errorMessage);
+        return false;
+    }
+
+    if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
+        $autoloadPath = __DIR__ . '/../../vendor/autoload.php';
+        if (file_exists($autoloadPath)) {
+            require_once $autoloadPath;
+        }
+    }
+
+    if (!class_exists('\PHPMailer\PHPMailer\PHPMailer')) {
+        $errorMessage = "PHPMailer library is not available.";
+        error_log("{$errorMessage} Password reset OTP for {$recipientEmail}: {$code}");
+        return false;
+    }
+
+    // Ensure .env is loaded
+    if (!getenv('SMTP_USERNAME')) {
+        $envFile = __DIR__ . '/../../.env';
+        if (file_exists($envFile)) {
+            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+            foreach ($lines as $line) {
+                if (strpos(trim($line), '#') === 0) continue;
+                if (strpos($line, '=') === false) continue;
+                list($name, $value) = explode('=', $line, 2);
+                $name = trim($name);
+                $value = trim(trim($value), '"\'');
+                putenv(sprintf('%s=%s', $name, $value));
+                $_ENV[$name] = $value;
+                $_SERVER[$name] = $value;
+            }
+        }
+    }
+
+    try {
+        $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
+        $mail->isSMTP();
+        $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = getenv('SMTP_USERNAME') ?: '';
+        $mail->Password   = getenv('SMTP_PASSWORD') ?: '';
+
+        $enc = getenv('SMTP_ENCRYPTION') ?: 'tls';
+        if (strtolower((string)$enc) === 'ssl') {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
+        }
+
+        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
+        $mail->Timeout = 10;
+
+        $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
+        $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
+        $mail->setFrom($fromAddress, $fromName);
+        $mail->addAddress($recipientEmail, $recipientName);
+
+        $logoPath = __DIR__ . '/../../public/images/TTU_LOGO.png';
+        if (!file_exists($logoPath)) {
+            $logoPath = __DIR__ . '/../../images/TTU_LOGO.png';
+        }
+        if (file_exists($logoPath)) {
+            $mail->addEmbeddedImage($logoPath, 'ttu_logo');
+        }
+
+        $campusPath = __DIR__ . '/../../images/ttu_campus.jpg';
+        if (!file_exists($campusPath)) {
+            $campusPath = __DIR__ . '/../../public/images/ttu_campus.jpg';
+        }
+        if (file_exists($campusPath)) {
+            $mail->addEmbeddedImage($campusPath, 'ttu_campus');
+        }
+
+        $mail->isHTML(true);
+        $portalLabel = ($portalType === 'faculty') ? 'Faculty LMS Portal' : 'Applicant Account';
+        $mail->Subject = "Password Reset Code ({$code}) - {$portalLabel} | Triple T University";
+
+        ob_start();
+        require __DIR__ . '/../Views/emails/password_reset_otp.php';
+        $mail->Body = ob_get_clean();
+
+        $sent = $mail->send();
+        if ($sent) {
+            return true;
+        }
+
+        $errorMessage = $mail->ErrorInfo ?: 'Unknown mailer error.';
+        return false;
+    } catch (\Throwable $e) {
+        $errorMessage = $e->getMessage();
+        error_log('Password Reset Mailer Error: ' . $errorMessage . " | Code was: {$code}");
+        return false;
+    }
+}

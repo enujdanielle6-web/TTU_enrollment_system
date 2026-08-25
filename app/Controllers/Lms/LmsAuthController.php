@@ -11,21 +11,39 @@ class LmsAuthController extends BaseController
 {
     public function showFacultyLogin(Request $request, Response $response)
     {
-        $pdo = Database::getConnection();
-        
+        $errors = $_SESSION['login_errors'] ?? [];
+        $success = $_SESSION['login_success'] ?? null;
+        $warning = $_SESSION['login_warning'] ?? null;
+        $old = $_SESSION['login_old'] ?? [];
+        unset($_SESSION['login_errors'], $_SESSION['login_success'], $_SESSION['login_warning'], $_SESSION['login_old']);
 
-$pageTitle = 'Faculty LMS Login - Triple T University';
+        $pageTitle = 'Faculty LMS Login - Triple T University';
 
-        return $this->render('auth/lms_faculty_login', get_defined_vars());
+        return $this->render('auth/lms_faculty_login', [
+            'pageTitle' => $pageTitle,
+            'errors' => $errors,
+            'success' => $success,
+            'warning' => $warning,
+            'old' => $old
+        ]);
     }
     public function showStudentLogin(Request $request, Response $response)
     {
-        $pdo = Database::getConnection();
-        
+        $errors = $_SESSION['login_errors'] ?? [];
+        $success = $_SESSION['login_success'] ?? null;
+        $warning = $_SESSION['login_warning'] ?? null;
+        $old = $_SESSION['login_old'] ?? [];
+        unset($_SESSION['login_errors'], $_SESSION['login_success'], $_SESSION['login_warning'], $_SESSION['login_old']);
 
-$pageTitle = 'Student LMS Login - Triple T University';
+        $pageTitle = 'Student LMS Login - Triple T University';
 
-        return $this->render('auth/lms_student_login', get_defined_vars());
+        return $this->render('auth/lms_student_login', [
+            'pageTitle' => $pageTitle,
+            'errors' => $errors,
+            'success' => $success,
+            'warning' => $warning,
+            'old' => $old
+        ]);
     }
     public function loginProcess(Request $request, Response $response)
     {

@@ -9,7 +9,7 @@ This document summarizes the current state of the TTU Enrollment System and LMS 
 Newly registered applicants must verify their email before accessing the portal.
 
 ### Implementation Details
-- **Tables Modified:** `users` table expanded with `email_verified` (TINYINT(1) DEFAULT 1), `verification_code` (VARCHAR(10) NULL), and `verification_expires_at` (DATETIME NULL). Existing users default to `email_verified = 1`.
+- **Tables Modified:** `users` table expanded with `email_verified` (TINYINT(1) DEFAULT 0), `verification_code` (VARCHAR(10) NULL), and `verification_code_expires_at` (DATETIME NULL). Existing users default to `email_verified = 1`.
 - **OTP Generation & Expiry:** 6-digit cryptographic random code (`random_int(100000, 999999)`), valid for **15 minutes**.
 - **Email Delivery Helper:** [`sendVerificationCodeEmail()`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php) uses PHPMailer with embedded university logo and campus hero image. Automatically loads `.env` SMTP variables.
 - **Verification UI:** [`app/Views/auth/verify_email.php`](file:///c:/xampp/htdocs/sia/app/Views/auth/verify_email.php) features 6 auto-tabbing input boxes, clipboard paste support, 60s resend cooldown timer, and error/warning feedback.
@@ -43,7 +43,7 @@ Upon finalizing enrollment in Admissions:
 ---
 
 ## 4. Finance Module: "Tuition Rate per Unit" Refactoring
-- **Table:** `fee_templates` (`is_per_unit` TINYINT(1) DEFAULT 0).
+- **Table:** `fee_templates` (`is_per_unit` TINYINT(1) DEFAULT 0, `semester` ENUM('First','Second','Summer')).
 - **Assessment Math:** `Total Tuition = Enrolled Units × tuition_fee (rate) + Misc Fees`.
 - **UI:** Assessment breakdown displays unit calculation (e.g. `18 units @ ₱500.00/unit`) and supports bank payment proof upload with cashier verification.
 
@@ -57,5 +57,5 @@ Upon finalizing enrollment in Admissions:
 ---
 
 ## 6. Environment & Schema Reference
-- **Active Schema Dump:** [`schema_dump.sql`](file:///c:/xampp/htdocs/sia/schema_dump.sql) contains the complete 41-table structure.
+- **Active Schema Dump:** [`schema_dump.sql`](file:///c:/xampp/htdocs/sia/schema_dump.sql) contains the complete 42-table and view structure.
 - **Configuration:** Copy `.env.example` or edit `.env` for database and Google SMTP credentials.

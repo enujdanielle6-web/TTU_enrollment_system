@@ -1,44 +1,44 @@
 # Triple T University (TTU) Enrollment & Learning Management System
 
-![PHP Version](https://img.shields.io/badge/PHP-7.4%20|%208.x-blue.svg)
-![Database](https://img.shields.io/badge/Database-MariaDB%20%2F%20MySQL-orange.svg)
+![PHP Version](https://img.shields.io/badge/PHP-8.2%2B-blue.svg)
+![Database](https://img.shields.io/badge/Database-MariaDB%20%2F%20MySQL%20(42%20Tables)-orange.svg)
 ![Framework](https://img.shields.io/badge/Architecture-Hybrid%20MVC%20Vanilla%20PHP-green.svg)
-![Frontend](https://img.shields.io/badge/Frontend-Bootstrap%205.3%20%2B%20jQuery-purple.svg)
+![Frontend](https://img.shields.io/badge/Frontend-Bootstrap%205.3%20%2B%20Vanilla%20CSS-purple.svg)
 
-The **Triple T University (TTU) Enrollment & Learning Management System** is a monolithic web platform managing the full student academic lifecycle—from online application, 6-digit email OTP verification, document upload, and clinic medical clearance, to curriculum versioning, dynamic per-unit tuition assessment, cashier verification, automated credential issuance, and an integrated Student & Faculty Learning Management System (LMS).
+The **Triple T University (TTU) Enrollment & Learning Management System** is a monolithic web application managing the full student academic lifecycle—from online application, 6-digit email OTP verification, document upload, and clinic medical clearance, to curriculum versioning, dynamic per-unit tuition assessment, cashier ledger verification, automated student number issuance, and an integrated Student & Faculty Learning Management System (LMS).
 
 ---
 
-## Key Features
+## Key Subsystems & Features
 
 1. **Self-Service Applicant Portal:**
    - Online registration with mandatory **6-Digit Email OTP Verification** (Google SMTP / PHPMailer).
-   - Digital requirements upload with preview modal.
-   - Medical history declaration and emergency contact submission.
-   - Timetable selection and dynamic subject schedule builder.
-   - Downloadable/printable Certificate of Matriculation & Assessment Slips.
+   - Multi-step application submission with dynamic requirements uploader.
+   - Medical history declaration, emergency contacts, and clinical clearance status tracking.
+   - Timetable selection and section enrollment builder.
+   - Real-time tuition assessment breakdowns and bank transfer proof upload.
 2. **Administrative Management System:**
-   - **Admissions:** Application intake, document verification, approval, and automated student number / institutional email provisioning.
-   - **Clinic / Health:** Medical history evaluations and clearance gating.
-   - **Registrar:** Versioned curriculum builder for **College Programs** & **Senior High School (SHS) Strands**, master subject catalog, and student masterlists.
-   - **Scheduler:** Class section creation, faculty adviser assignments, timetable scheduling, and room capacity enforcement.
-   - **Finance & Cashier:** Dynamic **Tuition Rate per Unit** calculation ($\text{Units} \times \text{Rate}$), cashier ledger, bank payment proof inspection, and official receipt issuance.
-   - **Scholarships:** Program management, student grant reviews, and automated discount deductions.
-   - **System Admin:** User management, granular permissions, database backup manager, activity audit logs, and demographic reports.
-3. **Integrated Dual Learning Management System (LMS):**
-   - Dual enrollment repository support for both **College** and **SHS** courses.
-   - **Student LMS:** Enrolled course viewer, learning modules, assignments, timed multiple-choice quizzes, real-time attendance, and student gradebook.
-   - **Faculty LMS:** Module file uploader, assignment creation & grading, quiz authoring engine with question banks, and attendance manager.
-   - **Secure File Delivery:** Direct object download protection preventing unauthorized file leaks.
+   - **Admissions:** Application intake queue, document verification modal, section assignment, and automated student number / institutional email provisioning.
+   - **Clinic / Health:** Medical declaration audits, health condition tagging, and clinic clearance gating.
+   - **Registrar:** Versioned curriculum builder for **College Programs** & **Senior High School (SHS) Strands**, master subject catalog, and enrolled student masterlist exports.
+   - **Scheduler:** Class section block creation, faculty adviser assignments, timetable scheduling, and room conflict prevention.
+   - **Finance & Cashier:** Dynamic **Tuition Rate per Unit** calculation ($\text{Units} \times \text{Rate}$), cashier ledger, online payment verification, and official receipt (`REC-YYYYMMDD-XXXX`) generation.
+   - **Scholarships:** Scholarship catalog, applicant review queue, and automated assessment discount deductions.
+   - **System Admin:** User account management, granular role permissions, native SQL database backup/restore manager, activity audit logs with old/new diffs, and demographic reports.
+3. **Integrated Dual-Tier Learning Management System (LMS):**
+   - JIT course auto-provisioning from dual enrollment repositories (**College** & **SHS**).
+   - **Student LMS:** Enrolled course viewer, learning modules, downloadable materials, assignment submission uploader, timed multiple-choice quizzes, attendance tracking, and gradebook.
+   - **Faculty LMS:** Assigned section rosters, module file manager, assignment authoring & grading with feedback, quiz authoring engine with question banks, and attendance logging.
+   - **Secure File Delivery:** Protected media routing preventing unauthorized asset discovery.
 
 ---
 
 ## Technology Stack
 
-- **Backend:** Vanilla PHP (Custom PSR-4 Autoloader, Custom Router, Middleware Pipeline)
-- **Database:** MariaDB 10.4+ / MySQL 8.0+ (Raw SQL via PDO with prepared statements, 41 relational tables)
+- **Backend:** Vanilla PHP 8.2+ (Custom PSR-4 Autoloader, Custom Router with Dynamic Parameter Binding, Middleware Pipeline)
+- **Database:** MariaDB 10.4+ / MySQL 8.0+ (Raw SQL via PDO with prepared statements, 42 relational tables and views)
 - **Email Delivery:** PHPMailer (v6.9+) with Google SMTP TLS (Port 587)
-- **Frontend:** Bootstrap 5.3, Vanilla CSS, JavaScript (ES6+), jQuery 3.7+, SweetAlert2, Chart.js
+- **Frontend:** Bootstrap 5.3, Vanilla CSS, JavaScript (ES6+), SweetAlert2, Chart.js
 - **Web Server:** Apache 2.4 (XAMPP Environment) with `.htaccess` mod_rewrite
 
 ---
@@ -46,27 +46,25 @@ The **Triple T University (TTU) Enrollment & Learning Management System** is a m
 ## Quickstart Setup Guide
 
 ### 1. Requirements
-- XAMPP (Apache + MySQL/MariaDB)
-- PHP 7.4 or 8.x with `pdo_mysql`, `openssl`, `mbstring`, `curl`
+- XAMPP with PHP 8.2+ (Apache + MySQL/MariaDB)
+- Extensions: `pdo_mysql`, `openssl`, `mbstring`, `curl`
 - Composer 2.x
 
 ### 2. Installation Steps
 1. Place repository in `C:\xampp\htdocs\sia`.
-2. Start **Apache** and **MySQL** in XAMPP.
-3. Create database in MySQL:
-   ```sql
-   CREATE DATABASE sia CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   ```
-4. Import active schema:
-   ```bash
-   mysql -u root -p sia < schema_dump.sql
-   ```
-5. Install dependencies:
+2. Start **Apache** and **MySQL** in your XAMPP Control Panel.
+3. Install Composer dependencies:
    ```bash
    composer install
    ```
-6. Configure `.env` in the project root:
+4. Configure environment variables by creating `.env` in the project root:
    ```ini
+   DB_HOST="localhost"
+   DB_PORT="3306"
+   DB_DATABASE="sia"
+   DB_USERNAME="root"
+   DB_PASSWORD=""
+
    SMTP_HOST="smtp.gmail.com"
    SMTP_PORT="587"
    SMTP_ENCRYPTION="tls"
@@ -75,20 +73,32 @@ The **Triple T University (TTU) Enrollment & Learning Management System** is a m
    MAIL_FROM_ADDRESS="no-reply@ttu.edu.ph"
    MAIL_FROM_NAME="Triple T University"
 
-   DB_HOST="localhost"
-   DB_PORT="3306"
-   DB_DATABASE="sia"
-   DB_USERNAME="root"
-   DB_PASSWORD=""
-
    APP_ENV="development"
    ```
+
+### 3. Automated Database Setup (Recommended)
+Run the automated setup engine via CLI:
+```bash
+php database/migrations/setup_database.php
+```
+*(Or navigate to `http://localhost/sia/database/migrations/setup_database.php` in your browser).*
+
+This automated script will:
+- Initialize database `sia` with `utf8mb4_unicode_ci` collation.
+- Import the complete 42-table schema and views from `database/schema.sql`.
+- Seed standard institutional accounts, degree programs, subjects, versioned curricula, class sections, fee templates, scholarships, sample students, and interactive LMS courses from `database/seed.sql`.
+
+#### Alternative Manual Database Import:
+```bash
+mysql -u root sia < database/schema.sql
+mysql -u root sia < database/seed.sql
+```
 
 ---
 
 ## Standard Test Credentials
 
-| Role | Username / ID / Email | Password | Access Route |
+| Role | Identifier / Email | Password | Access Route |
 |---|---|---|---|
 | **Superadmin** | `admin@ttu.edu.ph` | `admin123` | `/admin/dashboard.php` |
 | **Admissions Officer** | `admissions@ttu.edu.ph` | `admin123` | `/admin/admissions/admissions_dashboard.php` |
@@ -97,18 +107,23 @@ The **Triple T University (TTU) Enrollment & Learning Management System** is a m
 | **Clinic Officer** | `clinic@ttu.edu.ph` | `admin123` | `/admin/clinic/clinic_dashboard.php` |
 | **Scheduler** | `scheduler@ttu.edu.ph` | `admin123` | `/admin/scheduler/scheduler_dashboard.php` |
 | **Scholarship Officer** | `scholarship@ttu.edu.ph` | `admin123` | `/admin/scholarship/scholarship_dashboard.php` |
-| **Enrolled Student** | `2026-000003` (or applicant email) | `password123` | `/lms/student/dashboard.php` |
-| **Faculty Instructor** | Faculty Employee ID | `password123` | `/lms/faculty/dashboard.php` |
+| **Faculty Instructor** | `FAC-2026-001` *(or `alan.turing@ttu.edu.ph`)* | `password123` | `/lms/faculty/dashboard.php` |
+| **Enrolled College Student** | `2026-000001` *(or `john.doe@example.com`)* | `password123` | `/lms/student/dashboard.php` |
+| **Enrolled SHS Student** | `2026-000002` *(or `mary.smith@example.com`)* | `password123` | `/lms/student/dashboard.php` |
+| **Applicant User** | `jane.applicant@example.com` | `password123` | `/applicant/dashboard.php` |
 
 ---
 
-## Documentation Index
+## Documentation Vault
+
 The complete technical and architectural documentation is maintained in the [`docs/obsidian/`](file:///c:/xampp/htdocs/sia/docs/obsidian/) vault:
-- **[[TTU Enrollment System Home]](file:///c:/xampp/htdocs/sia/docs/obsidian/00%20-%20Home/TTU%20Enrollment%20System%20Home.md)**: Master documentation hub.
-- **[[System Architecture]](file:///c:/xampp/htdocs/sia/docs/obsidian/01%20-%20Architecture/System%20Architecture.md)**: Hybrid MVC framework & request lifecycle.
-- **[[Data Dictionary]](file:///c:/xampp/htdocs/sia/docs/obsidian/04%20-%20Database/Data%20Dictionary.md)**: Full schema dictionary for all 41 tables.
-- **[[Student Lifecycle Workflow]](file:///c:/xampp/htdocs/sia/docs/obsidian/03%20-%20Workflows/Student%20Lifecycle%20Workflow.md)**: Complete end-to-end lifecycle guide.
-- **[[AI Development Context]](file:///c:/xampp/htdocs/sia/docs/obsidian/11%20-%20Development%20Guide/AI%20Development%20Context.md)**: Engineering guidelines and sensitive areas for AI assistants.
+- **[Master Hub](file:///c:/xampp/htdocs/sia/docs/obsidian/00%20-%20Home/TTU%20Enrollment%20System%20Home.md)**: Central launchpad for all 17 documentation domains.
+- **[System Architecture](file:///c:/xampp/htdocs/sia/docs/obsidian/01%20-%20Architecture/System%20Architecture.md)**: Monolithic Hybrid MVC structure, routing, and request lifecycle.
+- **[Entity Relationship Architecture](file:///c:/xampp/htdocs/sia/docs/obsidian/04%20-%20Database/Entity%20Relationship%20Architecture.md)**: High-level and domain-level Mermaid ER diagrams, cardinality, and foreign key topology.
+- **[Data Dictionary](file:///c:/xampp/htdocs/sia/docs/obsidian/04%20-%20Database/Data%20Dictionary.md)**: Complete column specifications for all 42 tables and views.
+- **[Page Relationships & Dependency Maps](file:///c:/xampp/htdocs/sia/docs/obsidian/16%20-%20Page%20Relationships/00%20-%20Master%20Relationship%20Index%20&%20Matrix.md)**: End-to-end trace from View $\rightarrow$ Route $\rightarrow$ Controller $\rightarrow$ Service $\rightarrow$ Database.
+- **[Troubleshooting Runbook](file:///c:/xampp/htdocs/sia/docs/obsidian/15%20-%20Operations/Troubleshooting%20Runbook.md)**: Common runtime error fixes and SMTP debugging guide.
 
 ---
+
 &copy; 2026 Triple T University. All rights reserved.

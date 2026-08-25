@@ -26,11 +26,11 @@ flowchart TD
 ---
 
 ## 2. Technology Stack
-- **Backend:** PHP 7.4+ / 8.x (Custom PSR-4 Autoloader, Custom Router, Middleware Pipeline)
-- **Database:** MariaDB 10.4+ / MySQL 8.0+ (Raw SQL via PDO with prepared statements)
-- **Email Delivery:** PHPMailer (v6.9+) via Composer, with Google SMTP TLS (Port 587)
-- **Frontend Framework:** HTML5, CSS3, JavaScript (ES6+), jQuery 3.7+, Bootstrap 5.3+
-- **Icons & UI Utilities:** Bootstrap Icons (v1.11+), Chart.js, SweetAlert2
+- **Backend:** PHP 8.2+ (PSR-4 Custom Autoloader, Custom Router, Middleware Pipeline)
+- **Database:** MariaDB 10.4.32 / MySQL 8.0+ (Raw SQL via PDO with prepared statements, `ATTR_EMULATE_PREPARES => false`)
+- **Email Delivery:** PHPMailer (v6.9.1) via Composer, with SMTP TLS (Port 587)
+- **Frontend Framework:** HTML5, Vanilla CSS3 tokens, JavaScript (ES6+), Bootstrap 5.3+
+- **Visuals & Charts:** Bootstrap Icons (v1.11+), Chart.js (v4.4+), Google Fonts (Inter, Plus Jakarta Sans)
 - **Web Server:** Apache 2.4 (XAMPP Environment) with `.htaccess` mod_rewrite engine
 
 ---
@@ -46,14 +46,20 @@ The system follows a **Fat Controller** standard:
 
 ### Repositories (`app/Repositories/`)
 Introduced for cross-tier data access where logic spans College and SHS:
-- `CollegeEnrollmentRepository`: Resolves active subjects, sections, and advisers from `college_enrollments`.
-- `ShsEnrollmentRepository`: Resolves active subjects, sections, and advisers from `shs_enrollments`.
+- `CollegeEnrollmentRepository`: Resolves active subjects, sections, and advisers from `college_enrollments` and auto-provisions `lms_courses` on student access.
+- `ShsEnrollmentRepository`: Resolves active subjects, sections, and advisers from `shs_enrollments` and auto-provisions `lms_courses` on student access.
 
 ### Services (`app/Services/`)
-- `LmsService`: Aggregates cross-course student deadlines, announcements, class streaks, and next calendar events.
+Domain services encapsulate complex business logic and calculations:
+- `LmsService`: Aggregates cross-course student deadlines, announcements, class streaks, course details, and materials.
+- `LmsGradebookService`: Computes assignment scores, quiz results, and weighted student grades.
+- `LmsQuizService`: Handles quiz attempts, choice validation, instant multiple-choice grading, and time limits.
+- `LmsAttendanceService`: Manages daily attendance sessions and roll-call records.
+- `LmsAnnouncementService`: Handles instructor and course announcements.
+- `LmsCalendarService`: Compiles academic schedule events and assignment due dates.
 
 ### Models (`app/Models/`)
-Models act primarily as basic data structures and lightweight utility wrappers (`User`, `Application`, `HealthRecord`).
+Models act primarily as basic data structures and lightweight utility wrappers (`User`, `Application`, `HealthRecord`, `Schedule`, `StudentAssessment`, `ActivityLog`, `Announcement`).
 
 ### Views (`app/Views/`)
 - Presentation layer composed of standard PHP/HTML templates.

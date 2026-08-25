@@ -25,11 +25,13 @@ class AuthController extends BaseController
 
         $errors = $_SESSION['login_errors'] ?? [];
         $old = $_SESSION['login_old'] ?? [];
-        unset($_SESSION['login_errors'], $_SESSION['login_old']);
+        $success = $_SESSION['login_success'] ?? null;
+        unset($_SESSION['login_errors'], $_SESSION['login_old'], $_SESSION['login_success']);
 
         return $this->render('auth/login', [
             'errors' => $errors,
-            'old' => $old
+            'old' => $old,
+            'success' => $success
         ]);
     }
 
@@ -398,6 +400,390 @@ class AuthController extends BaseController
         }
 
         $response->redirect($redirectUrl);
+    }
+
+    public function showForgotPassword(Request $request, Response $response)
+    {
+        if (!empty($_SESSION['logged_in'])) {
+            $userRole = $_SESSION['user_role'] ?? '';
+            $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
+            if (in_array($userRole, $adminRoles, true)) {
+                $response->redirect('/sia/admin/dashboard.php');
+            } elseif ($userRole === 'faculty') {
+                $response->redirect('/sia/lms/faculty/dashboard.php');
+            } elseif ($userRole === 'student') {
+                $response->redirect('/sia/lms/student/dashboard.php');
+            } else {
+                $response->redirect('/sia/applicant/dashboard.php');
+            }
+            return;
+        }
+
+        $portal = $request->query('portal', 'applicant');
+        if (!in_array($portal, ['faculty', 'student', 'applicant'], true)) {
+            $portal = 'applicant';
+        }
+
+        $errors = $_SESSION['forgot_errors'] ?? [];
+        $old = $_SESSION['forgot_old'] ?? [];
+        $warning = $_SESSION['forgot_warning'] ?? null;
+        unset($_SESSION['forgot_errors'], $_SESSION['forgot_old'], $_SESSION['forgot_warning']);
+
+        return $this->render('auth/forgot_password', [
+            'portal' => $portal,
+            'errors' => $errors,
+            'old' => $old,
+            'warning' => $warning
+        ]);
+    }
+
+    public function processForgotPassword(Request $request, Response $response)
+    {
+        $inputPortal = $request->input('portal', 'applicant');
+        if ($inputPortal === 'faculty') {
+            $portal = 'faculty';
+        } elseif ($inputPortal === 'student') {
+            $portal = 'student';
+        } else {
+            $portal = 'applicant';
+        }
+
+        $errors = [];
+        $pdo = \App\Core\Database::getConnection();
+
+        if ($portal === 'faculty') {
+            $identifier = trim((string)$request->input('identifier', ''));
+            if ($identifier === '') {
+                $errors[] = 'Please enter your Employee ID or institutional TTU email.';
+            }
+
+            if (!empty($errors)) {
+                $_SESSION['forgot_errors'] = $errors;
+                $_SESSION['forgot_old'] = ['identifier' => $identifier];
+                $response->redirect('/sia/auth/forgot_password.php?portal=faculty');
+                return;
+            }
+
+            $stmt = $pdo->prepare("
+                SELECT * FROM users 
+                WHERE (student_number = :student_number OR email = :email) 
+                  AND role = 'faculty' 
+                  AND is_active = 1 
+                LIMIT 1
+            ");
+            $stmt->execute([
+                'student_number' => $identifier,
+                'email' => $identifier
+            ]);
+            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$user) {
+                $_SESSION['forgot_errors'] = ["No active faculty account found matching '{$identifier}'. Please check your Employee ID or institutional email."];
+                $_SESSION['forgot_old'] = ['identifier' => $identifier];
+                $response->redirect('/sia/auth/forgot_password.php?portal=faculty');
+                return;
+            }
+        } elseif ($portal === 'student') {
+            $identifier = trim((string)$request->input('identifier', ''));
+            if ($identifier === '') {
+                $errors[] = 'Please enter your Student ID or institutional TTU email.';
+            }
+
+            if (!empty($errors)) {
+                $_SESSION['forgot_errors'] = $errors;
+                $_SESSION['forgot_old'] = ['identifier' => $identifier];
+                $response->redirect('/sia/auth/forgot_password.php?portal=student');
+                return;
+            }
+
+            $stmt = $pdo->prepare("
+                SELECT * FROM users 
+                WHERE (student_number = :student_number OR email = :email) 
+                  AND is_active = 1 
+                LIMIT 1
+            ");
+            $stmt->execute([
+                'student_number' => $identifier,
+                'email' => $identifier
+            ]);
+            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$user) {
+                $_SESSION['forgot_errors'] = ["No active student account found matching '{$identifier}'. Please check your Student ID or institutional email."];
+                $_SESSION['forgot_old'] = ['identifier' => $identifier];
+                $response->redirect('/sia/auth/forgot_password.php?portal=student');
+                return;
+            }
+        } else {
+            $email = trim((string)$request->input('email', ''));
+            if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors[] = 'A valid email address is required.';
+            }
+
+            if (!empty($errors)) {
+                $_SESSION['forgot_errors'] = $errors;
+                $_SESSION['forgot_old'] = ['email' => $email];
+                $response->redirect('/sia/auth/forgot_password.php?portal=applicant');
+                return;
+            }
+
+            $stmt = $pdo->prepare("
+                SELECT * FROM users 
+                WHERE email = :email 
+                  AND role = 'applicant' 
+                  AND is_active = 1 
+                LIMIT 1
+            ");
+            $stmt->execute(['email' => $email]);
+            $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if (!$user) {
+                $_SESSION['forgot_errors'] = ["No active applicant account found with email '{$email}'."];
+                $_SESSION['forgot_old'] = ['email' => $email];
+                $response->redirect('/sia/auth/forgot_password.php?portal=applicant');
+                return;
+            }
+        }
+
+        // Generate 6-digit OTP
+        $code = sprintf('%06d', random_int(100000, 999999));
+        $upd = $pdo->prepare("
+            UPDATE users 
+            SET reset_password_code = :code, 
+                reset_password_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) 
+            WHERE id = :id
+        ");
+        $upd->execute([
+            'code' => $code,
+            'id' => (int)$user['id']
+        ]);
+
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $resetUrl = "{$scheme}://{$host}/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']) . "&code={$code}";
+
+        $mailError = null;
+        $recipientName = trim($user['first_name'] . ' ' . $user['last_name']);
+        $emailSent = sendPasswordResetOtpEmail($user['email'], $recipientName, $code, $portal, $resetUrl, $mailError);
+
+        $_SESSION['reset_user_id'] = (int)$user['id'];
+        $_SESSION['reset_email'] = $user['email'];
+        $_SESSION['reset_name'] = $recipientName;
+        $_SESSION['reset_portal'] = $portal;
+
+        if ($emailSent) {
+            if ($portal === 'faculty' || $portal === 'student') {
+                $_SESSION['reset_success'] = "A 6-digit password reset code has been sent to your institutional email: {$user['email']}.";
+            } else {
+                $_SESSION['reset_success'] = "A 6-digit password reset code has been sent to {$user['email']}.";
+            }
+        } else {
+            $_SESSION['reset_warning'] = "We generated a password reset code for {$user['email']}, but encountered an email delivery issue. You may click 'Resend Code'.";
+            error_log("Password reset email delivery issue for {$user['email']}: {$mailError}");
+        }
+
+        $response->redirect("/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']));
+    }
+
+    public function showResetPassword(Request $request, Response $response)
+    {
+        $portal = $request->query('portal') ?: ($_SESSION['reset_portal'] ?? 'applicant');
+        if (!in_array($portal, ['faculty', 'student', 'applicant'], true)) {
+            $portal = 'applicant';
+        }
+
+        $email = trim((string)($request->query('email') ?: ($_SESSION['reset_email'] ?? '')));
+        $code = trim((string)$request->query('code', ''));
+
+        if ($email === '' && empty($_SESSION['reset_user_id'])) {
+            $response->redirect("/sia/auth/forgot_password.php?portal={$portal}");
+            return;
+        }
+
+        $errors = $_SESSION['reset_errors'] ?? [];
+        $success = $_SESSION['reset_success'] ?? null;
+        $warning = $_SESSION['reset_warning'] ?? null;
+        unset($_SESSION['reset_errors'], $_SESSION['reset_success'], $_SESSION['reset_warning']);
+
+        return $this->render('auth/reset_password', [
+            'portal' => $portal,
+            'email' => $email,
+            'code' => $code,
+            'errors' => $errors,
+            'success' => $success,
+            'warning' => $warning
+        ]);
+    }
+
+    public function processResetPassword(Request $request, Response $response)
+    {
+        $inputPortal = $request->input('portal', 'applicant');
+        if ($inputPortal === 'faculty') {
+            $portal = 'faculty';
+        } elseif ($inputPortal === 'student') {
+            $portal = 'student';
+        } else {
+            $portal = 'applicant';
+        }
+
+        $email = trim((string)$request->input('email', ''));
+        $password = (string)$request->input('password', '');
+        $confirmPassword = (string)$request->input('confirm_password', '');
+
+        // Support full code or individual digit inputs
+        $code = trim((string)$request->input('code', ''));
+        if (empty($code)) {
+            $d1 = (string)$request->input('digit_1', '');
+            $d2 = (string)$request->input('digit_2', '');
+            $d3 = (string)$request->input('digit_3', '');
+            $d4 = (string)$request->input('digit_4', '');
+            $d5 = (string)$request->input('digit_5', '');
+            $d6 = (string)$request->input('digit_6', '');
+            $code = $d1 . $d2 . $d3 . $d4 . $d5 . $d6;
+        }
+        $code = preg_replace('/\D/', '', $code);
+
+        $errors = [];
+
+        if (strlen($code) !== 6) {
+            $errors[] = 'Please enter the complete 6-digit verification code.';
+        }
+
+        if (strlen($password) < 8) {
+            $errors[] = 'Password must be at least 8 characters long.';
+        }
+
+        if ($password !== $confirmPassword) {
+            $errors[] = 'Passwords do not match.';
+        }
+
+        if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errors[] = 'Invalid email address.';
+        }
+
+        if (!empty($errors)) {
+            $_SESSION['reset_errors'] = $errors;
+            $response->redirect("/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($email) . "&code=" . urlencode($code));
+            return;
+        }
+
+        $pdo = \App\Core\Database::getConnection();
+        if ($portal === 'faculty') {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND role = 'faculty' AND is_active = 1 LIMIT 1");
+        } elseif ($portal === 'student') {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND is_active = 1 LIMIT 1");
+        } else {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND role = 'applicant' AND is_active = 1 LIMIT 1");
+        }
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            $_SESSION['reset_errors'] = ['Account not found or inactive. Please request a new password reset.'];
+            $response->redirect("/sia/auth/forgot_password.php?portal={$portal}");
+            return;
+        }
+
+        $storedCode = (string)($user['reset_password_code'] ?? '');
+        $expiresAt = (string)($user['reset_password_expires_at'] ?? '');
+        $now = date('Y-m-d H:i:s');
+
+        if ($storedCode === '' || $storedCode !== $code || ($expiresAt !== '' && $expiresAt < $now)) {
+            $_SESSION['reset_errors'] = ['The 6-digit verification code is invalid or has expired. Please try again or click Resend Code.'];
+            $response->redirect("/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($email));
+            return;
+        }
+
+        // Hash and update password
+        $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        $upd = $pdo->prepare("
+            UPDATE users 
+            SET password = :pwd, 
+                reset_password_code = NULL, 
+                reset_password_expires_at = NULL,
+                email_verified = 1 
+            WHERE id = :id
+        ");
+        $upd->execute([
+            'pwd' => $passwordHash,
+            'id' => (int)$user['id']
+        ]);
+
+        unset($_SESSION['reset_user_id'], $_SESSION['reset_email'], $_SESSION['reset_name'], $_SESSION['reset_portal']);
+
+        $_SESSION['login_success'] = 'Your password has been successfully reset! You can now log in with your new password.';
+
+        if ($portal === 'faculty') {
+            $response->redirect('/sia/auth/lms_faculty_login.php');
+        } elseif ($portal === 'student') {
+            $response->redirect('/sia/auth/lms_student_login.php');
+        } else {
+            $response->redirect('/sia/auth/login.php');
+        }
+    }
+
+    public function resendResetOtp(Request $request, Response $response)
+    {
+        $inputPortal = $request->input('portal', 'applicant');
+        if ($inputPortal === 'faculty') {
+            $portal = 'faculty';
+        } elseif ($inputPortal === 'student') {
+            $portal = 'student';
+        } else {
+            $portal = 'applicant';
+        }
+
+        $email = trim((string)($request->input('email') ?: ($_SESSION['reset_email'] ?? '')));
+
+        if ($email === '') {
+            $response->redirect("/sia/auth/forgot_password.php?portal={$portal}");
+            return;
+        }
+
+        $pdo = \App\Core\Database::getConnection();
+        if ($portal === 'faculty') {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND role = 'faculty' AND is_active = 1 LIMIT 1");
+        } elseif ($portal === 'student') {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND is_active = 1 LIMIT 1");
+        } else {
+            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND role = 'applicant' AND is_active = 1 LIMIT 1");
+        }
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$user) {
+            $_SESSION['reset_errors'] = ['User record not found. Please initiate password recovery again.'];
+            $response->redirect("/sia/auth/forgot_password.php?portal={$portal}");
+            return;
+        }
+
+        $newCode = sprintf('%06d', random_int(100000, 999999));
+        $upd = $pdo->prepare("
+            UPDATE users 
+            SET reset_password_code = :code, 
+                reset_password_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) 
+            WHERE id = :id
+        ");
+        $upd->execute([
+            'code' => $newCode,
+            'id' => (int)$user['id']
+        ]);
+
+        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+        $resetUrl = "{$scheme}://{$host}/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']) . "&code={$newCode}";
+
+        $mailError = null;
+        $recipientName = trim($user['first_name'] . ' ' . $user['last_name']);
+        $emailSent = sendPasswordResetOtpEmail($user['email'], $recipientName, $newCode, $portal, $resetUrl, $mailError);
+
+        if ($emailSent) {
+            $_SESSION['reset_success'] = "A fresh 6-digit reset code has been sent to {$user['email']}.";
+        } else {
+            $_SESSION['reset_errors'] = ["Failed to send email to {$user['email']}. " . ($mailError ?: 'Please try again in a few moments.')];
+        }
+
+        $response->redirect("/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']));
     }
 }
 

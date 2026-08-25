@@ -40,6 +40,10 @@ MAIL_FROM_NAME="Triple T University"
 - **Trigger:** Dispatched when Admissions finalizes an applicant's enrollment (`applications.status = 'enrolled'`).
 - **Content:** Welcome letter presenting the student's assigned **TTU Institutional Email** (`first.last@ttu.edu.ph`), **Student Number** (`YYYY-XXXXXX`), **Temporary Password**, and a direct login button to the Student Portal & LMS.
 
+### 3.3 6-Digit Password Reset OTP ([`password_reset_otp.php`](file:///c:/xampp/htdocs/sia/app/Views/emails/password_reset_otp.php))
+- **Trigger:** Dispatched when an applicant or faculty member initiates password recovery on `/auth/forgot_password.php`.
+- **Content:** Branded university email with campus header and seal, 6-digit OTP in a monospace container, 15-minute expiration timer, and direct "Reset Password" button.
+
 ---
 
 ## 4. Helper Dispatch Functions ([`functions.php`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php))
@@ -69,6 +73,19 @@ function sendStudentCredentialsEmail(
 ): bool
 ```
 - Dispatches official student credentials with automatic attachment embedding and delivery error capture.
+
+### `sendPasswordResetOtpEmail()`
+```php
+function sendPasswordResetOtpEmail(
+    string $recipientEmail,
+    string $recipientName,
+    string $code,
+    string $portalType = 'applicant',
+    ?string $resetUrl = null,
+    ?string &$errorMessage = null
+): bool
+```
+- Sends a 6-digit password reset OTP to applicant or faculty institutional email with automatic template rendering.
 
 ---
 

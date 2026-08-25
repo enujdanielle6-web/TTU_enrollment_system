@@ -11,16 +11,17 @@ The Admissions module is the primary administrative intake checkpoint in the [[S
 ## 1. Core Responsibilities
 1. **Application Intake & Review:** Reviews submitted applications across `pending`, `under_review`, and `correction_required` states.
 2. **Document Verification:** Inspects applicant-uploaded admission requirements (PSA Birth Certificate, Form 137/138, Good Moral, 2x2 Photos) via `application_documents`.
-3. **Application Decision:** Marks applications as `approved` or `rejected` with custom feedback and remarks.
-4. **Final Enrollment & Credential Provisioning:** When approving final enrollment, automatically generates student numbers, creates institutional emails, and sends credentials.
+3. **Section & Curriculum Assignment:** Assigns active class sections from `college_sections` or `shs_sections`. For college applicants, locks in permanent `college_curriculum_id` on the student record and populates `college_enrollments` from curriculum subjects.
+4. **Automatic Assessment Generation:** Upon moving status to `approved` or `enrolled`, dynamically creates `student_assessments` using active `fee_templates` (computing per-unit tuition based on enrolled subject units if `is_per_unit = 1`).
+5. **Final Enrollment & Credential Provisioning:** When finalizing enrollment (`status = 'enrolled'`), automatically generates student numbers (`YYYY-XXXXXX`), provisions institutional TTU email, sets temporary LMS password, and dispatches credentials via PHPMailer.
 
 ---
 
 ## 2. Automated Student Credential Issuance
 When an Admissions officer finalizes an application:
-1. **Student Number Generation:** Generates a unique student ID formatted as `YYYY-XXXXXX` (e.g. `2026-000003`).
-2. **Institutional TTU Email:** Formats and assigns a university email address (`first.last@ttu.edu.ph`).
-3. **Password Generation:** Assigns a secure temporary password.
+1. **Student Number Generation:** Generates a unique student ID formatted as `YYYY-XXXXXX` (e.g. `2026-000003`) via `generateStudentNumber()`.
+2. **Institutional TTU Email:** Formats and assigns a university email address (`firstname.lastname@ttu.edu.ph`).
+3. **Temporary Password Generation:** Assigns the student number as the initial temporary password and flags `users.force_password_reset = 1`.
 4. **Automated Dispatch:** Dispatches the branded HTML credentials email ([`welcome_credentials.php`](file:///c:/xampp/htdocs/sia/app/Views/emails/welcome_credentials.php)) via [`sendStudentCredentialsEmail()`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php) using PHPMailer.
 
 ---

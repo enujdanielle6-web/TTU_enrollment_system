@@ -37,12 +37,12 @@ TTU Enrollment System (c:\xampp\htdocs\sia\)
 │   ├── Core/                       # Custom framework engine (Router, Request, Response, BaseModel)
 │   ├── Helpers/                    # Global helper functions (functions.php)
 │   ├── Middleware/                 # Interceptors (SessionSecurity, Csrf, Auth, Role, Test)
-│   ├── Models/                     # Simple data containers (User, Application, HealthRecord)
+│   ├── Models/                     # Data containers & helper models (BaseModel, User, Application, ApplicationDocument, HealthRecord, Schedule, StudentAssessment, ScholarshipApplication, ActivityLog, Announcement)
 │   ├── Repositories/               # Cross-tier enrollment queries (CollegeEnrollmentRepository, ShsEnrollmentRepository)
 │   ├── Routes/                     # Central route definitions (web.php)
-│   ├── Services/                   # Domain service layer (LmsService.php)
+│   ├── Services/                   # Domain service layer (LmsService, Gradebook, Quiz, Attendance, Calendar, Announcement)
 │   ├── Views/                      # PHP presentation templates
-│   │   ├── admin/                  # Administrative blade-style views
+│   │   ├── admin/                  # Administrative views
 │   │   ├── applicant/              # Applicant self-service portal views
 │   │   ├── auth/                   # Login, register, verify_email views
 │   │   ├── emails/                 # Branded HTML email templates
@@ -58,8 +58,9 @@ TTU Enrollment System (c:\xampp\htdocs\sia\)
 ├── public/                         # WEB ROOT DIRECTORY (HTTP Entry)
 │   ├── index.php                   # Master Front Controller
 │   └── images/                     # Public image symlinks
-├── schema_dump.sql                 # Active, complete 41-table database dump
+├── schema_dump.sql                 # Active, complete 42-table/view database dump
 ├── scripts/                        # Maintenance, test scripts, and CLI utilities
+├── storage/                        # Dedicated LMS storage (storage/lms_materials/)
 └── vendor/                         # Composer packages (PHPMailer)
 ```
 

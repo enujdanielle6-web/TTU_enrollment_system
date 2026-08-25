@@ -98,6 +98,22 @@ class Request
         return $all[$key] ?? $default;
     }
 
+    public function query(?string $key = null, $default = null)
+    {
+        if ($key === null) {
+            return $_GET;
+        }
+        return $_GET[$key] ?? $default;
+    }
+
+    public function post(?string $key = null, $default = null)
+    {
+        if ($key === null) {
+            return $_POST;
+        }
+        return $_POST[$key] ?? $default;
+    }
+
     public function header(string $key, $default = null)
     {
         // Convert header name to $_SERVER key format (e.g., Content-Type -> HTTP_CONTENT_TYPE)

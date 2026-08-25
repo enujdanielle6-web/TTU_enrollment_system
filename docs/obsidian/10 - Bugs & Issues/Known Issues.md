@@ -35,9 +35,48 @@ This document tracks architectural debt, bugs discovered during development, and
 
 ---
 
-## 2. Active Technical Debt & Planned Improvements
-1. **Fat Controller Complexity:** While `BaseModel`, `CollegeEnrollmentRepository`, and `LmsService` have reduced duplication, administrative controllers still handle multi-faceted responsibilities. Gradual service extraction is planned.
-2. **Automated E2E Test Suite:** Implement continuous CI test runners to validate multi-step enrollment workflows.
+## 2. Active Technical Debt & Discovered Codebase Defects
+
+### Issue 6: Health Information Form Undefined Variable Block
+- **Module:** [[Applicant Portal]] / `HealthController.php`
+- **Location:** `app/Controllers/HealthController.php:66-92`
+- **Symptoms:** Applicant health form submissions always fail with "Please fill out all required physical and emergency contact fields."
+- **Root Cause:** `$heightVal = (float)$heightRaw;` and `$weightVal = (float)$weightRaw;` are invoked without extracting `$heightRaw = $request->input('height')` and `$weightRaw = $request->input('weight')`.
+- **Status:** Documented defect awaiting controller patch.
+
+### Issue 7: Non-Existent `shs_curriculum` Table in SHS Controllers & API
+- **Module:** [[Registrar]] / `ShsController.php` & `ApplicantApiController.php`
+- **Location:** `app/Controllers/Admin/Registrar/ShsController.php:257,314` and `app/Controllers/Api/ApplicantApiController.php:48`
+- **Symptoms:** Adding/removing subjects to SHS curriculum or querying SHS curriculum preview returns fatal `PDOException: Table 'sia.shs_curriculum' doesn't exist`.
+- **Root Cause:** Queries reference obsolete table `shs_curriculum` instead of `shs_curricula` and `shs_curriculum_subjects`.
+- **Status:** Documented defect awaiting controller patch.
+
+### Issue 8: Undefined Function `showErrorPage()`
+- **Module:** `ScholarshipController.php`, `RegistrarController.php`, `ReportController.php`
+- **Location:** `ScholarshipController.php:125`, `RegistrarController.php:323,366`, `ReportController.php:126`
+- **Symptoms:** Triggering database exception blocks causes fatal error `Call to undefined function showErrorPage()`.
+- **Root Cause:** The helper function `showErrorPage()` was never implemented in `app/Helpers/functions.php`.
+- **Status:** Documented defect awaiting helper definition.
+
+### Issue 9: Erroneous Capacity Foreign Key Comparison in `Schedule.php`
+- **Module:** [[Scheduler]] / `Schedule.php`
+- **Location:** `app/Models/Schedule.php:52`
+- **Symptoms:** Irregular subject schedule capacity checks report inaccurate student counts.
+- **Root Cause:** `$capStmt->execute([$off['id'], $off['subject_id']])` compares `shs_enrollments.shs_section_id` against `shs_section_subjects.id` (offering ID) instead of the actual `shs_section_id`.
+- **Status:** Documented defect awaiting model patch.
+
+### Issue 10: Setting Key Mismatch in Scholarship Recipient Enrollment
+- **Module:** [[Scholarship]] / `ScholarshipController.php`
+- **Location:** `app/Controllers/Admin/Scholarship/ScholarshipController.php:257-270`
+- **Symptoms:** Approved scholarships are not saved to `scholarship_recipients` or recalculated in `student_assessments`.
+- **Root Cause:** Controller queries `system_settings` for `active_academic_year_id`, but `SystemController.php` saves it as `active_school_year`.
+- **Status:** Documented defect awaiting key alignment.
+
+### Issue 11: Master Password Backdoor in LMS Student Login
+- **Module:** [[LMS]] / `LmsAuthController.php`
+- **Location:** `app/Controllers/Lms/LmsAuthController.php:76`
+- **Symptoms:** Student accounts can be logged into using plaintext string `'password123'` or the student's plain student number without password verification.
+- **Status:** Security risk documented for removal in subsequent security patch.
 
 ---
 **Related:**

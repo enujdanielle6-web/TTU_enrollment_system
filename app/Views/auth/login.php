@@ -16,6 +16,15 @@ require_once __DIR__ . '/../components/header.php';
             <p class="text-muted mb-0 small">Login to continue your enrollment account.</p>
           </div>
 
+          <?php if (!empty($success)): ?>
+            <div class="alert alert-success rounded-3 border-0 bg-success text-white py-2 px-3 small shadow-sm mb-4">
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill"></i>
+                <span><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></span>
+              </div>
+            </div>
+          <?php endif; ?>
+
           <?php if (!empty($errors)): ?>
             <div class="alert alert-danger rounded-3 border-0 bg-danger text-white py-2 px-3 small shadow-sm mb-4">
               <?php foreach ($errors as $error): ?>
@@ -35,7 +44,10 @@ require_once __DIR__ . '/../components/header.php';
             </div>
 
             <div class="mb-4">
-              <label class="form-label text-muted small fw-semibold" for="password">Password</label>
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label text-muted small fw-semibold mb-0" for="password">Password</label>
+                <a href="/sia/auth/forgot_password.php?portal=applicant" class="small text-decoration-none text-primary fw-semibold">Forgot Password?</a>
+              </div>
               <div class="input-group" style="border-radius: 10px; overflow: hidden; border: 1px solid #dee2e6;">
                 <input class="form-control border-0" style="padding: 0.75rem 1rem;" type="password" id="password" name="password" required placeholder="••••••••">
                 <button class="btn btn-light border-0 px-3 text-muted" type="button" id="togglePassword" tabindex="-1">
