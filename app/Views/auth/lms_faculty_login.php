@@ -64,7 +64,7 @@
             </div>
 
             <div class="mb-3 d-flex justify-content-end">
-              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="document.getElementById('employee_id').value='EMP-001'; document.getElementById('password').value='password123';">
+              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="document.getElementById('employee_id').value='FAC-2026-001'; document.getElementById('password').value='password123';">
                 <i class="bi bi-magic me-1"></i> Auto-fill Test Faculty
               </button>
             </div>

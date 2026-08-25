@@ -39,13 +39,13 @@ class User extends BaseModel
     public static function pruneStaleAttempts(): void
     {
         $pdo = Database::getConnection();
-        $pdo->exec('DELETE FROM login_attempts WHERE attempt_time < NOW() - INTERVAL 24 HOUR');
+        $pdo->exec('DELETE FROM login_attempts WHERE attempted_at < NOW() - INTERVAL 24 HOUR');
     }
 
     public static function updateLastLogin(int $userId): void
     {
         $pdo = Database::getConnection();
-        $stmt = $pdo->prepare('UPDATE users SET last_login = NOW() WHERE id = :id');
+        $stmt = $pdo->prepare('UPDATE users SET updated_at = NOW() WHERE id = :id');
         $stmt->execute(['id' => $userId]);
     }
 

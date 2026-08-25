@@ -67,14 +67,14 @@ require_once __DIR__ . '/../components/header.php';
             <div class="mb-4 bg-light rounded-3 p-3 border border-warning border-opacity-50">
                 <p class="small text-muted fw-bold mb-2"><i class="bi bi-bug"></i> Test Accounts (Auto-fill)</p>
                 <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admin@ttu.edu.ph', 'password123')">Superadmin</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('registrar@ttu.edu.ph', 'password123')">Registrar</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('cashier@ttu.edu.ph', 'password123')">Cashier</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admissions@ttu.edu.ph', 'password123')">Admissions</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scholarship@ttu.edu.ph', 'password123')">Scholarship</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('clinic@example.com', 'password123')">Clinic</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scheduler@ttu.edu.ph', 'password123')">Scheduler</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('jane.doe@example.com', 'password123')">Applicant</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admin@ttu.edu.ph', 'admin123')">Superadmin</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('registrar@ttu.edu.ph', 'admin123')">Registrar</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('cashier@ttu.edu.ph', 'admin123')">Cashier</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admissions@ttu.edu.ph', 'admin123')">Admissions</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scholarship@ttu.edu.ph', 'admin123')">Scholarship</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('clinic@ttu.edu.ph', 'admin123')">Clinic</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scheduler@ttu.edu.ph', 'admin123')">Scheduler</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('jane.applicant@example.com', 'password123')">Applicant</button>
                 </div>
             </div>
             
