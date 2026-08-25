@@ -20,7 +20,8 @@ if ($searchQuery !== '') {
     $params[':search'] = '%' . $searchQuery . '%';
 }
 
-if ($roleFilter !== 'all' && in_array($roleFilter, ['applicant', 'superadmin', 'admissions', 'scholarship', 'cashier'])) {
+$validRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler', 'faculty', 'applicant', 'student'];
+if ($roleFilter !== 'all' && in_array($roleFilter, $validRoles, true)) {
     $whereClauses[] = 'role = :role';
     $params[':role'] = $roleFilter;
 }
@@ -39,8 +40,16 @@ try {
     $countStmt->execute($params);
     $totalUsers = (int) $countStmt->fetchColumn();
 
-    // Fetch users
-    $stmt = $pdo->prepare("SELECT id, first_name, last_name, email, role, department, permissions, is_active, last_login, created_at FROM users $whereSQL ORDER BY created_at DESC LIMIT :limit OFFSET :offset");
+    // Fetch users with real last_login subquery from activity_logs
+    $stmt = $pdo->prepare("
+        SELECT 
+            u.id, u.first_name, u.last_name, u.email, u.role, u.department, u.permissions, u.is_active, u.created_at,
+            (SELECT MAX(created_at) FROM activity_logs WHERE user_id = u.id AND title = 'Logged In') AS last_login 
+        FROM users u 
+        $whereSQL 
+        ORDER BY u.created_at DESC 
+        LIMIT :limit OFFSET :offset
+    ");
     
     foreach ($params as $key => $val) {
         $stmt->bindValue($key, $val);
@@ -102,6 +111,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             <option value="scholarship" <?= esc($roleFilter === 'scholarship' ? 'selected' : '') ?>>Scholarship Officers</option>
             <option value="cashier" <?= esc($roleFilter === 'cashier' ? 'selected' : '') ?>>Cashiers</option>
             <option value="clinic" <?= esc($roleFilter === 'clinic' ? 'selected' : '') ?>>Clinic Officers</option>
+            <option value="faculty" <?= esc($roleFilter === 'faculty' ? 'selected' : '') ?>>Faculty</option>
           </select>
           <div class="input-group input-group-sm shadow-sm" style="width: 250px;">
             <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
@@ -166,6 +176,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                             'cashier' => 'bg-success-subtle text-success',
                             'scholarship' => 'bg-warning-subtle text-warning',
                             'clinic' => 'bg-danger-subtle text-danger',
+                            'faculty' => 'bg-primary-subtle text-primary',
                             'applicant' => 'bg-secondary-subtle text-secondary',
                             default => 'bg-light text-dark'
                         };
@@ -177,6 +188,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                             'scholarship' => 'Scholarship',
                             'cashier' => 'Cashier',
                             'clinic' => 'Clinic',
+                            'faculty' => 'Faculty',
                             default => 'Applicant'
                         };
                       ?>
