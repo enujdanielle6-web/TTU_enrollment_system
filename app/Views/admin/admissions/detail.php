@@ -52,13 +52,13 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         <div class="col-lg-8">
         
         <!-- Personal Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.1s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.2s;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="island-header border-bottom border-light">
             <i class="bi bi-person-vcard-fill"></i>
             <h2>Personal Information</h2>
           </div>
-          <div class="island-body fade-in-up" style="animation-delay: 0.3s;">
+          <div class="island-body">
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="text-muted small fw-semibold text-uppercase">Full Name</label>
@@ -98,13 +98,13 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         </div>
 
         <!-- Academic Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.4s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.5s;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="island-header border-bottom border-light">
             <i class="bi bi-mortarboard-fill"></i>
             <h2>Enrollment Details</h2>
           </div>
-          <div class="island-body fade-in-up" style="animation-delay: 0.6s;">
+          <div class="island-body">
             <div class="row g-3">
               <div class="col-md-3">
                 <label class="text-muted small fw-semibold text-uppercase">Academic Level</label>
@@ -134,16 +134,16 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               <?php endif; ?>
               <div class="col-md-6">
                 <label class="text-muted small fw-semibold text-uppercase">Selected Program</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars(getStrandLabel($app['strand']), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="fw-medium text-dark"><?= htmlspecialchars(getStrandLabel($app['strand'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
               </div>
               <div class="col-md-6">
                 <label class="text-muted small fw-semibold text-uppercase">Application Curriculum</label>
-                <div class="fw-medium text-dark"><?= $app['assigned_curriculum_version'] ? htmlspecialchars($app['assigned_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic">Pending Assignment</span>' ?></div>
+                <div class="fw-medium text-dark"><?= !empty($app['assigned_curriculum_version']) ? htmlspecialchars($app['assigned_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic">Pending Assignment</span>' ?></div>
               </div>
               <div class="col-12 mt-2">
                 <div class="p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
                   <label class="text-success small fw-semibold text-uppercase"><i class="bi bi-file-earmark-lock2-fill"></i> Official Student Curriculum</label>
-                  <div class="fw-bold text-success-emphasis"><?= $app['user_curriculum_version'] ? htmlspecialchars($app['user_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic">Pending First Enrollment</span>' ?></div>
+                  <div class="fw-bold text-success-emphasis"><?= !empty($app['user_curriculum_version']) ? htmlspecialchars($app['user_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic">Pending First Enrollment</span>' ?></div>
                 </div>
               </div>
             </div>
@@ -152,9 +152,9 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         
         <?php if (!empty($enrolledSubjects)): ?>
         <!-- Enrolled Subjects -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.7s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.8s;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center">
             <div>
               <i class="bi bi-journal-text"></i>
               <h2>Enrolled Subjects</h2>
@@ -165,7 +165,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             </button>
             <?php endif; ?>
           </div>
-          <div class="island-body p-0 mt-2 fade-in-up" style="animation-delay: 0.9s;">
+          <div class="island-body p-0 mt-2">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 custom-table">
                 <thead class="table-light text-muted small text-uppercase">
@@ -187,10 +187,10 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($sub['subject_code'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><?= htmlspecialchars($sub['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td class="text-primary small" style="font-size: 0.8rem;">
-                        <?php if ($sub['section_code']): ?>
+                        <?php if (!empty($sub['section_code'])): ?>
                             <span class="badge bg-secondary mb-1"><?= htmlspecialchars($sub['section_code'], ENT_QUOTES, 'UTF-8') ?></span><br>
                         <?php endif; ?>
-                        <?= esc($sub['schedule_text'] ?: '<span class="text-muted fst-italic">No schedule</span>') ?>
+                        <?= !empty($sub['schedule_text']) ? esc($sub['schedule_text']) : '<span class="text-muted fst-italic">No schedule</span>' ?>
                     </td>
                     <td>
                       <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
@@ -214,161 +214,136 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         <?php endif; ?>
 
         <!-- Educational History -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.1s;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="island-header border-bottom border-light">
             <i class="bi bi-building"></i>
             <h2>Educational History</h2>
           </div>
-          <div class="island-body fade-in-up" style="animation-delay: 1.2s;">
+          <div class="island-body">
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="text-muted small fw-semibold text-uppercase">Learner Reference Number (LRN)</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['lrn'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="fw-medium text-dark"><?= !empty($app['lrn']) ? htmlspecialchars($app['lrn'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
               </div>
               <div class="col-md-6">
                 <label class="text-muted small fw-semibold text-uppercase">Previous School Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['last_school_attended'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="fw-medium text-dark"><?= !empty($app['previous_school']) ? htmlspecialchars($app['previous_school'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
               </div>
-              <div class="col-12">
-                <label class="text-muted small fw-semibold text-uppercase">Previous School Address</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['last_school_address'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="col-md-6">
+                <label class="text-muted small fw-semibold text-uppercase">Previous School Type</label>
+                <div class="fw-medium text-dark"><?= !empty($app['previous_school_type']) ? htmlspecialchars($app['previous_school_type'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
               </div>
-
-              <div class="col-12"><hr class="my-1 border-light"></div>
-
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Previous Level</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['previous_school_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Strand / Course</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['previous_strand_course'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Academic Year</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars(($app['academic_year_from'] && $app['academic_year_to']) ? $app['academic_year_from'] . ' - ' . $app['academic_year_to'] : 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Status</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['previous_school_status'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Year Graduated/Attended</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['last_school_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="col-md-6">
+                <label class="text-muted small fw-semibold text-uppercase">Last School Year Attended</label>
+                <div class="fw-medium text-dark"><?= !empty($app['previous_school_year']) ? htmlspecialchars($app['previous_school_year'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Family Background -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1.3s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.4s;">
+        <!-- Family & Guardian Background -->
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="island-header border-bottom border-light">
             <i class="bi bi-people-fill"></i>
-            <h2>Family Background</h2>
+            <h2>Family & Guardian Information</h2>
           </div>
-          <div class="island-body fade-in-up" style="animation-delay: 1.5s;">
+          <div class="island-body">
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Father's Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['father_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <label class="text-muted small fw-semibold text-uppercase">Primary Guardian / Parent</label>
+                <div class="fw-medium text-dark"><?= !empty($app['guardian_name']) ? htmlspecialchars($app['guardian_name'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Father's Occupation</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['father_occupation'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <label class="text-muted small fw-semibold text-uppercase">Relationship to Applicant</label>
+                <div class="fw-medium text-dark"><?= !empty($app['guardian_relationship']) ? htmlspecialchars($app['guardian_relationship'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Father's Contact</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['father_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              
-              <div class="col-12"><hr class="my-1 border-light"></div>
-
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Mother's Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['mother_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Mother's Occupation</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['mother_occupation'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Mother's Contact</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['mother_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-
-              <div class="col-12"><hr class="my-1 border-light"></div>
-
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Guardian's Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['guardian_name'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Relationship</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['guardian_relationship'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
-              </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Guardian's Contact</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['guardian_contact'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <label class="text-muted small fw-semibold text-uppercase">Guardian Contact Number</label>
+                <div class="fw-medium text-dark"><?= !empty($app['guardian_contact']) ? htmlspecialchars($app['guardian_contact'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Emergency & Medical Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1.6s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 1.7s;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="island-header border-bottom border-light">
             <i class="bi bi-heart-pulse-fill"></i>
             <h2>Emergency & Medical Info</h2>
           </div>
-          <div class="island-body fade-in-up" style="animation-delay: 1.8s;">
+          <div class="island-body">
             <div class="row g-3">
               <div class="col-md-4">
                 <label class="text-muted small fw-semibold text-uppercase">Emergency Contact</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['emergency_contact_person'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="fw-medium text-dark"><?= !empty($app['emergency_name']) ? htmlspecialchars($app['emergency_name'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_name']) ? htmlspecialchars($health['emergency_name'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
               </div>
               <div class="col-md-4">
                 <label class="text-muted small fw-semibold text-uppercase">Relationship</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['emergency_contact_relationship'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="fw-medium text-dark"><?= !empty($app['emergency_relationship']) ? htmlspecialchars($app['emergency_relationship'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_relationship']) ? htmlspecialchars($health['emergency_relationship'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
               </div>
               <div class="col-md-4">
                 <label class="text-muted small fw-semibold text-uppercase">Contact Number</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['emergency_contact_number'] ?: 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="fw-medium text-dark"><?= !empty($app['emergency_contact']) ? htmlspecialchars($app['emergency_contact'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_contact']) ? htmlspecialchars($health['emergency_contact'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
               </div>
               
               <div class="col-12"><hr class="my-1 border-light"></div>
 
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Medical Conditions</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['medical_conditions'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="col-md-3">
+                <label class="text-muted small fw-semibold text-uppercase">Height & Weight</label>
+                <div class="fw-medium text-dark">
+                  <?= !empty($health['height']) ? htmlspecialchars($health['height']) . ' cm' : '—' ?> / 
+                  <?= !empty($health['weight']) ? htmlspecialchars($health['weight']) . ' kg' : '—' ?>
+                </div>
               </div>
-              <div class="col-md-4">
+              <div class="col-md-3">
+                <label class="text-muted small fw-semibold text-uppercase">Blood Type</label>
+                <div class="fw-medium text-dark"><?= !empty($health['blood_type']) ? htmlspecialchars($health['blood_type'], ENT_QUOTES, 'UTF-8') : '—' ?></div>
+              </div>
+              <div class="col-md-3">
                 <label class="text-muted small fw-semibold text-uppercase">Allergies</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['allergies'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="fw-medium text-dark"><?= !empty($health['allergies_details']) ? htmlspecialchars($health['allergies_details'], ENT_QUOTES, 'UTF-8') : (!empty($health['has_allergies']) ? 'Yes' : 'None') ?></div>
               </div>
-              <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Special Needs</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['special_needs'] ?: 'None', ENT_QUOTES, 'UTF-8') ?></div>
+              <div class="col-md-3">
+                <label class="text-muted small fw-semibold text-uppercase">Medical Clearance</label>
+                <div>
+                  <?php 
+                    $hStatus = $health['status'] ?? 'pending';
+                    $hBadge = match($hStatus) {
+                      'verified' => 'bg-success',
+                      'rejected' => 'bg-danger',
+                      'correction_required' => 'bg-warning text-dark',
+                      default => 'bg-secondary bg-opacity-10 text-secondary'
+                    };
+                  ?>
+                  <span class="badge <?= esc($hBadge) ?> rounded-pill text-uppercase" style="font-size: 0.7rem;"><?= ucfirst(htmlspecialchars($hStatus, ENT_QUOTES, 'UTF-8')) ?></span>
+                </div>
               </div>
+              <?php if (!empty($health['medical_conditions'])): ?>
+              <div class="col-12">
+                <label class="text-muted small fw-semibold text-uppercase">Declared Medical Conditions</label>
+                <div class="fw-medium text-dark"><?= htmlspecialchars($health['medical_conditions'], ENT_QUOTES, 'UTF-8') ?></div>
+              </div>
+              <?php endif; ?>
             </div>
           </div>
         </div>
 
         <!-- Documents -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 1.9s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 2s;">
+        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
+          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="island-header border-bottom border-light">
             <i class="bi bi-folder-fill"></i>
             <h2>Uploaded Documents</h2>
           </div>
-          <div class="island-body fade-in-up" style="animation-delay: 2.1s;">
+          <div class="island-body">
             <?php if ($app['document_submission_method'] === 'on_campus'): ?>
                <div class="alert alert-secondary bg-light border-0 text-center py-4 mb-0">
                  <i class="bi bi-building fs-2 text-muted mb-2 d-block"></i>
                  <span class="fw-medium text-dark">On-Campus Submission</span>
-                 <p class="text-muted small mb-0 mt-1">The applicant elected to present physical documents.</p>
+                 <p class="text-muted small mb-0 mt-1">The applicant elected to present physical documents in person.</p>
                </div>
             <?php elseif (empty($documents)): ?>
                <p class="text-muted mb-0 small">No documents have been uploaded yet.</p>
@@ -415,12 +390,12 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
       <!-- Right Column: Administrative Action -->
       <div class="col-lg-4">
         
-        <div class="island border-primary border-top border-4 sticky-top fade-in-up" style="top: 80px; animation-delay: 2.2s;">
-          <div class="island-header bg-primary-light fade-in-up" style="animation-delay: 2.3s;">
+        <div class="island border-primary border-top border-4 sticky-top" style="top: 80px;">
+          <div class="island-header bg-primary-light">
             <i class="bi bi-shield-lock-fill text-primary"></i>
             <h2 class="text-primary">Admin Action Panel</h2>
           </div>
-          <div class="island-body fade-in-up" style="animation-delay: 2.4s;">
+          <div class="island-body">
             
               <?php if (hasPermission('enrollment.finalize') && empty($app['section_id'])): ?>
               <div class="mb-3 p-3 bg-white rounded border border-primary">
@@ -748,5 +723,3 @@ document.addEventListener('DOMContentLoaded', function() {
 </main>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>
-
-

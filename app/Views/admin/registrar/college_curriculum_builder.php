@@ -18,21 +18,59 @@ require_once __DIR__ . '/../../components/header.php';
           </a>
           <h1 class="h3 fw-bold text-dark mb-1"><?= htmlspecialchars($curriculum['curriculum_name']) ?></h1>
           <p class="text-muted mb-0">
-            <?= htmlspecialchars($curriculum['program_code']) ?> | Version <?= htmlspecialchars($curriculum['version']) ?> | 
+            <?= htmlspecialchars($curriculum['program_code']) ?> | Version <?= htmlspecialchars($curriculum['version']) ?> | Effective AY: <?= htmlspecialchars($curriculum['effective_academic_year'] ?? 'N/A') ?> | 
             <?php if ($curriculum['status'] === 'active'): ?>
-                <span class="text-success fw-medium"><i class="bi bi-check-circle-fill me-1"></i>Active</span>
+                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-medium"><i class="bi bi-shield-check me-1"></i>Active - Immutable</span>
+            <?php elseif ($curriculum['status'] === 'draft'): ?>
+                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1 fw-medium"><i class="bi bi-pencil-fill me-1"></i>Draft - Editable</span>
             <?php else: ?>
-                <span class="text-secondary fw-medium"><i class="bi bi-circle me-1"></i><?= ucfirst($curriculum['status']) ?></span>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-1 fw-medium"><i class="bi bi-archive-fill me-1"></i>Archived - Read Only</span>
             <?php endif; ?>
           </p>
         </div>
-        <div>
-          <button class="btn btn-primary fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
-            <i class="bi bi-plus-lg me-1"></i> Add Subject
-          </button>
+        <div class="d-flex gap-2">
+          <?php if ($curriculum['status'] === 'draft'): ?>
+            <button class="btn btn-primary fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+              <i class="bi bi-plus-lg me-1"></i> Add Subject
+            </button>
+            <?php if (!empty($subjectsRaw)): ?>
+              <button type="button" class="btn btn-success fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#builderActivateModal">
+                <i class="bi bi-check-circle me-1"></i> Activate Curriculum
+              </button>
+            <?php endif; ?>
+          <?php elseif ($curriculum['status'] === 'active'): ?>
+            <button class="btn btn-primary fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#builderCloneModal">
+              <i class="bi bi-files me-1"></i> Create New Version
+            </button>
+          <?php endif; ?>
         </div>
       </div>
     </div>
+
+    <?php if ($curriculum['status'] === 'active'): ?>
+      <div class="alert alert-warning border-0 shadow-sm rounded-12 p-3 mb-4 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <i class="bi bi-shield-lock-fill fs-3 text-warning"></i>
+          <div>
+            <h6 class="fw-bold mb-1 text-dark">Curriculum Structure is Locked (Active)</h6>
+            <p class="mb-0 text-muted small">This curriculum is active and its academic structure is locked. Create a new version to make changes.</p>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-primary rounded-pill px-4 fw-medium shadow-sm" data-bs-toggle="modal" data-bs-target="#builderCloneModal">
+          <i class="bi bi-files me-1"></i> Create New Version
+        </button>
+      </div>
+    <?php elseif ($curriculum['status'] === 'archived'): ?>
+      <div class="alert alert-secondary border-0 shadow-sm rounded-12 p-3 mb-4 d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-3">
+          <i class="bi bi-archive-fill fs-3 text-secondary"></i>
+          <div>
+            <h6 class="fw-bold mb-1 text-dark">Historical Curriculum (Archived)</h6>
+            <p class="mb-0 text-muted small">This curriculum is archived and read-only for historical records.</p>
+          </div>
+        </div>
+      </div>
+    <?php endif; ?>
 
     <?php if ($successMsg): ?>
       <div class="alert alert-success shadow-sm rounded-12"><i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
@@ -61,9 +99,13 @@ require_once __DIR__ . '/../../components/header.php';
                         <span class="text-muted">Lecture Units</span>
                         <span class="fw-bold text-dark"><?= esc($lectureUnits) ?></span>
                     </div>
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
                         <span class="text-muted">Lab Units</span>
                         <span class="fw-bold text-dark"><?= esc($labUnits) ?></span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Active Usage</span>
+                        <span class="badge bg-light text-dark border"><?= (int)($curriculum['total_usage'] ?? 0) ?> references</span>
                     </div>
                 </div>
             </div>
@@ -85,9 +127,11 @@ require_once __DIR__ . '/../../components/header.php';
                     <i class="bi bi-diagram-3 fs-1 text-muted d-block mb-3"></i>
                     <h5 class="fw-bold text-dark">Curriculum is Empty</h5>
                     <p class="text-muted">Start building this curriculum by adding subjects.</p>
-                    <button class="btn btn-outline-primary fw-medium rounded-pill px-4 mt-2" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
-                        Add First Subject
-                    </button>
+                    <?php if ($curriculum['status'] === 'draft'): ?>
+                      <button class="btn btn-outline-primary fw-medium rounded-pill px-4 mt-2" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+                          Add First Subject
+                      </button>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <?php 
@@ -114,10 +158,12 @@ require_once __DIR__ . '/../../components/header.php';
                                             <thead class="border-bottom text-muted small text-uppercase">
                                                 <tr>
                                                     <th class="ps-4" style="width: 15%">Code</th>
-                                                    <th style="width: 40%">Title</th>
+                                                    <th style="<?= $curriculum['status'] === 'draft' ? 'width: 40%' : 'width: 60%' ?>">Title</th>
                                                     <th style="width: 10%">Type</th>
                                                     <th style="width: 10%">Units</th>
-                                                    <th class="text-end pe-4" style="width: 25%">Manage</th>
+                                                    <?php if ($curriculum['status'] === 'draft'): ?>
+                                                      <th class="text-end pe-4" style="width: 25%">Manage</th>
+                                                    <?php endif; ?>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -127,39 +173,41 @@ require_once __DIR__ . '/../../components/header.php';
                                                         <td class="searchable-name"><?= htmlspecialchars($sub['subject_name']) ?></td>
                                                         <td><span class="badge bg-light text-secondary border"><?= htmlspecialchars($sub['subject_type'] ?? 'Lecture') ?></span></td>
                                                         <td class="fw-medium text-success"><?= esc($sub['units']) ?></td>
-                                                        <td class="text-end pe-4">
-                                                            <div class="btn-group btn-group-sm me-2 shadow-sm rounded-pill">
-                                                                <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0">
-                                                                    <?= getCsrfInput() ?>
-                                                                    <input type="hidden" name="action" value="move_subject">
-                                                                    <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
-                                                                    <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
-                                                                    <input type="hidden" name="direction" value="up">
-                                                                    <button type="submit" class="btn btn-light border-end py-1 px-2" title="Move Up" <?= esc($index === 0 ? 'disabled' : '') ?>><i class="bi bi-arrow-up text-secondary"></i></button>
-                                                                </form>
-                                                                <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0">
-                                                                    <?= getCsrfInput() ?>
-                                                                    <input type="hidden" name="action" value="move_subject">
-                                                                    <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
-                                                                    <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
-                                                                    <input type="hidden" name="direction" value="down">
-                                                                    <button type="submit" class="btn btn-light py-1 px-2" title="Move Down" <?= esc($index === count($subjects[$yl][$sem]) - 1 ? 'disabled' : '') ?>><i class="bi bi-arrow-down text-secondary"></i></button>
-                                                                </form>
-                                                            </div>
-                                                            <button class="btn btn-sm btn-outline-primary rounded-circle px-2 py-1" title="Edit Assignment"
-                                                                    onclick="openEditSubject(<?= esc($sub['mapping_id']) ?>, '<?= htmlspecialchars(addslashes($sub['subject_code']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($yl), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($sem), ENT_QUOTES, 'UTF-8') ?>')">
-                                                                <i class="bi bi-pencil-fill"></i>
-                                                            </button>
-                                                            <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Remove <?= htmlspecialchars(addslashes($sub['subject_code'])) ?> from this curriculum?');">
-                                                                <?= getCsrfInput() ?>
-                                                                <input type="hidden" name="action" value="delete_subject">
-                                                                <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
-                                                                <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
-                                                                <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle px-2 py-1 ms-1" title="Remove Subject">
-                                                                    <i class="bi bi-trash-fill"></i>
-                                                                </button>
-                                                            </form>
-                                                        </td>
+                                                        <?php if ($curriculum['status'] === 'draft'): ?>
+                                                          <td class="text-end pe-4">
+                                                              <div class="btn-group btn-group-sm me-2 shadow-sm rounded-pill">
+                                                                  <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0">
+                                                                      <?= getCsrfInput() ?>
+                                                                      <input type="hidden" name="action" value="move_subject">
+                                                                      <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
+                                                                      <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
+                                                                      <input type="hidden" name="direction" value="up">
+                                                                      <button type="submit" class="btn btn-light border-end py-1 px-2" title="Move Up" <?= esc($index === 0 ? 'disabled' : '') ?>><i class="bi bi-arrow-up text-secondary"></i></button>
+                                                                  </form>
+                                                                  <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0">
+                                                                      <?= getCsrfInput() ?>
+                                                                      <input type="hidden" name="action" value="move_subject">
+                                                                      <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
+                                                                      <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
+                                                                      <input type="hidden" name="direction" value="down">
+                                                                      <button type="submit" class="btn btn-light py-1 px-2" title="Move Down" <?= esc($index === count($subjects[$yl][$sem]) - 1 ? 'disabled' : '') ?>><i class="bi bi-arrow-down text-secondary"></i></button>
+                                                                  </form>
+                                                              </div>
+                                                              <button class="btn btn-sm btn-outline-primary rounded-circle px-2 py-1" title="Edit Assignment"
+                                                                      onclick="openEditSubject(<?= esc($sub['mapping_id']) ?>, '<?= htmlspecialchars(addslashes($sub['subject_code']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($yl), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($sem), ENT_QUOTES, 'UTF-8') ?>')">
+                                                                  <i class="bi bi-pencil-fill"></i>
+                                                              </button>
+                                                              <form action="college_curriculum_process.php" method="POST" class="d-inline m-0 p-0" onsubmit="return confirm('Remove <?= htmlspecialchars(addslashes($sub['subject_code'])) ?> from this curriculum?');">
+                                                                  <?= getCsrfInput() ?>
+                                                                  <input type="hidden" name="action" value="delete_subject">
+                                                                  <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
+                                                                  <input type="hidden" name="subject_mapping_id" value="<?= esc($sub['mapping_id']) ?>">
+                                                                  <button type="submit" class="btn btn-sm btn-outline-danger rounded-circle px-2 py-1 ms-1" title="Remove Subject">
+                                                                      <i class="bi bi-trash-fill"></i>
+                                                                  </button>
+                                                              </form>
+                                                          </td>
+                                                        <?php endif; ?>
                                                     </tr>
                                                 <?php endforeach; ?>
                                             </tbody>
@@ -266,6 +314,93 @@ require_once __DIR__ . '/../../components/header.php';
         <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
           <button type="button" class="btn btn-light rounded-pill px-3 fw-medium" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-success rounded-pill px-3 fw-medium shadow-sm">Save Move</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Builder Clone Modal -->
+<div class="modal fade" id="builderCloneModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
+        <input type="hidden" name="action" value="clone_curriculum">
+        <input type="hidden" name="source_curriculum_id" value="<?= esc($currId) ?>">
+        <div class="modal-header bg-primary text-white border-bottom-0 pb-3">
+          <h5 class="modal-title fw-bold"><i class="bi bi-files me-2"></i>Clone to New Version</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4 pt-3">
+            <div class="alert alert-light border py-2 px-3 small mb-3">
+              Cloning source: <strong class="text-primary"><?= htmlspecialchars($curriculum['curriculum_name']) ?> (v<?= htmlspecialchars($curriculum['version']) ?>)</strong>
+            </div>
+            <?php
+              $curVer = (float)$curriculum['version'];
+              $nextVer = $curVer > 0 ? number_format($curVer + 1.0, 1) : '2.0';
+              $suggestedName = preg_replace('/\bv\d+(\.\d+)?\b/i', '', $curriculum['curriculum_name']);
+              $suggestedName = trim($suggestedName) . ' (v' . $nextVer . ')';
+            ?>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">New Curriculum Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control bg-light" name="curriculum_name" value="<?= htmlspecialchars($suggestedName) ?>" required>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark">New Version Tag <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control bg-light" name="version" value="<?= htmlspecialchars($nextVer) ?>" placeholder="e.g. 2.0" required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark">Effective Academic Year <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control bg-light" name="effective_academic_year" value="<?= htmlspecialchars($curriculum['effective_academic_year'] ?? '') ?>" placeholder="e.g. 2027-2028" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">Description</label>
+                <textarea class="form-control bg-light" name="description" rows="2" placeholder="Notes regarding this revision..."><?= htmlspecialchars($curriculum['description'] ?? '') ?></textarea>
+            </div>
+            <p class="small text-muted mb-0">
+              <i class="bi bi-check2-all text-success me-1"></i> All <?= count($subjectsRaw) ?> subjects will be duplicated into the new <strong>Draft</strong> version where you can freely add, reassign, or remove subjects.
+            </p>
+        </div>
+        <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+          <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary px-4 rounded-pill fw-medium shadow-sm">Clone into Draft</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Builder Activate Modal -->
+<div class="modal fade" id="builderActivateModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
+        <input type="hidden" name="action" value="activate_curriculum">
+        <input type="hidden" name="curriculum_id" value="<?= esc($currId) ?>">
+        <div class="modal-header bg-success text-white border-bottom-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-shield-check me-2"></i>Activate Curriculum</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+            <i class="bi bi-shield-lock-fill text-success fs-1 d-block mb-3"></i>
+            <h5 class="fw-bold text-dark mb-2">Activate <?= htmlspecialchars($curriculum['curriculum_name']) ?>?</h5>
+            <p class="text-muted small">
+              Activating this curriculum will <strong>lock its academic structure</strong> for official student enrollment and class scheduling. You will not be able to add, reassign, or remove subjects directly once active.
+            </p>
+            <div class="form-check text-start d-inline-block bg-light p-3 rounded-12 border mt-2">
+              <input class="form-check-input" type="checkbox" name="archive_previous" value="1" id="builderArchivePrevious" checked>
+              <label class="form-check-label small fw-semibold text-dark" for="builderArchivePrevious">
+                Archive previous active versions of this program
+              </label>
+            </div>
+        </div>
+        <div class="modal-footer border-top-0 d-flex justify-content-center pb-4">
+          <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success px-4 rounded-pill fw-medium shadow-sm">Yes, Activate Curriculum</button>
         </div>
       </form>
     </div>

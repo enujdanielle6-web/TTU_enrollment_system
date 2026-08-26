@@ -80,7 +80,7 @@ function getApplicationTimelineSteps(string $status, string $docMethod = 'online
         [
             'key' => 'documents',
             'label' => $docMethod === 'on_campus' ? 'On-Campus Verification' : 'Documents Upload',
-            'description' => $docMethod === 'on_campus' ? 'Physical verification scheduled at the admissions office.' : 'Required academic documents uploaded (Verification pending).',
+            'description' => $docMethod === 'on_campus' ? 'Physical document verification required at the Admissions Office before approval.' : 'Required academic documents uploaded (Verification pending).',
             'state' => 'pending',
             'timestamp' => $timestamps['documents'] ?? null,
         ],
@@ -237,7 +237,7 @@ function getStepAction(array $step, ?array $application = null, ?string $healthS
             ],
             'documents' => [
                 'url' => 'documents.php',
-                'label' => ($application['document_submission_method'] ?? '') === 'on_campus' ? 'View Details' : 'Upload Documents',
+                'label' => ($application['document_submission_method'] ?? '') === 'on_campus' ? 'View Campus Guide' : 'Upload Documents',
                 'icon' => ($application['document_submission_method'] ?? '') === 'on_campus' ? 'bi-building' : 'bi-cloud-arrow-up-fill',
                 'class' => 'btn-primary'
             ],

@@ -282,8 +282,8 @@ try {
     $progStmt = $pdo->query("SELECT id, code, name FROM shs_strands WHERE is_active = 1 ORDER BY code ASC");
     $programs = $progStmt->fetchAll();
 
-    // Fetch active curricula for Add Section modal
-    $currStmt = $pdo->query("SELECT id, strand_id, curriculum_name, version, effective_academic_year FROM shs_curricula WHERE status = 'active' ORDER BY strand_id ASC, version DESC");
+    // Fetch active & archived curricula for Add Section modal
+    $currStmt = $pdo->query("SELECT id, strand_id, curriculum_name, version, effective_academic_year, status FROM shs_curricula WHERE status IN ('active', 'archived') ORDER BY strand_id ASC, version DESC");
     $curricula = $currStmt->fetchAll();
 } catch (PDOException $e) {
     error_log('Error fetching shs_sections: ' . $e->getMessage());

@@ -52,7 +52,7 @@ class HealthController extends BaseController
         $userId = (int) $_SESSION['user_id'];
         $pdo = Database::getConnection();
 
-        $appStmt = $pdo->prepare('SELECT id FROM applications WHERE user_id = :user_id LIMIT 1');
+        $appStmt = $pdo->prepare('SELECT id, emergency_name, emergency_relationship, emergency_contact, guardian_name, guardian_relationship, guardian_contact FROM applications WHERE user_id = :user_id LIMIT 1');
         $appStmt->execute(['user_id' => $userId]);
         $application = $appStmt->fetch();
 
@@ -63,6 +63,8 @@ class HealthController extends BaseController
         }
         $appId = (int) $application['id'];
 
+        $heightRaw = trim((string) $request->input('height', ''));
+        $weightRaw = trim((string) $request->input('weight', ''));
         $heightVal = (float) $heightRaw;
         $weightVal = (float) $weightRaw;
         $height = $heightRaw !== '' ? $heightRaw . ' cm' : '';
@@ -88,6 +90,17 @@ class HealthController extends BaseController
         $emergencyName = trim((string) $request->input('emergency_name', ''));
         $emergencyRelationship = trim((string) $request->input('emergency_relationship', ''));
         $emergencyContact = trim((string) $request->input('emergency_contact', ''));
+
+        // Fallback to existing application emergency or guardian contacts if blank
+        if ($emergencyName === '') {
+            $emergencyName = !empty($application['emergency_name']) ? $application['emergency_name'] : (!empty($application['guardian_name']) ? $application['guardian_name'] : '');
+        }
+        if ($emergencyRelationship === '') {
+            $emergencyRelationship = !empty($application['emergency_relationship']) ? $application['emergency_relationship'] : (!empty($application['guardian_relationship']) ? $application['guardian_relationship'] : 'Guardian');
+        }
+        if ($emergencyContact === '') {
+            $emergencyContact = !empty($application['emergency_contact']) ? $application['emergency_contact'] : (!empty($application['guardian_contact']) ? $application['guardian_contact'] : '');
+        }
 
         if (empty($heightRaw) || empty($weightRaw) || empty($bloodType) || empty($emergencyName) || empty($emergencyRelationship) || empty($emergencyContact)) {
             $_SESSION['error_msg'] = 'Please fill out all required physical and emergency contact fields.';

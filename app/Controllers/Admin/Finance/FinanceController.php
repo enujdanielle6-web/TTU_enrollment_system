@@ -38,9 +38,9 @@ try {
     $stmt = $pdo->prepare('
         SELECT sa.*, 
                u.first_name, u.last_name, u.email,
-               a.reference_number, a.academic_level, a.grade_level, a.strand,
+               a.reference_number, a.academic_level, a.grade_level, a.strand, a.semester,
                s.name as scholarship_name,
-               ft.is_per_unit
+               ft.is_per_unit, ft.tuition_fee as template_tuition_rate
         FROM student_assessments sa
         INNER JOIN users u ON sa.user_id = u.id
         INNER JOIN applications a ON sa.application_id = a.id
@@ -56,14 +56,6 @@ try {
         return;
     }
 
-    // Calculate balances
-    $totalAmount = (float)$assessment['total_amount'];
-    $discountAmount = (float)$assessment['discount_amount'];
-    $netAmount = (float)$assessment['net_amount'];
-    $totalPaid = (float)$assessment['total_paid'];
-    $balance = $netAmount - $totalPaid;
-    if ($balance < 0) $balance = 0;
-
     // Fetch Payment History (Receipts) for this assessment
     $payStmt = $pdo->prepare('
         SELECT pr.*, u.first_name as cashier_first, u.last_name as cashier_last
@@ -75,7 +67,7 @@ try {
     $payStmt->execute(['id' => $assessmentId]);
     $payments = $payStmt->fetchAll();
 
-    // Fetch Enrolled Subjects
+    // Fetch Enrolled / Curriculum Subjects
     $enrolledSubjects = [];
     if ($assessment['academic_level'] === 'College') {
         $subStmt = $pdo->prepare('
@@ -86,6 +78,40 @@ try {
         ');
         $subStmt->execute(['app_id' => $assessment['application_id']]);
         $enrolledSubjects = $subStmt->fetchAll();
+
+        if (empty($enrolledSubjects)) {
+            $appSecStmt = $pdo->prepare('SELECT section_id FROM applications WHERE id = :app_id');
+            $appSecStmt->execute(['app_id' => $assessment['application_id']]);
+            $secId = $appSecStmt->fetchColumn();
+            if ($secId) {
+                $secSubStmt = $pdo->prepare('
+                    SELECT s.subject_code, s.subject_name, s.units
+                    FROM college_section_subjects css
+                    JOIN subjects s ON css.subject_id = s.id
+                    WHERE css.college_section_id = :sec_id
+                ');
+                $secSubStmt->execute(['sec_id' => $secId]);
+                $enrolledSubjects = $secSubStmt->fetchAll();
+            }
+        }
+
+        if (empty($enrolledSubjects)) {
+            $currSubStmt = $pdo->prepare('
+                SELECT s.subject_code, s.subject_name, s.units
+                FROM college_curriculum_subjects ccs
+                JOIN subjects s ON ccs.subject_id = s.id
+                JOIN college_curricula cc ON ccs.curriculum_id = cc.id
+                JOIN college_programs p ON cc.program_id = p.id
+                WHERE p.code = :strand AND ccs.year_level = :year_level AND ccs.semester = :semester
+                ORDER BY ccs.display_order ASC
+            ');
+            $currSubStmt->execute([
+                'strand' => $assessment['strand'],
+                'year_level' => $assessment['grade_level'],
+                'semester' => $assessment['semester'] ?? 'First'
+            ]);
+            $enrolledSubjects = $currSubStmt->fetchAll();
+        }
     } elseif ($assessment['academic_level'] === 'Senior High School') {
         $subStmt = $pdo->prepare('
             SELECT s.subject_code, s.subject_name, s.units 
@@ -95,7 +121,76 @@ try {
         ');
         $subStmt->execute(['app_id' => $assessment['application_id']]);
         $enrolledSubjects = $subStmt->fetchAll();
+
+        if (empty($enrolledSubjects)) {
+            $appSecStmt = $pdo->prepare('SELECT section_id FROM applications WHERE id = :app_id');
+            $appSecStmt->execute(['app_id' => $assessment['application_id']]);
+            $secId = $appSecStmt->fetchColumn();
+            if ($secId) {
+                $secSubStmt = $pdo->prepare('
+                    SELECT s.subject_code, s.subject_name, s.units
+                    FROM shs_section_subjects ss
+                    JOIN subjects s ON ss.subject_id = s.id
+                    WHERE ss.shs_section_id = :sec_id
+                ');
+                $secSubStmt->execute(['sec_id' => $secId]);
+                $enrolledSubjects = $secSubStmt->fetchAll();
+            }
+        }
+
+        if (empty($enrolledSubjects)) {
+            $currSubStmt = $pdo->prepare('
+                SELECT s.subject_code, s.subject_name, s.units
+                FROM shs_curriculum_subjects scs
+                JOIN subjects s ON scs.subject_id = s.id
+                JOIN shs_curricula sc ON scs.curriculum_id = sc.id
+                JOIN shs_strands st ON sc.strand_id = st.id
+                WHERE st.code = :strand AND scs.grade_level = :grade_level AND scs.semester = :semester
+                ORDER BY scs.display_order ASC
+            ');
+            $currSubStmt->execute([
+                'strand' => $assessment['strand'],
+                'grade_level' => $assessment['grade_level'],
+                'semester' => $assessment['semester'] ?? 'First'
+            ]);
+            $enrolledSubjects = $currSubStmt->fetchAll();
+        }
     }
+
+    // Auto-sync dynamic tuition fee ONLY for open/unpaid assessments with 0 payments recorded
+    $isUnpaid = ($assessment['payment_status'] === 'unpaid');
+    $hasNoPayments = ((float)($assessment['total_paid'] ?? 0) == 0.0);
+
+    if (!empty($assessment['is_per_unit']) && !empty($enrolledSubjects) && $isUnpaid && $hasNoPayments) {
+        $calcUnits = (int) array_sum(array_column($enrolledSubjects, 'units'));
+        $unitRate = (float)($assessment['template_tuition_rate'] ?? 500.0);
+        $calculatedTuition = $calcUnits * $unitRate;
+
+        if (((float)$assessment['tuition_fee'] !== $calculatedTuition || (float)$assessment['total_amount'] <= 0) && $calculatedTuition > 0) {
+            $calculatedTotal = $calculatedTuition + (float)$assessment['miscellaneous_fee'] + (float)$assessment['registration_fee'] + (float)$assessment['laboratory_fee'] + (float)$assessment['other_fees'];
+            $calculatedNet = $calculatedTotal - (float)$assessment['discount_amount'];
+
+            $syncStmt = $pdo->prepare('UPDATE student_assessments SET tuition_fee = :tuition, total_amount = :total, net_amount = :net WHERE id = :id');
+            $syncStmt->execute([
+                'tuition' => $calculatedTuition,
+                'total' => $calculatedTotal,
+                'net' => $calculatedNet,
+                'id' => $assessment['id']
+            ]);
+
+            $assessment['tuition_fee'] = $calculatedTuition;
+            $assessment['total_amount'] = $calculatedTotal;
+            $assessment['net_amount'] = $calculatedNet;
+        }
+    }
+
+    // Calculate balances
+    $totalAmount = (float)$assessment['total_amount'];
+    $discountAmount = (float)$assessment['discount_amount'];
+    $netAmount = (float)$assessment['net_amount'];
+    $totalPaid = (float)$assessment['total_paid'];
+    $balance = $netAmount - $totalPaid;
+    if ($balance < 0) $balance = 0;
 
 } catch (PDOException $e) {
     error_log('Admin assessment fetch failed: ' . $e->getMessage());

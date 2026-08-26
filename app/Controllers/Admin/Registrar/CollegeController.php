@@ -38,7 +38,11 @@ try {
     $stmt = $pdo->query("
         SELECT cc.id, cc.program_id, cc.curriculum_name, cc.version, cc.effective_academic_year, cc.status, cc.description, cc.created_at,
                p.code as program_code,
-               (SELECT COUNT(id) FROM college_curriculum_subjects WHERE curriculum_id = cc.id) as subject_count
+               (SELECT COUNT(id) FROM college_curriculum_subjects WHERE curriculum_id = cc.id) as subject_count,
+               (SELECT COALESCE(SUM(s.units), 0) FROM college_curriculum_subjects ccs JOIN subjects s ON ccs.subject_id = s.id WHERE ccs.curriculum_id = cc.id) as total_units,
+               (SELECT COUNT(id) FROM users WHERE college_curriculum_id = cc.id) as student_count,
+               (SELECT COUNT(id) FROM college_sections WHERE curriculum_id = cc.id) as section_count,
+               (SELECT COUNT(id) FROM applications WHERE college_curriculum_id = cc.id) as application_count
         FROM college_curricula cc
         INNER JOIN college_programs p ON cc.program_id = p.id
         ORDER BY p.code ASC, cc.curriculum_name ASC
@@ -66,10 +70,13 @@ if ($currId <= 0) {
     return;
 }
 
-// Fetch curriculum metadata
+// Fetch curriculum metadata with usage counts
 try {
     $stmt = $pdo->prepare("
-        SELECT cc.*, p.code as program_code, p.name as program_name 
+        SELECT cc.*, p.code as program_code, p.name as program_name,
+               (SELECT COUNT(id) FROM users WHERE college_curriculum_id = cc.id) as student_count,
+               (SELECT COUNT(id) FROM college_sections WHERE curriculum_id = cc.id) as section_count,
+               (SELECT COUNT(id) FROM applications WHERE college_curriculum_id = cc.id) as application_count
         FROM college_curricula cc 
         INNER JOIN college_programs p ON cc.program_id = p.id 
         WHERE cc.id = ?
@@ -84,6 +91,8 @@ if (!$curriculum) {
     $response->redirect("/sia/admin/registrar/college_curriculum.php");
     return;
 }
+
+$curriculum['total_usage'] = (int)$curriculum['student_count'] + (int)$curriculum['section_count'] + (int)$curriculum['application_count'];
 
 $pageTitle = htmlspecialchars($curriculum['curriculum_name']) . ' - Builder';
 
@@ -216,193 +225,548 @@ return;
     public function processCurriculum(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/admin/registrar/college_curriculum.php");
-    return;
-}
-
-
-
-$action = $_POST['action'] ?? '';
-
-if ($action === 'create_curriculum') {
-    $programId = (int)($_POST['program_id'] ?? 0);
-    $name = trim($_POST['curriculum_name'] ?? '');
-    $version = trim($_POST['version'] ?? '1.0');
-    $ay = trim($_POST['effective_academic_year'] ?? '');
-    $status = trim($_POST['status'] ?? 'active');
-    $desc = trim($_POST['description'] ?? '');
-
-    if ($programId <= 0 || $name === '' || $ay === '') {
-        $_SESSION['error_msg'] = 'Program, Curriculum Name, and Academic Year are required.';
-        $response->redirect("/sia/admin/registrar/college_curriculum.php");
-        return;
-    }
-
-    try {
-        $stmt = $pdo->prepare("INSERT INTO college_curricula (program_id, curriculum_name, version, effective_academic_year, description, status) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$programId, $name, $version, $ay, $desc ?: null, $status]);
-        $_SESSION['success_msg'] = "Curriculum created successfully.";
-    } catch (PDOException $e) {
-        $_SESSION['error_msg'] = "Failed to create curriculum: " . $e->getMessage();
-    }
-    $response->redirect("/sia/admin/registrar/college_curriculum.php");
-    return;
-} elseif ($action === 'update_curriculum') {
-    $id = (int)($_POST['curriculum_id'] ?? 0);
-    $programId = (int)($_POST['program_id'] ?? 0);
-    $name = trim($_POST['curriculum_name'] ?? '');
-    $version = trim($_POST['version'] ?? '1.0');
-    $ay = trim($_POST['effective_academic_year'] ?? '');
-    $status = trim($_POST['status'] ?? 'active');
-    $desc = trim($_POST['description'] ?? '');
-
-    if ($id <= 0 || $programId <= 0 || $name === '' || $ay === '') {
-        $_SESSION['error_msg'] = 'Invalid or missing data for updating curriculum.';
-        $response->redirect("/sia/admin/registrar/college_curriculum.php");
-        return;
-    }
-
-    try {
-        $stmt = $pdo->prepare("UPDATE college_curricula SET program_id = ?, curriculum_name = ?, version = ?, effective_academic_year = ?, description = ?, status = ? WHERE id = ?");
-        $stmt->execute([$programId, $name, $version, $ay, $desc ?: null, $status, $id]);
-        $_SESSION['success_msg'] = "Curriculum updated successfully.";
-    } catch (PDOException $e) {
-        $_SESSION['error_msg'] = "Failed to update curriculum: " . $e->getMessage();
-    }
-    $response->redirect("/sia/admin/registrar/college_curriculum.php");
-    return;
-} elseif ($action === 'delete_curriculum') {
-    $id = (int)($_POST['curriculum_id'] ?? 0);
-    
-    if ($id <= 0) {
-        $_SESSION['error_msg'] = "Invalid Curriculum ID.";
-        $response->redirect("/sia/admin/registrar/college_curriculum.php");
-        return;
-    }
-    
-    try {
-        $stmt = $pdo->prepare("DELETE FROM college_curricula WHERE id = ?");
-        $stmt->execute([$id]);
-        $_SESSION['success_msg'] = "Curriculum deleted successfully.";
-    } catch (PDOException $e) {
-        $_SESSION['error_msg'] = "Failed to delete curriculum: " . $e->getMessage();
-    }
-    $response->redirect("/sia/admin/registrar/college_curriculum.php");
-    return;
-} elseif ($action === 'add_subject') {
-    $currId = (int)($_POST['curriculum_id'] ?? 0);
-    $subjectId = (int)($_POST['subject_id'] ?? 0);
-    $yearLevel = trim($_POST['year_level'] ?? '');
-    $semester = trim($_POST['semester'] ?? '');
-    
-    if ($currId <= 0 || $subjectId <= 0 || $yearLevel === '' || $semester === '') {
-        $_SESSION['error_msg'] = "All fields are required to add a subject.";
-        $response->redirect("/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
-        return;
-    }
-
-    try {
-        // Get max display order
-        $ordStmt = $pdo->prepare("SELECT MAX(display_order) FROM college_curriculum_subjects WHERE curriculum_id = ? AND year_level = ? AND semester = ?");
-        $ordStmt->execute([$currId, $yearLevel, $semester]);
-        $maxOrder = (int)$ordStmt->fetchColumn();
-
-        $stmt = $pdo->prepare("INSERT INTO college_curriculum_subjects (curriculum_id, subject_id, year_level, semester, display_order) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$currId, $subjectId, $yearLevel, $semester, $maxOrder + 1]);
-        $_SESSION['success_msg'] = "Subject added successfully.";
-    } catch (PDOException $e) {
-        if ($e->getCode() == 23000) {
-            $_SESSION['error_msg'] = "Subject is already assigned to this year and semester.";
-        } else {
-            $_SESSION['error_msg'] = "Failed to add subject: " . $e->getMessage();
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $response->redirect("/sia/admin/registrar/college_curriculum.php");
+            return;
         }
-    }
-    $response->redirect("/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
-    return;
-} elseif ($action === 'edit_subject') {
-    $subId = (int)($_POST['subject_mapping_id'] ?? 0);
-    $currId = (int)($_POST['curriculum_id'] ?? 0);
-    $yearLevel = trim($_POST['year_level'] ?? '');
-    $semester = trim($_POST['semester'] ?? '');
 
-    try {
-        // Get max display order in new year/sem
-        $ordStmt = $pdo->prepare("SELECT MAX(display_order) FROM college_curriculum_subjects WHERE curriculum_id = ? AND year_level = ? AND semester = ?");
-        $ordStmt->execute([$currId, $yearLevel, $semester]);
-        $maxOrder = (int)$ordStmt->fetchColumn();
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') 
+                  || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)
+                  || isset($_POST['ajax']);
 
-        $stmt = $pdo->prepare("UPDATE college_curriculum_subjects SET year_level = ?, semester = ?, display_order = ? WHERE id = ?");
-        $stmt->execute([$yearLevel, $semester, $maxOrder + 1, $subId]);
-        $_SESSION['success_msg'] = "Subject updated successfully.";
-    } catch (PDOException $e) {
-        if ($e->getCode() == 23000) {
-            $_SESSION['error_msg'] = "Subject is already assigned to that year and semester.";
-        } else {
-            $_SESSION['error_msg'] = "Failed to update subject: " . $e->getMessage();
-        }
-    }
-    $response->redirect("/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
-    return;
-} elseif ($action === 'delete_subject') {
-    $subId = (int)($_POST['subject_mapping_id'] ?? 0);
-    $currId = (int)($_POST['curriculum_id'] ?? 0);
-
-    try {
-        $stmt = $pdo->prepare("DELETE FROM college_curriculum_subjects WHERE id = ?");
-        $stmt->execute([$subId]);
-        $_SESSION['success_msg'] = "Subject removed from curriculum.";
-    } catch (PDOException $e) {
-        $_SESSION['error_msg'] = "Failed to remove subject: " . $e->getMessage();
-    }
-    $response->redirect("/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
-    return;
-} elseif ($action === 'move_subject') {
-    $subId = (int)($_POST['subject_mapping_id'] ?? 0);
-    $currId = (int)($_POST['curriculum_id'] ?? 0);
-    $direction = $_POST['direction'] ?? 'up';
-
-    try {
-        $pdo->beginTransaction();
-        
-        $stmt = $pdo->prepare("SELECT year_level, semester, display_order FROM college_curriculum_subjects WHERE id = ?");
-        $stmt->execute([$subId]);
-        $current = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($current) {
-            $yearLevel = $current['year_level'];
-            $semester = $current['semester'];
-            $currentOrder = (int)$current['display_order'];
-            
-            $swapStmt = null;
-            if ($direction === 'up') {
-                $swapStmt = $pdo->prepare("SELECT id, display_order FROM college_curriculum_subjects WHERE curriculum_id = ? AND year_level = ? AND semester = ? AND display_order < ? ORDER BY display_order DESC LIMIT 1");
+        $sendResponse = function(bool $success, string $message, array $data = [], ?string $redirectUrl = null) use ($isAjax, $response) {
+            if ($isAjax) {
+                header('Content-Type: application/json');
+                echo json_encode(array_merge([
+                    'success' => $success,
+                    'message' => $message
+                ], $data));
+                exit;
+            }
+            if ($success) {
+                $_SESSION['success_msg'] = $message;
             } else {
-                $swapStmt = $pdo->prepare("SELECT id, display_order FROM college_curriculum_subjects WHERE curriculum_id = ? AND year_level = ? AND semester = ? AND display_order > ? ORDER BY display_order ASC LIMIT 1");
+                $_SESSION['error_msg'] = $message;
             }
-            
-            $swapStmt->execute([$currId, $yearLevel, $semester, $currentOrder]);
-            $swapWith = $swapStmt->fetch(PDO::FETCH_ASSOC);
+            $response->redirect($redirectUrl ?: "/sia/admin/registrar/college_curriculum.php");
+            return;
+        };
 
-            if ($swapWith) {
-                $update1 = $pdo->prepare("UPDATE college_curriculum_subjects SET display_order = ? WHERE id = ?");
-                $update1->execute([$swapWith['display_order'], $subId]);
-                
-                $update2 = $pdo->prepare("UPDATE college_curriculum_subjects SET display_order = ? WHERE id = ?");
-                $update2->execute([$currentOrder, $swapWith['id']]);
+        $action = $_POST['action'] ?? '';
+
+        // ----------------------------------------------------
+        // 1. CREATE CURRICULUM (Starts as DRAFT)
+        // ----------------------------------------------------
+        if ($action === 'create_curriculum') {
+            $programId = (int)($_POST['program_id'] ?? 0);
+            $name = trim($_POST['curriculum_name'] ?? '');
+            $version = trim($_POST['version'] ?? '1.0');
+            $ay = trim($_POST['effective_academic_year'] ?? '');
+            $desc = trim($_POST['description'] ?? '');
+
+            if ($programId <= 0 || $name === '' || $version === '' || $ay === '') {
+                $sendResponse(false, 'Program, Curriculum Name, Version, and Effective Academic Year are required.');
+                return;
+            }
+
+            try {
+                // Check if program exists
+                $progCheck = $pdo->prepare("SELECT id FROM college_programs WHERE id = ?");
+                $progCheck->execute([$programId]);
+                if (!$progCheck->fetch()) {
+                    $sendResponse(false, 'Selected program does not exist.');
+                    return;
+                }
+
+                // Check version uniqueness for this program
+                $verCheck = $pdo->prepare("SELECT id FROM college_curricula WHERE program_id = ? AND version = ?");
+                $verCheck->execute([$programId, $version]);
+                if ($verCheck->fetch()) {
+                    $sendResponse(false, "Version '{$version}' already exists for this program. Please specify a unique version tag.");
+                    return;
+                }
+
+                $stmt = $pdo->prepare("
+                    INSERT INTO college_curricula (program_id, curriculum_name, version, effective_academic_year, description, status) 
+                    VALUES (?, ?, ?, ?, ?, 'draft')
+                ");
+                $stmt->execute([$programId, $name, $version, $ay, $desc ?: null]);
+                $newId = (int) $pdo->lastInsertId();
+
+                logActivity((int)$_SESSION['user_id'], 'bi-journal-plus', 'Curriculum Created', "Created new draft curriculum '{$name}' (v{$version}) for program #{$programId}.");
+                $sendResponse(true, "Curriculum created successfully in Draft status. You can now build its subject catalog.", ['curriculum_id' => $newId], "/sia/admin/registrar/college_curriculum_builder.php?id={$newId}");
+                return;
+            } catch (PDOException $e) {
+                $sendResponse(false, "Failed to create curriculum: " . $e->getMessage());
+                return;
+            }
+        } 
+
+        // ----------------------------------------------------
+        // 2. CLONE CURRICULUM (Atomic copy into new DRAFT)
+        // ----------------------------------------------------
+        elseif ($action === 'clone_curriculum') {
+            $sourceId = (int)($_POST['source_curriculum_id'] ?? 0);
+            $name = trim($_POST['curriculum_name'] ?? '');
+            $version = trim($_POST['version'] ?? '');
+            $ay = trim($_POST['effective_academic_year'] ?? '');
+            $desc = trim($_POST['description'] ?? '');
+
+            if ($sourceId <= 0 || $name === '' || $version === '' || $ay === '') {
+                $sendResponse(false, 'Source Curriculum, New Curriculum Name, Version Tag, and Academic Year are required to clone.');
+                return;
+            }
+
+            try {
+                $pdo->beginTransaction();
+
+                // Lock source row for consistent snapshot
+                $srcStmt = $pdo->prepare("SELECT * FROM college_curricula WHERE id = ? FOR UPDATE");
+                $srcStmt->execute([$sourceId]);
+                $src = $srcStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$src) {
+                    $pdo->rollBack();
+                    $sendResponse(false, 'Source curriculum not found.');
+                    return;
+                }
+
+                // Check version uniqueness for the target program
+                $checkStmt = $pdo->prepare("SELECT id FROM college_curricula WHERE program_id = ? AND version = ?");
+                $checkStmt->execute([$src['program_id'], $version]);
+                if ($checkStmt->fetch()) {
+                    $pdo->rollBack();
+                    $sendResponse(false, "Version '{$version}' already exists for this program. Please specify a unique version tag (e.g. 2.0).");
+                    return;
+                }
+
+                // 1. Insert new Draft curriculum header (MUST be draft)
+                $insCurr = $pdo->prepare("
+                    INSERT INTO college_curricula (program_id, curriculum_name, version, effective_academic_year, description, status) 
+                    VALUES (?, ?, ?, ?, ?, 'draft')
+                ");
+                $insCurr->execute([$src['program_id'], $name, $version, $ay, $desc ?: $src['description']]);
+                $newCurrId = (int) $pdo->lastInsertId();
+
+                // 2. Fetch and duplicate all mapped subjects
+                $fetchSubs = $pdo->prepare("
+                    SELECT subject_id, year_level, semester, display_order 
+                    FROM college_curriculum_subjects 
+                    WHERE curriculum_id = ? 
+                    ORDER BY year_level ASC, semester ASC, display_order ASC
+                ");
+                $fetchSubs->execute([$sourceId]);
+                $sourceSubs = $fetchSubs->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!empty($sourceSubs)) {
+                    $insSub = $pdo->prepare("
+                        INSERT INTO college_curriculum_subjects (curriculum_id, subject_id, year_level, semester, display_order) 
+                        VALUES (?, ?, ?, ?, ?)
+                    ");
+                    foreach ($sourceSubs as $sub) {
+                        $insSub->execute([$newCurrId, $sub['subject_id'], $sub['year_level'], $sub['semester'], $sub['display_order']]);
+                    }
+                }
+
+                $pdo->commit();
+                logActivity((int)$_SESSION['user_id'], 'bi-files', 'Curriculum Cloned', "Cloned curriculum '{$src['curriculum_name']}' (v{$src['version']}) into new Draft '{$name}' (v{$version}).");
+                $sendResponse(true, "Curriculum successfully cloned into new Draft version (v{$version}). You can now customize its subjects.", ['curriculum_id' => $newCurrId], "/sia/admin/registrar/college_curriculum_builder.php?id={$newCurrId}");
+                return;
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                $sendResponse(false, "Cloning failed: " . $e->getMessage());
+                return;
             }
         }
-        $pdo->commit();
-    } catch (PDOException $e) {
-        $pdo->rollBack();
-        $_SESSION['error_msg'] = "Failed to reorder subject: " . $e->getMessage();
-    }
-    $response->redirect("/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
-    return;
-}
 
-$response->redirect("/sia/admin/registrar/college_curriculum.php");
-return;
+        // ----------------------------------------------------
+        // 3. ACTIVATE CURRICULUM (DRAFT -> ACTIVE only)
+        // ----------------------------------------------------
+        elseif ($action === 'activate_curriculum') {
+            $id = (int)($_POST['curriculum_id'] ?? 0);
+            $archivePrevious = isset($_POST['archive_previous']) && $_POST['archive_previous'] == '1';
+
+            if ($id <= 0) {
+                $sendResponse(false, 'Invalid Curriculum ID.');
+                return;
+            }
+
+            try {
+                $pdo->beginTransaction();
+
+                $currStmt = $pdo->prepare("SELECT * FROM college_curricula WHERE id = ? FOR UPDATE");
+                $currStmt->execute([$id]);
+                $curr = $currStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$curr) {
+                    $pdo->rollBack();
+                    $sendResponse(false, 'Curriculum not found.');
+                    return;
+                }
+
+                if ($curr['status'] !== 'draft') {
+                    $pdo->rollBack();
+                    $sendResponse(false, "Action Prohibited: Only 'Draft' curricula can be activated. This curriculum is currently " . strtoupper($curr['status']) . ".");
+                    return;
+                }
+
+                // Verify curriculum has at least 1 mapped subject before activation
+                $subCheck = $pdo->prepare("SELECT COUNT(*) FROM college_curriculum_subjects WHERE curriculum_id = ?");
+                $subCheck->execute([$id]);
+                $count = (int)$subCheck->fetchColumn();
+
+                if ($count === 0) {
+                    $pdo->rollBack();
+                    $sendResponse(false, "Cannot activate an empty curriculum. Please add at least one subject in the Builder first.", [], "/sia/admin/registrar/college_curriculum_builder.php?id={$id}");
+                    return;
+                }
+
+                if ($archivePrevious) {
+                    // Archive previous active curricula for this program
+                    $archStmt = $pdo->prepare("UPDATE college_curricula SET status = 'archived' WHERE program_id = ? AND status = 'active' AND id != ?");
+                    $archStmt->execute([$curr['program_id'], $id]);
+                }
+
+                $actStmt = $pdo->prepare("UPDATE college_curricula SET status = 'active' WHERE id = ?");
+                $actStmt->execute([$id]);
+
+                $pdo->commit();
+                logActivity((int)$_SESSION['user_id'], 'bi-check-circle', 'Curriculum Activated', "Activated curriculum '{$curr['curriculum_name']}' (v{$curr['version']}). Its structure is now locked for enrollment.");
+                $sendResponse(true, "Curriculum '{$curr['curriculum_name']}' is now Active and structurally locked for official enrollment.", ['curriculum_id' => $id]);
+                return;
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                $sendResponse(false, "Activation failed: " . $e->getMessage());
+                return;
+            }
+        }
+
+        // ----------------------------------------------------
+        // 4. ARCHIVE CURRICULUM (ACTIVE -> ARCHIVED only)
+        // ----------------------------------------------------
+        elseif ($action === 'archive_curriculum') {
+            $id = (int)($_POST['curriculum_id'] ?? 0);
+
+            if ($id <= 0) {
+                $sendResponse(false, 'Invalid Curriculum ID.');
+                return;
+            }
+
+            try {
+                $pdo->beginTransaction();
+
+                $currStmt = $pdo->prepare("SELECT * FROM college_curricula WHERE id = ? FOR UPDATE");
+                $currStmt->execute([$id]);
+                $curr = $currStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$curr) {
+                    $pdo->rollBack();
+                    $sendResponse(false, 'Curriculum not found.');
+                    return;
+                }
+
+                if ($curr['status'] !== 'active') {
+                    $pdo->rollBack();
+                    $sendResponse(false, "Action Prohibited: Only 'Active' curricula can be archived. Current status is " . strtoupper($curr['status']) . ".");
+                    return;
+                }
+
+                $stmt = $pdo->prepare("UPDATE college_curricula SET status = 'archived' WHERE id = ?");
+                $stmt->execute([$id]);
+
+                $pdo->commit();
+                logActivity((int)$_SESSION['user_id'], 'bi-archive', 'Curriculum Archived', "Archived curriculum '{$curr['curriculum_name']}' (v{$curr['version']}).");
+                $sendResponse(true, "Curriculum '{$curr['curriculum_name']}' has been moved to Archived status.", ['curriculum_id' => $id]);
+                return;
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                $sendResponse(false, "Failed to archive curriculum: " . $e->getMessage());
+                return;
+            }
+        }
+
+        // ----------------------------------------------------
+        // 5. UPDATE CURRICULUM METADATA (DRAFT only)
+        // ----------------------------------------------------
+        elseif ($action === 'update_curriculum') {
+            $id = (int)($_POST['curriculum_id'] ?? 0);
+            $programId = (int)($_POST['program_id'] ?? 0);
+            $name = trim($_POST['curriculum_name'] ?? '');
+            $version = trim($_POST['version'] ?? '1.0');
+            $ay = trim($_POST['effective_academic_year'] ?? '');
+            $desc = trim($_POST['description'] ?? '');
+
+            if ($id <= 0 || $programId <= 0 || $name === '' || $version === '' || $ay === '') {
+                $sendResponse(false, 'Invalid or missing data for updating curriculum.');
+                return;
+            }
+
+            try {
+                $currStmt = $pdo->prepare("SELECT * FROM college_curricula WHERE id = ?");
+                $currStmt->execute([$id]);
+                $curr = $currStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$curr) {
+                    $sendResponse(false, 'Curriculum not found.');
+                    return;
+                }
+
+                // Strict Guard: Metadata edits are only permitted in DRAFT state
+                if ($curr['status'] !== 'draft') {
+                    $sendResponse(false, "Action Denied: '{$curr['curriculum_name']}' is " . strtoupper($curr['status']) . " and cannot be modified. Create a new version instead.", [], "/sia/admin/registrar/college_curriculum.php");
+                    return;
+                }
+
+                // Check version uniqueness for program if changed
+                if ($curr['version'] !== $version || (int)$curr['program_id'] !== $programId) {
+                    $verCheck = $pdo->prepare("SELECT id FROM college_curricula WHERE program_id = ? AND version = ? AND id != ?");
+                    $verCheck->execute([$programId, $version, $id]);
+                    if ($verCheck->fetch()) {
+                        $sendResponse(false, "Version '{$version}' already exists for this program.");
+                        return;
+                    }
+                }
+
+                $stmt = $pdo->prepare("
+                    UPDATE college_curricula 
+                    SET program_id = ?, curriculum_name = ?, version = ?, effective_academic_year = ?, description = ? 
+                    WHERE id = ?
+                ");
+                $stmt->execute([$programId, $name, $version, $ay, $desc ?: null, $id]);
+                $sendResponse(true, "Curriculum details updated successfully.", ['curriculum_id' => $id]);
+                return;
+            } catch (PDOException $e) {
+                $sendResponse(false, "Failed to update curriculum: " . $e->getMessage());
+                return;
+            }
+        } 
+
+        // ----------------------------------------------------
+        // 6. DELETE CURRICULUM (DRAFT & UNUSED only)
+        // ----------------------------------------------------
+        elseif ($action === 'delete_curriculum') {
+            $id = (int)($_POST['curriculum_id'] ?? 0);
+            
+            if ($id <= 0) {
+                $sendResponse(false, "Invalid Curriculum ID.");
+                return;
+            }
+            
+            try {
+                $pdo->beginTransaction();
+
+                $currStmt = $pdo->prepare("SELECT * FROM college_curricula WHERE id = ? FOR UPDATE");
+                $currStmt->execute([$id]);
+                $curr = $currStmt->fetch(PDO::FETCH_ASSOC);
+
+                if (!$curr) {
+                    $pdo->rollBack();
+                    $sendResponse(false, 'Curriculum not found.');
+                    return;
+                }
+
+                // Strict Guard: Prohibit deletion of Active or Archived curricula
+                if ($curr['status'] !== 'draft') {
+                    $pdo->rollBack();
+                    $sendResponse(false, "Action Prohibited: Only 'Draft' curricula can be deleted. 'Active' and 'Archived' curricula are preserved permanently for student and historical records.");
+                    return;
+                }
+
+                // Verify actual database usage
+                $usersCount = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE college_curriculum_id = {$id}")->fetchColumn();
+                $sectionsCount = (int)$pdo->query("SELECT COUNT(*) FROM college_sections WHERE curriculum_id = {$id}")->fetchColumn();
+                $appsCount = (int)$pdo->query("SELECT COUNT(*) FROM applications WHERE college_curriculum_id = {$id}")->fetchColumn();
+
+                if (($usersCount + $sectionsCount + $appsCount) > 0) {
+                    $pdo->rollBack();
+                    $sendResponse(false, "Cannot delete: This curriculum is referenced by existing database records ({$usersCount} students, {$sectionsCount} sections, {$appsCount} applications).");
+                    return;
+                }
+
+                $stmt = $pdo->prepare("DELETE FROM college_curricula WHERE id = ?");
+                $stmt->execute([$id]);
+
+                $pdo->commit();
+                logActivity((int)$_SESSION['user_id'], 'bi-trash', 'Curriculum Deleted', "Deleted unused draft curriculum '{$curr['curriculum_name']}'.");
+                $sendResponse(true, "Draft curriculum deleted successfully.");
+                return;
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                $sendResponse(false, "Failed to delete curriculum: " . $e->getMessage());
+                return;
+            }
+        } 
+        
+        // ====================================================
+        // 7. SUBJECT MUTATION GUARDS (DRAFT only)
+        // ====================================================
+        $currId = (int)($_POST['curriculum_id'] ?? 0);
+        if ($currId > 0) {
+            $lockCheck = $pdo->prepare("SELECT status, curriculum_name FROM college_curricula WHERE id = ?");
+            $lockCheck->execute([$currId]);
+            $currLock = $lockCheck->fetch(PDO::FETCH_ASSOC);
+
+            if (!$currLock) {
+                $sendResponse(false, "Curriculum not found.");
+                return;
+            }
+
+            if ($currLock['status'] !== 'draft') {
+                $sendResponse(false, "Action Denied: '{$currLock['curriculum_name']}' is " . strtoupper($currLock['status']) . " and structurally immutable. To add, edit, move, or remove subjects, clone this curriculum into a new Draft version.", [], "/sia/admin/registrar/college_curriculum_builder.php?id={$currId}");
+                return;
+            }
+        }
+
+        // 7a. Add Subject (Draft only)
+        if ($action === 'add_subject') {
+            $subjectId = (int)($_POST['subject_id'] ?? 0);
+            $yearLevel = trim($_POST['year_level'] ?? '');
+            $semester = trim($_POST['semester'] ?? '');
+            
+            if ($currId <= 0 || $subjectId <= 0 || $yearLevel === '' || $semester === '') {
+                $sendResponse(false, "All fields are required to add a subject.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                return;
+            }
+
+            try {
+                // Verify subject exists
+                $subCheck = $pdo->prepare("SELECT id FROM subjects WHERE id = ?");
+                $subCheck->execute([$subjectId]);
+                if (!$subCheck->fetch()) {
+                    $sendResponse(false, "Selected subject does not exist.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                    return;
+                }
+
+                // Get max display order
+                $ordStmt = $pdo->prepare("SELECT MAX(display_order) FROM college_curriculum_subjects WHERE curriculum_id = ? AND year_level = ? AND semester = ?");
+                $ordStmt->execute([$currId, $yearLevel, $semester]);
+                $maxOrder = (int)$ordStmt->fetchColumn();
+
+                $stmt = $pdo->prepare("
+                    INSERT INTO college_curriculum_subjects (curriculum_id, subject_id, year_level, semester, display_order) 
+                    VALUES (?, ?, ?, ?, ?)
+                ");
+                $stmt->execute([$currId, $subjectId, $yearLevel, $semester, $maxOrder + 1]);
+                $sendResponse(true, "Subject added successfully.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                return;
+            } catch (PDOException $e) {
+                if ($e->getCode() == 23000) {
+                    $sendResponse(false, "Subject is already assigned to this year and semester.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                } else {
+                    $sendResponse(false, "Failed to add subject: " . $e->getMessage(), [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                }
+                return;
+            }
+        } 
+        
+        // 7b. Edit Subject Placement (Draft only)
+        elseif ($action === 'edit_subject') {
+            $subId = (int)($_POST['subject_mapping_id'] ?? 0);
+            $yearLevel = trim($_POST['year_level'] ?? '');
+            $semester = trim($_POST['semester'] ?? '');
+
+            try {
+                // Get max display order in new year/sem
+                $ordStmt = $pdo->prepare("SELECT MAX(display_order) FROM college_curriculum_subjects WHERE curriculum_id = ? AND year_level = ? AND semester = ?");
+                $ordStmt->execute([$currId, $yearLevel, $semester]);
+                $maxOrder = (int)$ordStmt->fetchColumn();
+
+                $stmt = $pdo->prepare("UPDATE college_curriculum_subjects SET year_level = ?, semester = ?, display_order = ? WHERE id = ?");
+                $stmt->execute([$yearLevel, $semester, $maxOrder + 1, $subId]);
+                $sendResponse(true, "Subject updated successfully.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                return;
+            } catch (PDOException $e) {
+                if ($e->getCode() == 23000) {
+                    $sendResponse(false, "Subject is already assigned to that year and semester.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                } else {
+                    $sendResponse(false, "Failed to update subject: " . $e->getMessage(), [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                }
+                return;
+            }
+        } 
+        
+        // 7c. Delete Subject from Curriculum (Draft only)
+        elseif ($action === 'delete_subject') {
+            $subId = (int)($_POST['subject_mapping_id'] ?? 0);
+
+            try {
+                $stmt = $pdo->prepare("DELETE FROM college_curriculum_subjects WHERE id = ?");
+                $stmt->execute([$subId]);
+                $sendResponse(true, "Subject removed from curriculum.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                return;
+            } catch (PDOException $e) {
+                $sendResponse(false, "Failed to remove subject: " . $e->getMessage(), [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                return;
+            }
+        } 
+        
+        // 7d. Move Subject Display Order (Draft only)
+        elseif ($action === 'move_subject') {
+            $subId = (int)($_POST['subject_mapping_id'] ?? 0);
+            $direction = $_POST['direction'] ?? 'up';
+
+            try {
+                $pdo->beginTransaction();
+                
+                $stmt = $pdo->prepare("SELECT year_level, semester, display_order FROM college_curriculum_subjects WHERE id = ? FOR UPDATE");
+                $stmt->execute([$subId]);
+                $current = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($current) {
+                    $yearLevel = $current['year_level'];
+                    $semester = $current['semester'];
+                    $currentOrder = (int)$current['display_order'];
+                    
+                    $swapStmt = null;
+                    if ($direction === 'up') {
+                        $swapStmt = $pdo->prepare("
+                            SELECT id, display_order 
+                            FROM college_curriculum_subjects 
+                            WHERE curriculum_id = ? AND year_level = ? AND semester = ? AND display_order < ? 
+                            ORDER BY display_order DESC LIMIT 1
+                        ");
+                    } else {
+                        $swapStmt = $pdo->prepare("
+                            SELECT id, display_order 
+                            FROM college_curriculum_subjects 
+                            WHERE curriculum_id = ? AND year_level = ? AND semester = ? AND display_order > ? 
+                            ORDER BY display_order ASC LIMIT 1
+                        ");
+                    }
+                    
+                    $swapStmt->execute([$currId, $yearLevel, $semester, $currentOrder]);
+                    $swapWith = $swapStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($swapWith) {
+                        $update1 = $pdo->prepare("UPDATE college_curriculum_subjects SET display_order = ? WHERE id = ?");
+                        $update1->execute([$swapWith['display_order'], $subId]);
+                        
+                        $update2 = $pdo->prepare("UPDATE college_curriculum_subjects SET display_order = ? WHERE id = ?");
+                        $update2->execute([$currentOrder, $swapWith['id']]);
+                    }
+                }
+                $pdo->commit();
+                $sendResponse(true, "Order updated.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                return;
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) {
+                    $pdo->rollBack();
+                }
+                $sendResponse(false, "Failed to reorder subject: " . $e->getMessage(), [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                return;
+            }
+        }
+
+        $sendResponse(false, "Invalid action requested.");
+        return;
     }
 }
 

@@ -33,6 +33,24 @@ This document tracks architectural debt, bugs discovered during development, and
 - **Symptoms:** Navigating to "Active Scholars" returned a 404 Not Found error.
 - **Resolution:** Registered `$router->get('/admin/scholarship/scholars.php', ...)` in `app/Routes/web.php` mapping to `ScholarshipController@scholars`.
 
+### Issue 12: Curriculum Archive Modal Unclosed Tag Causing Black Screen
+- **Module:** [[Registrar]] / `college_curriculum.php`
+- **Symptoms:** Attempting to delete/archive a curriculum rendered an un-dismissible dark black overlay covering the entire viewport.
+- **Root Cause:** In `app/Views/admin/registrar/college_curriculum.php`, the `#archiveCurriculumModal` element was missing its closing `</div>` tag, causing subsequent modals to nest within its backdrop tree.
+- **Resolution:** Added the missing `</div>` tag on `#archiveCurriculumModal`.
+
+### Issue 13: Missing `delivery_mode` Column in Section Subjects Tables
+- **Module:** [[Scheduler]] / `SchedulerController.php`
+- **Symptoms:** Clicking "Manage Schedule" on section directories failed silently and redirected back to the section listing with a generic database error.
+- **Root Cause:** Queries in `SchedulerController::builder()` and `process()` selected `delivery_mode`, but the column was absent from `college_section_subjects` and `shs_section_subjects`.
+- **Resolution:** Executed database schema migration adding `delivery_mode VARCHAR(50) NOT NULL DEFAULT 'Face-to-Face'` to both tables.
+
+### Issue 14: Schedule Builder SPA Router Script Re-execution Collision
+- **Module:** [[Scheduler]] / `schedule_builder.php` & `spa-router.js`
+- **Symptoms:** When navigating to the Schedule Builder via SPA, clicking back, and re-opening the builder, the canvas and unscheduled sidebar remained blank until manual browser refresh.
+- **Root Cause:** Re-evaluating top-level `const` and `let` declarations inside `spa-router.js` dynamic script injector triggered `Uncaught SyntaxError: Identifier 'type' has already been declared`, halting script execution before `render()` could run.
+- **Resolution:** Encapsulated `schedule_builder.php` JavaScript inside an IIFE `(function() { ... })();`, globally attached event handlers to `window`, and added `data-spa="false"` to full-screen canvas navigation links.
+
 ---
 
 ## 2. Active Technical Debt & Discovered Codebase Defects
@@ -83,3 +101,4 @@ This document tracks architectural debt, bugs discovered during development, and
 - [[System Architecture]]
 - [[LMS Navigation and Render Bugs Fixed]]
 - [[Development Guide]]
+- [[ADR-005 Curriculum Versioning and Subject Catalog Immutability]]

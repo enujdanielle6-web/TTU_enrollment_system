@@ -169,6 +169,25 @@ require_once __DIR__ . '/../components/header.php';
                   <p class="mb-0 small">Your application was not approved. Please contact the admissions office for further inquiries.</p>
                 </div>
               </div>
+            <?php elseif ($application && ($application['document_submission_method'] ?? '') === 'on_campus' && in_array($application['status'], ['pending', 'under_review', 'correction_required'], true)): ?>
+              <div class="alert alert-warning border-0 shadow-sm rounded-12 p-3.5 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-0" style="background-color: #fff9e6; border-left: 5px solid #ffc107 !important;">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="bg-warning text-dark rounded-circle p-2 flex-shrink-0 mt-1" style="width:42px; height:42px; display:inline-flex; align-items:center; justify-content:center;">
+                    <i class="bi bi-geo-alt-fill fs-5"></i>
+                  </div>
+                  <div>
+                    <h4 class="h6 mb-1 fw-bold text-dark"><i class="bi bi-exclamation-triangle-fill text-warning me-1"></i> Action Required: Visit Admissions Office</h4>
+                    <p class="mb-0 small text-muted">
+                      You selected <strong>On-Campus Submission</strong>. Please present your original documents at the TTU Admissions Office for physical validation to get your application approved.
+                    </p>
+                  </div>
+                </div>
+                <div class="flex-shrink-0 align-self-end align-self-md-center">
+                  <a href="documents.php" class="btn btn-warning text-dark btn-sm rounded-pill px-3.5 py-2 fw-semibold shadow-sm text-nowrap">
+                    <i class="bi bi-card-checklist me-1"></i> View Office Checklist
+                  </a>
+                </div>
+              </div>
             <?php else: ?>
               <div class="alert alert-info border-0 shadow-sm rounded-12 p-3 d-flex align-items-center gap-3 mb-0">
                 <div class="bg-info text-white rounded-circle p-2 flex-shrink-0" style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;">
@@ -454,9 +473,15 @@ require_once __DIR__ . '/../components/header.php';
             </div>
             <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.6s;">
               <?php if ($application !== null && $application['document_submission_method'] === 'on_campus'): ?>
-                <div class="text-center py-4">
-                  <i class="bi bi-building text-primary fs-1 mb-3"></i>
-                  <p class="text-muted mb-0 small">You opted for On-Campus verification. Please present your original documents at the admissions office.</p>
+                <div class="text-center py-4 px-2">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning mx-auto mb-3" style="width: 56px; height: 56px;">
+                    <i class="bi bi-building fs-3"></i>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">On-Campus Physical Verification</h6>
+                  <p class="text-muted mb-3 small">Please visit the Admissions Office with your original documents and reference number to validate your application.</p>
+                  <a href="documents.php" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-geo-alt me-1"></i> View Location & Guide
+                  </a>
                 </div>
               <?php elseif ($application === null): ?>
                 <div class="text-center py-4">

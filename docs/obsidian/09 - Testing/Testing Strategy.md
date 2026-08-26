@@ -6,8 +6,8 @@ This document outlines the testing methodology, critical verification test cases
 
 ## 1. Testing Framework & Philosophy
 Due to the system's **Hybrid MVC** architecture and raw PDO data access in controllers:
-- **Core Strategy:** Comprehensive **Integration & Manual Functional Testing** supplemented with CLI regression test scripts located in `/scripts`.
-- **Target Automated Approach:** End-to-End browser test automation using Playwright/Cypress combined with PHPUnit HTTP test runners targeting `App\Core\Router`.
+- **Core Strategy:** Comprehensive **Integration & Manual Functional Testing** supplemented with automated scenario test suites located in `/scratch` and `/scripts`.
+- **Target Automated Approach:** End-to-End browser test automation combined with standalone scenario-based CLI test suites verifying state machine transitions, foreign key constraints, and multi-tenant security boundaries.
 
 ---
 
@@ -24,16 +24,24 @@ Due to the system's **Hybrid MVC** architecture and raw PDO data access in contr
 | **TC-07** | **Dual LMS Auto-Provisioning** | Enrolled in College or SHS subjects. | Student logs into LMS with Student Number (`YYYY-XXXXXX`). | Courses dynamically populated from `college_enrollments` / `shs_enrollments`. Live deadlines, announcements, and study streak rendered. | **PASSED** |
 | **TC-08** | **Dedicated LMS Logout** | Active Student/Faculty LMS session. | Click "Sign out" in LMS sidebar. | Session destroyed, redirected directly to `/auth/lms_student_login.php` or `/auth/lms_faculty_login.php`. | **PASSED** |
 | **TC-09** | **Role Route Isolation** | Logged in as `applicant`. | Manually access `/admin/admissions/admissions_dashboard.php`. | `RoleMiddleware` intercepts request and returns 403 Forbidden / redirects to login. | **PASSED** |
+| **TC-10** | **College Curriculum Versioning & Immutability** | College programs in database. | Execute 24 lifecycle audit scenarios (`scratch/audit_curriculum_system.php`). | Drafts are fully editable/reorderable; Active/Archived curricula reject structural edits/deletes; Clone-to-draft produces Version $N+1$. | **PASSED (24/24)** |
+| **TC-11** | **SHS Curriculum Versioning & Immutability** | SHS strands in database. | Execute 24 lifecycle audit scenarios (`scratch/audit_shs_curriculum_system.php`). | SHS follows identical Draft $\rightarrow$ Active $\rightarrow$ Archived lifecycle with immutable active locks and version branching. | **PASSED (24/24)** |
+| **TC-12** | **Subject Catalog Immutability & Safety** | Shared universal subjects table. | Execute 15 safety checks (`scratch/verify_subject_immutability.php`). | `ON DELETE RESTRICT` blocks direct deletion of referenced subjects; locked structural fields reject edits; non-destructive `status` toggling functional. | **PASSED (15/15)** |
+| **TC-13** | **Scheduler Visual Timetable & Conflict Engine** | Sections and subjects configured. | Build section schedule via `/admin/scheduler/schedule_builder.php`. | Room and instructor collisions detected; delivery modes (`Face-to-Face`/`Online`) persisted; timetable renders without SPA script collision. | **PASSED** |
 
 ---
 
-## 3. Test Utilities & CLI Scripts
-Located in `/scripts`:
-- Syntax linting: `php -l <filename>`
-- Email dispatch validation: Verification and credentials transmission test scripts.
+## 3. Automated Test Suites & CLI Scripts
+
+- **`scratch/audit_curriculum_system.php`**: Comprehensive 24-scenario College curriculum lifecycle and immutability test suite.
+- **`scratch/audit_shs_curriculum_system.php`**: Comprehensive 24-scenario SHS curriculum lifecycle and immutability test suite.
+- **`scratch/verify_subject_immutability.php`**: 15-check automated verification suite for `ON DELETE RESTRICT` constraints, usage detection metrics, field mutation locking, and financial snapshot protection.
+- **`scratch/test_builder_scheduler_role.php` & `scratch/test_schedule_process.php`**: Verification scripts for timetable generation, room/faculty conflict checking, and payload processing.
 
 ---
 **Related:**
 - [[Coding Standards]]
 - [[Development Guide]]
-- [[Business Rules]]
+- [[Curriculum Architecture]]
+- [[Subject Catalog Immutability Architecture]]
+- [[ADR-005 Curriculum Versioning and Subject Catalog Immutability]]

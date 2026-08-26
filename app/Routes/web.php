@@ -95,9 +95,10 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/admin/registrar/shs_strands.php', ['App\Controllers\Admin\Registrar\ShsController', 'strands']);
     $router->post('/admin/registrar/shs_strand_process.php', ['App\Controllers\Admin\Registrar\ShsController', 'processStrand']);
     $router->get('/admin/registrar/shs_curriculum.php', ['App\Controllers\Admin\Registrar\ShsController', 'curriculum']);
+    $router->post('/admin/registrar/shs_curriculum.php', ['App\Controllers\Admin\Registrar\ShsController', 'processCurriculum']);
     $router->post('/admin/registrar/shs_curriculum_process.php', ['App\Controllers\Admin\Registrar\ShsController', 'processCurriculum']);
     $router->get('/admin/registrar/shs_curriculum_builder.php', ['App\Controllers\Admin\Registrar\ShsController', 'curriculumBuilder']);
-    $router->post('/admin/registrar/shs_curriculum_builder.php', ['App\Controllers\Admin\Registrar\ShsController', 'curriculumBuilder']);
+    $router->post('/admin/registrar/shs_curriculum_builder.php', ['App\Controllers\Admin\Registrar\ShsController', 'processCurriculum']);
 
     // Admin Finance
     $router->get('/admin/finance/cashier_dashboard.php', ['App\Controllers\Admin\Finance\FinanceController', 'dashboard']);

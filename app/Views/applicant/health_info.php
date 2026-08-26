@@ -190,15 +190,15 @@ require_once __DIR__ . '/../components/applicant_navbar.php';
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label small fw-semibold text-dark">Contact Name</label>
-                        <input type="text" name="emergency_name" class="form-control bg-light" required value="<?= htmlspecialchars($health['emergency_name'] ?? $application['emergency_contact_person'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="text" name="emergency_name" class="form-control bg-light" required value="<?= htmlspecialchars($health['emergency_name'] ?? $application['emergency_name'] ?? $application['guardian_name'] ?? $application['emergency_contact_person'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-semibold text-dark">Relationship</label>
-                        <input type="text" name="emergency_relationship" class="form-control bg-light" required value="<?= htmlspecialchars($health['emergency_relationship'] ?? $application['emergency_contact_relationship'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="text" name="emergency_relationship" class="form-control bg-light" required value="<?= htmlspecialchars($health['emergency_relationship'] ?? $application['emergency_relationship'] ?? $application['guardian_relationship'] ?? $application['emergency_contact_relationship'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-semibold text-dark">Contact Number</label>
-                        <input type="text" name="emergency_contact" class="form-control bg-light" required value="<?= htmlspecialchars($health['emergency_contact'] ?? $application['emergency_contact_number'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                        <input type="text" name="emergency_contact" class="form-control bg-light" required value="<?= htmlspecialchars($health['emergency_contact'] ?? $application['emergency_contact'] ?? $application['guardian_contact'] ?? $application['emergency_contact_number'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 </div>
             </div>

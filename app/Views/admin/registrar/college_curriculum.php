@@ -50,55 +50,102 @@ require_once __DIR__ . '/../../components/header.php';
                 <th>Effective AY</th>
                 <th>Status</th>
                 <th>Subjects</th>
+                <th>Total Units</th>
                 <th class="text-end pe-4">Actions</th>
               </tr>
             </thead>
             <tbody>
               <?php if (empty($curricula)): ?>
                 <tr>
-                  <td colspan="7" class="text-center py-5 text-muted">
+                  <td colspan="8" class="text-center py-5 text-muted">
                     <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
                     No curricula found.
                   </td>
                 </tr>
               <?php else: ?>
-                <?php foreach ($curricula as $curr): ?>
+                <?php foreach ($curricula as $curr): 
+                  $totalUsage = (int)($curr['student_count'] ?? 0) + (int)($curr['section_count'] ?? 0) + (int)($curr['application_count'] ?? 0);
+                ?>
                   <tr>
                     <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($curr['program_code'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td class="fw-medium text-dark"><?= htmlspecialchars($curr['curriculum_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($curr['version'], ENT_QUOTES, 'UTF-8') ?></td>
+                    <td>
+                      <div class="fw-medium text-dark"><?= htmlspecialchars($curr['curriculum_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                      <?php if ($totalUsage > 0): ?>
+                        <small class="text-muted"><i class="bi bi-people me-1"></i><?= (int)$curr['student_count'] ?> students, <?= (int)$curr['section_count'] ?> sections</small>
+                      <?php else: ?>
+                        <small class="text-muted">Unused</small>
+                      <?php endif; ?>
+                    </td>
+                    <td><span class="badge bg-light text-dark border">v<?= htmlspecialchars($curr['version'], ENT_QUOTES, 'UTF-8') ?></span></td>
                     <td><?= htmlspecialchars($curr['effective_academic_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></td>
                     <td>
                       <?php if ($curr['status'] === 'active'): ?>
-                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i>Active</span>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2" title="This curriculum is active and its academic structure is locked. Create a new version to make changes.">
+                          <i class="bi bi-shield-check me-1"></i>Active
+                        </span>
                       <?php elseif ($curr['status'] === 'draft'): ?>
-                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-2"><i class="bi bi-pencil-fill me-1"></i>Draft</span>
+                        <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-2">
+                          <i class="bi bi-pencil-fill me-1"></i>Draft
+                        </span>
+                      <?php elseif ($curr['status'] === 'archived'): ?>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2">
+                          <i class="bi bi-archive-fill me-1"></i>Archived
+                        </span>
                       <?php else: ?>
-                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2"><i class="bi bi-x-circle-fill me-1"></i>Inactive</span>
+                        <span class="badge bg-dark bg-opacity-10 text-muted rounded-pill px-3 py-2">
+                          <i class="bi bi-x-circle me-1"></i><?= htmlspecialchars(ucfirst($curr['status']), ENT_QUOTES, 'UTF-8') ?>
+                        </span>
                       <?php endif; ?>
                     </td>
                     <td><span class="badge bg-secondary rounded-pill px-3"><?= esc($curr['subject_count']) ?></span></td>
+                    <td><span class="fw-semibold text-primary"><?= esc($curr['total_units'] ?? 0) ?> units</span></td>
                     <td class="text-end pe-4">
-                      <a href="college_curriculum_builder.php?id=<?= esc($curr['id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3">
-                        <i class="bi bi-tools me-1"></i> Builder
-                      </a>
-                      <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 ms-1" 
-                              onclick="openEditCurriculum(<?= esc($curr['id']) ?>, <?= esc($curr['program_id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['version']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['effective_academic_year'] ?? ''), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?>', '<?= esc($curr['status']) ?>')">
-                        <i class="bi bi-pencil-fill me-1"></i> Edit
-                      </button>
-                      <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1" 
-                              data-bs-toggle="modal" 
-                              data-bs-target="#deleteCurriculumModal"
-                              onclick="setDeleteCurriculum(<?= esc($curr['id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>')"
-                              title="Delete Curriculum">
-                        <i class="bi bi-trash-fill"></i>
-                      </button>
+                      <?php if ($curr['status'] === 'draft'): ?>
+                        <!-- DRAFT ACTIONS: Edit, Manage Subjects, Activate, Delete -->
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 me-1" 
+                                onclick="openEditCurriculum(<?= esc($curr['id']) ?>, <?= esc($curr['program_id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['version']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['effective_academic_year'] ?? ''), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['description'] ?? ''), ENT_QUOTES, 'UTF-8') ?>')"
+                                title="Edit Draft Details">
+                          <i class="bi bi-pencil-fill me-1"></i> Edit
+                        </button>
+                        <a href="college_curriculum_builder.php?id=<?= esc($curr['id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 me-1" title="Manage Subjects in Builder">
+                          <i class="bi bi-tools me-1"></i> Manage Subjects
+                        </a>
+                        <button type="button" class="btn btn-sm btn-success rounded-pill px-3 me-1" 
+                                onclick="openActivateModal(<?= esc($curr['id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['version']), ENT_QUOTES, 'UTF-8') ?>')" title="Activate curriculum for official enrollment">
+                          <i class="bi bi-check-circle me-1"></i> Activate
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2" 
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteCurriculumModal"
+                                onclick="setDeleteCurriculum(<?= esc($curr['id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>')"
+                                title="Delete Unused Draft">
+                          <i class="bi bi-trash-fill"></i>
+                        </button>
+                      <?php elseif ($curr['status'] === 'active'): ?>
+                        <!-- ACTIVE ACTIONS: View, Create New Version, Archive -->
+                        <a href="college_curriculum_builder.php?id=<?= esc($curr['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 me-1" title="View curriculum catalog (Read-only)">
+                          <i class="bi bi-eye me-1"></i> View
+                        </a>
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 me-1" 
+                                onclick="openCloneModal(<?= esc($curr['id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['version']), ENT_QUOTES, 'UTF-8') ?>', '<?= htmlspecialchars(addslashes($curr['effective_academic_year'] ?? ''), ENT_QUOTES, 'UTF-8') ?>')" title="Create a new draft version by cloning this active curriculum">
+                          <i class="bi bi-files me-1"></i> Create New Version
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" 
+                                onclick="openArchiveModal(<?= esc($curr['id']) ?>, '<?= htmlspecialchars(addslashes($curr['curriculum_name']), ENT_QUOTES, 'UTF-8') ?>')" title="Retire and archive curriculum">
+                          <i class="bi bi-archive me-1"></i> Archive
+                        </button>
+                      <?php else: /* ARCHIVED / INACTIVE */ ?>
+                        <!-- ARCHIVED ACTIONS: View only -->
+                        <a href="college_curriculum_builder.php?id=<?= esc($curr['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3" title="View historical curriculum (Read-only)">
+                          <i class="bi bi-eye me-1"></i> View
+                        </a>
+                      <?php endif; ?>
                     </td>
                   </tr>
                 <?php endforeach; ?>
               <?php endif; ?>
               <tr id="noResultsRow" style="display: none;">
-                <td colspan="7" class="text-center py-5 text-muted">
+                <td colspan="8" class="text-center py-5 text-muted">
                   <i class="bi bi-search fs-1 d-block mb-3 text-secondary"></i>
                   No curricula match your search.
                 </td>
@@ -119,7 +166,7 @@ require_once __DIR__ . '/../../components/header.php';
         <?= getCsrfInput() ?>
         <input type="hidden" name="action" value="create_curriculum">
         <div class="modal-header bg-light border-bottom-0 pb-3">
-          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Create New Curriculum</h5>
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Create New Draft Curriculum</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4 pt-2">
@@ -128,47 +175,151 @@ require_once __DIR__ . '/../../components/header.php';
                 <select class="form-select bg-light" name="program_id" required>
                 <option value="" disabled selected>Select Program</option>
                 <?php foreach ($programs as $prog): ?>
-                    <option value="<?= esc($prog['id']) ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?></option>
+                    <option value="<?= esc($prog['id']) ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($prog['name'], ENT_QUOTES, 'UTF-8') ?></option>
                 <?php endforeach; ?>
                 </select>
             </div>
             <div class="mb-3">
                 <label class="form-label small fw-semibold text-dark">Curriculum Name <span class="text-danger">*</span></label>
-                <input type="text" class="form-control bg-light" name="curriculum_name" placeholder="e.g. BSIT Curriculum 2025" required>
+                <input type="text" class="form-control bg-light" name="curriculum_name" placeholder="e.g. BSIT 2026 Standard Curriculum" required>
             </div>
             <div class="row mb-3">
                 <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Version <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control bg-light" name="version" value="1.0" required>
+                    <label class="form-label small fw-semibold text-dark">Version Tag <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control bg-light" name="version" value="1.0" placeholder="1.0" required>
                 </div>
                 <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Effective AY</label>
-                    <input type="text" class="form-control bg-light" name="effective_academic_year" placeholder="e.g. 2025-2026">
+                    <label class="form-label small fw-semibold text-dark">Effective AY <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control bg-light" name="effective_academic_year" placeholder="2026-2027" required>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label small fw-semibold text-dark">Status <span class="text-danger">*</span></label>
-                <select class="form-select bg-light" name="status" required>
-                    <option value="draft">Draft</option>
-                    <option value="active" selected>Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
             </div>
             <div class="mb-3">
                 <label class="form-label small fw-semibold text-dark">Description</label>
-                <textarea class="form-control bg-light" name="description" rows="2"></textarea>
+                <textarea class="form-control bg-light" name="description" rows="2" placeholder="Curriculum overview and objectives..."></textarea>
+            </div>
+            <div class="alert alert-info py-2 px-3 small mb-0">
+              <i class="bi bi-info-circle me-1"></i> New curricula start in <strong>Draft</strong> status. You can customize the subject tree before activating it for enrollment.
             </div>
         </div>
         <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
           <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary px-4 rounded-pill fw-medium shadow-sm">Create Curriculum</button>
+          <button type="submit" class="btn btn-primary px-4 rounded-pill fw-medium shadow-sm">Create Draft</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Edit Curriculum Modal -->
+<!-- Clone Curriculum Modal -->
+<div class="modal fade" id="cloneCurriculumModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
+        <input type="hidden" name="action" value="clone_curriculum">
+        <input type="hidden" name="source_curriculum_id" id="clone_source_id" value="">
+        <div class="modal-header bg-primary text-white border-bottom-0 pb-3">
+          <h5 class="modal-title fw-bold"><i class="bi bi-files me-2"></i>Clone to New Version</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4 pt-3">
+            <div class="alert alert-light border py-2 px-3 small mb-3">
+              Cloning source: <strong id="clone_source_label" class="text-primary"></strong>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">New Curriculum Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control bg-light" name="curriculum_name" id="clone_curr_name" required>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark">New Version Tag <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control bg-light" name="version" id="clone_curr_version" placeholder="e.g. 2.0" required>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small fw-semibold text-dark">Effective Academic Year <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control bg-light" name="effective_academic_year" id="clone_curr_ay" placeholder="e.g. 2027-2028" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">Description</label>
+                <textarea class="form-control bg-light" name="description" id="clone_curr_desc" rows="2" placeholder="Notes regarding this revision..."></textarea>
+            </div>
+            <p class="small text-muted mb-0">
+              <i class="bi bi-check2-all text-success me-1"></i> All subjects from the source curriculum will be duplicated into the new <strong>Draft</strong> version.
+            </p>
+        </div>
+        <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+          <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary px-4 rounded-pill fw-medium shadow-sm">Clone into Draft</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Activate Curriculum Modal -->
+<div class="modal fade" id="activateCurriculumModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
+        <input type="hidden" name="action" value="activate_curriculum">
+        <input type="hidden" name="curriculum_id" id="activate_curr_id" value="">
+        <div class="modal-header bg-success text-white border-bottom-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-check-circle-fill me-2"></i>Activate Curriculum</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+            <i class="bi bi-shield-lock-fill text-success fs-1 d-block mb-3"></i>
+            <h5 class="fw-bold text-dark mb-2">Activate <span id="activate_curr_title"></span>?</h5>
+            <p class="text-muted small">
+              Activating this curriculum will <strong>lock its subject structure</strong> so that students and section timetables can safely rely on it.
+            </p>
+            <div class="form-check text-start d-inline-block bg-light p-3 rounded-12 border mt-2">
+              <input class="form-check-input" type="checkbox" name="archive_previous" value="1" id="archivePreviousCheck" checked>
+              <label class="form-check-label small fw-semibold text-dark" for="archivePreviousCheck">
+                Archive previous active versions of this program
+              </label>
+            </div>
+        </div>
+        <div class="modal-footer border-top-0 d-flex justify-content-center pb-4">
+          <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success px-4 rounded-pill fw-medium shadow-sm">Yes, Activate Curriculum</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Archive Curriculum Modal -->
+<div class="modal fade" id="archiveCurriculumModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <form action="college_curriculum_process.php" method="POST">
+        <?= getCsrfInput() ?>
+        <input type="hidden" name="action" value="archive_curriculum">
+        <input type="hidden" name="curriculum_id" id="archive_curr_id" value="">
+        <div class="modal-header bg-secondary text-white border-bottom-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-archive-fill me-2"></i>Archive Curriculum</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4 text-center">
+            <i class="bi bi-archive text-secondary fs-1 d-block mb-3"></i>
+            <h5 class="fw-bold text-dark mb-2">Archive <span id="archive_curr_title"></span>?</h5>
+            <p class="text-muted small mb-0">
+              Archived curricula are retired from new freshman admissions, but will be preserved permanently for existing students and transcripts.
+            </p>
+        </div>
+        <div class="modal-footer border-top-0 d-flex justify-content-center pb-4">
+          <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-secondary px-4 rounded-pill fw-medium shadow-sm">Archive Curriculum</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Draft Curriculum Modal -->
 <div class="modal fade" id="editCurriculumModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
@@ -177,7 +328,7 @@ require_once __DIR__ . '/../../components/header.php';
         <input type="hidden" name="action" value="update_curriculum">
         <input type="hidden" name="curriculum_id" id="edit_curr_id" value="">
         <div class="modal-header bg-light border-bottom-0 pb-3">
-          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-fill text-success me-2"></i>Edit Curriculum</h5>
+          <h5 class="modal-title fw-bold text-dark"><i class="bi bi-pencil-fill text-primary me-2"></i>Edit Draft Curriculum</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body p-4 pt-2">
@@ -185,7 +336,7 @@ require_once __DIR__ . '/../../components/header.php';
                 <label class="form-label small fw-semibold text-dark">Program <span class="text-danger">*</span></label>
                 <select class="form-select bg-light" name="program_id" id="edit_curr_program_id" required>
                 <?php foreach ($programs as $prog): ?>
-                    <option value="<?= esc($prog['id']) ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?></option>
+                    <option value="<?= esc($prog['id']) ?>"><?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($prog['name'], ENT_QUOTES, 'UTF-8') ?></option>
                 <?php endforeach; ?>
                 </select>
             </div>
@@ -195,21 +346,13 @@ require_once __DIR__ . '/../../components/header.php';
             </div>
             <div class="row mb-3">
                 <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Version <span class="text-danger">*</span></label>
+                    <label class="form-label small fw-semibold text-dark">Version Tag <span class="text-danger">*</span></label>
                     <input type="text" class="form-control bg-light" name="version" id="edit_curr_version" required>
                 </div>
                 <div class="col-6">
-                    <label class="form-label small fw-semibold text-dark">Effective AY</label>
-                    <input type="text" class="form-control bg-light" name="effective_academic_year" id="edit_curr_ay">
+                    <label class="form-label small fw-semibold text-dark">Effective AY <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control bg-light" name="effective_academic_year" id="edit_curr_ay" required>
                 </div>
-            </div>
-            <div class="mb-3">
-                <label class="form-label small fw-semibold text-dark">Status <span class="text-danger">*</span></label>
-                <select class="form-select bg-light" name="status" id="edit_curr_status" required>
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                </select>
             </div>
             <div class="mb-3">
                 <label class="form-label small fw-semibold text-dark">Description</label>
@@ -218,7 +361,7 @@ require_once __DIR__ . '/../../components/header.php';
         </div>
         <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
           <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success px-4 rounded-pill fw-medium shadow-sm">Save Changes</button>
+          <button type="submit" class="btn btn-primary px-4 rounded-pill fw-medium shadow-sm">Save Changes</button>
         </div>
       </form>
     </div>
@@ -230,7 +373,7 @@ require_once __DIR__ . '/../../components/header.php';
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-danger text-white border-bottom-0">
-        <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Curriculum</h5>
+        <h5 class="modal-title fw-bold"><i class="bi bi-exclamation-triangle-fill me-2"></i>Delete Draft Curriculum</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4 text-center">
@@ -238,7 +381,7 @@ require_once __DIR__ . '/../../components/header.php';
           <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
         </div>
         <h5 class="fw-bold text-dark mb-3">Are you sure?</h5>
-        <p class="text-muted mb-0">This will permanently remove the curriculum <strong id="deleteCurrTitle" class="text-dark"></strong> and all its assigned subjects. This cannot be undone.</p>
+        <p class="text-muted mb-0">This will permanently remove the unused draft curriculum <strong id="deleteCurrTitle" class="text-dark"></strong> and its draft subject mappings. This cannot be undone.</p>
       </div>
       <div class="modal-footer border-top-0 d-flex justify-content-center pb-4">
         <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
@@ -246,7 +389,7 @@ require_once __DIR__ . '/../../components/header.php';
             <?= getCsrfInput() ?>
             <input type="hidden" name="action" value="delete_curriculum">
             <input type="hidden" name="curriculum_id" id="deleteCurrId" value="">
-            <button type="submit" class="btn btn-danger px-4 rounded-pill fw-medium shadow-sm">Yes, Delete Curriculum</button>
+            <button type="submit" class="btn btn-danger px-4 rounded-pill fw-medium shadow-sm">Yes, Delete Draft</button>
         </form>
       </div>
     </div>
@@ -267,7 +410,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let visibleCount = 0;
 
             rows.forEach(row => {
-                if (row.children.length === 1) return; // Skip empty message
+                if (row.children.length === 1) return;
                 const text = row.textContent.toLowerCase();
                 if (text.includes(searchTerm)) {
                     row.style.display = '';
@@ -286,15 +429,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-function openEditCurriculum(id, programId, name, version, ay, desc, status) {
+function openEditCurriculum(id, programId, name, version, ay, desc) {
     document.getElementById('edit_curr_id').value = id;
     document.getElementById('edit_curr_program_id').value = programId;
     document.getElementById('edit_curr_name').value = name;
     document.getElementById('edit_curr_version').value = version;
     document.getElementById('edit_curr_ay').value = ay;
     document.getElementById('edit_curr_description').value = desc;
-    document.getElementById('edit_curr_status').value = status;
     new bootstrap.Modal(document.getElementById('editCurriculumModal')).show();
+}
+
+function openCloneModal(id, name, version, ay) {
+    document.getElementById('clone_source_id').value = id;
+    document.getElementById('clone_source_label').textContent = name + ' (v' + version + ')';
+    
+    // Propose incremented version
+    let nextVersion = '2.0';
+    let floatVer = parseFloat(version);
+    if (!isNaN(floatVer)) {
+        nextVersion = (floatVer + 1.0).toFixed(1);
+    }
+    
+    document.getElementById('clone_curr_name').value = name.replace(/\bv\d+(\.\d+)?\b/gi, '').trim() + ' (v' + nextVersion + ')';
+    document.getElementById('clone_curr_version').value = nextVersion;
+    document.getElementById('clone_curr_ay').value = ay;
+    document.getElementById('clone_curr_desc').value = 'Revision based on ' + name + ' v' + version;
+    new bootstrap.Modal(document.getElementById('cloneCurriculumModal')).show();
+}
+
+function openActivateModal(id, name, version) {
+    document.getElementById('activate_curr_id').value = id;
+    document.getElementById('activate_curr_title').textContent = name + ' (v' + version + ')';
+    new bootstrap.Modal(document.getElementById('activateCurriculumModal')).show();
+}
+
+function openArchiveModal(id, name) {
+    document.getElementById('archive_curr_id').value = id;
+    document.getElementById('archive_curr_title').textContent = name;
+    new bootstrap.Modal(document.getElementById('archiveCurriculumModal')).show();
 }
 
 function setDeleteCurriculum(id, name) {

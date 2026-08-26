@@ -161,7 +161,7 @@ if (empty($semesters)) $semesters = ['1'];
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <h1 class="h3 fw-bold text-dark mb-1">
-                        <a href="<?= esc($type === 'shs' ? 'shs_sections.php' : 'college_sections.php') ?>" class="text-decoration-none text-muted me-2"><i class="bi bi-arrow-left"></i></a>
+                        <a href="<?= esc($type === 'shs' ? 'shs_sections.php' : 'college_sections.php') ?>" data-spa="false" class="text-decoration-none text-muted me-2"><i class="bi bi-arrow-left"></i></a>
                         Schedule Builder
                     </h1>
                     <p class="text-muted mb-0">
@@ -321,6 +321,7 @@ if (empty($semesters)) $semesters = ['1'];
 </div>
 
 <script>
+(function() {
 const type = '<?= esc($type) ?>';
 const sectionId = <?= esc($sectionId) ?>;
 let subjects = <?= json_encode($jsSubjects) ?>;
@@ -334,6 +335,18 @@ const CAL_PIXELS_PER_HOUR = 60;
 
 let editModal = null;
 
+function normalizeDay(day) {
+    if (!day) return null;
+    const d = day.trim().toLowerCase();
+    if (d === 'monday' || d === 'mon' || d === 'm') return 'Monday';
+    if (d === 'tuesday' || d === 'tue' || d === 't') return 'Tuesday';
+    if (d === 'wednesday' || d === 'wed' || d === 'w') return 'Wednesday';
+    if (d === 'thursday' || d === 'thu' || d === 'th') return 'Thursday';
+    if (d === 'friday' || d === 'fri' || d === 'f') return 'Friday';
+    if (d === 'saturday' || d === 'sat' || d === 's') return 'Saturday';
+    return day;
+}
+
 function render() {
     // Clear all
     document.querySelectorAll('.day-col').forEach(c => c.innerHTML = '');
@@ -342,14 +355,13 @@ function render() {
     let unscheduledCount = 0;
 
     subjects.forEach(sub => {
-        if (sub.semester !== currentSemester && type === 'shs') {
-            return; // Only render current semester for SHS
-        }
-        if (sub.semester !== currentSemester && type === 'college') {
-            // College handles 1 semester at a time, but curriculum could technically have null semester. We just render everything for college.
+        if (type === 'shs' && sub.semester && currentSemester && sub.semester !== currentSemester) {
+            return; // Only filter by semester for SHS multi-semester view
         }
 
-        const isScheduled = sub.day && sub.day !== 'TBA' && sub.start_time && sub.end_time && sub.start_time !== '00:00:00';
+        const normalizedDay = normalizeDay(sub.day);
+        const col = normalizedDay ? document.getElementById('col_' + normalizedDay) : null;
+        const isScheduled = col && sub.start_time && sub.end_time && sub.start_time !== '00:00:00';
 
         const el = document.createElement('div');
         el.id = 'sub_' + sub.id;
@@ -368,7 +380,7 @@ function render() {
             const [eh, em] = sub.end_time.split(':').map(Number);
             
             const top = ((sh - CAL_START_HOUR) + (sm/60)) * CAL_PIXELS_PER_HOUR;
-            const height = ((eh - sh) + ((em - sm)/60)) * CAL_PIXELS_PER_HOUR;
+            const height = Math.max(30, ((eh - sh) + ((em - sm)/60)) * CAL_PIXELS_PER_HOUR);
 
             el.style.top = top + 'px';
             el.style.height = height + 'px';
@@ -386,8 +398,7 @@ function render() {
                 <div class="sub-meta"><i class="bi bi-door-open"></i> ${roomText}</div>
                 <div class="sub-meta text-truncate"><i class="bi bi-person"></i> ${instText}</div>
             `;
-            const col = document.getElementById('col_' + sub.day);
-            if (col) col.appendChild(el);
+            col.appendChild(el);
         } else {
             unscheduledCount++;
             el.className = 'unscheduled-item';
@@ -401,7 +412,9 @@ function render() {
                     <span class="badge bg-light text-muted border"><i class="bi bi-easel2 me-1"></i>${sub.delivery_mode || 'F2F'}</span>
                 </div>
             `;
-            const list = document.getElementById('unscheduledList_' + currentSemester) || document.querySelector('.unscheduled-list');
+            const list = document.getElementById('unscheduledList_' + (sub.semester || currentSemester)) || 
+                         document.getElementById('unscheduledList_' + currentSemester) || 
+                         document.querySelector('.unscheduled-list');
             if (list) list.appendChild(el);
         }
     });
@@ -773,11 +786,36 @@ function saveSchedule() {
     });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    editModal = new bootstrap.Modal(document.getElementById('editModal'));
+function initScheduleBuilder() {
+    const modalEl = document.getElementById('editModal');
+    if (modalEl && typeof bootstrap !== 'undefined') {
+        editModal = new bootstrap.Modal(modalEl);
+    }
     detectLocalConflicts();
     render();
-});
+}
+
+// Expose handlers globally for inline event attributes
+window.render = render;
+window.switchSemester = switchSemester;
+window.allowDrop = allowDrop;
+window.dragStart = dragStart;
+window.dropToUnscheduled = dropToUnscheduled;
+window.dropToCalendar = dropToCalendar;
+window.openEdit = openEdit;
+window.saveEdit = saveEdit;
+window.unassignSubject = unassignSubject;
+window.deleteSession = deleteSession;
+window.splitSession = splitSession;
+window.autoGenerate = autoGenerate;
+window.saveSchedule = saveSchedule;
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScheduleBuilder);
+} else {
+    initScheduleBuilder();
+}
+})();
 </script>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>

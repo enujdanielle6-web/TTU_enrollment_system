@@ -10,9 +10,12 @@ Architecture Decision Records (ADRs) document significant structural, behavioral
 - **[[ADR-002 Strangler Fig Migration]]**: Explains the strategy for incrementally migrating procedural legacy scripts to a unified Vanilla PHP Hybrid MVC architecture.
 - **[[ADR-003 Hybrid SPA Navigation Design]]**: Detailed architecture and implementation specification for client-side HTML fragment swapping and history management in the LMS.
 - **[[ADR-004 Hybrid Navigation Adversarial Audit]]**: Adversarial security and reliability audit of the LMS SPA navigation layer, covering race conditions, memory leaks, and DOM injection vectors.
+- **[[ADR-005 Curriculum Versioning and Subject Catalog Immutability]]**: Complete specification of the 3-state curriculum lifecycle (Draft $\rightarrow$ Active $\rightarrow$ Archived), clone-to-draft versioning, and subject catalog historical integrity safeguards.
 
 ---
 **Related:**
 - [[System Architecture]]
 - [[System Architecture Reconnaissance]]
+- [[Curriculum Architecture]]
+- [[Subject Catalog Immutability Architecture]]
 - [[TTU Enrollment System Home]]

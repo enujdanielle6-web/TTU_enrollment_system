@@ -98,7 +98,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       <?php endif; ?>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="schedule_builder.php?type=shs&id=<?= esc($s['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Manage Schedule">
+                      <a href="schedule_builder.php?type=shs&id=<?= esc($s['id']) ?>" data-spa="false" class="btn btn-sm btn-outline-primary rounded-pill me-1" title="Manage Schedule">
                         <i class="bi bi-calendar-range"></i>
                       </a>
                       <form method="POST" class="d-inline">

@@ -730,7 +730,7 @@ try {
         
         if (!$assCheckStmt->fetch()) {
             // Fetch applicant details to find matching template
-            $appStmt = $pdo->prepare('SELECT academic_level, grade_level, strand, semester FROM applications WHERE id = :id LIMIT 1');
+            $appStmt = $pdo->prepare('SELECT academic_level, grade_level, strand, semester, section_id FROM applications WHERE id = :id LIMIT 1');
             $appStmt->execute(['id' => $appId]);
             $appData = $appStmt->fetch();
 
@@ -745,7 +745,7 @@ try {
                 
                 if ($appData['academic_level'] === 'College') {
                     $sql .= ' AND semester = :semester';
-                    $params['semester'] = $appData['semester'];
+                    $params['semester'] = $appData['semester'] ?? 'First';
                 }
                 $sql .= ' LIMIT 1';
 
@@ -756,7 +756,6 @@ try {
                 if ($template) {
                     $academicLevel = $appData['academic_level'];
                     $feeTemplateId = (int)$template['id'];
-
 
                 $tuitionFee = (float)$template['tuition_fee'];
                 $isPerUnit = !empty($template['is_per_unit']);
@@ -783,6 +782,23 @@ try {
                             $unitsStmt->execute(['sec_id' => $appData['section_id']]);
                             $totalUnits = (int)$unitsStmt->fetchColumn();
                         }
+
+                        if ($totalUnits === 0) {
+                            $unitsStmt = $pdo->prepare('
+                                SELECT SUM(s.units)
+                                FROM college_curriculum_subjects ccs
+                                JOIN subjects s ON ccs.subject_id = s.id
+                                JOIN college_curricula cc ON ccs.curriculum_id = cc.id
+                                JOIN college_programs p ON cc.program_id = p.id
+                                WHERE p.code = :strand AND ccs.year_level = :year_level AND ccs.semester = :semester
+                            ');
+                            $unitsStmt->execute([
+                                'strand' => $appData['strand'],
+                                'year_level' => $appData['grade_level'],
+                                'semester' => $appData['semester'] ?? 'First'
+                            ]);
+                            $totalUnits = (int)$unitsStmt->fetchColumn();
+                        }
                     } elseif ($academicLevel === 'Senior High School') {
                         $unitsStmt = $pdo->prepare('
                             SELECT SUM(s.units) 
@@ -801,6 +817,23 @@ try {
                                 WHERE ss.shs_section_id = :sec_id
                             ');
                             $unitsStmt->execute(['sec_id' => $appData['section_id']]);
+                            $totalUnits = (int)$unitsStmt->fetchColumn();
+                        }
+
+                        if ($totalUnits === 0) {
+                            $unitsStmt = $pdo->prepare('
+                                SELECT SUM(s.units)
+                                FROM shs_curriculum_subjects scs
+                                JOIN subjects s ON scs.subject_id = s.id
+                                JOIN shs_curricula sc ON scs.curriculum_id = sc.id
+                                JOIN shs_strands st ON sc.strand_id = st.id
+                                WHERE st.code = :strand AND scs.grade_level = :grade_level AND scs.semester = :semester
+                            ');
+                            $unitsStmt->execute([
+                                'strand' => $appData['strand'],
+                                'grade_level' => $appData['grade_level'],
+                                'semester' => $appData['semester'] ?? 'First'
+                            ]);
                             $totalUnits = (int)$unitsStmt->fetchColumn();
                         }
                     }

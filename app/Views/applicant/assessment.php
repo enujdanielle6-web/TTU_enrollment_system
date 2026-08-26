@@ -44,6 +44,27 @@ require_once __DIR__ . '/../components/header.php';
           <?php unset($_SESSION['success_msg']); ?>
         <?php endif; ?>
 
+        <?php if (($userAppStatus ?? '') === 'approved' && empty($healthStatus)): ?>
+          <div class="alert alert-warning border-0 shadow-sm rounded-4 p-3.5 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" style="background-color: #fff9e6; border-left: 5px solid #ffc107 !important;">
+            <div class="d-flex align-items-start gap-3">
+              <div class="bg-warning text-dark rounded-circle p-2 flex-shrink-0 mt-1" style="width:42px; height:42px; display:inline-flex; align-items:center; justify-content:center;">
+                <i class="bi bi-heart-pulse-fill fs-5"></i>
+              </div>
+              <div>
+                <h6 class="fw-bold mb-1 text-dark"><i class="bi bi-exclamation-circle-fill text-warning me-1"></i> Action Required: Submit Health & Medical Information</h6>
+                <p class="mb-0 small text-muted">
+                  Your application is approved! You may review your financial assessment statement below, but please remember to submit your <strong>Health Information Form</strong> to complete your enrollment requirements.
+                </p>
+              </div>
+            </div>
+            <div class="flex-shrink-0 align-self-end align-self-md-center">
+              <a href="health_info.php" class="btn btn-warning text-dark btn-sm rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap">
+                <i class="bi bi-pencil-square me-1"></i> Fill Up Health Form
+              </a>
+            </div>
+          </div>
+        <?php endif; ?>
+
         <?php if (!$assessment): ?>
           <?php
              $appStatus = $userAppStatus ?? null;
@@ -96,13 +117,13 @@ require_once __DIR__ . '/../components/header.php';
           <div class="row g-4">
             <!-- Left Column: Breakdown -->
             <div class="col-lg-7">
-              <?php if ($assessment['academic_level'] === 'College' && !empty($enrolledSubjects)): ?>
-              <div class="island mb-4 fade-in-up" style="animation-delay: 0.3s;">
-                <div class="island-header fade-in-up" style="animation-delay: 0.4s;">
+              <?php if (!empty($enrolledSubjects)): ?>
+              <div class="island mb-4">
+                <div class="island-header">
                   <i class="bi bi-journal-text"></i>
-                  <h2>Curriculum Enrolled</h2>
+                  <h2>Curriculum Subjects & Units</h2>
                 </div>
-                <div class="island-body p-0 fade-in-up" style="animation-delay: 0.5s;">
+                <div class="island-body p-0">
                   <div class="table-responsive">
                     <table class="table table-hover mb-0">
                       <thead class="table-light text-muted small text-uppercase">
@@ -127,7 +148,7 @@ require_once __DIR__ . '/../components/header.php';
                       </tbody>
                       <tfoot class="table-light">
                         <tr>
-                          <td colspan="2" class="text-end fw-bold text-dark">Total Units:</td>
+                          <td colspan="2" class="text-end fw-bold text-dark">Total Enrolled Units:</td>
                           <td class="text-end pe-4 fw-bold text-dark fs-5"><?= esc($totalUnits) ?></td>
                         </tr>
                       </tfoot>
@@ -137,11 +158,11 @@ require_once __DIR__ . '/../components/header.php';
               </div>
               <?php endif; ?>
 
-              <div class="island minimal-card mb-4 fade-in-up" style="animation-delay: 0.6s;">
-                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3 fade-in-up" style="animation-delay: 0.7s;">
+              <div class="island minimal-card mb-4">
+                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3">
                   <h2 class="mb-0 fs-5 fw-bold text-dark"><i class="bi bi-receipt me-2 text-primary"></i>Fee Breakdown</h2>
                 </div>
-                <div class="island-body p-0 fade-in-up" style="animation-delay: 0.8s;">
+                <div class="island-body p-0">
                   <ul class="list-group list-group-flush border-0">
                     <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4 border-bottom-dashed">
                       <div>
@@ -149,9 +170,9 @@ require_once __DIR__ . '/../components/header.php';
                         <?php 
                           $calcTotalUnits = array_sum(array_column($enrolledSubjects ?? [], 'units'));
                           if (!empty($assessment['is_per_unit']) && $calcTotalUnits > 0): 
-                            $inferredCost = (float)$assessment['tuition_fee'] / $calcTotalUnits; 
+                            $unitRateDisplay = (float)($assessment['template_tuition_rate'] ?? 500.0);
                         ?>
-                          <small class="text-secondary d-block mt-1"><?= esc($calcTotalUnits) ?> units @ ₱<?= number_format($inferredCost, 2) ?>/unit</small>
+                          <small class="text-secondary d-block mt-1"><?= esc($calcTotalUnits) ?> units @ ₱<?= number_format($unitRateDisplay, 2) ?>/unit</small>
                         <?php endif; ?>
                       </div>
                       <span class="fw-semibold text-dark">₱<?= number_format((float)$assessment['tuition_fee'], 2) ?></span>

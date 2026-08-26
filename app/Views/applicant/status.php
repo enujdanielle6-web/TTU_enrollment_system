@@ -64,6 +64,14 @@ require_once __DIR__ . '/../components/header.php';
                         <i class="bi bi-pencil-square me-1"></i> Edit Application
                       </a>
                     </div>
+                  <?php elseif (($application['document_submission_method'] ?? '') === 'on_campus' && in_array($application['status'], ['pending', 'under_review'], true)): ?>
+                    <div class="mt-4 p-3 bg-light border border-warning rounded-3 text-start">
+                      <p class="text-dark fw-bold mb-1 small"><i class="bi bi-geo-alt-fill text-warning me-1"></i> Action: Visit Admissions Office</p>
+                      <p class="text-muted small mb-3">Please present your original physical documents at the Admissions Office to complete validation and receive approval.</p>
+                      <a href="documents.php" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold w-100">
+                        <i class="bi bi-card-checklist me-1"></i> View Office Checklist
+                      </a>
+                    </div>
                   <?php elseif (in_array($application['status'], ['approved', 'enrolled'], true)): ?>
                     <?php if ($application['status'] === 'enrolled'): ?>
                       <div class="mt-3 p-3 bg-light border border-info rounded-3 text-start">

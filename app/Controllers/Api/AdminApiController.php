@@ -26,10 +26,10 @@ if ($programId <= 0) {
 
 try {
     $stmt = $pdo->prepare("
-        SELECT id, curriculum_name, version, effective_academic_year 
+        SELECT id, curriculum_name, version, effective_academic_year, status 
         FROM college_curricula 
-        WHERE program_id = ? AND status = 'active'
-        ORDER BY curriculum_name ASC
+        WHERE program_id = ? AND status IN ('active', 'archived')
+        ORDER BY FIELD(status, 'active', 'archived'), version DESC
     ");
     $stmt->execute([$programId]);
     $curricula = $stmt->fetchAll(PDO::FETCH_ASSOC);

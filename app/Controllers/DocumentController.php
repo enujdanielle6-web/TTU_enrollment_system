@@ -226,6 +226,10 @@ class DocumentController extends BaseController
                 }
                 
                 $appId = (int) $application['id'];
+
+                if (in_array($application['status'], ['under_review', 'approved', 'enrolled'], true)) {
+                    $respond(false, 'Your document submission method is already locked and cannot be changed.');
+                }
                 
                 if ($submissionMethod === 'on_campus' && in_array($application['status'], ['pending', 'correction_required'])) {
                     $updStmt = $pdo->prepare('UPDATE applications SET document_submission_method = :method, status = "under_review" WHERE id = :id');
@@ -234,7 +238,7 @@ class DocumentController extends BaseController
                 } else {
                     $updStmt = $pdo->prepare('UPDATE applications SET document_submission_method = :method WHERE id = :id');
                     $updStmt->execute(['method' => $submissionMethod, 'id' => $appId]);
-                    User::logActivity($userId, 'Submission Preference Updated', 'You updated your document submission preference.', 'bi-gear text-primary');
+                    User::logActivity($userId, 'Submission Preference Updated', 'You updated your document submission preference to ' . ($submissionMethod === 'online' ? 'Online Upload' : 'On-Campus') . '.', 'bi-gear text-primary');
                 }
 
                 $respond(true, 'Submission preference saved successfully.');
