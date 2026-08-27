@@ -215,7 +215,7 @@ require_once __DIR__ . '/../components/header.php';
                     <div class="text-muted small">
                       <i class="bi bi-info-circle text-primary me-1"></i> You will be asked for a secondary confirmation before your choice is finalized.
                     </div>
-                    <button type="button" id="btnOpenMethodConfirmModal" data-bs-toggle="modal" data-bs-target="#confirmMethodModal" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm text-nowrap">
+                    <button type="button" id="btnOpenMethodConfirmModal" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm text-nowrap">
                       <i class="bi bi-shield-check me-1"></i> Save Preference
                     </button>
                   </div>
@@ -545,10 +545,13 @@ require_once __DIR__ . '/../components/header.php';
         </div>
       </div>
     </div>
-  </div  <script>
+  </div>
+
+  <script>
   (function() {
     function initDocumentsPage() {
       const methodForm = document.getElementById('submissionMethodForm');
+      const openMethodModalBtn = document.getElementById('btnOpenMethodConfirmModal');
       const confirmModalEl = document.getElementById('confirmMethodModal');
       const consentCheck = document.getElementById('irreversibleConsentCheck');
       const confirmSaveMethodBtn = document.getElementById('confirmSaveMethodBtn');
@@ -563,8 +566,7 @@ require_once __DIR__ . '/../components/header.php';
       const modalMethodDetails = document.getElementById('modalMethodDetails');
 
       function updateModalContent() {
-        if (!methodForm) return;
-        const checkedRadio = methodForm.querySelector('input[name="submission_method"]:checked');
+        const checkedRadio = document.querySelector('input[name="submission_method"]:checked');
         const selectedMethod = checkedRadio ? checkedRadio.value : 'online';
 
         if (selectedMethod === 'on_campus') {
@@ -615,8 +617,13 @@ require_once __DIR__ . '/../components/header.php';
         if (confirmSaveMethodBtn) confirmSaveMethodBtn.disabled = true;
       }
 
-      if (confirmModalEl) {
-        confirmModalEl.addEventListener('show.bs.modal', updateModalContent);
+      if (openMethodModalBtn && confirmModalEl) {
+        openMethodModalBtn.onclick = function(e) {
+          e.preventDefault();
+          updateModalContent();
+          const modalInstance = bootstrap.Modal.getOrCreateInstance(confirmModalEl);
+          modalInstance.show();
+        };
       }
 
       const radioOptions = document.querySelectorAll('input[name="submission_method"]');
@@ -625,9 +632,9 @@ require_once __DIR__ . '/../components/header.php';
       });
 
       if (consentCheck && confirmSaveMethodBtn) {
-        consentCheck.addEventListener('change', function() {
+        consentCheck.onchange = function() {
           confirmSaveMethodBtn.disabled = !this.checked;
-        });
+        };
       }
 
       if (confirmSaveMethodBtn && methodForm) {
@@ -640,16 +647,28 @@ require_once __DIR__ . '/../components/header.php';
       }
 
       // --- Final Document Submission Modal Logic ---
+      const btnSubmitAllDocs = document.getElementById('btnSubmitAllDocs');
+      const confirmSubmitDocsModalEl = document.getElementById('confirmSubmitDocsModal');
       const submitDocsConsentCheck = document.getElementById('submitDocsConsentCheck');
       const confirmSubmitDocsBtn = document.getElementById('confirmSubmitDocsBtn');
       const submitAllDocsForm = document.getElementById('submitAllDocsForm');
       const submitDocsSpinner = document.getElementById('submitDocsSpinner');
       const submitDocsBtnText = document.getElementById('submitDocsBtnText');
 
+      if (btnSubmitAllDocs && confirmSubmitDocsModalEl) {
+        btnSubmitAllDocs.onclick = function(e) {
+          e.preventDefault();
+          if (submitDocsConsentCheck) submitDocsConsentCheck.checked = false;
+          if (confirmSubmitDocsBtn) confirmSubmitDocsBtn.disabled = true;
+          const modalInstance = bootstrap.Modal.getOrCreateInstance(confirmSubmitDocsModalEl);
+          modalInstance.show();
+        };
+      }
+
       if (submitDocsConsentCheck && confirmSubmitDocsBtn) {
-        submitDocsConsentCheck.addEventListener('change', function() {
+        submitDocsConsentCheck.onchange = function() {
           confirmSubmitDocsBtn.disabled = !this.checked;
-        });
+        };
       }
 
       if (confirmSubmitDocsBtn && submitAllDocsForm) {
