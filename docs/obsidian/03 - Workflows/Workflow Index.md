@@ -18,8 +18,12 @@ This directory documents the end-to-end operational workflows of the TTU Enrollm
 ### 4. [[Payment & Assessment Workflow]]
 * **Overview:** Dynamic tuition rate-per-unit evaluation, scholarship deduction, online bank proof of payment upload, cashier verification, and official receipt issuance.
 
+### 5. [[Document Submission Preference Workflow]]
+* **Overview:** Dual verification pathway (Online Upload vs On-Campus Physical Submission), interactive secondary confirmation lock, dynamic guide, and status synchronization.
+
 ---
 **Related:**
 - [[Module Index]]
 - [[Business Rules]]
 - [[System Architecture]]
+- [[National Service Training Program (NSTP) Architecture]]
