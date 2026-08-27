@@ -215,7 +215,7 @@ require_once __DIR__ . '/../components/header.php';
                     <div class="text-muted small">
                       <i class="bi bi-info-circle text-primary me-1"></i> You will be asked for a secondary confirmation before your choice is finalized.
                     </div>
-                    <button type="button" id="btnOpenMethodConfirmModal" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm text-nowrap">
+                    <button type="button" id="btnOpenMethodConfirmModal" data-bs-toggle="modal" data-bs-target="#confirmMethodModal" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm text-nowrap">
                       <i class="bi bi-shield-check me-1"></i> Save Preference
                     </button>
                   </div>
@@ -332,7 +332,7 @@ require_once __DIR__ . '/../components/header.php';
                   <form id="submitAllDocsForm" action="document_workflow.php" method="POST" class="m-0">
                     <?= getCsrfInput() ?>
                     <input type="hidden" name="action" value="submit_documents">
-                    <button type="button" id="btnSubmitAllDocs" class="btn btn-success px-4 py-2.5 rounded-pill fw-semibold shadow-sm text-nowrap">
+                    <button type="button" id="btnSubmitAllDocs" data-bs-toggle="modal" data-bs-target="#confirmSubmitDocsModal" class="btn btn-success px-4 py-2.5 rounded-pill fw-semibold shadow-sm text-nowrap">
                       <i class="bi bi-send-check me-1"></i> Submit for Verification
                     </button>
                   </form>
@@ -545,231 +545,188 @@ require_once __DIR__ . '/../components/header.php';
         </div>
       </div>
     </div>
-  </div>
+  </div  <script>
+  (function() {
+    function initDocumentsPage() {
+      const methodForm = document.getElementById('submissionMethodForm');
+      const confirmModalEl = document.getElementById('confirmMethodModal');
+      const consentCheck = document.getElementById('irreversibleConsentCheck');
+      const confirmSaveMethodBtn = document.getElementById('confirmSaveMethodBtn');
+      const saveMethodSpinner = document.getElementById('saveMethodSpinner');
+      const saveMethodBtnText = document.getElementById('saveMethodBtnText');
 
-</main>
+      const modalMethodIcon = document.getElementById('modalMethodIcon');
+      const modalMethodTitle = document.getElementById('modalMethodTitle');
+      const modalMethodBadge = document.getElementById('modalMethodBadge');
+      const modalMethodSubtitle = document.getElementById('modalMethodSubtitle');
+      const modalWarningText = document.getElementById('modalWarningText');
+      const modalMethodDetails = document.getElementById('modalMethodDetails');
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    function showToast(message, type = 'success') {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-4 shadow`;
-        alertDiv.style.zIndex = '9999';
-        alertDiv.innerHTML = `
-            <i class="bi ${type === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-2"></i>${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        document.body.appendChild(alertDiv);
-        setTimeout(() => {
-            alertDiv.classList.remove('show');
-            setTimeout(() => alertDiv.remove(), 150);
-        }, 4000);
-    }
+      function updateModalContent() {
+        if (!methodForm) return;
+        const checkedRadio = methodForm.querySelector('input[name="submission_method"]:checked');
+        const selectedMethod = checkedRadio ? checkedRadio.value : 'online';
 
-    // --- Submission Method Secondary Confirmation Logic ---
-    const methodForm = document.getElementById('submissionMethodForm');
-    const openMethodModalBtn = document.getElementById('btnOpenMethodConfirmModal');
-    const confirmModalEl = document.getElementById('confirmMethodModal');
-    const consentCheck = document.getElementById('irreversibleConsentCheck');
-    const confirmSaveMethodBtn = document.getElementById('confirmSaveMethodBtn');
-    const saveMethodSpinner = document.getElementById('saveMethodSpinner');
-    const saveMethodBtnText = document.getElementById('saveMethodBtnText');
+        if (selectedMethod === 'on_campus') {
+          if (modalMethodIcon) {
+            modalMethodIcon.className = 'rounded-3 d-flex align-items-center justify-content-center fs-3 bg-warning bg-opacity-10 text-warning';
+            modalMethodIcon.innerHTML = '<i class="bi bi-building"></i>';
+          }
+          if (modalMethodTitle) modalMethodTitle.textContent = 'On-Campus Submission';
+          if (modalMethodBadge) {
+            modalMethodBadge.className = 'badge bg-warning text-dark rounded-pill';
+            modalMethodBadge.textContent = 'Physical Verification';
+          }
+          if (modalMethodSubtitle) modalMethodSubtitle.textContent = 'Submit original copies at the TTU Admissions Office';
+          if (modalWarningText) modalWarningText.textContent = 'Selecting On-Campus Submission will immediately set your application to Under Review and disable online document uploading. This action cannot be undone online.';
+          if (modalMethodDetails) {
+            modalMethodDetails.innerHTML = `
+              <ul class="mb-0 ps-3 text-muted">
+                <li><strong class="text-dark">Physical Presence Required:</strong> You must visit the Admissions Office with your original documents.</li>
+                <li><strong class="text-dark">Upload Locked:</strong> You will not be able to upload or replace files online.</li>
+                <li><strong class="text-dark">Irreversible:</strong> You cannot switch back to Online Upload once confirmed.</li>
+              </ul>
+            `;
+          }
+        } else {
+          if (modalMethodIcon) {
+            modalMethodIcon.className = 'rounded-3 d-flex align-items-center justify-content-center fs-3 bg-primary bg-opacity-10 text-primary';
+            modalMethodIcon.innerHTML = '<i class="bi bi-cloud-arrow-up"></i>';
+          }
+          if (modalMethodTitle) modalMethodTitle.textContent = 'Online Upload';
+          if (modalMethodBadge) {
+            modalMethodBadge.className = 'badge bg-primary rounded-pill';
+            modalMethodBadge.textContent = 'Digital Upload';
+          }
+          if (modalMethodSubtitle) modalMethodSubtitle.textContent = 'Submit digital copies of requirements through the portal';
+          if (modalWarningText) modalWarningText.textContent = 'Selecting Online Upload locks your choice to digital verification. You will be required to submit clear digital copies of all mandatory documents through this portal.';
+          if (modalMethodDetails) {
+            modalMethodDetails.innerHTML = `
+              <ul class="mb-0 ps-3 text-muted">
+                <li><strong class="text-dark">Digital Copies Required:</strong> Prepare PDF, JPG, or PNG files under 5MB for each document.</li>
+                <li><strong class="text-dark">Online Verification:</strong> Admissions officers will verify your documents directly on the portal.</li>
+                <li><strong class="text-dark">Irreversible:</strong> Once confirmed, online submission is your primary verification mode.</li>
+              </ul>
+            `;
+          }
+        }
 
-    const modalMethodIcon = document.getElementById('modalMethodIcon');
-    const modalMethodTitle = document.getElementById('modalMethodTitle');
-    const modalMethodBadge = document.getElementById('modalMethodBadge');
-    const modalMethodSubtitle = document.getElementById('modalMethodSubtitle');
-    const modalWarningText = document.getElementById('modalWarningText');
-    const modalMethodDetails = document.getElementById('modalMethodDetails');
+        if (consentCheck) consentCheck.checked = false;
+        if (confirmSaveMethodBtn) confirmSaveMethodBtn.disabled = true;
+      }
 
-    let methodModal = null;
-    if (confirmModalEl) {
-        methodModal = new bootstrap.Modal(confirmModalEl);
-    }
+      if (confirmModalEl) {
+        confirmModalEl.addEventListener('show.bs.modal', updateModalContent);
+      }
 
-    if (openMethodModalBtn && methodForm && methodModal) {
-        openMethodModalBtn.addEventListener('click', function() {
-            const checkedRadio = methodForm.querySelector('input[name="submission_method"]:checked');
-            const selectedMethod = checkedRadio ? checkedRadio.value : 'online';
+      const radioOptions = document.querySelectorAll('input[name="submission_method"]');
+      radioOptions.forEach(r => {
+        r.addEventListener('change', updateModalContent);
+      });
 
-            if (selectedMethod === 'on_campus') {
-                modalMethodIcon.className = 'rounded-3 d-flex align-items-center justify-content-center fs-3 bg-primary bg-opacity-10 text-primary';
-                modalMethodIcon.innerHTML = '<i class="bi bi-building"></i>';
-                modalMethodTitle.textContent = 'On-Campus Submission';
-                modalMethodBadge.className = 'badge bg-warning text-dark rounded-pill';
-                modalMethodBadge.textContent = 'Physical Verification';
-                modalMethodSubtitle.textContent = 'Submit original copies at the TTU Admissions Office';
-                modalWarningText.textContent = 'Selecting On-Campus Submission will immediately set your application to Under Review and disable online document uploading. This action cannot be undone online.';
-                modalMethodDetails.innerHTML = `
-                    <ul class="mb-0 ps-3 text-muted">
-                        <li><strong class="text-dark">Physical Presence Required:</strong> You must visit the Admissions Office with your original documents.</li>
-                        <li><strong class="text-dark">Upload Locked:</strong> You will not be able to upload or replace files online.</li>
-                        <li><strong class="text-dark">Irreversible:</strong> You cannot switch back to Online Upload once confirmed.</li>
-                    </ul>
-                `;
-            } else {
-                modalMethodIcon.className = 'rounded-3 d-flex align-items-center justify-content-center fs-3 bg-primary bg-opacity-10 text-primary';
-                modalMethodIcon.innerHTML = '<i class="bi bi-cloud-arrow-up"></i>';
-                modalMethodTitle.textContent = 'Online Upload';
-                modalMethodBadge.className = 'badge bg-primary rounded-pill';
-                modalMethodBadge.textContent = 'Digital Upload';
-                modalMethodSubtitle.textContent = 'Submit digital copies of requirements through the portal';
-                modalWarningText.textContent = 'Selecting Online Upload locks your choice to digital verification. You will be required to submit clear digital copies of all mandatory documents through this portal.';
-                modalMethodDetails.innerHTML = `
-                    <ul class="mb-0 ps-3 text-muted">
-                        <li><strong class="text-dark">Digital Copies Required:</strong> Prepare PDF, JPG, or PNG files under 5MB for each document.</li>
-                        <li><strong class="text-dark">Online Verification:</strong> Admissions officers will verify your documents directly on the portal.</li>
-                        <li><strong class="text-dark">Irreversible:</strong> Once confirmed, online submission is your primary verification mode.</li>
-                    </ul>
-                `;
-            }
-
-            if (consentCheck) consentCheck.checked = false;
-            if (confirmSaveMethodBtn) confirmSaveMethodBtn.disabled = true;
-
-            methodModal.show();
-        });
-    }
-
-    if (consentCheck && confirmSaveMethodBtn) {
+      if (consentCheck && confirmSaveMethodBtn) {
         consentCheck.addEventListener('change', function() {
-            confirmSaveMethodBtn.disabled = !this.checked;
+          confirmSaveMethodBtn.disabled = !this.checked;
         });
-    }
+      }
 
-    if (confirmSaveMethodBtn && methodForm) {
-        confirmSaveMethodBtn.addEventListener('click', function() {
-            confirmSaveMethodBtn.disabled = true;
-            if (saveMethodSpinner) saveMethodSpinner.classList.remove('d-none');
-            if (saveMethodBtnText) saveMethodBtnText.textContent = 'Saving...';
-            methodForm.submit();
-        });
-    }
+      if (confirmSaveMethodBtn && methodForm) {
+        confirmSaveMethodBtn.onclick = function() {
+          confirmSaveMethodBtn.disabled = true;
+          if (saveMethodSpinner) saveMethodSpinner.classList.remove('d-none');
+          if (saveMethodBtnText) saveMethodBtnText.textContent = 'Saving...';
+          methodForm.submit();
+        };
+      }
 
-    // --- Final Document Submission Modal Logic ---
-    const btnSubmitAllDocs = document.getElementById('btnSubmitAllDocs');
-    const submitDocsModalEl = document.getElementById('confirmSubmitDocsModal');
-    const submitDocsConsentCheck = document.getElementById('submitDocsConsentCheck');
-    const confirmSubmitDocsBtn = document.getElementById('confirmSubmitDocsBtn');
-    const submitAllDocsForm = document.getElementById('submitAllDocsForm');
-    const submitDocsSpinner = document.getElementById('submitDocsSpinner');
-    const submitDocsBtnText = document.getElementById('submitDocsBtnText');
+      // --- Final Document Submission Modal Logic ---
+      const submitDocsConsentCheck = document.getElementById('submitDocsConsentCheck');
+      const confirmSubmitDocsBtn = document.getElementById('confirmSubmitDocsBtn');
+      const submitAllDocsForm = document.getElementById('submitAllDocsForm');
+      const submitDocsSpinner = document.getElementById('submitDocsSpinner');
+      const submitDocsBtnText = document.getElementById('submitDocsBtnText');
 
-    let submitDocsModal = null;
-    if (submitDocsModalEl) {
-        submitDocsModal = new bootstrap.Modal(submitDocsModalEl);
-    }
-
-    if (btnSubmitAllDocs && submitDocsModal) {
-        btnSubmitAllDocs.addEventListener('click', function() {
-            if (submitDocsConsentCheck) submitDocsConsentCheck.checked = false;
-            if (confirmSubmitDocsBtn) confirmSubmitDocsBtn.disabled = true;
-            submitDocsModal.show();
-        });
-    }
-
-    if (submitDocsConsentCheck && confirmSubmitDocsBtn) {
+      if (submitDocsConsentCheck && confirmSubmitDocsBtn) {
         submitDocsConsentCheck.addEventListener('change', function() {
-            confirmSubmitDocsBtn.disabled = !this.checked;
+          confirmSubmitDocsBtn.disabled = !this.checked;
         });
-    }
+      }
 
-    if (confirmSubmitDocsBtn && submitAllDocsForm) {
-        confirmSubmitDocsBtn.addEventListener('click', function() {
-            confirmSubmitDocsBtn.disabled = true;
-            if (submitDocsSpinner) submitDocsSpinner.classList.remove('d-none');
-            if (submitDocsBtnText) submitDocsBtnText.textContent = 'Submitting...';
-            submitAllDocsForm.submit();
-        });
-    }
+      if (confirmSubmitDocsBtn && submitAllDocsForm) {
+        confirmSubmitDocsBtn.onclick = function() {
+          confirmSubmitDocsBtn.disabled = true;
+          if (submitDocsSpinner) submitDocsSpinner.classList.remove('d-none');
+          if (submitDocsBtnText) submitDocsBtnText.textContent = 'Submitting...';
+          submitAllDocsForm.submit();
+        };
+      }
 
-    // --- AJAX Document Upload Form Handlers ---
-    const uploadForms = document.querySelectorAll('form[action="document_upload.php"]');
-    uploadForms.forEach(form => {
-        form.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const btn = form.querySelector('button[type="submit"]');
-            const originalBtnHtml = btn.innerHTML;
+      // --- AJAX Document Upload Form Handlers ---
+      const uploadForms = document.querySelectorAll('form[action="document_upload.php"]');
+      uploadForms.forEach(form => {
+        form.onsubmit = async function(e) {
+          e.preventDefault();
+          
+          const btn = form.querySelector('button[type="submit"]');
+          const originalBtnHtml = btn ? btn.innerHTML : 'Upload';
+          if (btn) {
             btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Uploading...';
             btn.disabled = true;
+          }
 
-            const formData = new FormData(form);
-            formData.append('ajax', '1');
+          const formData = new FormData(form);
+          formData.append('ajax', '1');
 
-            try {
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: { 'Accept': 'application/json' }
-                });
+          try {
+            const response = await fetch(form.action, {
+              method: 'POST',
+              body: formData,
+              headers: { 'Accept': 'application/json' }
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    
-                    const card = form.closest('.doc-card');
-                    if (card) {
-                        card.classList.add('border-success');
-                        
-                        // Update badge
-                        const badgeContainer = card.querySelector('.d-flex.align-items-center.gap-2.mb-1');
-                        if (badgeContainer) {
-                            let badge = badgeContainer.querySelector('.badge-status');
-                            if (badge) {
-                                badge.className = 'badge badge-status bg-warning text-dark rounded-pill';
-                                badge.textContent = 'Pending';
-                            } else {
-                                const title = badgeContainer.querySelector('h3');
-                                badge = document.createElement('span');
-                                badge.className = 'badge badge-status bg-warning text-dark rounded-pill';
-                                badge.textContent = 'Pending';
-                                badgeContainer.insertBefore(badge, title.nextSibling);
-                            }
-                        }
-                        
-                        // Update icon
-                        const icon = card.querySelector('.doc-icon i');
-                        if (icon) {
-                            icon.className = 'bi bi-file-earmark-check-fill';
-                        }
-                        
-                        // Add or update "View Current File" button
-                        let viewBtnContainer = card.querySelector('.mb-2');
-                        if (!viewBtnContainer) {
-                            const uploadContainer = card.querySelector('.text-md-end.custom-file-upload');
-                            if (uploadContainer) {
-                                viewBtnContainer = document.createElement('div');
-                                viewBtnContainer.className = 'mb-2';
-                                uploadContainer.insertBefore(viewBtnContainer, form);
-                            }
-                        }
-                        
-                        if (viewBtnContainer) {
-                            viewBtnContainer.innerHTML = `
-                                <a href="document_view.php?id=${data.doc_id}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm btn-sm">
-                                    <i class="bi bi-eye me-1"></i> View Current File
-                                </a>
-                            `;
-                        }
-                    }
-                    
-                    // Change button text to 'Replace'
-                    btn.innerHTML = '<i class="bi bi-upload me-1"></i> Replace';
-                } else {
-                    showToast(data.message, 'danger');
-                    btn.innerHTML = originalBtnHtml;
+            if (data.success) {
+              const alertDiv = document.createElement('div');
+              alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed top-0 start-50 translate-middle-x mt-4 shadow';
+              alertDiv.style.zIndex = '9999';
+              alertDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2"></i>${data.message}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+              document.body.appendChild(alertDiv);
+              setTimeout(() => alertDiv.remove(), 4000);
+
+              const card = form.closest('.doc-card');
+              if (card) {
+                card.classList.add('border-success');
+                const badge = card.querySelector('.badge-status');
+                if (badge) {
+                  badge.className = 'badge badge-status bg-warning text-dark rounded-pill';
+                  badge.textContent = 'Pending';
                 }
-            } catch (err) {
-                console.error(err);
-                showToast('An unexpected error occurred during upload.', 'danger');
-                btn.innerHTML = originalBtnHtml;
-            } finally {
-                btn.disabled = false;
+              }
+              if (btn) btn.innerHTML = '<i class="bi bi-upload me-1"></i> Replace';
+            } else {
+              alert(data.message || 'Upload failed');
+              if (btn) btn.innerHTML = originalBtnHtml;
             }
-        });
-    });
-});
-</script>
+          } catch (err) {
+            console.error(err);
+            alert('An unexpected error occurred during upload.');
+            if (btn) btn.innerHTML = originalBtnHtml;
+          } finally {
+            if (btn) btn.disabled = false;
+          }
+        };
+      });
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initDocumentsPage);
+    } else {
+      initDocumentsPage();
+    }
+    document.addEventListener('spa:navigated', initDocumentsPage);
+  })();
+  </script>
+</main>
+
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
