@@ -105,24 +105,21 @@ require_once __DIR__ . '/../components/header.php';
       if (!form.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
-      } else {
-        event.preventDefault(); // Stop normal submission temporarily
-        
-        Swal.fire({
-          title: 'Creating Account...',
-          text: 'Please wait while we set up your profile.',
-          allowOutsideClick: false,
-          showConfirmButton: false,
-          didOpen: () => {
-            Swal.showLoading();
-            setTimeout(() => {
-              form.submit(); // Actually submit the form
-            }, 1500);
-          }
-        });
+        $(form).addClass('was-validated');
+        return;
       }
 
-      $(form).addClass('was-validated');
+      // Prevent duplicate submissions
+      if ($(form).data('submitting')) {
+        event.preventDefault();
+        return;
+      }
+      $(form).data('submitting', true);
+
+      var btn = $(form).find('button[type="submit"]');
+      btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> Sending Verification Code...');
+      
+      // Submit immediately
     });
 
     // Password visibility toggle
