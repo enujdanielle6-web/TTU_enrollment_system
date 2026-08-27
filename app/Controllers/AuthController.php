@@ -169,7 +169,7 @@ class AuthController extends BaseController
         if (strlen($password) < 8) $errors[] = 'Password must be at least 8 characters long.';
         if ($password !== $confirmPassword) $errors[] = 'Passwords do not match.';
 
-        // Ensure email isn't taken
+        // Ensure email isn't already taken
         if (User::findByEmail($email)) {
             $errors[] = 'Email is already registered.';
         }
@@ -184,27 +184,30 @@ class AuthController extends BaseController
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
         $code = sprintf('%06d', random_int(100000, 999999));
 
-        $pdo = \App\Core\Database::getConnection();
-        $stmt = $pdo->prepare('
-            INSERT INTO users (first_name, last_name, email, password, role, is_active, email_verified, verification_code, verification_code_expires_at) 
-            VALUES (?, ?, ?, ?, ?, ?, 0, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))
-        ');
-        $stmt->execute([$firstName, $lastName, $email, $hashedPassword, 'applicant', 1, $code]);
-        $userId = (int)$pdo->lastInsertId();
+        // Store registration details in session - account is NOT created in DB until OTP is verified
+        $_SESSION['pending_registration'] = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+            'password' => $hashedPassword,
+            'role' => 'applicant',
+            'code' => $code,
+            'expires_at' => time() + (15 * 60)
+        ];
+
+        $_SESSION['pending_verification_email'] = $email;
+        $_SESSION['pending_verification_name'] = "$firstName $lastName";
+        unset($_SESSION['pending_verification_user_id']);
 
         // Send 6-digit OTP verification email with validation
         $mailError = null;
         $emailSent = sendVerificationCodeEmail($email, $firstName, $code, $mailError);
 
-        $_SESSION['pending_verification_user_id'] = $userId;
-        $_SESSION['pending_verification_email'] = $email;
-        $_SESSION['pending_verification_name'] = "$firstName $lastName";
-        
         if ($emailSent) {
             $_SESSION['verification_success'] = "A 6-digit verification code has been successfully sent to {$email}. Please check your inbox or spam folder.";
         } else {
-            $_SESSION['verification_warning'] = "Account registered, but there was a temporary delivery issue sending the verification email to {$email}. Please click 'Resend Code' if not received.";
-            error_log("Email delivery warning for user ID {$userId}: {$mailError}");
+            $_SESSION['verification_warning'] = "We attempted to send a verification code to {$email}, but encountered a temporary delivery issue. Please click 'Resend Code' if not received.";
+            error_log("Email delivery warning for {$email}: {$mailError}");
         }
 
         $response->redirect('/sia/auth/verify_email.php');
@@ -223,10 +226,9 @@ class AuthController extends BaseController
             }
         }
 
-        $userId = $_SESSION['pending_verification_user_id'] ?? ($_SESSION['user_id'] ?? null);
-        $email = $_SESSION['pending_verification_email'] ?? ($_SESSION['user_email'] ?? '');
+        $email = $_SESSION['pending_registration']['email'] ?? ($_SESSION['pending_verification_email'] ?? ($_SESSION['user_email'] ?? ''));
 
-        if (!$userId) {
+        if (empty($email)) {
             $response->redirect('/sia/auth/register.php');
             return;
         }
@@ -246,12 +248,6 @@ class AuthController extends BaseController
 
     public function processVerifyEmail(Request $request, Response $response)
     {
-        $userId = (int)($_SESSION['pending_verification_user_id'] ?? ($_SESSION['user_id'] ?? 0));
-        if ($userId <= 0) {
-            $response->redirect('/sia/auth/register.php');
-            return;
-        }
-
         $code = trim((string)$request->input('code', ''));
         if (empty($code)) {
             $d1 = (string)$request->input('digit_1', '');
@@ -267,6 +263,77 @@ class AuthController extends BaseController
         if (strlen($code) !== 6) {
             $_SESSION['verify_errors'] = ['Please enter the complete 6-digit verification code.'];
             $response->redirect('/sia/auth/verify_email.php');
+            return;
+        }
+
+        // Scenario 1: New registration pending OTP verification (Account created only NOW)
+        if (!empty($_SESSION['pending_registration'])) {
+            $pending = $_SESSION['pending_registration'];
+            $storedCode = (string)($pending['code'] ?? '');
+            $expiresAt = (int)($pending['expires_at'] ?? 0);
+
+            if ($storedCode !== $code || time() > $expiresAt) {
+                $_SESSION['verify_errors'] = ['The verification code is incorrect or has expired. Please try again or click Resend Code.'];
+                $response->redirect('/sia/auth/verify_email.php');
+                return;
+            }
+
+            // Check if email was taken in the interim
+            if (User::findByEmail($pending['email'])) {
+                unset($_SESSION['pending_registration'], $_SESSION['pending_verification_email'], $_SESSION['pending_verification_name']);
+                $_SESSION['register_errors'] = ['Email is already registered. Please log in.'];
+                $response->redirect('/sia/auth/login.php');
+                return;
+            }
+
+            // Create account in DB now that OTP is valid
+            $pdo = \App\Core\Database::getConnection();
+            $stmt = $pdo->prepare('
+                INSERT INTO users (first_name, last_name, email, password, role, is_active, email_verified, verification_code, verification_code_expires_at, created_at, updated_at) 
+                VALUES (?, ?, ?, ?, ?, 1, 1, NULL, NULL, NOW(), NOW())
+            ');
+            $stmt->execute([
+                $pending['first_name'],
+                $pending['last_name'],
+                $pending['email'],
+                $pending['password'],
+                $pending['role'] ?? 'applicant'
+            ]);
+            $userId = (int)$pdo->lastInsertId();
+
+            // Automatically authenticate newly created user
+            session_regenerate_id(true);
+            $_SESSION['user_id'] = $userId;
+            $_SESSION['user_first_name'] = $pending['first_name'];
+            $_SESSION['user_last_name'] = $pending['last_name'];
+            $_SESSION['user_name'] = $pending['first_name'] . ' ' . $pending['last_name'];
+            $_SESSION['user_email'] = $pending['email'];
+            $_SESSION['user_role'] = $pending['role'] ?? 'applicant';
+            $_SESSION['user_department'] = 'None';
+            $_SESSION['user_permissions'] = [];
+            $_SESSION['logged_in'] = true;
+            
+            $_SESSION['user_ip'] = $_SERVER['REMOTE_ADDR'] ?? '';
+            $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'] ?? '';
+            $_SESSION['created_time'] = time();
+
+            unset(
+                $_SESSION['pending_registration'],
+                $_SESSION['pending_verification_user_id'],
+                $_SESSION['pending_verification_email'],
+                $_SESSION['pending_verification_name']
+            );
+
+            User::logActivity($userId, "Account Created & Verified", "Applicant completed email verification and account was created.", "bi-patch-check-fill");
+
+            $response->redirect('/sia/applicant/dashboard.php');
+            return;
+        }
+
+        // Scenario 2: Legacy unverified user logging in
+        $userId = (int)($_SESSION['pending_verification_user_id'] ?? ($_SESSION['user_id'] ?? 0));
+        if ($userId <= 0) {
+            $response->redirect('/sia/auth/register.php');
             return;
         }
 
@@ -324,6 +391,29 @@ class AuthController extends BaseController
 
     public function resendVerification(Request $request, Response $response)
     {
+        // Scenario 1: Pending registration
+        if (!empty($_SESSION['pending_registration'])) {
+            $newCode = sprintf('%06d', random_int(100000, 999999));
+            $_SESSION['pending_registration']['code'] = $newCode;
+            $_SESSION['pending_registration']['expires_at'] = time() + (15 * 60);
+
+            $email = $_SESSION['pending_registration']['email'];
+            $firstName = $_SESSION['pending_registration']['first_name'];
+
+            $mailError = null;
+            $emailSent = sendVerificationCodeEmail($email, $firstName, $newCode, $mailError);
+
+            if ($emailSent) {
+                $_SESSION['verification_success'] = "A new 6-digit verification code has been successfully sent to {$email}.";
+            } else {
+                $_SESSION['verify_errors'] = ["Failed to send email to {$email}. " . ($mailError ?: 'Please try again in a few moments.')];
+            }
+
+            $response->redirect('/sia/auth/verify_email.php');
+            return;
+        }
+
+        // Scenario 2: Legacy unverified user
         $userId = (int)($_SESSION['pending_verification_user_id'] ?? ($_SESSION['user_id'] ?? 0));
         if ($userId <= 0) {
             $response->redirect('/sia/auth/register.php');
