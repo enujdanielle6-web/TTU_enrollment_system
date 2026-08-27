@@ -5,9 +5,9 @@ require_once __DIR__ . '/../components/header.php';
 <main id="spa-main" class="status-page py-5 bg-light min-vh-100">
 <style>
 /* Wizard Styles */
-.wizard-step { display: none; animation: fadeIn 0.4s ease; }
-.wizard-step.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.wizard-step { display: none; }
+.wizard-step.active { display: block; animation: fadeInStep 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes fadeInStep { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 .wizard-progress { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; position: relative; }
 .wizard-progress::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 4px; background: #e9ecef; z-index: 1; transform: translateY(-50%); border-radius: 2px; }
 .wizard-progress-bar { position: absolute; top: 50%; left: 0; height: 4px; background: var(--color-primary); z-index: 2; transform: translateY(-50%); border-radius: 2px; transition: width 0.4s ease; width: 0%; }
@@ -82,12 +82,12 @@ require_once __DIR__ . '/../components/header.php';
           
           <div class="wizard-step active" id="step-1">
           <!-- 1. Personal Information Island -->
-          <div class="island fade-in-up" style="animation-delay: 0.1s;">
-            <div class="island-header fade-in-up" style="animation-delay: 0.2s;">
+          <div class="island" >
+            <div class="island-header" >
               <i class="bi bi-person"></i>
               <h2>Personal Information</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 0.3s;">
+            <div class="island-body mt-2" >
               <div class="row g-3">
                 <div class="col-md-3">
                   <label class="form-label text-muted small fw-semibold" for="firstName">First Name</label>
@@ -151,12 +151,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- 2. Contact Information Island -->
-          <div class="island fade-in-up" style="animation-delay: 0.4s;">
-            <div class="island-header fade-in-up" style="animation-delay: 0.5s;">
+          <div class="island" >
+            <div class="island-header" >
               <i class="bi bi-telephone"></i>
               <h2>Contact Information</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 0.6s;">
+            <div class="island-body mt-2" >
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted small fw-semibold" for="contactNumber">Mobile Number</label>
@@ -184,12 +184,12 @@ require_once __DIR__ . '/../components/header.php';
 
           <div class="wizard-step" id="step-2">
           <!-- 3. Current Address Island -->
-          <div class="island fade-in-up" style="animation-delay: 0.7s;">
-            <div class="island-header fade-in-up" style="animation-delay: 0.8s;">
+          <div class="island" >
+            <div class="island-header" >
               <i class="bi bi-geo-alt"></i>
               <h2>Current Address</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 0.9s;">
+            <div class="island-body mt-2" >
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted small fw-semibold" for="addressHouseNumber">House Number</label>
@@ -233,12 +233,12 @@ require_once __DIR__ . '/../components/header.php';
 
           <div class="wizard-step" id="step-3">
           <!-- 4. Parent / Guardian Information Island -->
-          <div class="island fade-in-up" style="animation-delay: 1s;">
-            <div class="island-header fade-in-up" style="animation-delay: 1.1s;">
+          <div class="island" >
+            <div class="island-header" >
               <i class="bi bi-people"></i>
               <h2>Parent / Guardian Information</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.2s;">
+            <div class="island-body mt-2" >
               <h6 class="fw-semibold text-primary mb-3">Father's Information</h6>
               <div class="row g-3 mb-4">
                 <div class="col-md-4">
@@ -300,12 +300,12 @@ require_once __DIR__ . '/../components/header.php';
 
           <div class="wizard-step" id="step-4">
           <!-- 5. Previous School Island -->
-          <div class="island fade-in-up" style="animation-delay: 1.3s;">
-            <div class="island-header fade-in-up" style="animation-delay: 1.4s;">
+          <div class="island" >
+            <div class="island-header" >
               <i class="bi bi-building"></i>
               <h2>Previous School Information</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.5s;">
+            <div class="island-body mt-2" >
               <div class="row g-3">
                 <div class="col-md-6">
                   <label class="form-label text-muted small fw-semibold" for="lastSchoolAttended">Previous School Name</label>
@@ -369,12 +369,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- 6. Enrollment Details Island -->
-          <div class="island fade-in-up" style="animation-delay: 1.6s;">
-            <div class="island-header fade-in-up" style="animation-delay: 1.7s;">
+          <div class="island" >
+            <div class="island-header" >
               <i class="bi bi-mortarboard"></i>
               <h2>Enrollment Details</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 1.8s;">
+            <div class="island-body mt-2" >
               <div class="row g-3">
                 <div class="col-md-3">
                   <label class="form-label text-muted small fw-semibold" for="schoolYear">School Year</label>
@@ -437,12 +437,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Curriculum Subjects Island -->
-          <div class="island mb-4 fade-in-up" id="curriculumContainer" style="display: none; animation-delay: 1.9s;">
-            <div class="island-header fade-in-up" style="animation-delay: 2s;">
+          <div class="island mb-4" id="curriculumContainer" style="display: none; ">
+            <div class="island-header" >
               <i class="bi bi-journal-text"></i>
               <h2>Curriculum Subjects</h2>
             </div>
-            <div class="island-body p-0 mt-2 fade-in-up" style="animation-delay: 2.1s;">
+            <div class="island-body p-0 mt-2" >
               <div class="table-responsive">
                 <table class="table table-hover mb-0">
                   <thead class="table-light text-muted small text-uppercase">
@@ -470,12 +470,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Section Selection Island -->
-          <div class="island mb-4 fade-in-up" id="sectionContainer" style="display: none; animation-delay: 2.2s;">
-            <div class="island-header fade-in-up" style="animation-delay: 2.3s;">
+          <div class="island mb-4" id="sectionContainer" style="display: none; ">
+            <div class="island-header" >
               <i class="bi bi-diagram-3"></i>
               <h2>Available Sections</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 2.4s;">
+            <div class="island-body mt-2" >
               <div id="sectionGrid" class="row g-3">
                 <!-- Dynamically populated sections will appear here -->
                 <div class="col-12 text-center text-muted py-3">Please select your Program, Year Level, Semester, and Student Type first.</div>
@@ -486,7 +486,7 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Irregular Info Island -->
-          <div class="island mb-4 border border-warning border-2 rounded-4 text-center overflow-hidden fade-in-up" id="irregularContainer" style="display: none; padding: 0; animation-delay: 2.5s;">
+          <div class="island mb-4 border border-warning border-2 rounded-4 text-center overflow-hidden" id="irregularContainer" style="display: none; padding: 0; ">
             <div class="bg-warning bg-opacity-10 p-4 border-bottom border-warning border-opacity-25">
               <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2.5rem; line-height: 1;"></i>
               <h2 class="text-warning-emphasis mt-2 mb-0 fw-bold fs-4">Irregular Student Enrollment</h2>
@@ -498,12 +498,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- Irregular Curriculum Selection Island -->
-          <div class="island mb-4 fade-in-up" id="irregularCurriculumContainer" style="display: none; animation-delay: 2.6s;">
-            <div class="island-header fade-in-up" style="animation-delay: 2.7s;">
+          <div class="island mb-4" id="irregularCurriculumContainer" style="display: none; ">
+            <div class="island-header" >
               <i class="bi bi-card-checklist"></i>
               <h2>Curriculum & Subject Selection</h2>
             </div>
-            <div class="island-body mt-3 fade-in-up" style="animation-delay: 2.8s;">
+            <div class="island-body mt-3" >
               
               <!-- Weekly Schedule GUI -->
               <div class="mb-5">
@@ -548,11 +548,11 @@ require_once __DIR__ . '/../components/header.php';
                   </div>
                 </div>
                 <div class="col-lg-5">
-                  <div class="card border-primary border-opacity-25 shadow-sm sticky-top fade-in-up" style="top: 100px; z-index: 10; animation-delay: 2.9s;">
-                    <div class="card-header bg-primary bg-opacity-10 border-bottom border-primary border-opacity-25 py-3 fade-in-up" style="animation-delay: 3s;">
+                  <div class="card border-primary border-opacity-25 shadow-sm sticky-top" style="top: 100px; z-index: 10; ">
+                    <div class="card-header bg-primary bg-opacity-10 border-bottom border-primary border-opacity-25 py-3" >
                       <h6 class="mb-0 fw-bold text-primary-emphasis"><i class="bi bi-bag-check me-2"></i>Selected Subjects</h6>
                     </div>
-                    <div class="card-body p-0 bg-light fade-in-up" style="animation-delay: 3.1s;">
+                    <div class="card-body p-0 bg-light" >
                       <ul class="list-group list-group-flush mb-0 p-2" id="selectedSubjectsList" style="max-height: 400px; overflow-y: auto;">
                         <li class="list-group-item bg-transparent px-0 py-3 text-center text-muted border-0 small" id="emptyCartMsg">
                           <i class="bi bi-bag-x fs-2 d-block mb-2 text-secondary opacity-50"></i>
@@ -560,7 +560,7 @@ require_once __DIR__ . '/../components/header.php';
                         </li>
                       </ul>
                     </div>
-                    <div class="card-footer bg-white border-top border-light py-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 3.2s;">
+                    <div class="card-footer bg-white border-top border-light py-3 d-flex justify-content-between align-items-center" >
                       <span class="fw-bold text-dark small">Total Units:</span>
                       <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill shadow-sm" id="cartTotalUnitsBadge">0 Units</span>
                     </div>
@@ -582,12 +582,12 @@ require_once __DIR__ . '/../components/header.php';
 
           <div class="wizard-step" id="step-5">
           <!-- 7. Emergency Contact Island -->
-          <div class="island fade-in-up" style="animation-delay: 3.3s;">
-            <div class="island-header fade-in-up" style="animation-delay: 3.4s;">
+          <div class="island" >
+            <div class="island-header" >
               <i class="bi bi-heart-pulse"></i>
               <h2>Emergency Contact</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 3.5s;">
+            <div class="island-body mt-2" >
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted small fw-semibold" for="emergencyContactPerson">Contact Person</label>
@@ -609,12 +609,12 @@ require_once __DIR__ . '/../components/header.php';
           </div>
 
           <!-- 8. Additional Information Island -->
-          <div class="island fade-in-up" style="animation-delay: 3.6s;">
-            <div class="island-header fade-in-up" style="animation-delay: 3.7s;">
+          <div class="island" >
+            <div class="island-header" >
               <i class="bi bi-info-circle"></i>
               <h2>Additional Information</h2>
             </div>
-            <div class="island-body mt-2 fade-in-up" style="animation-delay: 3.8s;">
+            <div class="island-body mt-2" >
               <div class="row g-3">
                 <div class="col-md-4">
                   <label class="form-label text-muted small fw-semibold" for="specialNeeds">Special Needs (Optional)</label>
@@ -640,14 +640,14 @@ require_once __DIR__ . '/../components/header.php';
 
           <!-- 6. Review Information -->
           <div class="wizard-step" id="step-6">
-            <div class="island mb-4 fade-in-up" style="animation-delay: 3.9s;">
-              <div class="island-header d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 4s;">
+            <div class="island mb-4" >
+              <div class="island-header d-flex justify-content-between align-items-center" >
                 <div>
                   <i class="bi bi-search"></i>
                   <h2>Review Your Information</h2>
                 </div>
               </div>
-              <div class="island-body mt-2 fade-in-up" id="reviewContent" style="animation-delay: 4.1s;">
+              <div class="island-body mt-2" id="reviewContent" >
                 <!-- Generated by JS -->
               </div>
             </div>
@@ -659,7 +659,7 @@ require_once __DIR__ . '/../components/header.php';
 
           <!-- 7. Submit Enrollment -->
           <div class="wizard-step" id="step-7">
-            <div class="island text-center py-5 fade-in-up" style="animation-delay: 4.2s;">
+            <div class="island text-center py-5" >
               <i class="bi bi-check-circle text-success mb-3" style="font-size: 4rem;"></i>
               <h2 class="h3 fw-bold text-dark">Ready to Submit!</h2>
               <p class="text-muted mx-auto" style="max-width: 500px;">You have completed all the steps. Please verify everything on the previous page before submitting your application. By submitting, you agree to the University's enrollment terms and conditions.</p>
@@ -835,6 +835,7 @@ require_once __DIR__ . '/../components/header.php';
       const yr = gradeLevelSelect.value;
       const sem = semesterSelect.value;
       const level = academicLevelSelect.value;
+      const nstp = nstpSelect ? nstpSelect.value : '';
 
       const container = document.getElementById('curriculumContainer');
       const tbody = document.getElementById('curriculumBody');
@@ -850,16 +851,18 @@ require_once __DIR__ . '/../components/header.php';
       tbody.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-muted"><div class="spinner-border spinner-border-sm text-primary me-2"></div> Loading curriculum...</td></tr>';
       ttotal.textContent = '0';
 
-      fetch(`api_get_curriculum.php?program_code=${encodeURIComponent(prog)}&year_level=${encodeURIComponent(yr)}&semester=${encodeURIComponent(sem)}`)
+      fetch(`api_get_curriculum.php?program_code=${encodeURIComponent(prog)}&year_level=${encodeURIComponent(yr)}&semester=${encodeURIComponent(sem)}&nstp=${encodeURIComponent(nstp)}`)
         .then(response => response.json())
         .then(data => {
           if (data.success && data.subjects.length > 0) {
             let html = '';
             data.subjects.forEach(sub => {
+              const isNstp = (sub.subject_type === 'NSTP' || (sub.subject_code && sub.subject_code.includes('NSTP')));
+              const badgeClass = isNstp ? 'bg-primary bg-opacity-10 text-primary border border-primary-subtle' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle';
               html += `<tr>
                 <td class="ps-4 fw-bold text-dark">${sub.subject_code}</td>
                 <td>${sub.subject_name}</td>
-                <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">${sub.subject_type || 'Subject'}</span></td>
+                <td><span class="badge ${badgeClass}">${sub.subject_type || 'Subject'}</span></td>
                 <td class="text-end pe-4">${sub.units}</td>
               </tr>`;
             });
@@ -1283,7 +1286,8 @@ require_once __DIR__ . '/../components/header.php';
       
       accordion.innerHTML = '<div class="text-center py-5 text-muted"><div class="spinner-border spinner-border-sm text-primary mb-2"></div><p class="mb-0 small">Loading full curriculum...</p></div>';
       
-      fetch(`api_get_full_curriculum.php?program_code=${encodeURIComponent(prog)}`)
+      const nstp = nstpSelect ? nstpSelect.value : '';
+      fetch(`api_get_full_curriculum.php?program_code=${encodeURIComponent(prog)}&nstp=${encodeURIComponent(nstp)}`)
         .then(res => res.json())
         .then(data => {
           if (data.success && data.curriculum && Object.keys(data.curriculum).length > 0) {
@@ -1372,7 +1376,7 @@ require_once __DIR__ . '/../components/header.php';
               html += `
                 <div class="col-md-6 col-lg-4">
                   <label class="card h-100 ${cardClass} section-card" style="cursor: ${cursor}; transition: all 0.2s;">
-                    <div class="card-body fade-in-up" style="animation-delay: 4.3s;">
+                    <div class="card-body" >
                       <div class="d-flex justify-content-between align-items-center mb-2">
                         <h5 class="card-title fw-bold ${textClass} mb-0">${sec.section_code}</h5>
                         <input class="form-check-input section-radio" type="radio" name="section_choice" value="${sec.id}" ${disabled}>
@@ -1468,6 +1472,14 @@ require_once __DIR__ . '/../components/header.php';
     strandSelect.addEventListener('change', () => { updateCurriculum(); updateSectionVisibility(); });
     semesterSelect.addEventListener('change', () => { updateCurriculum(); updateSectionVisibility(); });
     studentTypeSelect.addEventListener('change', updateSectionVisibility);
+    if (nstpSelect) {
+      nstpSelect.addEventListener('change', () => {
+        updateCurriculum();
+        if (studentTypeSelect.value === 'Irregular') {
+          fetchIrregularCurriculum();
+        }
+      });
+    }
 
     // Initial update if academic level is pre-selected
     if (academicLevelSelect.value) {
@@ -1798,32 +1810,146 @@ function autoFillEnrollment() {
   const form = document.getElementById('enrollmentForm');
   if(!form) return;
   
-  const textInputs = form.querySelectorAll('input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]):not([readonly]):not([disabled]):not([type="file"])');
-  textInputs.forEach(input => {
-    if(input.value.trim() === '') {
-      if(input.type === 'date') input.value = '2005-06-15';
-      else if(input.type === 'number') input.value = '12345';
-      else if(input.type === 'email') input.value = 'test@example.com';
-      else if(input.id.toLowerCase().includes('contact') || input.id.toLowerCase().includes('phone') || input.id.toLowerCase().includes('number')) input.value = '09123456789';
-      else if(input.id.toLowerCase().includes('zip')) input.value = '1000';
-      else input.value = 'Test Data';
+  function setFieldValue(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.readOnly || el.disabled) return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  // 1. Personal Information (Step 1)
+  setFieldValue('middleName', 'Santos');
+  setFieldValue('suffix', '');
+  setFieldValue('gender', 'male');
+  setFieldValue('birthDate', '2005-08-15');
+  setFieldValue('placeOfBirth', 'Manila City');
+  setFieldValue('civilStatus', 'Single');
+  setFieldValue('nationality', 'Filipino');
+  setFieldValue('religion', 'Roman Catholic');
+
+  // 2. Contact Information (Step 1)
+  setFieldValue('contactNumber', '09171234567');
+  setFieldValue('telephoneNumber', '81234567');
+
+  // 3. Current Address (Step 2)
+  setFieldValue('addressHouseNumber', '123');
+  setFieldValue('addressStreet', 'Rizal Street');
+  setFieldValue('addressBarangay', 'Barangay 101');
+  setFieldValue('addressCity', 'Manila');
+  setFieldValue('addressProvince', 'Metro Manila');
+  setFieldValue('addressZip', '1000');
+
+  // 4. Parent / Guardian Information (Step 3)
+  setFieldValue('fatherName', 'Roberto Dela Cruz');
+  setFieldValue('fatherOccupation', 'Civil Engineer');
+  setFieldValue('fatherContact', '09181234567');
+  setFieldValue('motherName', 'Maria Santos Dela Cruz');
+  setFieldValue('motherOccupation', 'Teacher');
+  setFieldValue('motherContact', '09191234567');
+  setFieldValue('guardianName', 'Roberto Dela Cruz');
+  setFieldValue('guardianRelationship', 'Father');
+  setFieldValue('guardianContact', '09181234567');
+
+  // 5. Previous School Information (Step 4)
+  setFieldValue('lastSchoolAttended', 'Manila Science High School');
+  setFieldValue('lastSchoolAddress', 'Taft Avenue, Manila');
+  setFieldValue('previousSchoolLevel', 'Senior High School');
+  setFieldValue('previousStrandCourse', 'STEM');
+  setFieldValue('previousSchoolStatus', 'Graduated');
+  setFieldValue('academicYearFrom', '2024');
+  setFieldValue('academicYearTo', '2026');
+  setFieldValue('lrn', '123456789012');
+
+  // 6. Enrollment Details (Step 4)
+  const academicLevelSelect = document.getElementById('academicLevel');
+  if (academicLevelSelect) {
+    academicLevelSelect.value = 'College';
+    academicLevelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  const gradeLevelSelect = document.getElementById('gradeLevel');
+  if (gradeLevelSelect) {
+    gradeLevelSelect.value = '1st Year';
+    gradeLevelSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  const strandSelect = document.getElementById('strand');
+  if (strandSelect && strandSelect.options.length > 1) {
+    strandSelect.selectedIndex = 1;
+    strandSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  const semesterSelect = document.getElementById('semester');
+  if (semesterSelect) {
+    semesterSelect.value = 'First';
+    semesterSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  const studentTypeSelect = document.getElementById('studentType');
+  if (studentTypeSelect) {
+    studentTypeSelect.value = 'Regular';
+    studentTypeSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  const nstpSelect = document.getElementById('nstp');
+  if (nstpSelect) {
+    nstpSelect.value = 'CWTS';
+    nstpSelect.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  // 7. Emergency Contact (Step 5)
+  setFieldValue('emergencyContactPerson', 'Roberto Dela Cruz');
+  setFieldValue('emergencyContactRelationship', 'Father');
+  setFieldValue('emergencyContactNumber', '09181234567');
+
+  // 8. Additional Information (Step 5)
+  setFieldValue('specialNeeds', 'None');
+  setFieldValue('medicalConditions', 'None');
+  setFieldValue('allergies', 'None');
+
+  // 9. Auto-select first available section once loaded
+  let attempts = 0;
+  const pollSections = setInterval(() => {
+    attempts++;
+    const radio = document.querySelector('.section-radio:not(:disabled)');
+    const sectionIdInput = document.getElementById('section_id');
+    const sectionFeedback = document.getElementById('sectionFeedback');
+    if (radio) {
+      radio.checked = true;
+      if (sectionIdInput) {
+        sectionIdInput.value = radio.value;
+      }
+      if (sectionFeedback) {
+        sectionFeedback.style.setProperty('display', 'none', 'important');
+      }
+      radio.dispatchEvent(new Event('change', { bubbles: true }));
+      clearInterval(pollSections);
+    } else if (attempts > 25) {
+      clearInterval(pollSections);
     }
-  });
-  
-  const selects = form.querySelectorAll('select:not([disabled])');
-  selects.forEach(select => {
-    if(select.options.length > 1 && (select.selectedIndex === 0 || select.value === '')) {
-      select.selectedIndex = 1;
-      select.dispatchEvent(new Event('change'));
-    }
-  });
-  
-  const textareas = form.querySelectorAll('textarea:not([readonly]):not([disabled])');
-  textareas.forEach(ta => {
-    if(ta.value.trim() === '') ta.value = 'Test Data Notes';
-  });
-  
-  alert('Form fields auto-filled successfully!');
+  }, 120);
+
+  // Trigger global form save
+  form.dispatchEvent(new Event('input', { bubbles: true }));
+  form.dispatchEvent(new Event('change', { bubbles: true }));
+
+  // Visual Confirmation Notification
+  if (typeof Swal !== 'undefined') {
+    Swal.fire({
+      icon: 'success',
+      title: 'Test Data Auto-Filled!',
+      text: 'Valid test data has been populated across all enrollment steps.',
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true
+    });
+  } else {
+    alert('Form fields auto-filled successfully with valid test data!');
+  }
 }
 </script>
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

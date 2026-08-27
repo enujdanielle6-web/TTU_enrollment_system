@@ -26,17 +26,14 @@ flowchart TD
 ## 2. Technical Implementation Details
 
 ### Database Schema Updates (`users`)
-- `email_verified` (TINYINT(1), DEFAULT 1): `0` for new applicants; `1` for verified accounts.
-- `verification_code` (VARCHAR(10), NULL): Stores the active 6-digit code.
-- `verification_expires_at` (DATETIME, NULL): Expiration timestamp (15 minutes).
+- `email_verified` (TINYINT(1), DEFAULT 0): Gating flag. 0 = Unverified (cannot log in), 1 = Verified.
+- `verification_code` (VARCHAR(10), NULL): 6-digit random string (e.g., `481920`).
+- `verification_code_expires_at` (DATETIME, NULL): Expiration timestamp (15 minutes).
 
-### 6-Digit OTP Generation & Expiry
-```php
-$code = sprintf('%06d', random_int(100000, 999999));
-$stmt = $pdo->prepare('
-    INSERT INTO users (first_name, last_name, email, password, role, is_active, email_verified, verification_code, verification_expires_at) 
-    VALUES (?, ?, ?, ?, ?, ?, 0, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))
-');
+```sql
+-- Registration insert
+INSERT INTO users (first_name, last_name, email, password, role, is_active, email_verified, verification_code, verification_code_expires_at) 
+VALUES (?, ?, ?, ?, 'applicant', 1, 0, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE));
 ```
 
 ### Verification Interface (`/auth/verify_email.php`)

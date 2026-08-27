@@ -162,6 +162,10 @@ $pageTitle = 'SHS Strands - Administrator';
             if ($action === 'create_strand') {
                 $code = strtolower(trim($_POST['code'] ?? ''));
                 $name = trim($_POST['name'] ?? '');
+                $description = trim($_POST['description'] ?? '');
+                $icon = trim($_POST['icon'] ?? '');
+                $careers = trim($_POST['careers'] ?? '');
+                $customTuition = trim($_POST['custom_tuition'] ?? '');
 
                 if ($code === '' || $name === '') {
                     throw new Exception('Strand code and name are required.');
@@ -174,33 +178,63 @@ $pageTitle = 'SHS Strands - Administrator';
                     throw new Exception("A strand with code '{$code}' already exists.");
                 }
 
-                $insertStmt = $pdo->prepare('INSERT INTO shs_strands (code, name, is_active) VALUES (:code, :name, 1)');
-                $insertStmt->execute(['code' => $code, 'name' => $name]);
+                $insertStmt = $pdo->prepare('INSERT INTO shs_strands (code, name, description, icon, careers, custom_tuition, is_active) VALUES (:code, :name, :description, :icon, :careers, :custom_tuition, 1)');
+                $insertStmt->execute([
+                    'code' => $code, 
+                    'name' => $name,
+                    'description' => $description !== '' ? $description : null,
+                    'icon' => $icon !== '' ? $icon : null,
+                    'careers' => $careers !== '' ? $careers : null,
+                    'custom_tuition' => $customTuition !== '' ? $customTuition : null
+                ]);
 
                 logActivity((int)$_SESSION['user_id'], 'bi-mortarboard', 'SHS Strand Added', "Added SHS strand: " . strtoupper($code));
                 $_SESSION['success_msg'] = 'Strand created successfully.';
             } 
-            elseif ($action === 'update_strand') {
+            elseif ($action === 'update_strand' || $action === 'update_landing_card') {
                 $id = (int)($_POST['id'] ?? 0);
                 $code = strtolower(trim($_POST['code'] ?? ''));
                 $name = trim($_POST['name'] ?? '');
+                $description = trim($_POST['description'] ?? '');
+                $icon = trim($_POST['icon'] ?? '');
+                $careers = trim($_POST['careers'] ?? '');
+                $customTuition = trim($_POST['custom_tuition'] ?? '');
 
-                if ($id <= 0 || $code === '' || $name === '') {
+                if ($id <= 0) {
                     throw new Exception('Missing required information to update strand.');
                 }
 
-                // Check duplicate code
-                $stmt = $pdo->prepare('SELECT id FROM shs_strands WHERE code = :code AND id != :id');
-                $stmt->execute(['code' => $code, 'id' => $id]);
-                if ($stmt->fetch()) {
-                    throw new Exception("The code '{$code}' is already used by another strand.");
+                if ($code !== '' && $name !== '') {
+                    // Check duplicate code
+                    $stmt = $pdo->prepare('SELECT id FROM shs_strands WHERE code = :code AND id != :id');
+                    $stmt->execute(['code' => $code, 'id' => $id]);
+                    if ($stmt->fetch()) {
+                        throw new Exception("The code '{$code}' is already used by another strand.");
+                    }
+
+                    $updateStmt = $pdo->prepare('UPDATE shs_strands SET code = :code, name = :name, description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition WHERE id = :id');
+                    $updateStmt->execute([
+                        'code' => $code, 
+                        'name' => $name, 
+                        'description' => $description !== '' ? $description : null,
+                        'icon' => $icon !== '' ? $icon : null,
+                        'careers' => $careers !== '' ? $careers : null,
+                        'custom_tuition' => $customTuition !== '' ? $customTuition : null,
+                        'id' => $id
+                    ]);
+                } else {
+                    $updateStmt = $pdo->prepare('UPDATE shs_strands SET description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition WHERE id = :id');
+                    $updateStmt->execute([
+                        'description' => $description !== '' ? $description : null,
+                        'icon' => $icon !== '' ? $icon : null,
+                        'careers' => $careers !== '' ? $careers : null,
+                        'custom_tuition' => $customTuition !== '' ? $customTuition : null,
+                        'id' => $id
+                    ]);
                 }
 
-                $updateStmt = $pdo->prepare('UPDATE shs_strands SET code = :code, name = :name WHERE id = :id');
-                $updateStmt->execute(['code' => $code, 'name' => $name, 'id' => $id]);
-
-                logActivity((int)$_SESSION['user_id'], 'bi-pencil', 'SHS Strand Updated', "Updated details for strand: " . strtoupper($code));
-                $_SESSION['success_msg'] = 'Strand details updated successfully.';
+                logActivity((int)$_SESSION['user_id'], 'bi-pencil', 'SHS Strand Updated', "Updated details/card for strand ID: " . $id);
+                $_SESSION['success_msg'] = 'Strand details & landing card updated successfully.';
             } 
             elseif ($action === 'toggle_strand') {
                 $id = (int)($_POST['id'] ?? 0);

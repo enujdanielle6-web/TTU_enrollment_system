@@ -82,7 +82,7 @@ class AuthController extends BaseController
         if ($user['role'] === 'applicant' && (int)($user['email_verified'] ?? 1) === 0) {
             $newCode = sprintf('%06d', random_int(100000, 999999));
             $pdo = \App\Core\Database::getConnection();
-            $upd = $pdo->prepare("UPDATE users SET verification_code = :code, verification_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE id = :id");
+            $upd = $pdo->prepare("UPDATE users SET verification_code = :code, verification_code_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE id = :id");
             $upd->execute([
                 'code' => $newCode,
                 'id' => (int)$user['id']
@@ -186,7 +186,7 @@ class AuthController extends BaseController
 
         $pdo = \App\Core\Database::getConnection();
         $stmt = $pdo->prepare('
-            INSERT INTO users (first_name, last_name, email, password, role, is_active, email_verified, verification_code, verification_expires_at) 
+            INSERT INTO users (first_name, last_name, email, password, role, is_active, email_verified, verification_code, verification_code_expires_at) 
             VALUES (?, ?, ?, ?, ?, ?, 0, ?, DATE_ADD(NOW(), INTERVAL 15 MINUTE))
         ');
         $stmt->execute([$firstName, $lastName, $email, $hashedPassword, 'applicant', 1, $code]);
@@ -283,7 +283,7 @@ class AuthController extends BaseController
 
         $now = date('Y-m-d H:i:s');
         $storedCode = (string)($user['verification_code'] ?? '');
-        $expiresAt = (string)($user['verification_expires_at'] ?? '');
+        $expiresAt = (string)($user['verification_code_expires_at'] ?? '');
 
         if ($storedCode !== $code || ($expiresAt !== '' && $expiresAt < $now)) {
             $_SESSION['verify_errors'] = ['The verification code is incorrect or has expired. Please try again or click Resend Code.'];
@@ -292,7 +292,7 @@ class AuthController extends BaseController
         }
 
         // Mark as verified
-        $upd = $pdo->prepare("UPDATE users SET email_verified = 1, verification_code = NULL, verification_expires_at = NULL WHERE id = :id");
+        $upd = $pdo->prepare("UPDATE users SET email_verified = 1, verification_code = NULL, verification_code_expires_at = NULL WHERE id = :id");
         $upd->execute(['id' => $userId]);
 
         // Automatically authenticate user
@@ -341,7 +341,7 @@ class AuthController extends BaseController
         }
 
         $newCode = sprintf('%06d', random_int(100000, 999999));
-        $upd = $pdo->prepare("UPDATE users SET verification_code = :code, verification_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE id = :id");
+        $upd = $pdo->prepare("UPDATE users SET verification_code = :code, verification_code_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) WHERE id = :id");
         $upd->execute([
             'code' => $newCode,
             'id' => $userId

@@ -580,10 +580,33 @@ try {
 
             if (!empty($subjectsToEnroll)) {
                 $insSubStmt = $pdo->prepare('INSERT INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                $checkSubStmt = $pdo->prepare('SELECT subject_code, subject_type FROM subjects WHERE id = :id');
+                $findTrackStmt = $pdo->prepare('SELECT id FROM subjects WHERE subject_code = :code LIMIT 1');
+
+                $applicantNstp = strtoupper(trim($oldApp['nstp'] ?? ''));
+
                 foreach ($subjectsToEnroll as $row) {
+                    $targetSubId = (int)$row['subject_id'];
+
+                    // Check if subject is NSTP
+                    $checkSubStmt->execute(['id' => $targetSubId]);
+                    $subInfo = $checkSubStmt->fetch(PDO::FETCH_ASSOC);
+
+                    if ($subInfo && ($subInfo['subject_type'] === 'NSTP' || stripos($subInfo['subject_code'], 'NSTP') !== false)) {
+                        if (!empty($applicantNstp) && in_array($applicantNstp, ['CWTS', 'ROTC', 'LTS'], true)) {
+                            $semNum = (stripos($subInfo['subject_code'], '102') !== false || stripos($subInfo['subject_code'], '2') !== false) ? '102' : '101';
+                            $trackCode = $applicantNstp . $semNum;
+                            $findTrackStmt->execute(['code' => $trackCode]);
+                            $mappedId = $findTrackStmt->fetchColumn();
+                            if ($mappedId) {
+                                $targetSubId = (int)$mappedId;
+                            }
+                        }
+                    }
+
                     $insSubStmt->execute([
                         'app_id' => $appId, 
-                        'sub_id' => $row['subject_id'],
+                        'sub_id' => $targetSubId,
                         'sec_id' => $assignSectionId
                     ]);
                 }

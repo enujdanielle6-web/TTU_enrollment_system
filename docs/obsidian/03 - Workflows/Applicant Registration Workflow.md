@@ -20,7 +20,7 @@ sequenceDiagram
     Browser->>Auth: POST /auth/register_process.php
     Auth->>DB: Check if email already registered
     Auth->>Auth: Hash password & generate 6-digit random code
-    Auth->>DB: INSERT INTO users (role='applicant', email_verified=0, verification_code, verification_expires_at=NOW()+15m)
+    Auth->>DB: INSERT INTO users (role='applicant', email_verified=0, verification_code, verification_code_expires_at=NOW()+15m)
     Auth->>Mailer: sendVerificationCodeEmail(email, firstName, code)
     Mailer->>Inbox: Delivers HTML Email with 6-digit OTP
     Auth->>Browser: Set pending session & Redirect to /auth/verify_email.php
@@ -28,7 +28,7 @@ sequenceDiagram
     User->>Browser: Types/pastes 6-digit code into OTP input boxes
     Browser->>Auth: POST /auth/verify_email_process.php
     Auth->>DB: Verify code match and expiration timestamp
-    Auth->>DB: UPDATE users SET email_verified=1, verification_code=NULL, verification_expires_at=NULL
+    Auth->>DB: UPDATE users SET email_verified=1, verification_code=NULL, verification_code_expires_at=NULL
     Auth->>Browser: Authenticate session (logged_in=true) & Redirect to /applicant/dashboard.php
 ```
 

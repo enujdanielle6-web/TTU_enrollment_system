@@ -162,6 +162,10 @@ try {
     if ($action === 'create_program') {
         $code = strtolower(trim($_POST['code'] ?? ''));
         $name = trim($_POST['name'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $icon = trim($_POST['icon'] ?? '');
+        $careers = trim($_POST['careers'] ?? '');
+        $customTuition = trim($_POST['custom_tuition'] ?? '');
 
         if ($code === '' || $name === '') {
             throw new Exception('Program code and name are required.');
@@ -174,33 +178,63 @@ try {
             throw new Exception("A program with code '{$code}' already exists.");
         }
 
-        $insertStmt = $pdo->prepare('INSERT INTO college_programs (code, name, is_active) VALUES (:code, :name, 1)');
-        $insertStmt->execute(['code' => $code, 'name' => $name]);
+        $insertStmt = $pdo->prepare('INSERT INTO college_programs (code, name, description, icon, careers, custom_tuition, is_active) VALUES (:code, :name, :description, :icon, :careers, :custom_tuition, 1)');
+        $insertStmt->execute([
+            'code' => $code, 
+            'name' => $name,
+            'description' => $description !== '' ? $description : null,
+            'icon' => $icon !== '' ? $icon : null,
+            'careers' => $careers !== '' ? $careers : null,
+            'custom_tuition' => $customTuition !== '' ? $customTuition : null
+        ]);
 
         logActivity((int)$_SESSION['user_id'], 'bi-mortarboard', 'College Program Added', "Added college program: " . strtoupper($code));
         $_SESSION['success_msg'] = 'Program created successfully.';
     } 
-    elseif ($action === 'update_program') {
+    elseif ($action === 'update_program' || $action === 'update_landing_card') {
         $id = (int)($_POST['id'] ?? 0);
         $code = strtolower(trim($_POST['code'] ?? ''));
         $name = trim($_POST['name'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $icon = trim($_POST['icon'] ?? '');
+        $careers = trim($_POST['careers'] ?? '');
+        $customTuition = trim($_POST['custom_tuition'] ?? '');
 
-        if ($id <= 0 || $code === '' || $name === '') {
+        if ($id <= 0) {
             throw new Exception('Missing required information to update program.');
         }
 
-        // Check duplicate code
-        $stmt = $pdo->prepare('SELECT id FROM college_programs WHERE code = :code AND id != :id');
-        $stmt->execute(['code' => $code, 'id' => $id]);
-        if ($stmt->fetch()) {
-            throw new Exception("The code '{$code}' is already used by another program.");
+        if ($code !== '' && $name !== '') {
+            // Check duplicate code
+            $stmt = $pdo->prepare('SELECT id FROM college_programs WHERE code = :code AND id != :id');
+            $stmt->execute(['code' => $code, 'id' => $id]);
+            if ($stmt->fetch()) {
+                throw new Exception("The code '{$code}' is already used by another program.");
+            }
+
+            $updateStmt = $pdo->prepare('UPDATE college_programs SET code = :code, name = :name, description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition WHERE id = :id');
+            $updateStmt->execute([
+                'code' => $code, 
+                'name' => $name, 
+                'description' => $description !== '' ? $description : null,
+                'icon' => $icon !== '' ? $icon : null,
+                'careers' => $careers !== '' ? $careers : null,
+                'custom_tuition' => $customTuition !== '' ? $customTuition : null,
+                'id' => $id
+            ]);
+        } else {
+            $updateStmt = $pdo->prepare('UPDATE college_programs SET description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition WHERE id = :id');
+            $updateStmt->execute([
+                'description' => $description !== '' ? $description : null,
+                'icon' => $icon !== '' ? $icon : null,
+                'careers' => $careers !== '' ? $careers : null,
+                'custom_tuition' => $customTuition !== '' ? $customTuition : null,
+                'id' => $id
+            ]);
         }
 
-        $updateStmt = $pdo->prepare('UPDATE college_programs SET code = :code, name = :name WHERE id = :id');
-        $updateStmt->execute(['code' => $code, 'name' => $name, 'id' => $id]);
-
-        logActivity((int)$_SESSION['user_id'], 'bi-pencil', 'College Program Updated', "Updated details for program: " . strtoupper($code));
-        $_SESSION['success_msg'] = 'Program details updated successfully.';
+        logActivity((int)$_SESSION['user_id'], 'bi-pencil', 'College Program Updated', "Updated details/card for program ID: " . $id);
+        $_SESSION['success_msg'] = 'Program details & landing card updated successfully.';
     }
     elseif ($action === 'toggle_program') {
         $id = (int)($_POST['id'] ?? 0);

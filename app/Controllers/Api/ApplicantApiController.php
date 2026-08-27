@@ -80,10 +80,25 @@ try {
     $stmt->execute($params);
     $subjects = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $nstpChoice = strtoupper(trim($_GET['nstp'] ?? ''));
+    $trackNames = [
+        'CWTS' => 'Civic Welfare Training Service',
+        'ROTC' => 'Reserve Officers\' Training Corps',
+        'LTS' => 'Literacy Training Service'
+    ];
+
     $totalUnits = 0;
-    foreach ($subjects as $sub) {
+    foreach ($subjects as &$sub) {
         $totalUnits += (int) $sub['units'];
+        if ((strtoupper($sub['subject_type']) === 'NSTP' || stripos($sub['subject_code'], 'NSTP') !== false) && !empty($nstpChoice)) {
+            if (isset($trackNames[$nstpChoice])) {
+                $semNum = (stripos($sub['subject_code'], '102') !== false || stripos($sub['subject_code'], '2') !== false) ? '2' : '1';
+                $sub['subject_code'] = "NSTP {$semNum} ({$nstpChoice})";
+                $sub['subject_name'] = "{$trackNames[$nstpChoice]} {$semNum}";
+            }
+        }
     }
+    unset($sub);
 
     echo json_encode([
         'success' => true,
@@ -160,6 +175,13 @@ try {
     $stmt->execute(['program_id' => $programId]);
     $results = $stmt->fetchAll();
 
+    $nstpChoice = strtoupper(trim($_GET['nstp'] ?? ''));
+    $trackNames = [
+        'CWTS' => 'Civic Welfare Training Service',
+        'ROTC' => 'Reserve Officers\' Training Corps',
+        'LTS' => 'Literacy Training Service'
+    ];
+
     // Group the curriculum
     $curriculum = [];
     foreach ($results as $row) {
@@ -172,11 +194,21 @@ try {
         if (!isset($curriculum[$year][$semester])) {
             $curriculum[$year][$semester] = [];
         }
+
+        $subCode = $row['subject_code'];
+        $subName = $row['subject_name'];
+        if ((strtoupper($row['subject_type']) === 'NSTP' || stripos($subCode, 'NSTP') !== false) && !empty($nstpChoice)) {
+            if (isset($trackNames[$nstpChoice])) {
+                $semNum = (stripos($subCode, '102') !== false || stripos($subCode, '2') !== false) ? '2' : '1';
+                $subCode = "NSTP {$semNum} ({$nstpChoice})";
+                $subName = "{$trackNames[$nstpChoice]} {$semNum}";
+            }
+        }
         
         $curriculum[$year][$semester][] = [
             'id' => (int) $row['id'],
-            'subject_code' => $row['subject_code'],
-            'subject_name' => $row['subject_name'],
+            'subject_code' => $subCode,
+            'subject_name' => $subName,
             'units' => (int) $row['units'],
             'subject_type' => $row['subject_type']
         ];

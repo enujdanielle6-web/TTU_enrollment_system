@@ -420,6 +420,87 @@ require_once __DIR__ . '/components/navbar.php';
         <p>Choose the right program for your future.</p>
       </div>
 
+      <?php
+      $getLandingProgramIcon = function (string $code): string {
+          $code = strtoupper(trim($code));
+          $iconMap = [
+              'STEM' => 'bi-calculator',
+              'ABM' => 'bi-briefcase',
+              'HUMSS' => 'bi-chat-square-quote',
+              'TVL' => 'bi-tools',
+              'TVL-ICT' => 'bi-laptop',
+              'GAS' => 'bi-journal-bookmark',
+              'ICT' => 'bi-cpu',
+              'ARTS' => 'bi-palette',
+              'SPORTS' => 'bi-trophy',
+              'BSIT' => 'bi-pc-display',
+              'BSCS' => 'bi-laptop',
+              'BSIS' => 'bi-diagram-3',
+              'BSHM' => 'bi-cup-hot',
+              'BSA' => 'bi-calculator-fill',
+              'BSBA' => 'bi-bar-chart-line',
+              'BSED' => 'bi-book-half',
+              'BEED' => 'bi-pencil-square',
+              'BSN' => 'bi-heart-pulse',
+              'BSC' => 'bi-shield-check',
+              'BSCE' => 'bi-building',
+              'BSEE' => 'bi-lightning-charge',
+              'BSME' => 'bi-gear-wide-connected',
+          ];
+          if (isset($iconMap[$code])) {
+              return $iconMap[$code];
+          }
+          foreach ($iconMap as $key => $icon) {
+              if (str_contains($code, $key)) {
+                  return $icon;
+              }
+          }
+          return 'bi-mortarboard';
+      };
+
+      $getLandingProgramCareers = function (string $code, string $type = 'College'): string {
+          $code = strtoupper(trim($code));
+          $careerMap = [
+              'STEM' => 'Engineer, Programmer, Architect',
+              'ABM' => 'Accountant, Entrepreneur, Manager',
+              'HUMSS' => 'Lawyer, Teacher, Psychologist',
+              'TVL' => 'Technician, Chef, IT Support',
+              'TVL-ICT' => 'Technician, Web Developer, IT Support',
+              'GAS' => 'Educator, Administrator, Various',
+              'BSIT' => 'Software Engineer, IT Analyst, System Admin',
+              'BSCS' => 'Data Scientist, Systems Architect, AI Researcher',
+              'BSIS' => 'Systems Analyst, ERP Consultant, IT Manager',
+              'BSHM' => 'Hotel Manager, F&B Director, Event Coordinator',
+              'BSA' => 'CPA, Financial Advisor, Auditor',
+              'BSBA' => 'Corporate Manager, HR Director, Marketer',
+              'BSED' => 'High School Teacher, Educator, Principal',
+              'BEED' => 'Elementary Educator, Academic Specialist',
+              'BSN' => 'Registered Nurse, Clinical Specialist',
+          ];
+          if (isset($careerMap[$code])) {
+              return $careerMap[$code];
+          }
+          foreach ($careerMap as $key => $careers) {
+              if (str_contains($code, $key)) {
+                  return $careers;
+              }
+          }
+          return $type === 'College' ? 'Industry Specialist, Professional Practitioner' : 'Higher Education, Career Readiness';
+      };
+
+      $formatLandingProgramTuition = function (array $item, string $type = 'College'): string {
+          if (!empty($item['total_amount']) && floatval($item['total_amount']) > 0) {
+              if (!empty($item['is_per_unit'])) {
+                  $perUnit = floatval($item['tuition_fee'] ?? 0);
+                  $totalEst = floatval($item['total_amount']);
+                  return '₱' . number_format($perUnit, 0) . ' / unit (Est. ₱' . number_format($totalEst, 0) . ' / sem)';
+              }
+              return '₱' . number_format((float)$item['total_amount'], 0) . ' / sem';
+          }
+          return $type === 'College' ? '₱25,000 - ₱30,000 / sem' : '₱15,000 - ₱20,000 / sem';
+      };
+      ?>
+
       <ul class="nav nav-pills justify-content-center mb-4" id="programsTab" role="tablist">
         <li class="nav-item" role="presentation">
           <button class="nav-link active rounded-pill px-4" id="shs-tab" data-bs-toggle="tab" data-bs-target="#shs" type="button" role="tab" aria-controls="shs" aria-selected="true">Senior High School</button>
@@ -433,142 +514,68 @@ require_once __DIR__ . '/components/navbar.php';
         <!-- Senior High School Tab -->
         <div class="tab-pane fade show active" id="shs" role="tabpanel" aria-labelledby="shs-tab">
           <div class="row g-4">
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-calculator"></i>
+            <?php if (!empty($shsStrands)): ?>
+              <?php foreach ($shsStrands as $strand): ?>
+                <?php 
+                  $strandCode = $strand['code'] ?? '';
+                  $icon = !empty($strand['icon']) ? $strand['icon'] : $getLandingProgramIcon($strandCode);
+                  $careers = !empty($strand['careers']) ? $strand['careers'] : $getLandingProgramCareers($strandCode, 'SHS');
+                  $tuition = !empty($strand['custom_tuition']) ? $strand['custom_tuition'] : $formatLandingProgramTuition($strand, 'SHS');
+                  $desc = !empty($strand['description']) ? $strand['description'] : ($strand['name'] ?? '');
+                ?>
+                <div class="col-lg-4 col-md-6">
+                  <div class="card program-card h-100 fade-in-up">
+                    <div class="card-body fade-in-up">
+                      <div class="program-icon">
+                        <i class="bi <?= esc($icon) ?>"></i>
+                      </div>
+                      <h3><?= esc($strandCode) ?></h3>
+                      <p><?= esc($desc) ?></p>
+                      <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: <?= esc($tuition) ?></p>
+                      <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: <?= esc($careers) ?></p>
+                    </div>
                   </div>
-                  <h3>STEM</h3>
-                  <p>Science, Technology, Engineering, and Mathematics for future innovators.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Engineer, Programmer, Architect</p>
                 </div>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div class="col-12 text-center text-muted py-4">
+                <p>No Senior High School strands are currently available.</p>
               </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-briefcase"></i>
-                  </div>
-                  <h3>ABM</h3>
-                  <p>Accountancy, Business, and Management for aspiring business leaders.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Accountant, Entrepreneur, Manager</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-chat-square-quote"></i>
-                  </div>
-                  <h3>HUMSS</h3>
-                  <p>Humanities and Social Sciences for communication and public service paths.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Lawyer, Teacher, Psychologist</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-tools"></i>
-                  </div>
-                  <h3>TVL</h3>
-                  <p>Technical Vocational Livelihood for practical career-ready training.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Technician, Chef, IT Support</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-journal-bookmark"></i>
-                  </div>
-                  <h3>GAS</h3>
-                  <p>General Academic Strand for flexible preparation across college programs.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱15,000 - ₱20,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Educator, Administrator, Various</p>
-                </div>
-              </div>
-            </div>
+            <?php endif; ?>
           </div>
         </div>
 
         <!-- College Tab -->
         <div class="tab-pane fade" id="college" role="tabpanel" aria-labelledby="college-tab">
           <div class="row g-4">
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-pc-display"></i>
+            <?php if (!empty($collegePrograms)): ?>
+              <?php foreach ($collegePrograms as $program): ?>
+                <?php 
+                  $programCode = $program['code'] ?? '';
+                  $icon = !empty($program['icon']) ? $program['icon'] : $getLandingProgramIcon($programCode);
+                  $careers = !empty($program['careers']) ? $program['careers'] : $getLandingProgramCareers($programCode, 'College');
+                  $tuition = !empty($program['custom_tuition']) ? $program['custom_tuition'] : $formatLandingProgramTuition($program, 'College');
+                  $desc = !empty($program['description']) ? $program['description'] : ($program['name'] ?? '');
+                ?>
+                <div class="col-lg-4 col-md-6">
+                  <div class="card program-card h-100 fade-in-up">
+                    <div class="card-body fade-in-up">
+                      <div class="program-icon">
+                        <i class="bi <?= esc($icon) ?>"></i>
+                      </div>
+                      <h3><?= esc($programCode) ?></h3>
+                      <p><?= esc($desc) ?></p>
+                      <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: <?= esc($tuition) ?></p>
+                      <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: <?= esc($careers) ?></p>
+                    </div>
                   </div>
-                  <h3>BSIT</h3>
-                  <p>Bachelor of Science in Information Technology for future software developers and IT professionals.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Software Engineer, IT Analyst, System Admin</p>
                 </div>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <div class="col-12 text-center text-muted py-4">
+                <p>No College degree programs are currently available.</p>
               </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-laptop"></i>
-                  </div>
-                  <h3>BSCS</h3>
-                  <p>Bachelor of Science in Computer Science focusing on computing theory and advanced software systems.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Data Scientist, Systems Architect, AI Researcher</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-calculator-fill"></i>
-                  </div>
-                  <h3>BSA</h3>
-                  <p>Bachelor of Science in Accountancy for future certified public accountants and financial experts.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: CPA, Financial Advisor, Auditor</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-book-half"></i>
-                  </div>
-                  <h3>BSED</h3>
-                  <p>Bachelor of Secondary Education for aspiring high school teachers and educators.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: High School Teacher, Educator, Principal</p>
-                </div>
-              </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-              <div class="card program-card h-100 fade-in-up">
-                <div class="card-body fade-in-up">
-                  <div class="program-icon">
-                    <i class="bi bi-bar-chart-line"></i>
-                  </div>
-                  <h3>BSBA</h3>
-                  <p>Bachelor of Science in Business Administration for future corporate leaders and entrepreneurs.</p>
-                  <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: ₱25,000 - ₱30,000 / sem</p>
-                  <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: Corporate Manager, HR Director, Marketer</p>
-                </div>
-              </div>
-            </div>
+            <?php endif; ?>
           </div>
         </div>
       </div>
