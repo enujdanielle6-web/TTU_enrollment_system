@@ -151,7 +151,7 @@ class DocumentController extends BaseController
             $safeDocName = preg_replace('/[^a-zA-Z0-9]+/', '_', strtolower($documentName));
             $uniq = bin2hex(random_bytes(8));
             $newFilename = sprintf('app_%d_%s_%s.%s', $appId, $safeDocName, $uniq, $ext);
-            $uploadDir = __DIR__ . '/../../../uploads/documents/';
+            $uploadDir = dirname(__DIR__, 2) . '/uploads/documents/';
             
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);

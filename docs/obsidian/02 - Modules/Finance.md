@@ -18,7 +18,7 @@ $$\text{Total Assessment} = (\text{Total Enrolled Units} \times \text{Tuition Ra
 - **Per-Unit Mode (`is_per_unit = 1`):** The `tuition_fee` column represents the *rate per unit* (e.g. ₱500.00/unit). The controller queries `college_enrollments` or `shs_enrollments` joined with `subjects`, sums the total units (e.g. 18 units), and multiplies by the rate.
 - **Fixed Rate Mode (`is_per_unit = 0`):** Legacy fallback where `tuition_fee` acts as a static flat fee.
 - **SHS & College Compatibility:** Queries both `college_enrollments` and `shs_enrollments`, ensuring SHS strands and College degrees compute accurate breakdowns.
-- **Automated Enrollment Finalization:** When a payment is recorded or verified that brings `total_paid >= ₱3,000` (or full balance), the system triggers `finalizeStudentEnrollment()`, transitioning `applications.status = 'enrolled'`, assigning a student number, and issuing institutional credentials.
+- **Payment Verification & Registrar Queue:** When a payment is recorded or verified (bringing `payment_status = 'paid'`), the assessment is marked as paid and the application is routed to the **Registrar Enrollment Queue**. The status remains `approved` until the Registrar officer manually reviews and finalizes official enrollment (`applications.status = 'enrolled'`).
 - **Receipt Numbering Format:** Official payment receipts are automatically generated in the format `REC-YYYYMMDD-XXXX` (e.g., `REC-20260825-0001`).
 
 ---

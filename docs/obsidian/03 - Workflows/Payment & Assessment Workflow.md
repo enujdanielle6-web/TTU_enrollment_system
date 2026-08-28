@@ -22,7 +22,7 @@ flowchart TD
     StudentView --> UploadProof[8. Student Uploads Bank/GCash Deposit Slip]
     UploadProof --> CashierQueue[9. Transaction in Cashier Queue: payment_records]
     CashierQueue --> CashierAction{10. Cashier Verifies Slip on /admin/finance/cashier_payments.php}
-    CashierAction -->|Approved| IssueReceipt[11. Generates OR Number & Sets Status = verified]
+    CashierAction -->|Approved| IssueReceipt[11. Generates OR Number & Sets Status = verified] --> Queue[12. Queued for Registrar Enrollment Review] --> RegistrarAction[13. Registrar Manually Finalizes Enrollment & Assigns Student No.]
     CashierAction -->|Rejected| RejectNotice[Sets Status = rejected with remarks]
     IssueReceipt --> PrintSlip[12. Student Prints Certificate of Matriculation / Receipt]
 ```

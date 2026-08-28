@@ -331,36 +331,85 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           </div>
         </div>
 
-        <!-- Documents -->
+                        <!-- Documents -->
         <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
           <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-folder-fill"></i>
-            <h2>Uploaded Documents</h2>
+          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-folder-fill text-primary"></i>
+              <h2 class="mb-0">Uploaded Documents</h2>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#adminUploadDocModal">
+              <i class="bi bi-cloud-arrow-up"></i>
+              <span>Upload Document</span>
+            </button>
           </div>
           <div class="island-body">
             <?php if ($app['document_submission_method'] === 'on_campus'): ?>
-               <div class="alert alert-secondary bg-light border-0 text-center py-4 mb-0">
-                 <i class="bi bi-building fs-2 text-muted mb-2 d-block"></i>
-                 <span class="fw-medium text-dark">On-Campus Submission</span>
-                 <p class="text-muted small mb-0 mt-1">The applicant elected to present physical documents in person.</p>
+               <div class="alert alert-secondary bg-light border-0 d-flex align-items-center justify-content-between flex-wrap gap-2 py-3 px-3 mb-3 rounded-3">
+                 <div class="d-flex align-items-center gap-3">
+                   <i class="bi bi-building fs-3 text-primary"></i>
+                   <div>
+                     <span class="fw-semibold text-dark d-block">On-Campus Physical Submission Mode</span>
+                     <p class="text-muted small mb-0">The applicant elected to present physical documents in person. Admissions staff can upload scanned copies below.</p>
+                   </div>
+                 </div>
+                 <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#adminUploadDocModal">
+                   <i class="bi bi-plus-lg me-1"></i> Attach Document
+                 </button>
                </div>
-            <?php elseif (empty($documents)): ?>
-               <p class="text-muted mb-0 small">No documents have been uploaded yet.</p>
+            <?php endif; ?>
+
+            <?php if (empty($documents)): ?>
+               <div class="text-center py-4 bg-light rounded-3 border">
+                 <i class="bi bi-file-earmark-x fs-2 text-muted d-block mb-2"></i>
+                 <p class="text-muted mb-2 small">No documents have been uploaded for this application yet.</p>
+                 <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#adminUploadDocModal">
+                   <i class="bi bi-cloud-upload me-1"></i> Upload First Document
+                 </button>
+               </div>
             <?php else: ?>
-               <ul class="list-group list-group-flush border rounded-3">
-                 <?php foreach ($documents as $doc): ?>
+               <ul class="list-group list-group-flush border rounded-3 mb-0">
+                 <?php foreach ($documents as $doc): 
+                    $docExt = strtolower(pathinfo($doc['file_path'] ?? '', PATHINFO_EXTENSION));
+                    $isPdf = $docExt === 'pdf';
+                    $iconClass = $isPdf ? 'bi-file-earmark-pdf-fill text-danger' : 'bi-file-earmark-image-fill text-primary';
+                    $statusBadge = match($doc['status'] ?? 'pending') {
+                      'verified' => 'bg-success text-white',
+                      'rejected' => 'bg-danger text-white',
+                      default => 'bg-warning text-dark'
+                    };
+                    $viewUrl = "/sia/admin/admissions/document_view.php?id=" . (int)$doc['id'];
+                    $docNameEsc = htmlspecialchars($doc['document_name'], ENT_QUOTES, 'UTF-8');
+                 ?>
                    <li class="list-group-item py-3">
-                     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
-                       <div>
-                         <i class="bi bi-file-earmark-pdf text-danger me-2 fs-5"></i>
-                         <span class="fw-semibold text-dark"><?= htmlspecialchars($doc['document_name'], ENT_QUOTES, 'UTF-8') ?></span>
-                         <div class="small text-muted mt-1">Uploaded: <?= date('M j, Y g:i A', strtotime($doc['created_at'])) ?></div>
+                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                       <div class="d-flex align-items-center gap-3">
+                         <div class="fs-3"><i class="bi <?= esc($iconClass) ?>"></i></div>
+                         <div>
+                           <div class="d-flex align-items-center gap-2 flex-wrap">
+                             <span class="fw-bold text-dark"><?= $docNameEsc ?></span>
+                             <span class="badge <?= esc($statusBadge) ?> rounded-pill text-uppercase" style="font-size: 0.65rem;"><?= ucfirst(htmlspecialchars($doc['status'] ?? 'pending', ENT_QUOTES, 'UTF-8')) ?></span>
+                           </div>
+                           <div class="small text-muted mt-1">
+                             <i class="bi bi-clock me-1"></i> Uploaded: <?= !empty($doc['created_at']) ? date('M j, Y g:i A', strtotime($doc['created_at'])) : 'N/A' ?>
+                           </div>
+                         </div>
                        </div>
-                       <div>
-                         <a href="document_view.php?id=<?= esc($doc['id']) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                           <i class="bi bi-eye"></i> View
+                       <div class="d-flex align-items-center gap-2">
+                         <a href="<?= esc($viewUrl) ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 preview-doc-btn" 
+                           data-doc-id="<?= esc($doc['id']) ?>" 
+                           data-doc-name="<?= $docNameEsc ?>" 
+                           data-doc-url="<?= esc($viewUrl) ?>"
+                           data-doc-ext="<?= esc($docExt) ?>"
+                           onclick="event.preventDefault(); window.previewDocument('<?= esc($doc['id']) ?>', '<?= addslashes($doc['document_name']) ?>', '<?= esc($viewUrl) ?>', '<?= esc($docExt) ?>');">
+                           <i class="bi bi-eye me-1"></i> View
                          </a>
+                         <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 replace-doc-btn" 
+                           data-doc-name="<?= $docNameEsc ?>"
+                           onclick="window.openReplaceModal('<?= addslashes($doc['document_name']) ?>');">
+                           <i class="bi bi-arrow-repeat me-1"></i> Replace
+                         </button>
                        </div>
                      </div>
                      
@@ -368,9 +417,9 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                        <div class="col-md-4">
                          <label class="small text-muted fw-bold mb-1">Verify Status</label>
                          <select name="doc_status[<?= esc($doc['id']) ?>]" class="form-select form-select-sm">
-                           <option value="pending" <?= esc($doc['status'] === 'pending' ? 'selected' : '') ?>>Pending / Awaiting</option>
-                           <option value="verified" <?= esc($doc['status'] === 'verified' ? 'selected' : '') ?>>Verified / Approved</option>
-                           <option value="rejected" <?= esc($doc['status'] === 'rejected' ? 'selected' : '') ?>>Rejected / Needs Reupload</option>
+                           <option value="pending" <?= esc(($doc['status'] ?? '') === 'pending' ? 'selected' : '') ?>>Pending / Awaiting</option>
+                           <option value="verified" <?= esc(($doc['status'] ?? '') === 'verified' ? 'selected' : '') ?>>Verified / Approved</option>
+                           <option value="rejected" <?= esc(($doc['status'] ?? '') === 'rejected' ? 'selected' : '') ?>>Rejected / Needs Reupload</option>
                          </select>
                        </div>
                        <div class="col-md-8">
@@ -720,6 +769,185 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
+<!-- Document Preview Modal -->
+<div class="modal fade" id="docPreviewModal" tabindex="-1" aria-labelledby="docPreviewModalLabel" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content rounded-4 shadow-lg border-0 overflow-hidden">
+      <div class="modal-header bg-dark text-white border-0 py-3 px-4">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-file-earmark-text text-primary fs-4"></i>
+          <div>
+            <h5 class="modal-title fw-bold text-white mb-0" id="docPreviewModalLabel">Document Preview</h5>
+            <small class="text-white-50" id="docPreviewSubtitle">Student Admission Document</small>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <a id="docPreviewNewTabBtn" href="#" target="_blank" class="btn btn-sm btn-outline-light rounded-pill px-3">
+            <i class="bi bi-box-arrow-up-right me-1"></i> Open in Tab
+          </a>
+          <a id="docPreviewDownloadBtn" href="#" download class="btn btn-sm btn-light rounded-pill px-3 fw-medium">
+            <i class="bi bi-download me-1"></i> Download
+          </a>
+          <button type="button" class="btn-close btn-close-white ms-2" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+      </div>
+      <div class="modal-body p-0 bg-light d-flex justify-content-center align-items-center position-relative" style="min-height: 520px; max-height: 75vh; overflow: auto;">
+        <div id="docPreviewSpinner" class="text-center py-5">
+          <div class="spinner-border text-primary" role="status"></div>
+          <p class="text-muted mt-2 small">Loading document preview...</p>
+        </div>
+        <div id="docPreviewContainer" class="w-100 h-100 d-flex justify-content-center align-items-center p-3">
+          <!-- Dynamically inserted iframe or img -->
+        </div>
+      </div>
+      <div class="modal-footer bg-white border-top py-3 px-4 d-flex justify-content-between">
+        <div class="text-muted small">
+          <i class="bi bi-shield-check text-success me-1"></i> Official Student Admission Document Record
+        </div>
+        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Document Upload Modal -->
+<div class="modal fade" id="adminUploadDocModal" tabindex="-1" aria-labelledby="adminUploadDocModalLabel" aria-hidden="true" style="z-index: 1060;">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow-lg border-0 overflow-hidden">
+      <div class="modal-header bg-primary text-white border-0 py-3 px-4">
+        <h5 class="modal-title fw-bold text-white mb-0" id="adminUploadDocModalLabel"><i class="bi bi-cloud-arrow-up me-2"></i>Upload Student Document</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/sia/admin/admissions/document_upload.php" method="POST" enctype="multipart/form-data" id="adminDocUploadForm">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+        <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-dark">Document Requirement Type</label>
+            <select name="document_name" id="modalDocNameSelect" class="form-select" required>
+              <option value="">-- Select Document Type --</option>
+              <option value="Form 138 (Report Card)">Form 138 (Report Card)</option>
+              <option value="Certificate of Good Moral Character">Certificate of Good Moral Character</option>
+              <option value="PSA Birth Certificate">PSA Birth Certificate</option>
+              <option value="2x2 ID Picture">2x2 ID Picture</option>
+              <option value="Transcript of Records (TOR)">Transcript of Records (TOR)</option>
+              <option value="Honorable Dismissal">Honorable Dismissal</option>
+              <option value="Medical Certificate">Medical Certificate</option>
+              <option value="Other Official Document">Other Official Document</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-dark">Select File (PDF, JPG, PNG, WEBP - Max 5MB)</label>
+            <input type="file" name="document_file" id="modalDocFileInput" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.webp" required>
+            <div class="form-text small">Accepted formats: PDF document or clear Image (Max 5MB).</div>
+          </div>
+          <div class="alert alert-info py-2 px-3 small mb-0 rounded-3">
+            <i class="bi bi-info-circle me-1"></i> Documents uploaded by Admissions Staff will be automatically saved and marked as <strong>Verified</strong>.
+          </div>
+        </div>
+        <div class="modal-footer bg-light border-top-0 py-3 px-4">
+          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4 fw-medium" id="btnAdminUploadSubmit">
+            <i class="bi bi-upload me-1"></i> Upload &amp; Verify
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+window.previewDocument = function(docId, docName, docUrl, docExt) {
+  const previewModalEl = document.getElementById('docPreviewModal');
+  const previewModalLabel = document.getElementById('docPreviewModalLabel');
+  const previewSubtitle = document.getElementById('docPreviewSubtitle');
+  const previewContainer = document.getElementById('docPreviewContainer');
+  const previewSpinner = document.getElementById('docPreviewSpinner');
+  const previewNewTabBtn = document.getElementById('docPreviewNewTabBtn');
+  const previewDownloadBtn = document.getElementById('docPreviewDownloadBtn');
+
+  if (previewModalLabel) previewModalLabel.textContent = docName || 'Document Preview';
+  if (previewSubtitle) previewSubtitle.textContent = `Document ID #${docId}`;
+  if (previewNewTabBtn) previewNewTabBtn.href = docUrl;
+  if (previewDownloadBtn) {
+    previewDownloadBtn.href = docUrl;
+    previewDownloadBtn.setAttribute('download', `${(docName || 'document').replace(/[^a-zA-Z0-9_-]/g, '_')}`);
+  }
+
+  if (previewSpinner) previewSpinner.style.display = 'block';
+  if (previewContainer) previewContainer.innerHTML = '';
+
+  const ext = (docExt || '').toLowerCase();
+  if (['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext)) {
+    const img = document.createElement('img');
+    img.className = 'img-fluid rounded shadow-sm';
+    img.style.maxHeight = '70vh';
+    img.style.maxWidth = '100%';
+    img.style.objectFit = 'contain';
+    img.src = docUrl;
+    img.onload = function() {
+      if (previewSpinner) previewSpinner.style.display = 'none';
+    };
+    img.onerror = function() {
+      if (previewSpinner) previewSpinner.style.display = 'none';
+      previewContainer.innerHTML = '<div class="alert alert-warning py-3 text-center"><i class="bi bi-exclamation-triangle me-2"></i>Unable to load preview directly. <a href="' + docUrl + '" target="_blank" class="alert-link">Open in new tab</a></div>';
+    };
+    previewContainer.appendChild(img);
+  } else {
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '100%';
+    iframe.style.height = '70vh';
+    iframe.style.border = 'none';
+    iframe.src = docUrl;
+    iframe.onload = function() {
+      if (previewSpinner) previewSpinner.style.display = 'none';
+    };
+    previewContainer.appendChild(iframe);
+  }
+
+  if (previewModalEl) {
+    const modal = bootstrap.Modal.getOrCreateInstance(previewModalEl);
+    modal.show();
+  }
+};
+
+window.openReplaceModal = function(docName) {
+  const uploadModalEl = document.getElementById('adminUploadDocModal');
+  const modalDocNameSelect = document.getElementById('modalDocNameSelect');
+
+  if (modalDocNameSelect && docName) {
+    let matched = false;
+    for (let i = 0; i < modalDocNameSelect.options.length; i++) {
+      if (modalDocNameSelect.options[i].value.toLowerCase() === docName.toLowerCase()) {
+        modalDocNameSelect.selectedIndex = i;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
+      modalDocNameSelect.value = docName;
+    }
+  }
+
+  if (uploadModalEl) {
+    const modal = bootstrap.Modal.getOrCreateInstance(uploadModalEl);
+    modal.show();
+  }
+};
+
+// Modal Cleanup on Hide
+document.addEventListener('DOMContentLoaded', function() {
+  const previewModalEl = document.getElementById('docPreviewModal');
+  if (previewModalEl) {
+    previewModalEl.addEventListener('hidden.bs.modal', function () {
+      const previewContainer = document.getElementById('docPreviewContainer');
+      const previewSpinner = document.getElementById('docPreviewSpinner');
+      if (previewContainer) previewContainer.innerHTML = '';
+      if (previewSpinner) previewSpinner.style.display = 'block';
+    });
+  }
+});
+</script>
 </main>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>

@@ -74,6 +74,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->post('/admin/admissions/application_process.php', ['App\Controllers\Admin\Admissions\AdmissionsController', 'process']);
     $router->post('/admin/admissions/bulk_process.php', ['App\Controllers\Admin\Admissions\AdmissionsController', 'bulkProcess']);
     $router->get('/admin/admissions/document_view.php', ['App\Controllers\Admin\Admissions\AdmissionsController', 'viewDocument']);
+    $router->post('/admin/admissions/document_upload.php', ['App\Controllers\Admin\Admissions\AdmissionsController', 'uploadDocument']);
 
     // Admin Registrar
     $router->get('/admin/registrar/registrar_dashboard.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'dashboard']);
