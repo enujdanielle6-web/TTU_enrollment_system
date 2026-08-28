@@ -462,8 +462,11 @@ $programCount = count($programs);
               <label class="form-label small fw-bold text-muted text-uppercase mb-1">Status</label>
               <select id="filterStatus" class="form-select">
                 <option value="all">All Statuses</option>
-                <option value="enrolled">Enrolled</option>
+                <option value="enrolled">Officially Enrolled</option>
                 <option value="approved">Approved</option>
+                <option value="under_review">Under Review</option>
+                <option value="pending">Pending</option>
+                <option value="correction_required">Correction Required</option>
               </select>
             </div>
 

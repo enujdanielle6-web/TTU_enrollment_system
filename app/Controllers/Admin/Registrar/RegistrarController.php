@@ -45,7 +45,7 @@ try {
             u.student_number
         FROM applications a
         INNER JOIN users u ON u.id = a.user_id
-        WHERE a.status IN ("approved", "enrolled")
+        WHERE (u.role IN ("applicant", "student") OR a.id IS NOT NULL)
         ORDER BY a.grade_level ASC, a.strand ASC, u.last_name ASC
     ');
     $students = $stmt->fetchAll();
