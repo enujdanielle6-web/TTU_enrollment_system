@@ -917,6 +917,14 @@ function sendVerificationCodeEmail(string $recipientEmail, string $recipientName
         $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
         $mail->Timeout = 10;
 
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];
+
         $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
         $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
         $mail->setFrom($fromAddress, $fromName);
@@ -1020,6 +1028,14 @@ function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, 
 
         $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
         $mail->Timeout = 10;
+
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];
 
         $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
         $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
@@ -1138,6 +1154,14 @@ function sendPasswordResetOtpEmail(
 
         $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
         $mail->Timeout = 10;
+
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true
+            ]
+        ];
 
         $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
         $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
