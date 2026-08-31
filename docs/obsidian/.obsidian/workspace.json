@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "10 - Bugs & Issues/Known Issues.md",
+                "file": "04 - Database/Applications Table.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Known Issues"
+              "title": "Applications Table"
             }
           }
         ]
@@ -185,8 +185,9 @@
       "bases:Create new base": false
     }
   },
-  "active": "094ecf3ffec287db",
+  "active": "ded3c0e39e297c65",
   "lastOpenFiles": [
+    "10 - Bugs & Issues/Known Issues.md",
     "14 - Architecture Decisions/ADR Index.md",
     "14 - Architecture Decisions/ADR-005 Curriculum Versioning and Subject Catalog Immutability.md",
     "04 - Database/Entity Relationship Architecture.md",
@@ -213,7 +214,6 @@
     "11 - Development Guide/AI Development Context.md",
     "11 - Development Guide/Project Structure & Code Map.md",
     "03 - Workflows/Student Lifecycle Workflow.md",
-    "03 - Workflows/Payment & Assessment Workflow.md",
-    "03 - Workflows/Health Submission & Clearance Workflow.md"
+    "03 - Workflows/Payment & Assessment Workflow.md"
   ]
 }
