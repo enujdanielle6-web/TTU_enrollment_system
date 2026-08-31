@@ -1,0 +1,16 @@
+# Disable execution of scripts in uploads folder
+<FilesMatch "\.(php|php5|phtml|sh|py|pl|cgi|asp|aspx)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Turn off PHP engine
+<IfModule mod_php5.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
