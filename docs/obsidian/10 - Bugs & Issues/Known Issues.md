@@ -51,6 +51,18 @@ This document tracks architectural debt, bugs discovered during development, and
 - **Root Cause:** Re-evaluating top-level `const` and `let` declarations inside `spa-router.js` dynamic script injector triggered `Uncaught SyntaxError: Identifier 'type' has already been declared`, halting script execution before `render()` could run.
 - **Resolution:** Encapsulated `schedule_builder.php` JavaScript inside an IIFE `(function() { ... })();`, globally attached event handlers to `window`, and added `data-spa="false"` to full-screen canvas navigation links.
 
+### Issue 15: LMS Course Schema Mismatch (`lc.academic_level` Unknown Column)
+- **Module:** [[LMS]] / `CollegeEnrollmentRepository.php`, `ShsEnrollmentRepository.php`, `schema.sql`
+- **Symptoms:** Accessing the LMS Student Dashboard (`/sia/lms/student/dashboard.php`) threw `500 Internal Server Error` with `PDOException: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'lc.academic_level' in 'where clause'`.
+- **Root Cause:** Live database and baseline DDL in `database/schema.sql` retained legacy static LMS table structures lacking the unified `academic_level` and `academic_section_id` proxy architecture.
+- **Resolution:** Synchronized all 13 LMS table DDLs in `database/schema.sql` and seed definitions in `database/seed.sql`. Executed live schema migration and validated test suites.
+
+### Issue 16: Cashier Payment Verification Nested Modal Infinite Recursion Crash
+- **Module:** [[Finance]] / `cashier_payments.php`
+- **Symptoms:** Clicking "Reject Payment" with empty remarks opened a warning modal; clicking "OK, Got It" froze the JavaScript main thread and crashed the browser tab.
+- **Root Cause:** Stacking `#customWarningModal` on top of `#verifyModal` triggered a Bootstrap 5 `_enforceFocus` / focus-trap collision (`RangeError: Maximum call stack size exceeded`) during modal dismissal and focus restoration.
+- **Resolution:** Replaced stacked warning and confirmation modals with inline form validation (`is-invalid` indicator + helper alert) and an inline confirmation box directly inside `#verifyModal`.
+
 ---
 
 ## 2. Active Technical Debt & Discovered Codebase Defects

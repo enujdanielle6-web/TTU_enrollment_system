@@ -25,8 +25,20 @@ This runbook catalogs known runtime symptoms, diagnostic procedures, and verifie
 * **Resolution:** Move modal HTML markup outside the `<table>` to the bottom of the view template.
 
 ### 1.4 Database Schema Mismatch
-* **Symptom:** SQL error indicating missing column (e.g. `is_per_unit` in `fee_templates` or `verification_code` in `users`).
-* **Resolution:** Import the latest [`schema_dump.sql`](file:///c:/xampp/htdocs/sia/schema_dump.sql) into MariaDB to align with current production schema.
+* **Symptom:** SQL error indicating missing column (e.g. `lc.academic_level` in `CollegeEnrollmentRepository` or `is_per_unit` in `fee_templates`).
+* **Resolution:** Re-import [`database/schema.sql`](file:///c:/xampp/htdocs/sia/database/schema.sql) and [`database/seed.sql`](file:///c:/xampp/htdocs/sia/database/seed.sql) to align table signatures with active application repositories and services.
+
+### 1.5 PHPMailer Fails on New Device / Fresh Clone
+* **Symptom:** `PHPMailer library is not available` or OpenSSL handshake / certificate verify error.
+* **Diagnostics & Resolution:**
+  1. Ensure `vendor/autoload.php` exists (tracked in git or generated via `composer install`).
+  2. In `php.ini`, verify `extension=openssl` and `extension=sockets` are enabled.
+  3. All system mail helpers in [`app/Helpers/functions.php`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php) include permissive `SMTPOptions` for local development environments to prevent SSL certificate authority mismatches.
+
+### 1.6 Browser Freezes or Crashes on Cashier Modal Rejection
+* **Symptom:** Clicking "OK, Got It" on verification alert modal causes browser tab to freeze.
+* **Root Cause:** Bootstrap 5 focus-trap collision on stacked/nested modals.
+* **Resolution:** Use inline form validation (`is-invalid` indicator + feedback message) and inline confirmation boxes inside `#verifyModal` rather than secondary stacked modals.
 
 ---
 
