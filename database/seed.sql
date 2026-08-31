@@ -212,42 +212,49 @@ INSERT INTO `scholarship_recipients` (`id`, `user_id`, `scholarship_id`, `academ
 -- ----------------------------------------------------------------------------
 -- 10. SAMPLE LMS COURSES, MODULES, ASSIGNMENTS & QUIZZES
 -- ----------------------------------------------------------------------------
-DELETE FROM `lms_courses`;
-INSERT INTO `lms_courses` (`id`, `subject_id`, `faculty_user_id`, `course_code`, `course_name`, `term`, `academic_year`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 9, 'CC101-BSIT1A', 'Introduction to Computing (BSIT 1-A)', 'First Semester', '2026-2027', 'active', NOW(), NOW()),
-(2, 2, 8, 'CC102-BSIT1A', 'Fundamentals of Programming (BSIT 1-A)', 'First Semester', '2026-2027', 'active', NOW(), NOW()),
-(3, 4, 10, 'ENG101-BSIT1A', 'Purposive Communication (BSIT 1-A)', 'First Semester', '2026-2027', 'active', NOW(), NOW()),
-(4, 8, 10, 'STEM101-STEM11A', 'Pre-Calculus (STEM 11-A)', 'First Semester', '2026-2027', 'active', NOW(), NOW());
-
+DELETE FROM `lms_announcements`;
+DELETE FROM `lms_attendance_records`;
+DELETE FROM `lms_attendance_sessions`;
+DELETE FROM `lms_quiz_answers`;
+DELETE FROM `lms_quiz_attempts`;
+DELETE FROM `lms_question_choices`;
+DELETE FROM `lms_questions`;
+DELETE FROM `lms_quizzes`;
+DELETE FROM `lms_submissions`;
+DELETE FROM `lms_assignments`;
+DELETE FROM `lms_materials`;
 DELETE FROM `lms_modules`;
-INSERT INTO `lms_modules` (`id`, `lms_course_id`, `title`, `description`, `order_index`, `status`, `created_at`, `updated_at`) VALUES
+DELETE FROM `lms_courses`;
+
+INSERT INTO `lms_courses` (`id`, `academic_level`, `academic_section_id`, `subject_id`, `faculty_user_id`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'College', 1, 1, 9, 'active', NOW(), NOW()),
+(2, 'College', 1, 2, 8, 'active', NOW(), NOW()),
+(3, 'College', 1, 4, 10, 'active', NOW(), NOW()),
+(4, 'SHS', 1, 8, 10, 'active', NOW(), NOW());
+
+INSERT INTO `lms_modules` (`id`, `lms_course_id`, `title`, `description`, `display_order`, `status`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Module 1: Architecture of Modern Computers', 'Binary representations, CPU microarchitecture, and memory hierarchies.', 1, 'published', NOW(), NOW()),
 (2, 1, 'Module 2: Operating Systems & Virtualization', 'Process scheduling, file systems, and hypervisor concepts.', 2, 'published', NOW(), NOW()),
 (3, 2, 'Module 1: Structured Control Flow & Logic', 'Conditionals, nested iterations, and functional decomposition.', 1, 'published', NOW(), NOW());
 
-DELETE FROM `lms_materials`;
-INSERT INTO `lms_materials` (`id`, `lms_module_id`, `title`, `file_path`, `file_type`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Lecture 1: Digital Logic & Binary Systems (PDF)', 'materials/cc101_lec1.pdf', 'pdf', 'published', NOW(), NOW()),
-(2, 1, 'Syllabus & Course Outline 2026-2027', 'materials/cc101_syllabus.pdf', 'pdf', 'published', NOW(), NOW()),
-(3, 3, 'Lecture 1: Algorithmic Thinking in C / Python', 'materials/cc102_lec1.pdf', 'pdf', 'published', NOW(), NOW());
+INSERT INTO `lms_materials` (`id`, `lms_module_id`, `file_name`, `file_path`, `mime_type`, `file_size`, `created_at`) VALUES
+(1, 1, 'Lecture 1: Digital Logic & Binary Systems (PDF)', 'materials/cc101_lec1.pdf', 'application/pdf', 1048576, NOW()),
+(2, 1, 'Syllabus & Course Outline 2026-2027', 'materials/cc101_syllabus.pdf', 'application/pdf', 524288, NOW()),
+(3, 3, 'Lecture 1: Algorithmic Thinking in C / Python', 'materials/cc102_lec1.pdf', 'application/pdf', 2097152, NOW());
 
-DELETE FROM `lms_assignments`;
-INSERT INTO `lms_assignments` (`id`, `lms_course_id`, `lms_module_id`, `title`, `description`, `due_date`, `max_points`, `file_path`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'Assignment 1: Number Systems Conversion Exercise', 'Convert the provided decimal numbers to binary, octal, and hexadecimal representation. Submit your PDF solution sheet.', DATE_ADD(NOW(), INTERVAL 7 DAY), 100.00, NULL, 'published', NOW(), NOW()),
-(2, 2, 3, 'Lab Exercise 1: Conditional Flow Implementation', 'Implement the quadratic formula solver with input edge-case handling in standard C or PHP.', DATE_ADD(NOW(), INTERVAL 5 DAY), 50.00, NULL, 'published', NOW(), NOW());
+INSERT INTO `lms_assignments` (`id`, `lms_course_id`, `lms_module_id`, `title`, `description`, `due_date`, `max_score`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'Assignment 1: Number Systems Conversion Exercise', 'Convert the provided decimal numbers to binary, octal, and hexadecimal representation. Submit your PDF solution sheet.', DATE_ADD(NOW(), INTERVAL 7 DAY), 100, 'published', NOW(), NOW()),
+(2, 2, 3, 'Lab Exercise 1: Conditional Flow Implementation', 'Implement the quadratic formula solver with input edge-case handling in standard C or PHP.', DATE_ADD(NOW(), INTERVAL 5 DAY), 50, 'published', NOW(), NOW());
 
-DELETE FROM `lms_quizzes`;
-INSERT INTO `lms_quizzes` (`id`, `lms_course_id`, `title`, `time_limit_minutes`, `passing_score`, `due_date`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Quiz 1: Computer Hardware & Logic Fundamentals', 20, 75.00, DATE_ADD(NOW(), INTERVAL 10 DAY), 'published', NOW(), NOW());
+INSERT INTO `lms_quizzes` (`id`, `lms_course_id`, `title`, `description`, `time_limit`, `max_attempts`, `passing_score`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Quiz 1: Computer Hardware & Logic Fundamentals', 'Evaluates knowledge in CPU architecture and logic gates.', 20, 1, 75.00, NOW(), DATE_ADD(NOW(), INTERVAL 10 DAY), 'published', NOW(), NOW());
 
-DELETE FROM `lms_questions`;
-INSERT INTO `lms_questions` (`id`, `lms_quiz_id`, `question_text`, `question_type`, `points`, `order_index`, `created_at`) VALUES
+INSERT INTO `lms_questions` (`id`, `lms_quiz_id`, `question_text`, `question_type`, `points`, `display_order`, `created_at`) VALUES
 (1, 1, 'What is the primary function of the Arithmetic Logic Unit (ALU) in a CPU?', 'multiple_choice', 5.00, 1, NOW()),
 (2, 1, 'Which memory type is volatile and loses its contents when power is turned off?', 'multiple_choice', 5.00, 2, NOW()),
 (3, 1, 'A gigabyte is equivalent to exactly 1,024 megabytes in binary prefix notation.', 'true_false', 5.00, 3, NOW());
 
-DELETE FROM `lms_question_choices`;
-INSERT INTO `lms_question_choices` (`id`, `lms_question_id`, `choice_text`, `is_correct`, `order_index`) VALUES
+INSERT INTO `lms_question_choices` (`id`, `lms_question_id`, `choice_text`, `is_correct`, `display_order`) VALUES
 (1, 1, 'Performs arithmetic calculations and logical decisions', 1, 1),
 (2, 1, 'Stores persistent files on solid-state media', 0, 2),
 (3, 1, 'Manages cooling fan speeds across thermal zones', 0, 3),
@@ -257,16 +264,14 @@ INSERT INTO `lms_question_choices` (`id`, `lms_question_id`, `choice_text`, `is_
 (7, 3, 'True', 1, 1),
 (8, 3, 'False', 0, 2);
 
-DELETE FROM `lms_attendance_sessions`;
-INSERT INTO `lms_attendance_sessions` (`id`, `lms_course_id`, `session_date`, `title`, `created_at`) VALUES
-(1, 1, CURDATE(), 'Class Orientation & Syllabus Review', NOW());
+INSERT INTO `lms_attendance_sessions` (`id`, `lms_course_id`, `session_date`, `start_time`, `end_time`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 1, CURDATE(), '08:00:00', '10:00:00', 'Class Orientation & Syllabus Review', NOW(), NOW());
 
-DELETE FROM `lms_attendance_records`;
-INSERT INTO `lms_attendance_records` (`id`, `lms_attendance_session_id`, `student_id`, `status`, `remarks`, `created_at`, `updated_at`) VALUES
-(1, 1, 11, 'present', 'Attended on time.', NOW(), NOW());
+INSERT INTO `lms_attendance_records` (`id`, `lms_attendance_session_id`, `student_id`, `status`, `remarks`, `recorded_at`) VALUES
+(1, 1, 11, 'present', 'Attended on time.', NOW());
 
-DELETE FROM `lms_announcements`;
-INSERT INTO `lms_announcements` (`id`, `lms_course_id`, `author_user_id`, `title`, `content`, `created_at`, `updated_at`) VALUES
-(1, 1, 9, 'Welcome to CC101 Introduction to Computing!', 'Please download the course syllabus from Module 1 and review the lecture slides before our next lab meeting on Wednesday.', NOW(), NOW());
+INSERT INTO `lms_announcements` (`id`, `lms_course_id`, `author_user_id`, `title`, `content`, `status`, `published_at`, `expires_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 9, 'Welcome to CC101 Introduction to Computing!', 'Please download the course syllabus from Module 1 and review the lecture slides before our next lab meeting on Wednesday.', 'published', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW());
 
 SET FOREIGN_KEY_CHECKS = 1;
+

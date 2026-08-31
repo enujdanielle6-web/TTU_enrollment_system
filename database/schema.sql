@@ -600,36 +600,42 @@ CREATE TABLE `student_scholarships` (
 -- 5. LEARNING MANAGEMENT SYSTEM (LMS) TABLES
 -- ----------------------------------------------------------------------------
 
+DROP TABLE IF EXISTS `lms_announcements`;
+DROP TABLE IF EXISTS `lms_attendance_records`;
+DROP TABLE IF EXISTS `lms_attendance_sessions`;
+DROP TABLE IF EXISTS `lms_quiz_answers`;
+DROP TABLE IF EXISTS `lms_quiz_attempts`;
+DROP TABLE IF EXISTS `lms_question_choices`;
+DROP TABLE IF EXISTS `lms_questions`;
+DROP TABLE IF EXISTS `lms_quizzes`;
+DROP TABLE IF EXISTS `lms_submissions`;
+DROP TABLE IF EXISTS `lms_assignments`;
+DROP TABLE IF EXISTS `lms_materials`;
+DROP TABLE IF EXISTS `lms_modules`;
 DROP TABLE IF EXISTS `lms_courses`;
+
 CREATE TABLE `lms_courses` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `academic_level` enum('College','SHS') NOT NULL,
+  `academic_section_id` int(10) unsigned NOT NULL COMMENT 'Maps to college_sections.id or shs_sections.id logically',
   `subject_id` int(10) unsigned NOT NULL,
-  `faculty_user_id` int(10) unsigned DEFAULT NULL,
-  `college_section_id` int(10) unsigned DEFAULT NULL,
-  `course_code` varchar(100) NOT NULL,
-  `course_name` varchar(255) NOT NULL,
-  `term` varchar(50) NOT NULL DEFAULT 'First Semester',
-  `academic_year` varchar(50) NOT NULL DEFAULT '2026-2027',
+  `faculty_user_id` int(10) unsigned NOT NULL,
   `status` enum('active','archived') NOT NULL DEFAULT 'active',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `course_code` (`course_code`),
-  KEY `fk_lms_course_subject` (`subject_id`),
-  KEY `fk_lms_course_faculty` (`faculty_user_id`),
-  KEY `fk_lms_course_section` (`college_section_id`),
-  CONSTRAINT `fk_lms_course_faculty` FOREIGN KEY (`faculty_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  KEY `idx_lms_course_subject` (`subject_id`),
+  KEY `idx_lms_course_faculty` (`faculty_user_id`),
   CONSTRAINT `fk_lms_course_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_lms_course_section` FOREIGN KEY (`college_section_id`) REFERENCES `college_sections` (`id`) ON DELETE SET NULL
+  CONSTRAINT `fk_lms_course_faculty` FOREIGN KEY (`faculty_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_modules`;
 CREATE TABLE `lms_modules` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_course_id` int(10) unsigned NOT NULL,
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `order_index` int(11) NOT NULL DEFAULT 1,
+  `display_order` int(11) NOT NULL DEFAULT 0,
   `status` enum('draft','published') NOT NULL DEFAULT 'published',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
@@ -638,23 +644,19 @@ CREATE TABLE `lms_modules` (
   CONSTRAINT `fk_lms_mod_course` FOREIGN KEY (`lms_course_id`) REFERENCES `lms_courses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_materials`;
 CREATE TABLE `lms_materials` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_module_id` int(10) unsigned NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
+  `file_name` varchar(255) NOT NULL,
   `file_path` varchar(255) NOT NULL,
-  `file_type` varchar(50) NOT NULL DEFAULT 'pdf',
-  `status` enum('draft','published') NOT NULL DEFAULT 'published',
+  `mime_type` varchar(100) DEFAULT NULL,
+  `file_size` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `fk_lms_mat_module` (`lms_module_id`),
   CONSTRAINT `fk_lms_mat_module` FOREIGN KEY (`lms_module_id`) REFERENCES `lms_modules` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_assignments`;
 CREATE TABLE `lms_assignments` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_course_id` int(10) unsigned NOT NULL,
@@ -662,9 +664,9 @@ CREATE TABLE `lms_assignments` (
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
   `due_date` datetime DEFAULT NULL,
-  `max_points` decimal(5,2) NOT NULL DEFAULT 100.00,
+  `max_score` int(11) NOT NULL DEFAULT 100,
+  `status` enum('draft','published') NOT NULL DEFAULT 'draft',
   `file_path` varchar(255) DEFAULT NULL,
-  `status` enum('draft','published') NOT NULL DEFAULT 'published',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -674,18 +676,21 @@ CREATE TABLE `lms_assignments` (
   CONSTRAINT `fk_lms_ass_module` FOREIGN KEY (`lms_module_id`) REFERENCES `lms_modules` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_submissions`;
 CREATE TABLE `lms_submissions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `assignment_id` int(10) unsigned NOT NULL,
   `student_id` int(10) unsigned NOT NULL,
-  `graded_by` int(10) unsigned DEFAULT NULL,
+  `status` enum('SUBMITTED','RESUBMITTED','GRADED') NOT NULL DEFAULT 'SUBMITTED',
   `file_path` varchar(255) DEFAULT NULL,
+  `file_name` varchar(255) DEFAULT NULL,
+  `mime_type` varchar(100) DEFAULT NULL,
+  `file_size` int(11) DEFAULT 0,
   `submission_text` text DEFAULT NULL,
   `grade` decimal(5,2) DEFAULT NULL,
   `feedback` text DEFAULT NULL,
   `submitted_at` datetime NOT NULL DEFAULT current_timestamp(),
   `graded_at` datetime DEFAULT NULL,
+  `graded_by` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_assignment_student` (`assignment_id`,`student_id`),
   KEY `fk_lms_sub_student` (`student_id`),
@@ -695,17 +700,17 @@ CREATE TABLE `lms_submissions` (
   CONSTRAINT `fk_lms_sub_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_quizzes`;
 CREATE TABLE `lms_quizzes` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_course_id` int(10) unsigned NOT NULL,
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
-  `time_limit_minutes` int(11) NOT NULL DEFAULT 30,
-  `passing_score` decimal(5,2) NOT NULL DEFAULT 50.00,
-  `max_attempts` int(11) NOT NULL DEFAULT 1,
-  `due_date` datetime DEFAULT NULL,
-  `status` enum('draft','published') NOT NULL DEFAULT 'published',
+  `time_limit` int(11) DEFAULT NULL COMMENT 'In minutes. NULL means unlimited.',
+  `max_attempts` int(11) DEFAULT 1,
+  `passing_score` decimal(5,2) DEFAULT NULL,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
+  `status` enum('draft','published') NOT NULL DEFAULT 'draft',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -713,108 +718,104 @@ CREATE TABLE `lms_quizzes` (
   CONSTRAINT `fk_quiz_course` FOREIGN KEY (`lms_course_id`) REFERENCES `lms_courses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_questions`;
 CREATE TABLE `lms_questions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_quiz_id` int(10) unsigned NOT NULL,
   `question_text` text NOT NULL,
-  `question_type` enum('multiple_choice','true_false','essay') NOT NULL DEFAULT 'multiple_choice',
+  `question_type` enum('multiple_choice','true_false') NOT NULL DEFAULT 'multiple_choice',
   `points` decimal(5,2) NOT NULL DEFAULT 1.00,
-  `order_index` int(11) NOT NULL DEFAULT 1,
+  `display_order` int(11) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `fk_question_quiz` (`lms_quiz_id`),
   CONSTRAINT `fk_question_quiz` FOREIGN KEY (`lms_quiz_id`) REFERENCES `lms_quizzes` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_question_choices`;
 CREATE TABLE `lms_question_choices` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_question_id` int(10) unsigned NOT NULL,
   `choice_text` text NOT NULL,
   `is_correct` tinyint(1) NOT NULL DEFAULT 0,
-  `order_index` int(11) NOT NULL DEFAULT 1,
+  `display_order` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `fk_choice_question` (`lms_question_id`),
   CONSTRAINT `fk_choice_question` FOREIGN KEY (`lms_question_id`) REFERENCES `lms_questions` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_quiz_attempts`;
 CREATE TABLE `lms_quiz_attempts` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_quiz_id` int(10) unsigned NOT NULL,
   `student_id` int(10) unsigned NOT NULL,
   `attempt_number` int(11) NOT NULL DEFAULT 1,
+  `started_at` datetime NOT NULL,
+  `submitted_at` datetime DEFAULT NULL,
   `score` decimal(5,2) DEFAULT NULL,
-  `total_points` decimal(5,2) DEFAULT NULL,
-  `passed` tinyint(1) DEFAULT 0,
-  `started_at` datetime NOT NULL DEFAULT current_timestamp(),
-  `completed_at` datetime DEFAULT NULL,
+  `status` enum('in_progress','submitted','graded') NOT NULL DEFAULT 'in_progress',
   PRIMARY KEY (`id`),
-  KEY `fk_attempt_quiz` (`lms_quiz_id`),
+  UNIQUE KEY `uq_quiz_student_attempt` (`lms_quiz_id`,`student_id`,`attempt_number`),
   KEY `fk_attempt_student` (`student_id`),
   CONSTRAINT `fk_attempt_quiz` FOREIGN KEY (`lms_quiz_id`) REFERENCES `lms_quizzes` (`id`) ON DELETE CASCADE,
   CONSTRAINT `fk_attempt_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_quiz_answers`;
 CREATE TABLE `lms_quiz_answers` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_quiz_attempt_id` int(10) unsigned NOT NULL,
   `lms_question_id` int(10) unsigned NOT NULL,
   `lms_question_choice_id` int(10) unsigned DEFAULT NULL,
-  `text_answer` text DEFAULT NULL,
-  `is_correct` tinyint(1) DEFAULT 0,
-  `points_awarded` decimal(5,2) DEFAULT 0.00,
+  `is_correct` tinyint(1) NOT NULL DEFAULT 0,
+  `points_awarded` decimal(5,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (`id`),
-  KEY `fk_answer_attempt` (`lms_quiz_attempt_id`),
+  UNIQUE KEY `uq_attempt_question` (`lms_quiz_attempt_id`,`lms_question_id`),
   KEY `fk_answer_question` (`lms_question_id`),
   KEY `fk_answer_choice` (`lms_question_choice_id`),
   CONSTRAINT `fk_answer_attempt` FOREIGN KEY (`lms_quiz_attempt_id`) REFERENCES `lms_quiz_attempts` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `fk_answer_choice` FOREIGN KEY (`lms_question_choice_id`) REFERENCES `lms_question_choices` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `fk_answer_question` FOREIGN KEY (`lms_question_id`) REFERENCES `lms_questions` (`id`) ON DELETE CASCADE
+  CONSTRAINT `fk_answer_question` FOREIGN KEY (`lms_question_id`) REFERENCES `lms_questions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_answer_choice` FOREIGN KEY (`lms_question_choice_id`) REFERENCES `lms_question_choices` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_attendance_sessions`;
 CREATE TABLE `lms_attendance_sessions` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_course_id` int(10) unsigned NOT NULL,
   `session_date` date NOT NULL,
-  `title` varchar(255) NOT NULL DEFAULT 'Regular Class Session',
+  `start_time` time DEFAULT NULL,
+  `end_time` time DEFAULT NULL,
+  `notes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `lms_attendance_sessions_ibfk_1` (`lms_course_id`),
+  KEY `lms_course_id` (`lms_course_id`),
   CONSTRAINT `lms_attendance_sessions_ibfk_1` FOREIGN KEY (`lms_course_id`) REFERENCES `lms_courses` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_attendance_records`;
 CREATE TABLE `lms_attendance_records` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_attendance_session_id` int(10) unsigned NOT NULL,
   `student_id` int(10) unsigned NOT NULL,
-  `status` enum('present','late','absent','excused') NOT NULL DEFAULT 'present',
+  `status` enum('present','absent','late','excused') NOT NULL DEFAULT 'present',
   `remarks` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `recorded_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_session_student` (`lms_attendance_session_id`,`student_id`),
-  KEY `lms_attendance_records_ibfk_2` (`student_id`),
+  UNIQUE KEY `uq_attendance_student` (`lms_attendance_session_id`,`student_id`),
+  KEY `student_id` (`student_id`),
   CONSTRAINT `lms_attendance_records_ibfk_1` FOREIGN KEY (`lms_attendance_session_id`) REFERENCES `lms_attendance_sessions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `lms_attendance_records_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-DROP TABLE IF EXISTS `lms_announcements`;
 CREATE TABLE `lms_announcements` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `lms_course_id` int(10) unsigned NOT NULL,
   `author_user_id` int(10) unsigned NOT NULL,
   `title` varchar(255) NOT NULL,
   `content` text NOT NULL,
+  `status` enum('draft','published') NOT NULL DEFAULT 'draft',
+  `published_at` timestamp NULL DEFAULT NULL,
+  `expires_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `lms_announcements_ibfk_1` (`lms_course_id`),
-  KEY `lms_announcements_ibfk_2` (`author_user_id`),
+  KEY `lms_course_id` (`lms_course_id`),
+  KEY `author_user_id` (`author_user_id`),
   CONSTRAINT `lms_announcements_ibfk_1` FOREIGN KEY (`lms_course_id`) REFERENCES `lms_courses` (`id`) ON DELETE CASCADE,
   CONSTRAINT `lms_announcements_ibfk_2` FOREIGN KEY (`author_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

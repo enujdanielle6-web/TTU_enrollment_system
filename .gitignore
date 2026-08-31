@@ -2,10 +2,6 @@
 /vendor/
 /node_modules/
 
-# Environment
-.env
-.env.local
-
 # Uploads (user files)
 /uploads/
 app/uploads/
@@ -19,3 +15,8 @@ Thumbs.db
 # Logs
 *.log
 /logs/
+
+# Environment / Secrets
+.env
+.env.local
+.env.*.local
