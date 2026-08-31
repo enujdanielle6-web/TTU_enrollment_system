@@ -16,7 +16,4 @@ Thumbs.db
 *.log
 /logs/
 
-# Environment / Secrets
-.env
-.env.local
-.env.*.local
+    
