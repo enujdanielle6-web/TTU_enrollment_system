@@ -222,7 +222,24 @@ try {
           <div class="mt-4 pt-3 border-top border-light">
             <label for="verifyRemarks" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;"><i class="bi bi-chat-left-text me-1"></i>Remarks / Reason for Rejection</label>
             <textarea name="remarks" id="verifyRemarks" class="form-control border-secondary border-opacity-25 rounded-3 shadow-sm" rows="2" placeholder="e.g., Screenshot is blurry, Amount is incorrect, etc."></textarea>
-            <div class="form-text small text-danger mt-1"><i class="bi bi-info-circle me-1"></i>Please provide a reason if you are rejecting the payment.</div>
+            <div id="remarksFeedback" class="text-danger small fw-semibold mt-1 d-none">
+              <i class="bi bi-exclamation-triangle-fill me-1"></i> Please provide a reason for rejection in the Remarks field before proceeding.
+            </div>
+          </div>
+
+          <!-- Inline Rejection Confirmation Box -->
+          <div id="rejectConfirmBox" class="alert alert-danger border-0 shadow-sm rounded-3 mt-3 mb-0 d-none">
+            <div class="d-flex align-items-start gap-3">
+              <i class="bi bi-exclamation-octagon-fill fs-4 text-danger flex-shrink-0 mt-1"></i>
+              <div class="flex-grow-1">
+                <h6 class="fw-bold mb-1 text-danger">Confirm Payment Rejection</h6>
+                <p class="small text-dark mb-2">Are you sure you want to <strong>REJECT</strong> this payment? Reason: <span id="rejectReasonDisplay" class="fw-bold text-danger"></span></p>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 fw-bold" onclick="submitRejection()"><i class="bi bi-x-circle me-1"></i> Yes, Reject It</button>
+                  <button type="button" class="btn btn-sm btn-light border rounded-pill px-3" onclick="cancelRejectionPrompt()">Cancel</button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="modal-footer border-top-0 pt-0 bg-light d-flex justify-content-between">
@@ -237,7 +254,7 @@ try {
   </div>
 </div>
 
-<!-- Custom Reason Modal -->
+<!-- Custom Reason Modal (for viewing historical rejection reasons) -->
 <div class="modal fade" id="customReasonModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content border-0 shadow">
@@ -247,45 +264,6 @@ try {
       </div>
       <div class="modal-body text-center pt-3 pb-4">
         <p class="text-dark fw-medium mb-0" id="customReasonText"></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Custom Warning Modal -->
-<div class="modal fade" id="customWarningModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-body text-center p-4">
-        <div class="text-warning mb-3">
-          <i class="bi bi-exclamation-triangle-fill display-4"></i>
-        </div>
-        <h6 class="fw-bold mb-2">Remarks Required</h6>
-        <p class="text-muted small mb-4">Please provide a reason for rejection in the Remarks field before proceeding.</p>
-        <button type="button" class="btn btn-warning rounded-pill px-4 fw-medium text-dark" data-bs-dismiss="modal" onclick="setTimeout(()=>document.getElementById('verifyRemarks').focus(), 300)">OK, Got It</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Custom Confirm Modal -->
-<div class="modal fade" id="customConfirmModal" tabindex="-1" aria-hidden="true" style="z-index: 1060;">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg">
-      <div class="modal-body p-4 text-center">
-        <div class="text-danger mb-3">
-          <i class="bi bi-question-circle display-4"></i>
-        </div>
-        <h5 class="fw-bold mb-3">Reject Payment?</h5>
-        <p class="text-muted mb-3">Are you sure you want to <b>REJECT</b> this payment?</p>
-        <div class="bg-light p-3 rounded mb-4 text-start border">
-            <span class="text-danger fw-bold small text-uppercase" style="letter-spacing: 0.5px;">Reason:</span><br>
-            <span class="fw-medium text-dark" id="customConfirmReasonText"></span>
-        </div>
-        <div class="d-flex justify-content-center gap-2">
-            <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-danger rounded-pill px-4" id="customConfirmBtn">Yes, Reject It</button>
-        </div>
       </div>
     </div>
   </div>
@@ -466,13 +444,20 @@ try {
             const refEl = document.getElementById('verifyRef');
             const imgEl = document.getElementById('verifyImage');
             const remarksEl = document.getElementById('verifyRemarks');
+            const feedbackEl = document.getElementById('remarksFeedback');
+            const confirmBox = document.getElementById('rejectConfirmBox');
 
             if (pidInput) pidInput.value = id;
             if (nameEl) nameEl.textContent = name;
             if (amtEl) amtEl.textContent = amount;
             if (methEl) methEl.textContent = method;
             if (refEl) refEl.textContent = ref;
-            if (remarksEl) remarksEl.value = '';
+            if (remarksEl) {
+                remarksEl.value = '';
+                remarksEl.classList.remove('is-invalid');
+            }
+            if (feedbackEl) feedbackEl.classList.add('d-none');
+            if (confirmBox) confirmBox.classList.add('d-none');
             
             resetZoom();
 
@@ -487,6 +472,17 @@ try {
         }
     });
 
+    // Clear validation on typing in remarks
+    document.addEventListener('input', function(e) {
+        if (e.target && e.target.id === 'verifyRemarks') {
+            if (e.target.value.trim() !== '') {
+                e.target.classList.remove('is-invalid');
+                const feedbackEl = document.getElementById('remarksFeedback');
+                if (feedbackEl) feedbackEl.classList.add('d-none');
+            }
+        }
+    });
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initCashierPayments);
     } else {
@@ -497,36 +493,52 @@ try {
 
 window.showRejectReason = function(reason) {
     document.getElementById('customReasonText').textContent = reason || 'No reason provided.';
-    const modal = new bootstrap.Modal(document.getElementById('customReasonModal'));
+    const modalEl = document.getElementById('customReasonModal');
+    let modal = bootstrap.Modal.getInstance(modalEl);
+    if (!modal) modal = new bootstrap.Modal(modalEl);
     modal.show();
 };
 
 window.confirmReject = function(btn) {
-    const remarks = document.getElementById('verifyRemarks').value.trim();
+    const remarksEl = document.getElementById('verifyRemarks');
+    const feedbackEl = document.getElementById('remarksFeedback');
+    const confirmBox = document.getElementById('rejectConfirmBox');
+    const reasonDisplay = document.getElementById('rejectReasonDisplay');
+    const remarks = remarksEl ? remarksEl.value.trim() : '';
+
     if (remarks === '') {
-        const warnModal = new bootstrap.Modal(document.getElementById('customWarningModal'));
-        warnModal.show();
+        if (remarksEl) {
+            remarksEl.classList.add('is-invalid');
+            remarksEl.focus();
+        }
+        if (feedbackEl) feedbackEl.classList.remove('d-none');
+        if (confirmBox) confirmBox.classList.add('d-none');
         return;
     }
     
-    document.getElementById('customConfirmReasonText').textContent = remarks;
-    const confirmModal = new bootstrap.Modal(document.getElementById('customConfirmModal'));
-    
-    const confirmBtn = document.getElementById('customConfirmBtn');
-    const newConfirmBtn = confirmBtn.cloneNode(true);
-    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-    
-    newConfirmBtn.addEventListener('click', function() {
-        const form = btn.closest('form');
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'decision';
-        input.value = 'reject';
-        form.appendChild(input);
-        form.submit();
-    });
-    
-    confirmModal.show();
+    if (remarksEl) remarksEl.classList.remove('is-invalid');
+    if (feedbackEl) feedbackEl.classList.add('d-none');
+    if (reasonDisplay) reasonDisplay.textContent = remarks;
+    if (confirmBox) {
+        confirmBox.classList.remove('d-none');
+        confirmBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+};
+
+window.cancelRejectionPrompt = function() {
+    const confirmBox = document.getElementById('rejectConfirmBox');
+    if (confirmBox) confirmBox.classList.add('d-none');
+};
+
+window.submitRejection = function() {
+    const form = document.querySelector('#verifyModal form');
+    if (!form) return;
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'decision';
+    input.value = 'reject';
+    form.appendChild(input);
+    form.submit();
 };
 </script>
 </main>
