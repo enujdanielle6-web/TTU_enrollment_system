@@ -150,18 +150,28 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           </div>
         </div>
         
-        <?php if (!empty($enrolledSubjects)): ?>
-        <!-- Enrolled Subjects -->
+        <?php 
+        $displaySubs = !empty($enrolledSubjects) ? $enrolledSubjects : ($requestedSubjects ?? []);
+        $isRequested = empty($enrolledSubjects) && !empty($requestedSubjects);
+        $isIrregular = ($app['student_type'] ?? '') === 'Irregular';
+        ?>
+        <?php if (!empty($displaySubs) || $isIrregular): ?>
+        <!-- Subjects Section -->
         <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
+          <div class="position-absolute top-0 start-0 w-100 <?= $isRequested ? 'bg-warning' : 'bg-primary' ?>" style="height: 4px;"></div>
           <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center">
-            <div>
-              <i class="bi bi-journal-text"></i>
-              <h2>Enrolled Subjects</h2>
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi <?= $isRequested ? 'bi-clipboard-check text-warning fs-4' : 'bi-journal-text text-primary fs-4' ?>"></i>
+              <div>
+                <h2 class="mb-0 fs-5"><?= $isRequested ? 'Requested Subjects (Irregular Student)' : 'Enrolled Subjects' ?></h2>
+                <?php if ($isRequested): ?>
+                <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle small">Awaiting Evaluation</span>
+                <?php endif; ?>
+              </div>
             </div>
-            <?php if (($app['student_type'] ?? '') === 'Irregular' && $app['status'] !== 'approved' && $app['status'] !== 'rejected'): ?>
+            <?php if ($isIrregular && $app['status'] !== 'enrolled' && $app['status'] !== 'rejected'): ?>
             <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium" data-bs-toggle="modal" data-bs-target="#editSubjectsModal">
-              <i class="bi bi-pencil-square"></i> Edit Subjects
+              <i class="bi bi-pencil-square me-1"></i> Edit Subjects
             </button>
             <?php endif; ?>
           </div>
@@ -172,41 +182,51 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                   <tr>
                     <th class="ps-4">Subject Code</th>
                     <th>Subject Name</th>
-                    <th>Schedule</th>
+                    <th>Section / Schedule</th>
                     <th>Type</th>
                     <th class="text-end pe-4">Units</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <?php 
-                  $totalUnits = 0;
-                  foreach ($enrolledSubjects as $sub): 
-                      $totalUnits += (int)$sub['units'];
-                  ?>
+                  <?php if (empty($displaySubs)): ?>
                   <tr>
-                    <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($sub['subject_code'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><?= htmlspecialchars($sub['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td class="text-primary small" style="font-size: 0.8rem;">
-                        <?php if (!empty($sub['section_code'])): ?>
-                            <span class="badge bg-secondary mb-1"><?= htmlspecialchars($sub['section_code'], ENT_QUOTES, 'UTF-8') ?></span><br>
-                        <?php endif; ?>
-                        <?= !empty($sub['schedule_text']) ? esc($sub['schedule_text']) : '<span class="text-muted fst-italic">No schedule</span>' ?>
+                    <td colspan="5" class="text-center py-4 text-muted">
+                      <em>No subjects requested or enrolled yet. Click "Edit Subjects" to assign subjects.</em>
                     </td>
-                    <td>
-                      <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
-                        <?= htmlspecialchars($sub['subject_type'] ?? 'Subject', ENT_QUOTES, 'UTF-8') ?>
-                      </span>
-                    </td>
-                    <td class="text-end pe-4"><?= htmlspecialchars((string)$sub['units'], ENT_QUOTES, 'UTF-8') ?></td>
                   </tr>
-                  <?php endforeach; ?>
+                  <?php else: ?>
+                    <?php 
+                    $totalUnits = 0;
+                    foreach ($displaySubs as $sub): 
+                        $totalUnits += (int)$sub['units'];
+                    ?>
+                    <tr>
+                      <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($sub['subject_code'], ENT_QUOTES, 'UTF-8') ?></td>
+                      <td><?= htmlspecialchars($sub['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                      <td class="text-primary small" style="font-size: 0.8rem;">
+                          <?php if (!empty($sub['section_code'])): ?>
+                              <span class="badge bg-secondary mb-1"><?= htmlspecialchars($sub['section_code'], ENT_QUOTES, 'UTF-8') ?></span><br>
+                          <?php endif; ?>
+                          <?= !empty($sub['schedule_text']) ? esc($sub['schedule_text']) : '<span class="text-muted fst-italic">Standard Schedule</span>' ?>
+                      </td>
+                      <td>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                          <?= htmlspecialchars($sub['subject_type'] ?? 'Curriculum', ENT_QUOTES, 'UTF-8') ?>
+                        </span>
+                      </td>
+                      <td class="text-end pe-4"><?= htmlspecialchars((string)$sub['units'], ENT_QUOTES, 'UTF-8') ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                  <?php endif; ?>
                 </tbody>
+                <?php if (!empty($displaySubs)): ?>
                 <tfoot class="table-light">
                   <tr>
                     <td colspan="3" class="text-end fw-bold text-dark">Total Units:</td>
-                    <td class="text-end pe-4 fw-bold text-dark fs-5"><?= esc($totalUnits) ?></td>
+                    <td class="text-end pe-4 fw-bold text-dark fs-5" colspan="2"><?= esc($totalUnits) ?></td>
                   </tr>
                 </tfoot>
+                <?php endif; ?>
               </table>
             </div>
           </div>
@@ -542,13 +562,14 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
   </div>
 
 <?php if (($app['student_type'] ?? '') === 'Irregular'): 
-    // Get currently enrolled subject IDs
-    $currentSubIds = array_column($enrolledSubjects, 'id');
+    $modalSubs = !empty($enrolledSubjects) ? $enrolledSubjects : ($requestedSubjects ?? []);
+    $currentSubIds = array_column($modalSubs, 'subject_id');
 ?>
 <!-- Edit Subjects Modal -->
 <div class="modal fade" id="editSubjectsModal" tabindex="-1" aria-labelledby="editSubjectsModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <form class="modal-content border-0 shadow" method="POST" action="application_process.php">
+      <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
       <input type="hidden" name="action" value="update_subjects">
       <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
       
@@ -589,20 +610,24 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               </tr>
             </thead>
             <tbody>
-              <?php if (empty($enrolledSubjects)): ?>
+              <?php if (empty($modalSubs)): ?>
               <tr class="empty-row">
-                <td colspan="4" class="text-center py-4 text-muted">No subjects currently assigned.</td>
+                <td colspan="4" class="text-center py-4 text-muted">No subjects currently assigned or requested.</td>
               </tr>
               <?php else: ?>
-                <?php foreach ($enrolledSubjects as $sub): ?>
+                <?php foreach ($modalSubs as $sub): 
+                    $subId = $sub['subject_id'] ?? $sub['id'];
+                ?>
                 <tr>
                   <td class="ps-3 fw-bold text-dark align-middle">
                     <?= htmlspecialchars($sub['subject_code'], ENT_QUOTES) ?>
-                    <input type="hidden" name="subjects[<?= esc($sub['subject_id']) ?>]" value="<?= esc($sub['section_id'] ?? '') ?>">
+                    <input type="hidden" name="subjects[<?= esc($subId) ?>]" value="<?= esc($sub['section_id'] ?? '') ?>">
                   </td>
                   <td class="align-middle">
                     <?= htmlspecialchars($sub['subject_name'], ENT_QUOTES) ?>
+                    <?php if (!empty($sub['schedule_text'])): ?>
                     <div class="text-primary mt-1" style="font-size: 0.65rem;"><?= esc($sub['schedule_text']) ?></div>
+                    <?php endif; ?>
                   </td>
                   <td class="text-center align-middle unit-val" data-units="<?= esc($sub['units']) ?>"><?= esc($sub['units']) ?></td>
                   <td class="text-center pe-3 align-middle">

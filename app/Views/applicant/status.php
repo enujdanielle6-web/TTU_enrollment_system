@@ -138,6 +138,141 @@ require_once __DIR__ . '/../components/header.php';
             </div>
 
             <div class="col-12">
+              <div class="island fade-in-up" style="animation-delay: 0.85s;">
+                <div class="island-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-file-earmark-check"></i>
+                    <h2 class="h5 mb-0 fw-bold">Required Documents Status</h2>
+                  </div>
+                  <?php if ($docMethod !== 'on_campus'): ?>
+                    <a href="documents.php" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                      <i class="bi bi-folder2-open me-1"></i> Documents Portal
+                    </a>
+                  <?php endif; ?>
+                </div>
+                <div class="island-body mt-3">
+                  <?php 
+                    $hasRejectedDocs = false;
+                    foreach ($documents ?? [] as $docItem) {
+                        if (($docItem['status'] ?? '') === 'rejected') {
+                            $hasRejectedDocs = true;
+                            break;
+                        }
+                    }
+                  ?>
+
+                  <?php if ($hasRejectedDocs): ?>
+                    <div class="alert alert-danger d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4 rounded-3 shadow-sm border-danger">
+                      <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-exclamation-octagon-fill fs-4 text-danger flex-shrink-0"></i>
+                        <div>
+                          <strong class="d-block text-danger">Action Required: Correction Needed</strong>
+                          <span class="small text-danger-emphasis">One or more uploaded documents were rejected by Admissions. Please review the feedback and re-upload the correct files.</span>
+                        </div>
+                      </div>
+                      <a href="documents.php" class="btn btn-danger btn-sm rounded-pill px-3 fw-semibold text-nowrap">
+                        <i class="bi bi-upload me-1"></i> Re-upload in Portal
+                      </a>
+                    </div>
+                  <?php endif; ?>
+
+                  <?php if (empty($documents)): ?>
+                    <?php if ($docMethod === 'on_campus'): ?>
+                      <div class="p-3 bg-light rounded-3 border text-center py-4">
+                        <i class="bi bi-building-check text-primary fs-2 mb-2 d-block"></i>
+                        <h6 class="fw-bold mb-1">On-Campus Physical Document Verification</h6>
+                        <p class="text-muted small mb-0">You selected on-campus document submission. Please bring your original documents and photocopies to the Admissions Office.</p>
+                      </div>
+                    <?php else: ?>
+                      <div class="p-3 bg-light rounded-3 border text-center py-4">
+                        <i class="bi bi-cloud-arrow-up text-muted fs-2 mb-2 d-block"></i>
+                        <h6 class="fw-bold mb-1">No Documents Uploaded Yet</h6>
+                        <p class="text-muted small mb-3">Please upload your required credentials to proceed with document verification.</p>
+                        <a href="documents.php" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold">
+                          <i class="bi bi-upload me-1"></i> Upload Requirements
+                        </a>
+                      </div>
+                    <?php endif; ?>
+                  <?php else: ?>
+                    <div class="table-responsive">
+                      <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                          <tr class="small text-muted text-uppercase">
+                            <th style="min-width: 200px;">Document Name</th>
+                            <th>Status</th>
+                            <th>Review Feedback</th>
+                            <th class="text-end">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <?php foreach ($documents as $doc): ?>
+                            <?php
+                              $dStatus = $doc['status'] ?? 'pending';
+                              $docFormattedName = ucwords(str_replace(['_', '-'], ' ', $doc['document_name']));
+                            ?>
+                            <tr>
+                              <td>
+                                <div class="d-flex align-items-center gap-2">
+                                  <div class="p-2 rounded-2 bg-light text-primary">
+                                    <i class="bi bi-file-earmark-text fs-5"></i>
+                                  </div>
+                                  <div>
+                                    <span class="fw-semibold text-dark d-block"><?= htmlspecialchars($docFormattedName, ENT_QUOTES, 'UTF-8') ?></span>
+                                    <span class="text-muted small"><?= htmlspecialchars($doc['document_name'], ENT_QUOTES, 'UTF-8') ?></span>
+                                  </div>
+                                </div>
+                              </td>
+                              <td>
+                                <?php if ($dStatus === 'verified'): ?>
+                                  <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 rounded-pill">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Verified
+                                  </span>
+                                <?php elseif ($dStatus === 'rejected'): ?>
+                                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1 rounded-pill">
+                                    <i class="bi bi-x-circle-fill me-1"></i> Rejected
+                                  </span>
+                                <?php else: ?>
+                                  <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle px-2.5 py-1 rounded-pill">
+                                    <i class="bi bi-hourglass-split me-1"></i> Under Review
+                                  </span>
+                                <?php endif; ?>
+                              </td>
+                              <td>
+                                <?php if ($dStatus === 'rejected' && !empty($doc['feedback'])): ?>
+                                  <div class="p-2 rounded-3 bg-danger-subtle border border-danger-subtle text-danger small">
+                                    <i class="bi bi-chat-left-dots-fill me-1"></i> <strong>Admissions Note:</strong> <?= htmlspecialchars($doc['feedback'], ENT_QUOTES, 'UTF-8') ?>
+                                  </div>
+                                <?php elseif (!empty($doc['feedback'])): ?>
+                                  <span class="text-muted small"><?= htmlspecialchars($doc['feedback'], ENT_QUOTES, 'UTF-8') ?></span>
+                                <?php else: ?>
+                                  <span class="text-muted small fst-italic">No feedback remarks</span>
+                                <?php endif; ?>
+                              </td>
+                              <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                  <?php if (!empty($doc['file_path'])): ?>
+                                    <a href="<?= htmlspecialchars($doc['file_path'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="btn btn-sm btn-light border rounded-pill px-2.5" title="View Uploaded File">
+                                      <i class="bi bi-eye"></i>
+                                    </a>
+                                  <?php endif; ?>
+                                  <?php if ($dStatus === 'rejected'): ?>
+                                    <a href="documents.php" class="btn btn-sm btn-danger rounded-pill px-3" title="Re-upload">
+                                      <i class="bi bi-upload me-1"></i> Re-upload
+                                    </a>
+                                  <?php endif; ?>
+                                </div>
+                              </td>
+                            </tr>
+                          <?php endforeach; ?>
+                        </tbody>
+                      </table>
+                    </div>
+                  <?php endif; ?>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12">
               <div class="island fade-in-up" style="animation-delay: 0.9s;">
                 <div class="island-header fade-in-up" style="animation-delay: 1s;">
                   <i class="bi bi-file-earmark-text"></i>

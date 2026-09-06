@@ -36,12 +36,8 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
 });
 
 $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {
-    // Applicant Portal Legacy Routes
+    // Applicant Portal Routes
     $router->get('/applicant/dashboard.php', ['App\Controllers\ApplicantController', 'dashboard']);
-    $router->get('/applicant/application_form.php', ['App\Controllers\ApplicantController', 'applicationForm']);
-    $router->post('/applicant/application_process.php', ['App\Controllers\ApplicantController', 'processApplication']);
-    $router->get('/applicant/requirements.php', ['App\Controllers\ApplicantController', 'requirements']);
-    $router->post('/applicant/upload_document.php', ['App\Controllers\ApplicantController', 'uploadDocument']);
     $router->get('/applicant/assessment.php', ['App\Controllers\ApplicantController', 'assessment']);
     $router->post('/applicant/payment_process.php', ['App\Controllers\ApplicantController', 'processPayment']);
     $router->get('/applicant/print_slip.php', ['App\Controllers\ApplicantController', 'printSlip']);
@@ -79,9 +75,11 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     // Admin Registrar
     $router->get('/admin/registrar/registrar_dashboard.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'dashboard']);
     $router->get('/admin/registrar/students.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'students']);
+    $router->get('/admin/registrar/students_export.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'exportStudents']);
     $router->post('/admin/registrar/students_export.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'exportStudents']);
     $router->get('/admin/registrar/college_enrollment_queue.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'collegeQueue']);
     $router->get('/admin/registrar/shs_enrollment_queue.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'shsQueue']);
+    $router->post('/admin/registrar/finalize_enrollment.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'finalizeEnrollment']);
 
     $router->get('/admin/registrar/subjects.php', ['App\Controllers\Admin\Registrar\SubjectController', 'index']);
     $router->post('/admin/registrar/subject_process.php', ['App\Controllers\Admin\Registrar\SubjectController', 'process']);

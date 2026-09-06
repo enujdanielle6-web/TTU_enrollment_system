@@ -47,7 +47,7 @@ flowchart TD
 - **Role:** Resolves database host, port, database name, username, and password from environment variables (`getenv()`) or `.env` file and creates the PDO connection.
 - **Used By:**
   - `app/Helpers/functions.php` (`getDbConnection()`).
-  - `app/Core/BaseModel.php`.
+  - `app/Models/BaseModel.php`.
   - Standalone migration and CLI scripts (`scripts/`).
 - **Blast Radius / Impact If Changed:**
   - **CRITICAL / SYSTEM-WIDE (100%)**: Failure to connect halts all HTTP requests with database exception errors.

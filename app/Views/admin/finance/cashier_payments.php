@@ -246,7 +246,7 @@ try {
           <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
           <div>
             <button type="button" class="btn btn-outline-danger rounded-pill px-4 shadow-sm fw-semibold me-2" onclick="confirmReject(this)"><i class="bi bi-x-circle me-1"></i> Reject Payment</button>
-            <button type="submit" name="decision" value="approve" class="btn btn-success rounded-pill px-4 shadow-sm fw-semibold"><i class="bi bi-check-circle me-1"></i> Approve Payment</button>
+            <button type="submit" id="approvePaymentBtn" name="decision" value="approve" class="btn btn-success rounded-pill px-4 shadow-sm fw-semibold"><i class="bi bi-check-circle me-1"></i> Approve Payment</button>
           </div>
         </div>
       </form>
@@ -533,6 +533,11 @@ window.cancelRejectionPrompt = function() {
 window.submitRejection = function() {
     const form = document.querySelector('#verifyModal form');
     if (!form) return;
+    const rejectBtn = document.querySelector('#rejectConfirmBox button.btn-danger');
+    if (rejectBtn && !rejectBtn.disabled) {
+        rejectBtn.disabled = true;
+        rejectBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Rejecting...';
+    }
     const input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'decision';
@@ -540,6 +545,20 @@ window.submitRejection = function() {
     form.appendChild(input);
     form.submit();
 };
+
+// Debounce Approve submit button
+document.addEventListener('DOMContentLoaded', function() {
+    const verifyForm = document.querySelector('#verifyModal form');
+    if (verifyForm) {
+        verifyForm.addEventListener('submit', function() {
+            const approveBtn = document.getElementById('approvePaymentBtn');
+            if (approveBtn && !approveBtn.disabled) {
+                approveBtn.disabled = true;
+                approveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Processing...';
+            }
+        });
+    }
+});
 </script>
 </main>
 

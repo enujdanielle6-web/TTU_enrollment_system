@@ -45,10 +45,12 @@ try {
     if ($programData['category'] === 'Senior High School') {
         $query = '
             SELECT s.id, s.subject_code, s.subject_name, s.units, s.subject_type
-            FROM shs_curriculum c
+            FROM shs_curricula sc
+            INNER JOIN shs_curriculum_subjects c ON sc.id = c.curriculum_id
             INNER JOIN subjects s ON c.subject_id = s.id
-            WHERE c.strand_id = :program_id 
+            WHERE sc.strand_id = :program_id 
               AND c.grade_level = :year_level
+              AND sc.status = "active"
               AND s.status = 1
         ';
     } else {
@@ -150,9 +152,11 @@ try {
             SELECT 
                 s.id, s.subject_code, s.subject_name, s.units, s.subject_type,
                 c.grade_level as year_level, c.semester
-            FROM shs_curriculum c
+            FROM shs_curricula sc
+            INNER JOIN shs_curriculum_subjects c ON sc.id = c.curriculum_id
             INNER JOIN subjects s ON c.subject_id = s.id
-            WHERE c.strand_id = :program_id
+            WHERE sc.strand_id = :program_id
+              AND sc.status = "active"
               AND s.status = 1
             ORDER BY c.grade_level ASC, c.semester ASC, s.subject_code ASC
         ';

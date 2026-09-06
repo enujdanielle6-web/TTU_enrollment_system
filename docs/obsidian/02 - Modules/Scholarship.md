@@ -11,7 +11,7 @@ The Scholarship module governs financial aid programs, student grant application
 ## 1. Core Responsibilities
 1. **Scholarship Program Management:** Creates grant offerings in the `scholarships` table with defined discount types (`percentage` or `fixed_amount`), criteria, and active statuses.
 2. **Application Processing:** Reviews student scholarship submissions in `scholarship_applications` across `pending`, `under_review`, `approved`, and `rejected` states.
-3. **Active Scholars Registry:** Maintains the roster of awarded students in `student_scholarships` / `scholarship_recipients`.
+3. **Active Scholars Registry:** Maintains the roster of awarded students in `scholarship_recipients`.
 4. **Finance Integration:** When a scholarship is approved, the discount is automatically factored into the student's tuition assessment in [`FinanceController`](file:///c:/xampp/htdocs/sia/app/Controllers/Admin/Finance/FinanceController.php).
 
 ---

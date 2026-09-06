@@ -42,28 +42,29 @@ Renders financial summary cards, daily collection trend chart, and pending verif
 - **Controller:** `FinanceController@payments`, `FinanceController@process`
 - **Routes:** `GET /admin/finance/cashier_payments.php`, `POST /admin/finance/cashier_process.php`
 
-### Tracing Chain & Auto-Enrollment Trigger
+### Tracing Chain & Payment Verification Workflow
 ```mermaid
 sequenceDiagram
     autonumber
     actor Cashier as Cashier Officer
     participant Controller as FinanceController
+    participant Seq as FinanceController::generateAtomicReceiptNumber
     participant DB as MariaDB (sia)
-    participant Mailer as PHPMailer (Google SMTP)
-    participant Student as Student
+    participant Registrar as Registrar Finalization Queue
 
     Cashier->>Controller: POST cashier_process.php (action='record_payment', assessment_id, amount, payment_method)
     Controller->>DB: Begin PDO Transaction
-    Controller->>Controller: generateReceiptNumber() -> 'REC-YYYYMMDD-XXXX'
+    Controller->>Seq: generateAtomicReceiptNumber($currentYear)
+    Seq->>DB: SELECT current_sequence FROM receipt_sequences WHERE receipt_year = ? FOR UPDATE
+    Seq->>DB: UPDATE receipt_sequences SET current_sequence = current_sequence + 1
+    Seq-->>Controller: Returns guaranteed unique 'OR-YYYY-XXXXXX'
     Controller->>DB: INSERT INTO payment_records (assessment_id, user_id, cashier_id, amount, receipt_number, status='verified')
     Controller->>DB: UPDATE student_assessments SET total_paid = total_paid + ?, payment_status = (CASE WHEN total_paid >= net_amount THEN 'paid' ELSE 'partial' END)
     
-    opt If total_paid >= ₱3,000.00 AND application.status != 'enrolled'
-        Controller->>Controller: finalizeStudentEnrollment($applicationId)
-        Controller->>DB: UPDATE applications SET status = 'enrolled'
-        Controller->>DB: UPDATE users SET student_number = ?, ttu_email = ?, force_password_reset = 1
-        Controller->>Mailer: sendStudentCredentialsEmail($userEmail, $studentNo, $ttuEmail, $tempPass)
-        Mailer-->>Student: Deliver Welcome HTML Email with Credentials
+    opt If total_paid >= ₱3,000.00 (or total_assessment) AND application.status IN ('assessed', 'finance_verified')
+        Controller->>DB: UPDATE applications SET status = 'payment_verified'
+        Controller->>DB: INSERT INTO activity_logs (Payment Verified - Ready for Registrar Finalization)
+        Note over Controller,Registrar: Application is queued in Registrar Pending Finalization Queue
     end
 
     Controller->>DB: Commit PDO Transaction
@@ -75,12 +76,13 @@ sequenceDiagram
 ## 3. Official Printable Payment Receipt (`/admin/finance/cashier_receipt.php`)
 
 ### Page Identity
-- **File Path:** [`app/Views/admin/finance/cashier_receipt.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/finance/cashier_receipt.php)
+- **File Path:** [`app/Views/admin/finance/receipt.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/finance/receipt.php)
 - **Controller:** `FinanceController@receipt`
 - **Route:** `GET /admin/finance/cashier_receipt.php?id={payment_id}`
 
-### Data Rendered
-Renders official university header, OR Number (`REC-YYYYMMDD-XXXX`), student details, breakdown of amount paid, remaining balance, and cashier signature line with printable media stylesheet (`@media print`).
+### Data Rendered & Financial Snapshot Integrity
+Renders official university header, OR Number (`OR-YYYY-XXXXXX`), student demographics, payment breakdown, and cashier signature line with printable media stylesheet (`@media print`).
+- **Immutable Itemization:** Line items are loaded directly from `assessment_items` frozen snapshots (tuition per unit, lab fees, miscellaneous fees) preventing retroactive rate alteration when fee templates change.
 
 ---
 

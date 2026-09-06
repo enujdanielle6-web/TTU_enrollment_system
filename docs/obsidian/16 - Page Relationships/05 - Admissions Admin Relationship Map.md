@@ -7,7 +7,7 @@ This document traces the complete code execution chain, database queries, state 
 ## 1. Admissions Dashboard (`/admin/admissions/admissions_dashboard.php`)
 
 ### Page Identity
-- **File Path:** [`app/Views/admin/admissions/admissions_dashboard.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/admissions/admissions_dashboard.php)
+- **File Path:** [`app/Views/admin/admissions/dashboard.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/admissions/dashboard.php)
 - **Controller:** [`app/Controllers/Admin/Admissions/AdmissionsController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Admin/Admissions/AdmissionsController.php) (`index()`)
 - **Route:** `GET /admin/admissions/admissions_dashboard.php`
 - **Authorized Roles:** `admissions`, `admin`, `superadmin`
@@ -29,7 +29,7 @@ AdmissionsController@index
    JOIN users u ON a.user_id = u.id 
    ORDER BY a.created_at DESC LIMIT 10
     ↓
-Renders: app/Views/admin/admissions/admissions_dashboard.php
+Renders: app/Views/admin/admissions/dashboard.php
 ```
 
 ---
@@ -50,7 +50,7 @@ Filters applications table with pagination and dynamically displays document sub
 ## 3. Application Detail & Document Inspector (`/admin/admissions/application_detail.php`)
 
 ### Page Identity
-- **File Path:** [`app/Views/admin/admissions/application_detail.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/admissions/application_detail.php)
+- **File Path:** [`app/Views/admin/admissions/detail.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/admissions/detail.php)
 - **Controller:** `AdmissionsController@detail`
 - **Route:** `GET /admin/admissions/application_detail.php`
 - **Query Parameter:** `id` (int, required)

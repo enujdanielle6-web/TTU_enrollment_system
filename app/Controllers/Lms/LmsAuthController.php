@@ -73,7 +73,7 @@ if ($role === 'student') {
 
     $isPasswordValid = false;
     if ($user) {
-        if (password_verify($password, $user['password']) || $password === $user['student_number'] || $password === 'password123') {
+        if (password_verify($password, $user['password'])) {
             $isPasswordValid = true;
         }
     }

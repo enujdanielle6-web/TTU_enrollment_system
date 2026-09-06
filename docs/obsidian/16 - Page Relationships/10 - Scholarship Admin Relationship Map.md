@@ -62,14 +62,14 @@ Redirect: /admin/scholarship/scholarships.php
 
 ### Page Identity
 - **File Path:** [`app/Views/admin/scholarship/scholarship_review.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/scholarship/scholarship_review.php)
-- **Controller:** `ScholarshipController@review`, `ScholarshipController@processReview`
-- **Routes:** `GET /admin/scholarship/scholarship_review.php?id={id}`, `POST /admin/scholarship/scholarship_process_review.php`
+- **Controller:** `ScholarshipController@review`, `ScholarshipController@process`
+- **Routes:** `GET /admin/scholarship/scholarship_review.php`, `POST /admin/scholarship/scholarship_process.php`
 
 ### Tracing Chain & Assessment Math
 ```mermaid
 flowchart TD
-    Officer[Scholarship Officer] -->|Approves Grant| Submit[POST /admin/scholarship/scholarship_process_review.php]
-    Submit --> Controller[ScholarshipController@processReview]
+    Officer[Scholarship Officer] -->|Approves Grant| Submit[POST /admin/scholarship/scholarship_process.php]
+    Submit --> Controller[ScholarshipController@process]
     Controller --> DB1[UPDATE scholarship_applications SET status='approved']
     Controller --> DB2[INSERT INTO scholarship_recipients (user_id, scholarship_id, status='Active')]
     Controller --> Calc[Calculate Discount based on Scholarship Coverage]

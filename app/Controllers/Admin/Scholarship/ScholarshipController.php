@@ -253,29 +253,36 @@ class ScholarshipController extends BaseController
 
                     if ($status === 'approved') {
                         // Insert into scholarship_recipients
-                        // In a real scenario, we should get the active academic year/semester from system_settings
-                        $sysStmt = $pdo->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('active_academic_year_id', 'active_semester')");
+                        $sysStmt = $pdo->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('active_school_year', 'active_academic_year_id', 'active_semester')");
                         $settings = [];
                         foreach ($sysStmt->fetchAll() as $row) {
                             $settings[$row['setting_key']] = $row['setting_value'];
                         }
+
+                        // Fetch active application for this user to obtain academic year and semester if not in settings
+                        $appStmt = $pdo->prepare('SELECT school_year, semester FROM applications WHERE user_id = :uid AND status IN ("approved", "enrolled", "under_review", "pending") ORDER BY id DESC LIMIT 1');
+                        $appStmt->execute(['uid' => $userId]);
+                        $userApp = $appStmt->fetch(\PDO::FETCH_ASSOC);
+
+                        $activeAy = $settings['active_school_year'] ?? $settings['active_academic_year_id'] ?? ($userApp['school_year'] ?? '2026-2027');
+                        $activeSem = $settings['active_semester'] ?? ($userApp['semester'] ?? 'First');
                         
-                        if (!empty($settings['active_academic_year_id']) && !empty($settings['active_semester'])) {
+                        if (!empty($activeAy) && !empty($activeSem)) {
                             // Check if recipient record already exists for this term
                             $chkRecip = $pdo->prepare('SELECT id FROM scholarship_recipients WHERE user_id = :uid AND scholarship_id = :sid AND academic_year_id = :ay AND semester = :sem');
                             $chkRecip->execute([
                                 'uid' => $userId,
                                 'sid' => $scholarshipId,
-                                'ay' => $settings['active_academic_year_id'],
-                                'sem' => $settings['active_semester']
+                                'ay' => $activeAy,
+                                'sem' => $activeSem
                             ]);
                             if (!$chkRecip->fetch()) {
                                 $insRecip = $pdo->prepare('INSERT INTO scholarship_recipients (user_id, scholarship_id, academic_year_id, semester, status) VALUES (:uid, :sid, :ay, :sem, "Active")');
                                 $insRecip->execute([
                                     'uid' => $userId,
                                     'sid' => $scholarshipId,
-                                    'ay' => $settings['active_academic_year_id'],
-                                    'sem' => $settings['active_semester']
+                                    'ay' => $activeAy,
+                                    'sem' => $activeSem
                                 ]);
                                 
                                 // Recalculate assessment

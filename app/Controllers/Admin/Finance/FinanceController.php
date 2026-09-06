@@ -34,163 +34,23 @@ if ($assessmentId <= 0) {
 }
 
 try {
-    // Fetch Assessment Details
-    $stmt = $pdo->prepare('
-        SELECT sa.*, 
-               u.first_name, u.last_name, u.email,
-               a.reference_number, a.academic_level, a.grade_level, a.strand, a.semester,
-               s.name as scholarship_name,
-               ft.is_per_unit, ft.tuition_fee as template_tuition_rate
-        FROM student_assessments sa
-        INNER JOIN users u ON sa.user_id = u.id
-        INNER JOIN applications a ON sa.application_id = a.id
-        LEFT JOIN scholarships s ON sa.scholarship_id = s.id
-        LEFT JOIN fee_templates ft ON sa.fee_template_id = ft.id
-        WHERE sa.id = :id LIMIT 1
-    ');
-    $stmt->execute(['id' => $assessmentId]);
-    $assessment = $stmt->fetch();
-
-    if (!$assessment) {
+    $breakdown = \App\Services\AssessmentService::getAssessmentBreakdown($pdo, $assessmentId);
+    if (!$breakdown) {
         $response->redirect("/sia/admin/finance/cashier_dashboard.php");
         return;
     }
 
-    // Fetch Payment History (Receipts) for this assessment
-    $payStmt = $pdo->prepare('
-        SELECT pr.*, u.first_name as cashier_first, u.last_name as cashier_last
-        FROM payment_records pr
-        LEFT JOIN users u ON pr.cashier_id = u.id
-        WHERE pr.assessment_id = :id
-        ORDER BY pr.created_at DESC
-    ');
-    $payStmt->execute(['id' => $assessmentId]);
-    $payments = $payStmt->fetchAll();
-
-    // Fetch Enrolled / Curriculum Subjects
-    $enrolledSubjects = [];
-    if ($assessment['academic_level'] === 'College') {
-        $subStmt = $pdo->prepare('
-            SELECT s.subject_code, s.subject_name, s.units 
-            FROM college_enrollments es
-            JOIN subjects s ON es.subject_id = s.id
-            WHERE es.application_id = :app_id
-        ');
-        $subStmt->execute(['app_id' => $assessment['application_id']]);
-        $enrolledSubjects = $subStmt->fetchAll();
-
-        if (empty($enrolledSubjects)) {
-            $appSecStmt = $pdo->prepare('SELECT section_id FROM applications WHERE id = :app_id');
-            $appSecStmt->execute(['app_id' => $assessment['application_id']]);
-            $secId = $appSecStmt->fetchColumn();
-            if ($secId) {
-                $secSubStmt = $pdo->prepare('
-                    SELECT s.subject_code, s.subject_name, s.units
-                    FROM college_section_subjects css
-                    JOIN subjects s ON css.subject_id = s.id
-                    WHERE css.college_section_id = :sec_id
-                ');
-                $secSubStmt->execute(['sec_id' => $secId]);
-                $enrolledSubjects = $secSubStmt->fetchAll();
-            }
-        }
-
-        if (empty($enrolledSubjects)) {
-            $currSubStmt = $pdo->prepare('
-                SELECT s.subject_code, s.subject_name, s.units
-                FROM college_curriculum_subjects ccs
-                JOIN subjects s ON ccs.subject_id = s.id
-                JOIN college_curricula cc ON ccs.curriculum_id = cc.id
-                JOIN college_programs p ON cc.program_id = p.id
-                WHERE p.code = :strand AND ccs.year_level = :year_level AND ccs.semester = :semester
-                ORDER BY ccs.display_order ASC
-            ');
-            $currSubStmt->execute([
-                'strand' => $assessment['strand'],
-                'year_level' => $assessment['grade_level'],
-                'semester' => $assessment['semester'] ?? 'First'
-            ]);
-            $enrolledSubjects = $currSubStmt->fetchAll();
-        }
-    } elseif ($assessment['academic_level'] === 'Senior High School') {
-        $subStmt = $pdo->prepare('
-            SELECT s.subject_code, s.subject_name, s.units 
-            FROM shs_enrollments es
-            JOIN subjects s ON es.subject_id = s.id
-            WHERE es.application_id = :app_id
-        ');
-        $subStmt->execute(['app_id' => $assessment['application_id']]);
-        $enrolledSubjects = $subStmt->fetchAll();
-
-        if (empty($enrolledSubjects)) {
-            $appSecStmt = $pdo->prepare('SELECT section_id FROM applications WHERE id = :app_id');
-            $appSecStmt->execute(['app_id' => $assessment['application_id']]);
-            $secId = $appSecStmt->fetchColumn();
-            if ($secId) {
-                $secSubStmt = $pdo->prepare('
-                    SELECT s.subject_code, s.subject_name, s.units
-                    FROM shs_section_subjects ss
-                    JOIN subjects s ON ss.subject_id = s.id
-                    WHERE ss.shs_section_id = :sec_id
-                ');
-                $secSubStmt->execute(['sec_id' => $secId]);
-                $enrolledSubjects = $secSubStmt->fetchAll();
-            }
-        }
-
-        if (empty($enrolledSubjects)) {
-            $currSubStmt = $pdo->prepare('
-                SELECT s.subject_code, s.subject_name, s.units
-                FROM shs_curriculum_subjects scs
-                JOIN subjects s ON scs.subject_id = s.id
-                JOIN shs_curricula sc ON scs.curriculum_id = sc.id
-                JOIN shs_strands st ON sc.strand_id = st.id
-                WHERE st.code = :strand AND scs.grade_level = :grade_level AND scs.semester = :semester
-                ORDER BY scs.display_order ASC
-            ');
-            $currSubStmt->execute([
-                'strand' => $assessment['strand'],
-                'grade_level' => $assessment['grade_level'],
-                'semester' => $assessment['semester'] ?? 'First'
-            ]);
-            $enrolledSubjects = $currSubStmt->fetchAll();
-        }
-    }
-
-    // Auto-sync dynamic tuition fee ONLY for open/unpaid assessments with 0 payments recorded
-    $isUnpaid = ($assessment['payment_status'] === 'unpaid');
-    $hasNoPayments = ((float)($assessment['total_paid'] ?? 0) == 0.0);
-
-    if (!empty($assessment['is_per_unit']) && !empty($enrolledSubjects) && $isUnpaid && $hasNoPayments) {
-        $calcUnits = (int) array_sum(array_column($enrolledSubjects, 'units'));
-        $unitRate = (float)($assessment['template_tuition_rate'] ?? 500.0);
-        $calculatedTuition = $calcUnits * $unitRate;
-
-        if (((float)$assessment['tuition_fee'] !== $calculatedTuition || (float)$assessment['total_amount'] <= 0) && $calculatedTuition > 0) {
-            $calculatedTotal = $calculatedTuition + (float)$assessment['miscellaneous_fee'] + (float)$assessment['registration_fee'] + (float)$assessment['laboratory_fee'] + (float)$assessment['other_fees'];
-            $calculatedNet = $calculatedTotal - (float)$assessment['discount_amount'];
-
-            $syncStmt = $pdo->prepare('UPDATE student_assessments SET tuition_fee = :tuition, total_amount = :total, net_amount = :net WHERE id = :id');
-            $syncStmt->execute([
-                'tuition' => $calculatedTuition,
-                'total' => $calculatedTotal,
-                'net' => $calculatedNet,
-                'id' => $assessment['id']
-            ]);
-
-            $assessment['tuition_fee'] = $calculatedTuition;
-            $assessment['total_amount'] = $calculatedTotal;
-            $assessment['net_amount'] = $calculatedNet;
-        }
-    }
+    $assessment = $breakdown['assessment'];
+    $payments = $breakdown['payments'];
+    $assessmentItems = $breakdown['assessment_items'];
+    $enrolledSubjects = $breakdown['enrolled_subjects'];
 
     // Calculate balances
     $totalAmount = (float)$assessment['total_amount'];
     $discountAmount = (float)$assessment['discount_amount'];
     $netAmount = (float)$assessment['net_amount'];
     $totalPaid = (float)$assessment['total_paid'];
-    $balance = $netAmount - $totalPaid;
-    if ($balance < 0) $balance = 0;
+    $balance = max(0, $netAmount - $totalPaid);
 
 } catch (PDOException $e) {
     error_log('Admin assessment fetch failed: ' . $e->getMessage());
@@ -299,16 +159,8 @@ try {
                 throw new Exception('Minimum payment amount is ₱' . number_format($minPayment, 2) . '.');
             }
 
-            // Generate Receipt Number (Format: REC-YYYYMMDD-XXXX)
-            $datePrefix = date('Ymd');
-            $receiptStmt = $pdo->query("SELECT receipt_number FROM payment_records WHERE receipt_number LIKE 'REC-$datePrefix-%' ORDER BY id DESC LIMIT 1");
-            $lastReceipt = $receiptStmt->fetch();
-            $nextNum = 1;
-            if ($lastReceipt) {
-                $parts = explode('-', $lastReceipt['receipt_number']);
-                $nextNum = (int)end($parts) + 1;
-            }
-            $receiptNumber = sprintf("REC-%s-%04d", $datePrefix, $nextNum);
+            // Generate Concurrency-Safe Atomic Receipt Number (Format: REC-YYYYMMDD-XXXX)
+            $receiptNumber = generateAtomicReceiptNumber($pdo);
 
             // Record Payment
             $insertPayStmt = $pdo->prepare('
@@ -338,9 +190,10 @@ try {
                 'id' => $assessmentId
             ]);
 
-            // Auto-finalize enrollment upon initial/full payment confirmation
+            // Transition application status to payment_verified so Registrar can validate & finalize
             if ($newStatus === 'paid' || $newStatus === 'partial') {
-                finalizeStudentEnrollment($pdo, $userId, (int)$assessment['application_id']);
+                $updApp = $pdo->prepare('UPDATE applications SET status = "payment_verified" WHERE id = :app_id AND status != "enrolled"');
+                $updApp->execute(['app_id' => (int)$assessment['application_id']]);
             }
 
             // Log payment activity for student
@@ -372,6 +225,7 @@ try {
         $decision = $_POST['decision'] ?? 'approve';
         $remarks = trim($_POST['remarks'] ?? '');
         $cashierId = (int)$_SESSION['user_id'];
+        $redirectUrl = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : "/sia/admin/finance/cashier_payments.php";
 
         if ($paymentId <= 0) {
             throw new Exception('Invalid payment ID provided.');
@@ -438,20 +292,12 @@ try {
                 $pdo->commit();
                 
                 $_SESSION['success_msg'] = "Online payment successfully rejected.";
-                $response->redirect("/sia/admin/finance/cashier_payments.php");
+                $response->redirect($redirectUrl);
                 return;
             }
 
-            // Generate Receipt Number (Format: REC-YYYYMMDD-XXXX)
-            $datePrefix = date('Ymd');
-            $receiptStmt = $pdo->query("SELECT receipt_number FROM payment_records WHERE receipt_number LIKE 'REC-$datePrefix-%' ORDER BY id DESC LIMIT 1");
-            $lastReceipt = $receiptStmt->fetch();
-            $nextNum = 1;
-            if ($lastReceipt) {
-                $parts = explode('-', $lastReceipt['receipt_number']);
-                $nextNum = (int)end($parts) + 1;
-            }
-            $receiptNumber = sprintf("REC-%s-%04d", $datePrefix, $nextNum);
+            // Generate Concurrency-Safe Atomic Receipt Number (Format: REC-YYYYMMDD-XXXX)
+            $receiptNumber = generateAtomicReceiptNumber($pdo);
 
             // Update Payment Record
             $updPayStmt = $pdo->prepare('UPDATE payment_records SET status = "verified", cashier_id = :cashier, receipt_number = :receipt WHERE id = :id');
@@ -472,9 +318,10 @@ try {
                 'id' => $assessmentId
             ]);
 
-            // Auto-finalize enrollment upon payment verification
+            // Transition application status to payment_verified so Registrar can validate & finalize
             if ($newStatus === 'paid' || $newStatus === 'partial') {
-                finalizeStudentEnrollment($pdo, $userId, (int)$assessment['application_id']);
+                $updApp = $pdo->prepare('UPDATE applications SET status = "payment_verified" WHERE id = :app_id AND status != "enrolled"');
+                $updApp->execute(['app_id' => (int)$assessment['application_id']]);
             }
 
             // Log payment activity for student
@@ -495,12 +342,12 @@ try {
             $pdo->commit();
             
             $_SESSION['success_msg'] = "Online payment verified successfully! Receipt No: $receiptNumber";
-            $response->redirect("/sia/admin/finance/cashier_payments.php");
+            $response->redirect($redirectUrl);
             return;
         } catch (Exception $e) {
             $pdo->rollBack();
             $_SESSION['error_msg'] = $e->getMessage();
-            $response->redirect("/sia/admin/finance/cashier_payments.php");
+            $response->redirect($redirectUrl);
             return;
         }
     } else {

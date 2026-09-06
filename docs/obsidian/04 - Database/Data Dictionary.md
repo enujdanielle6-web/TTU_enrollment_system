@@ -1,6 +1,6 @@
 # Database Data Dictionary
 
-This document serves as the authoritative, verified technical data dictionary for all **42 database tables and views** in the TTU database (`sia`).
+This document serves as the authoritative, verified technical data dictionary for all **45 database tables and views** in the TTU database (`sia`).
 
 ---
 
@@ -65,6 +65,12 @@ Institutional broadcast notices.
 * `is_active` (TINYINT(1), NOT NULL, DEFAULT 1)
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
+### `student_number_sequences`
+Atomic sequence counter for concurrency-safe sequential student number allocation (`YYYY-XXXXXX`).
+* `year` (INT(11), PK): Academic enrollment year (e.g., `2026`).
+* `current_sequence` (INT(11), NOT NULL, DEFAULT 0): Incrementing sequence counter protected by `FOR UPDATE` row-level locks in `StudentNumberService`.
+* `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
+
 ---
 
 ## 2. Admissions, Applications & Medical Tables
@@ -112,6 +118,13 @@ Clinic medical profile and health clearance records.
 * `status` (ENUM('pending','under_review','correction_required','verified','rejected'), NOT NULL, DEFAULT 'pending')
 * `admin_remarks` (TEXT, NULL): Clinic physician/nurse remarks.
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+### `application_subject_requests`
+Requested individual subjects submitted by irregular or transferee applicants for academic evaluation.
+* `id` (INT(10) UNSIGNED, PK, AUTO_INC)
+* `application_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `applications.id`, ON DELETE CASCADE)
+* `subject_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `subjects.id`, ON DELETE CASCADE)
+* `created_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
 ---
 
@@ -240,6 +253,17 @@ Finalized financial billing ledger per application term.
 * `payment_status` (ENUM('unpaid','partial','paid'), NOT NULL, DEFAULT 'unpaid')
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
+### `assessment_items`
+Frozen itemized line items snapshot for student assessments (protects historical records from fee schedule changes).
+* `id` (INT(10) UNSIGNED, PK, AUTO_INC)
+* `assessment_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `student_assessments.id`, ON DELETE CASCADE)
+* `item_name` (VARCHAR(150), NOT NULL): E.g., `Tuition (18 Units @ ₱250.00)`, `Computer Lab Fee`, `Registration Fee`.
+* `item_type` (ENUM('tuition','miscellaneous','laboratory','registration','other'), NOT NULL, DEFAULT 'other')
+* `unit_rate` (DECIMAL(10,2), NOT NULL, DEFAULT 0.00)
+* `units` (INT(11), NOT NULL, DEFAULT 1)
+* `total_amount` (DECIMAL(10,2), NOT NULL, DEFAULT 0.00)
+* `created_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
 ### `payment_records`
 Transaction records for over-the-counter payments and online bank proofs.
 * `id` (INT(10) UNSIGNED, PK, AUTO_INC)
@@ -249,12 +273,18 @@ Transaction records for over-the-counter payments and online bank proofs.
 * `amount` (DECIMAL(10,2), NOT NULL)
 * `payment_date` (DATE, NOT NULL)
 * `payment_method` (VARCHAR(50), NOT NULL): `Cash`, `GCash`, `Bank Transfer`.
-* `receipt_number` (VARCHAR(50), NULL): Generated receipt ID (`REC-YYYYMMDD-XXXX`).
+* `receipt_number` (VARCHAR(50), NULL): Guaranteed unique official receipt ID (`OR-YYYY-XXXXXX`).
 * `reference_number` (VARCHAR(100), NULL): Bank reference number.
 * `proof_image` (VARCHAR(255), NULL): Uploaded receipt proof image.
 * `status` (ENUM('pending','verified','rejected'), NOT NULL, DEFAULT 'pending')
 * `remarks` (TEXT, NULL): Cashier remarks or rejection reasons.
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+
+### `receipt_sequences`
+Atomic counter sequence for concurrency-safe official receipt number generation (`OR-YYYY-XXXXXX`).
+* `receipt_year` (INT(11), PK): Calendar year (e.g., `2026`).
+* `current_sequence` (INT(11), NOT NULL, DEFAULT 0): Incrementing sequence counter protected by `FOR UPDATE` row-level locks.
+* `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
 
 ### `scholarships`
 Institutional and external financial grant definitions.
@@ -299,16 +329,11 @@ Active awardees receiving scholarship deductions per term.
 * `academic_year_id` (VARCHAR(50), NOT NULL)
 * `semester` (VARCHAR(50), NOT NULL)
 * `status` (VARCHAR(50), NOT NULL, DEFAULT 'Active')
+* `remarks` (TEXT, NULL): Award notes or conditions.
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
-### `student_scholarships`
-Legacy student-to-scholarship association table.
-* `id` (INT(10) UNSIGNED, PK, AUTO_INC)
-* `user_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `users.id`, ON DELETE CASCADE)
-* `scholarship_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `scholarships.id`, ON DELETE CASCADE)
-* `academic_year` (VARCHAR(50), NOT NULL)
-* `semester` (VARCHAR(50), NOT NULL)
-* `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+### `student_scholarships` *(Purged / Dropped)*
+> **Notice:** Purged and dropped in Phase 3. Replaced by `scholarship_recipients`.
 
 ---
 

@@ -37,8 +37,8 @@ Renders section capacity utilization bars and scheduled room counts
 
 ### Page Identity
 - **File Path:** [`app/Views/admin/scheduler/college_sections.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/scheduler/college_sections.php)
-- **Controller:** `SchedulerController@collegeSections`, `SchedulerController@saveSection`
-- **Routes:** `GET /admin/scheduler/college_sections.php`, `POST /admin/scheduler/section_save.php`
+- **Controller:** `SchedulerController@collegeSections`
+- **Routes:** `GET /admin/scheduler/college_sections.php`, `POST /admin/scheduler/college_sections.php`
 
 ### Interactive AJAX Dropdown Traced
 When creating a new section in the modal, selecting a Program triggers:
@@ -46,9 +46,9 @@ When creating a new section in the modal, selecting a Program triggers:
 
 ### Section Creation Chain
 ```text
-POST /admin/scheduler/section_save.php (section_code, program_id, curriculum_id, year_level, capacity, schedule_type, adviser)
+POST /admin/scheduler/college_sections.php (section_code, program_id, curriculum_id, year_level, capacity, schedule_type, adviser)
     ↓
-SchedulerController@saveSection
+SchedulerController@collegeSections
     ↓
 Validation: Unique section_code check
     ↓
@@ -66,15 +66,15 @@ Redirect: /admin/scheduler/college_sections.php
 
 ### Page Identity
 - **File Path:** [`app/Views/admin/scheduler/schedule_builder.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/scheduler/schedule_builder.php)
-- **Controller:** `SchedulerController@scheduleBuilder`, `SchedulerController@saveSchedule`
-- **Routes:** `GET /admin/scheduler/schedule_builder.php?section_id={id}`, `POST /admin/scheduler/schedule_save.php`
+- **Controller:** `SchedulerController@builder`, `SchedulerController@process`
+- **Routes:** `GET /admin/scheduler/schedule_builder.php?section_id={id}`, `POST /admin/scheduler/schedule_builder_process.php`
 
 ### Conflict Detection Engine
 ```mermaid
 flowchart TD
     Admin[Scheduler Staff] -->|Assigns Day, Start Time, End Time, Room, Instructor| Form[Schedule Form]
-    Form --> Submit[POST /admin/scheduler/schedule_save.php]
-    Submit --> Controller[SchedulerController@saveSchedule]
+    Form --> Submit[POST /admin/scheduler/schedule_builder_process.php]
+    Submit --> Controller[SchedulerController@process]
     Controller --> RoomCheck{Room Available?}
     RoomCheck -->|Conflict: Same Room & Time| Error1[Reject: Room Already Occupied]
     RoomCheck -->|Pass| InstCheck{Instructor Available?}

@@ -44,6 +44,17 @@ class SessionSecurityMiddleware implements MiddlewareInterface
                 session_regenerate_id(true);
                 $_SESSION['created_time'] = time();
             }
+
+            // Enforce forced password reset if flagged
+            if (!empty($_SESSION['force_password_reset_required'])) {
+                $uri = $request->getUri();
+                $allowed = ['/sia/applicant/profile.php', '/sia/applicant/profile_process.php', '/sia/auth/logout.php', '/applicant/profile.php', '/applicant/profile_process.php', '/auth/logout.php'];
+                if (!in_array($uri, $allowed, true)) {
+                    $res = new \App\Core\Response();
+                    $res->redirect('/sia/applicant/profile.php');
+                    exit;
+                }
+            }
         }
 
         // Generate CSRF Token if not exists

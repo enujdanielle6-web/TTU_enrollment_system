@@ -43,7 +43,23 @@ flowchart LR
 
 ---
 
-## 3. Guiding Rules for Future Modernization
+## 3. Extracted Domain Services (`app/Services/`)
+
+Following the Strangler Fig pattern, core business workflows and calculation logic previously bloated across multiple controllers have been cleanly extracted into authoritative domain services:
+
+1. **`App\Services\StudentNumberService`** ([StudentNumberService.php](file:///c:/xampp/htdocs/sia/app/Services/StudentNumberService.php)):
+   - Generates unique, strictly sequential student numbers formatted as `YYYY-XXXXXX`.
+   - Utilizes MariaDB table `student_number_sequences` with atomic upserts (`INSERT ... ON DUPLICATE KEY UPDATE`) to prevent race conditions during concurrent admissions.
+2. **`App\Services\AssessmentService`** ([AssessmentService.php](file:///c:/xampp/htdocs/sia/app/Services/AssessmentService.php)):
+   - Centralizes fee template lookup, lecture/lab unit rates calculation, and scholarship deductions.
+   - Creates immutable snapshot records in `assessment_items` to protect against historical fee mutations.
+   - Replaces duplicate multi-tier fallback queries across `FinanceController` and `ApplicantController` with `getAssessmentBreakdown()`.
+3. **`App\Services\EnrollmentService`** ([EnrollmentService.php](file:///c:/xampp/htdocs/sia/app/Services/EnrollmentService.php)):
+   - Coordinates the final onboarding transaction: verifies payment status (`payment_verified`), assigns student ID, provisions `@ttu.edu.ph` institutional email, sets `force_password_reset = 1`, enrolls subjects into section tables, and dispatches credentials via PHPMailer.
+
+---
+
+## 4. Guiding Rules for Modernization
 1. **Never Break Legacy Data Contracts:** The "Application as Term" relational structure and existing database schema must remain intact.
 2. **Controllers Own Business Logic:** Avoid abstracting SQL queries into complex ORM abstractions that hide query performance or alter parameter binding.
 3. **Repository Pattern for Cross-Tier Access:** When querying parallel academic tables (College vs. SHS), delegate to Repositories.

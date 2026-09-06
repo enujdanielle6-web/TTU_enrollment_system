@@ -8,7 +8,7 @@ The TTU system is organized into modular administrative, applicant, and academic
 * **Purpose:** Prospective and returning student onboarding, online registration, requirements uploading, health data submission, self-enrollment, and assessment viewing.
 * **Authorized Roles:** `applicant`
 * **Controllers:** [`ApplicantController`](file:///c:/xampp/htdocs/sia/app/Controllers/ApplicantController.php), [`EnrollController`](file:///c:/xampp/htdocs/sia/app/Controllers/EnrollController.php), [`DocumentController`](file:///c:/xampp/htdocs/sia/app/Controllers/DocumentController.php), [`HealthController`](file:///c:/xampp/htdocs/sia/app/Controllers/HealthController.php)
-* **Key Routes:** `/applicant/dashboard.php`, `/applicant/application_form.php`, `/applicant/health_info.php`, `/applicant/enroll.php`, `/applicant/assessment.php`
+* **Key Routes:** `/applicant/dashboard.php`, `/applicant/enroll.php`, `/applicant/status.php`, `/applicant/documents.php`, `/applicant/health_info.php`, `/applicant/assessment.php`
 
 ## 2. [[Admissions]]
 * **Purpose:** Intake processing, document review, acceptance/rejection, and automated student number / institutional email credential generation.

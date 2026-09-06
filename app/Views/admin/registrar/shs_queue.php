@@ -98,9 +98,18 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small">Needs Finalization</span>
                     </td>
                     <td class="pe-4 text-end">
-                      <a href="../admissions/application_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm">
-                        Finalize <i class="bi bi-arrow-right-short"></i>
-                      </a>
+                      <div class="d-inline-flex align-items-center gap-2">
+                        <a href="../admissions/application_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="View Details">
+                          <i class="bi bi-eye"></i>
+                        </a>
+                        <form method="POST" action="finalize_enrollment.php" class="d-inline" onsubmit="return confirm('Finalize official enrollment for this student? This will generate their student number, create institutional email, and send welcome credentials.');">
+                          <?= getCsrfInput() ?>
+                          <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
+                          <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                            <i class="bi bi-check-circle me-1"></i> Finalize
+                          </button>
+                        </form>
+                      </div>
                     </td>
                   </tr>
                 <?php endforeach; ?>

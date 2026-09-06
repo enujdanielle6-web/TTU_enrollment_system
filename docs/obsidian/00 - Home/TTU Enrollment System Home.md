@@ -40,7 +40,7 @@ This repository documentation maps out how the codebase, database, authenticatio
 ### 4. Database & Curriculum
 - **[[Database Overview]]**: The "Application as Term" concept and relational architecture.
 - **[[Entity Relationship Architecture]]**: High-level and domain-level Mermaid ER diagrams, cardinality, and foreign key topology.
-- **[[Data Dictionary]]**: Complete technical specifications for all 42 database tables and views.
+- **[[Data Dictionary]]**: Complete technical specifications for all 45 database tables and views.
 - **[[Curriculum Architecture]]**: College programs vs. SHS strands, versioning, and curriculum immutability.
 - **[[Users Table]]**: Identity root, roles enum, and OTP verification columns.
 - **[[Applications Table]]**: Lifecycle anchor and student enrollment state.
@@ -66,6 +66,12 @@ This repository documentation maps out how the codebase, database, authenticatio
 - **[[ADR-002 Strangler Fig Migration]]**: Incremental MVC modernization strategy.
 - **[[ADR-003 Hybrid SPA Navigation Design]]**: Dynamic HTML fragment swapping in the LMS.
 - **[[ADR-004 Hybrid Navigation Adversarial Audit]]**: Security analysis of SPA navigation.
+- **[[ADR-005 Curriculum Versioning and Subject Catalog Immutability]]**: 3-state curriculum lifecycle and catalog historical integrity.
+- **[[ADR-006 Deferred Account Creation via OTP]]**: Deferral of user record insertion until email OTP verification.
+- **[[ADR-007 NSTP Modular Curriculum Integration]]**: RA 9163 statutory compliance and track mapping.
+- **[[ADR-008 Authoritative Enrollment State Machine and Cashier Decoupling]]**: Separation of cashier verification from exclusive Registrar matriculation authority.
+- **[[ADR-009 Financial Immutability and Assessment Snapshots]]**: Frozen line-item breakdowns and atomic receipt sequencing.
+- **[[ADR-010 Domain Service Layer Extraction and Atomic Sequences]]**: Stateless domain service extraction and race-free sequence counters.
 
 ### 8. Page-to-Code Relationships & Dependency Maps
 - **[[00 - Master Relationship Index & Matrix]]**: Master mapping of every page, controller, route, view, table, and AJAX handler.
@@ -75,15 +81,23 @@ This repository documentation maps out how the codebase, database, authenticatio
 - **[[04 - Applicant Portal Relationship Map]]**: Trace for Dashboard, Application Form, Requirement Uploads, Health Info, Schedule Selection, and Assessment.
 - **[[05 - Admissions Admin Relationship Map]]**: Trace for Intake Queue, Document Verification, Section Assignment, and Credential Dispatch.
 - **[[06 - Clinic Admin Relationship Map]]**: Trace for Health Record Verification, Medical Conditions, and Clearance Gating.
-- **[[07 - Registrar Admin Relationship Map]]**: Trace for Masterlist CSV Export, Subjects Catalog, and College/SHS Curricula Builders.
+- **[[07 - Registrar Admin Relationship Map]]**: Trace for Masterlist CSV Export, Server-Side Pagination, Subjects Catalog, College/SHS Curricula Builders, and Enrollment Finalization.
 - **[[08 - Scheduler Admin Relationship Map]]**: Trace for Section Creation, Timetable Matrix, Room Assignments, and Conflict Detection.
-- **[[09 - Finance & Cashier Relationship Map]]**: Trace for Dynamic Assessment Math, Payment Verification, Auto-Enrollment Finalization, and OR Receipts.
+- **[[09 - Finance & Cashier Relationship Map]]**: Trace for Dynamic Assessment Math, Payment Verification, OR Receipts, and Financial Snapshots.
 - **[[10 - Scholarship Admin Relationship Map]]**: Trace for Grants Management, Application Reviews, and Assessment Discount Recalculation.
 - **[[11 - System Admin & Reports Relationship Map]]**: Trace for User Management, Audit Trail Snapshots, SQL Backup/Restore, System Settings, and CSV Reports.
 - **[[12 - LMS Student Portal Relationship Map]]**: Trace for Dynamic Dashboard, JIT Course Auto-Provisioning, Assignments, Quizzes, Attendance, and Gradebook.
 - **[[13 - LMS Faculty Portal Relationship Map]]**: Trace for Faculty Dashboard, Module Uploads, Assignment Grading, Quiz Authoring, and Attendance Logging.
 
+### 9. File-Level Technical Reference
+- **[[00 - File Reference Index]]**: Master developer index and standard file-level metadata documentation framework.
+- **[[01 - Controllers Reference]]**: Deep technical specifications for all 38 application controllers (methods, tables, roles, view chains).
+- **[[02 - Models Reference]]**: Complete documentation for all 10 active database models (`User`, `Application`, `StudentAssessment`, `HealthRecord`, `BaseModel`, etc.).
+- **[[03 - Services Reference]]**: In-depth specifications for all 9 core domain services (`StudentNumberService`, `AssessmentService`, `EnrollmentService`, and 6 LMS engine services).
+- **[[04 - Core & Middleware Reference]]**: Architectural contracts for the 6 core framework engines (`Router`, `Database`, `Request`, `Response`, `Session`, `View`) and 6 middleware security layers.
+- **[[05 - Views Catalog & Template Mapping]]**: Complete mapping of all 104 views across admin, applicant, auth, and LMS portals with layout and controller dependencies.
+
 ---
 
 ## High-Level System Summary
-The TTU system manages both **College** and **Senior High School (SHS)** students. It is a monolithic **Hybrid MVC** Vanilla PHP web application using MariaDB/MySQL (42 tables/views), Bootstrap 5, Chart.js, Vanilla JavaScript, and PHPMailer SMTP. The database acts as the single source of truth across administrative, applicant, and LMS domains.
+The TTU system manages both **College** and **Senior High School (SHS)** students. It is a monolithic **Hybrid MVC** Vanilla PHP web application using MariaDB/MySQL (45 tables/views), Bootstrap 5, Chart.js, Vanilla JavaScript, and PHPMailer SMTP. The database acts as the single source of truth across administrative, applicant, and LMS domains.

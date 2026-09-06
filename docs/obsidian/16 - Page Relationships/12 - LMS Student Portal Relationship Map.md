@@ -56,16 +56,21 @@ Renders accordion module viewer with download buttons pointing to:
 
 ---
 
-## 3. Assignment Submissions (`/lms/student/assignments.php`)
+## 3. Assignment Submissions (`/lms/student/course/{course_id}/assignments`)
 
 ### Page Identity
-- **File Path:** [`app/Views/lms/student/assignments.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/assignments.php)
-- **Controller:** [`app/Controllers/Lms/StudentAssignmentController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/StudentAssignmentController.php) (`index()`, `submit()`)
-- **Routes:** `GET /lms/student/assignments.php`, `POST /lms/student/assignment_submit.php`
+- **File Paths:**
+  - Index: [`app/Views/lms/student/assignments/index.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/assignments/index.php)
+  - Detail/Submission: [`app/Views/lms/student/assignments/show.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/assignments/show.php)
+- **Controller:** [`app/Controllers/Lms/StudentAssignmentController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/StudentAssignmentController.php) (`index()`, `show()`, `submit()`)
+- **Routes:**
+  - `GET /lms/student/course/{course_id}/assignments`
+  - `GET /lms/student/course/{course_id}/assignments/{id}`
+  - `POST /lms/student/course/{course_id}/assignments/{id}/submit`
 
 ### Tracing Chain & File Storage
 ```text
-POST /lms/student/assignment_submit.php (assignment_id, submission_text, submission_file)
+POST /lms/student/course/{course_id}/assignments/{id}/submit (submission_text, submission_file)
     ↓
 StudentAssignmentController@submit
     ↓
@@ -80,17 +85,28 @@ Database Operation:
     VALUES (?, ?, ?, ?, NOW())
     ON DUPLICATE KEY UPDATE file_path = VALUES(file_path), submission_text = VALUES(submission_text), submitted_at = NOW()
     ↓
-Redirect: /lms/student/assignments.php with success alert
+Redirect: /lms/student/course/{course_id}/assignments/{id} with success alert
 ```
 
 ---
 
-## 4. Timed Quiz Engine (`/lms/student/quizzes.php`)
+## 4. Timed Quiz Engine (`/lms/student/course/{course_id}/quizzes`)
 
 ### Page Identity
-- **File Path:** [`app/Views/lms/student/quizzes.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/quizzes.php)
-- **Controller:** [`app/Controllers/Lms/StudentQuizController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/StudentQuizController.php) (`index()`, `take()`, `submit()`)
+- **File Paths:**
+  - Quiz List: [`app/Views/lms/student/quizzes/index.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/quizzes/index.php)
+  - Quiz Overview: [`app/Views/lms/student/quizzes/show.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/quizzes/show.php)
+  - Quiz Taking / Timer: [`app/Views/lms/student/quizzes/attempt.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/quizzes/attempt.php)
+  - Results Breakdown: [`app/Views/lms/student/quizzes/result.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/quizzes/result.php)
+- **Controller:** [`app/Controllers/Lms/StudentQuizController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/StudentQuizController.php) (`index()`, `show()`, `start()`, `attempt()`, `submit()`, `result()`)
 - **Service:** [`app/Services/LmsQuizService.php`](file:///c:/xampp/htdocs/sia/app/Services/LmsQuizService.php)
+- **Routes:**
+  - `GET /lms/student/course/{course_id}/quizzes`
+  - `GET /lms/student/course/{course_id}/quizzes/{id}`
+  - `POST /lms/student/course/{course_id}/quizzes/{id}/start`
+  - `GET /lms/student/course/{course_id}/quizzes/{quiz_id}/attempt/{attempt_id}`
+  - `POST /lms/student/course/{course_id}/quizzes/{quiz_id}/attempt/{attempt_id}/submit`
+  - `GET /lms/student/course/{course_id}/quizzes/{quiz_id}/result/{attempt_id}`
 
 ### Execution Flow
 ```mermaid
@@ -101,26 +117,27 @@ sequenceDiagram
     participant Service as LmsQuizService
     participant DB as MariaDB (sia)
 
-    Student->>Controller: GET /lms/student/quiz_take.php?id={quiz_id}
+    Student->>Controller: POST /lms/student/course/{c_id}/quizzes/{id}/start
     Controller->>DB: INSERT INTO lms_quiz_attempts (lms_quiz_id, user_id, started_at)
-    Controller-->>Student: Render Quiz Modal with Countdown Timer JS
+    Controller-->>Student: Redirect /attempt/{attempt_id} with Countdown Timer JS
 
-    Student->>Controller: POST /lms/student/quiz_submit.php (attempt_id, answers[])
+    Student->>Controller: POST /lms/student/course/{c_id}/quizzes/{q_id}/attempt/{a_id}/submit (answers[])
     Controller->>Service: evaluateQuizAttempt($attemptId, $answers)
     Service->>DB: Fetch correct choices from lms_question_choices
     Service->>Service: Calculate Total Score & Check Passing Score
     Service->>DB: INSERT INTO lms_quiz_answers & UPDATE lms_quiz_attempts (score, completed_at, passed)
-    Controller-->>Student: Render Instant Score Breakdown Modal
+    Controller-->>Student: Redirect /result/{attempt_id} with Instant Score Breakdown
 ```
 
 ---
 
-## 5. Student Gradebook (`/lms/student/gradebook.php`)
+## 5. Student Gradebook (`/lms/student/course/{course_id}/gradebook`)
 
 ### Page Identity
-- **File Path:** [`app/Views/lms/student/gradebook.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/gradebook.php)
-- **Controller:** [`app/Controllers/Lms/StudentGradebookController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/StudentGradebookController.php)
+- **File Path:** [`app/Views/lms/student/gradebook/index.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/student/gradebook/index.php)
+- **Controller:** [`app/Controllers/Lms/StudentGradebookController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/StudentGradebookController.php) (`index()`)
 - **Service:** [`app/Services/LmsGradebookService.php`](file:///c:/xampp/htdocs/sia/app/Services/LmsGradebookService.php)
+- **Route:** `GET /lms/student/course/{course_id}/gradebook`
 
 ### Calculation Math
 Aggregates student scores across assignments (`lms_submissions.grade`) and quizzes (`lms_quiz_attempts.score`), computing term percentages and letter grades.

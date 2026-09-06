@@ -53,12 +53,6 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <div class="form-text">If closed, applicants cannot submit new enrollment forms.</div>
               </div>
 
-              <div class="mb-4">
-                <label for="college_cost_per_unit" class="form-label fw-semibold text-dark small">College Cost Per Unit (PHP)</label>
-                <input type="number" step="0.01" min="0" id="college_cost_per_unit" name="college_cost_per_unit" class="form-control bg-light" value="<?= htmlspecialchars($settings['college_cost_per_unit'] ?? '500.00', ENT_QUOTES, 'UTF-8') ?>" required>
-                <div class="form-text">Base rate multiplied by total enrolled units for college students.</div>
-              </div>
-
               <hr class="my-4 border-light">
               
               <button type="submit" class="btn btn-primary w-100 fw-medium shadow-sm">

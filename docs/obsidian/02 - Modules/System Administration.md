@@ -42,7 +42,6 @@ The **System Administration** module provides high-level control over institutio
 - Manages key-value pairs stored in `system_settings`:
   - `active_school_year`: E.g., `2026-2027`.
   - `enrollment_status`: `open` or `closed`.
-  - `college_cost_per_unit`: Default rate per unit for college tuition calculation.
 - **Broadcast Announcements:** Posts system-wide announcements (`announcements` table) with custom badge labels and color accents.
 
 ---

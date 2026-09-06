@@ -63,16 +63,27 @@ Redirect: /lms/faculty/course.php?id={course_id}
 
 ---
 
-## 3. Assignment Authoring & Submission Grading (`/lms/faculty/assignments.php`)
+## 3. Assignment Authoring & Submission Grading (`/lms/faculty/course/{course_id}/assignments`)
 
 ### Page Identity
-- **File Path:** [`app/Views/lms/faculty/assignments.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/assignments.php)
-- **Controller:** [`app/Controllers/Lms/FacultyAssignmentController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/FacultyAssignmentController.php) (`index()`, `create()`, `grade()`)
-- **Routes:** `GET /lms/faculty/assignments.php`, `POST /lms/faculty/assignment_create.php`, `POST /lms/faculty/grade_submission.php`
+- **File Paths:**
+  - Index: [`app/Views/lms/faculty/assignments/index.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/assignments/index.php)
+  - Create: [`app/Views/lms/faculty/assignments/create.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/assignments/create.php)
+  - Edit: [`app/Views/lms/faculty/assignments/edit.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/assignments/edit.php)
+  - Submissions & Grading: [`app/Views/lms/faculty/assignments/submissions.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/assignments/submissions.php)
+- **Controller:** [`app/Controllers/Lms/FacultyAssignmentController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/FacultyAssignmentController.php) (`index()`, `create()`, `store()`, `edit()`, `update()`, `submissions()`, `grade()`)
+- **Routes:**
+  - `GET /lms/faculty/course/{course_id}/assignments`
+  - `GET /lms/faculty/course/{course_id}/assignments/create`
+  - `POST /lms/faculty/course/{course_id}/assignments/store`
+  - `GET /lms/faculty/course/{course_id}/assignments/{id}/edit`
+  - `POST /lms/faculty/course/{course_id}/assignments/{id}/update`
+  - `GET /lms/faculty/course/{course_id}/assignments/{id}/submissions`
+  - `POST /lms/faculty/course/{course_id}/assignments/{id}/grade`
 
 ### Submission Grading Chain
 ```text
-POST /lms/faculty/grade_submission.php (submission_id, grade, feedback)
+POST /lms/faculty/course/{course_id}/assignments/{id}/grade (submission_id, grade, feedback)
     ↓
 FacultyAssignmentController@grade
     ↓
@@ -81,36 +92,59 @@ Validation: grade <= lms_assignments.max_points
 Database Operation:
     UPDATE lms_submissions SET grade = ?, feedback = ?, graded_at = NOW() WHERE id = ?
     ↓
-Redirect: /lms/faculty/assignments.php with toast notification
+Redirect: /lms/faculty/course/{course_id}/assignments/{id}/submissions with toast notification
 ```
 
 ---
 
-## 4. Quiz Authoring & Question Bank Engine (`/lms/faculty/quizzes.php`)
+## 4. Quiz Authoring & Question Bank Engine (`/lms/faculty/course/{course_id}/quizzes`)
 
 ### Page Identity
-- **File Path:** [`app/Views/lms/faculty/quizzes.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/quizzes.php)
-- **Controller:** [`app/Controllers/Lms/FacultyQuizController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/FacultyQuizController.php) (`index()`, `createQuiz()`, `addQuestion()`)
+- **File Paths:**
+  - Index: [`app/Views/lms/faculty/quizzes/index.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/quizzes/index.php)
+  - Create: [`app/Views/lms/faculty/quizzes/create.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/quizzes/create.php)
+  - Edit: [`app/Views/lms/faculty/quizzes/edit.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/quizzes/edit.php)
+  - Question Bank: [`app/Views/lms/faculty/quizzes/questions.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/quizzes/questions.php)
+  - Results Analysis: [`app/Views/lms/faculty/quizzes/results.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/quizzes/results.php)
+- **Controller:** [`app/Controllers/Lms/FacultyQuizController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/FacultyQuizController.php) (`index()`, `create()`, `store()`, `edit()`, `update()`, `questions()`, `storeQuestion()`, `results()`)
+- **Routes:**
+  - `GET /lms/faculty/course/{course_id}/quizzes`
+  - `GET /lms/faculty/course/{course_id}/quizzes/create`
+  - `POST /lms/faculty/course/{course_id}/quizzes/store`
+  - `GET /lms/faculty/course/{course_id}/quizzes/{id}/edit`
+  - `POST /lms/faculty/course/{course_id}/quizzes/{id}/update`
+  - `GET /lms/faculty/course/{course_id}/quizzes/{id}/questions`
+  - `POST /lms/faculty/course/{course_id}/quizzes/{id}/questions/store`
+  - `GET /lms/faculty/course/{course_id}/quizzes/{id}/results`
 
 ### Quiz Builder Tracing
 ```mermaid
 flowchart TD
-    Faculty[Faculty Instructor] -->|Create Quiz: title, duration, passing score| QForm[POST /lms/faculty/quiz_create.php]
-    QForm --> QController[FacultyQuizController@createQuiz]
+    Faculty[Faculty Instructor] -->|Create Quiz: title, duration, passing score| QForm[POST /lms/faculty/course/{c_id}/quizzes/store]
+    QForm --> QController[FacultyQuizController@store]
     QController --> DB1[INSERT INTO lms_quizzes]
-    DB1 --> QuestionUI[Interactive Question Authoring Modal]
-    QuestionUI -->|Add Question & Choices| DB2[INSERT INTO lms_questions]
+    DB1 --> QuestionUI[Redirect to /questions: Question Authoring Form]
+    QuestionUI -->|Add Question & Choices| DB2[POST /questions/store -> INSERT INTO lms_questions]
     DB2 --> DB3[INSERT INTO lms_question_choices is_correct=1/0]
     DB3 --> Published[Quiz Ready for Students]
 ```
 
 ---
 
-## 5. Attendance Session Logger (`/lms/faculty/attendance.php`)
+## 5. Attendance Session Logger (`/lms/faculty/course/{course_id}/attendance`)
 
 ### Page Identity
-- **File Path:** [`app/Views/lms/faculty/attendance.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/attendance.php)
-- **Controller:** [`app/Controllers/Lms/FacultyAttendanceController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/FacultyAttendanceController.php) (`index()`, `saveSession()`)
+- **File Paths:**
+  - Index: [`app/Views/lms/faculty/attendance/index.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/attendance/index.php)
+  - Create Session: [`app/Views/lms/faculty/attendance/create.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/attendance/create.php)
+  - Edit Session: [`app/Views/lms/faculty/attendance/edit.php`](file:///c:/xampp/htdocs/sia/app/Views/lms/faculty/attendance/edit.php)
+- **Controller:** [`app/Controllers/Lms/FacultyAttendanceController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/Lms/FacultyAttendanceController.php) (`index()`, `create()`, `store()`, `edit()`, `update()`)
+- **Routes:**
+  - `GET /lms/faculty/course/{course_id}/attendance`
+  - `GET /lms/faculty/course/{course_id}/attendance/create`
+  - `POST /lms/faculty/course/{course_id}/attendance/store`
+  - `GET /lms/faculty/course/{course_id}/attendance/{id}/edit`
+  - `POST /lms/faculty/course/{course_id}/attendance/{id}/update`
 
 ### Data Flow
 Creates records in `lms_attendance_sessions` and loops through class roster to insert `lms_attendance_records` (`present`, `late`, `absent`, `excused`).

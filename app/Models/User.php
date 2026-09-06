@@ -13,7 +13,7 @@ class User extends BaseModel
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'SELECT id, first_name, last_name, email, password, role, is_active, department, permissions
+            'SELECT id, first_name, last_name, email, password, role, is_active, department, permissions, email_verified, force_password_reset
              FROM users
              WHERE email = :email
              LIMIT 1'

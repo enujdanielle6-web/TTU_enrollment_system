@@ -723,15 +723,52 @@ require_once __DIR__ . '/../components/header.php';
 <script src="/sia/public/vendor/sweetalert2/sweetalert2.all.min.js"></script>
 <script>
   $(function () {
-
-
     $('#enrollmentForm').on('submit', function (event) {
       var form = this;
       if (!form.checkValidity()) {
         event.preventDefault();
         event.stopPropagation();
+        $(form).addClass('was-validated');
+
+        // Locate first invalid field
+        var firstInvalid = form.querySelector(':invalid');
+        if (firstInvalid) {
+          var stepContainer = firstInvalid.closest('.wizard-step');
+          if (stepContainer && typeof window.goToWizardStep === 'function') {
+            var stepNum = parseInt(stepContainer.id.replace('step-', ''), 10);
+            if (!isNaN(stepNum)) {
+              window.goToWizardStep(stepNum);
+            }
+          }
+
+          setTimeout(function () {
+            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstInvalid.focus({ preventScroll: true });
+            $(firstInvalid).addClass('is-invalid');
+          }, 250);
+
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'warning',
+              title: 'Required Information Missing',
+              text: 'Please review and fill in all required fields before submitting.',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3500,
+              timerProgressBar: true
+            });
+          }
+        }
+        return false;
       }
-      $(form).addClass('was-validated');
+
+      // Valid submission: debounce submit button to prevent double-submissions
+      var submitBtn = document.getElementById('finalSubmitBtn');
+      if (submitBtn && !submitBtn.disabled) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting Application...';
+      }
     });
   });
 </script>
@@ -1670,6 +1707,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
+  
+  // Expose step navigation globally for validation scroll-to-error redirection
+  window.goToWizardStep = function(step) {
+    if (step >= 1 && step <= totalSteps) {
+      currentStep = step;
+      updateWizardUI();
+    }
+  };
   
   // Next Button Handler
   document.querySelectorAll('.btn-next').forEach(btn => {

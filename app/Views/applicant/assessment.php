@@ -119,9 +119,14 @@ require_once __DIR__ . '/../components/header.php';
             <div class="col-lg-7">
               <?php if (!empty($enrolledSubjects)): ?>
               <div class="island mb-4">
-                <div class="island-header">
-                  <i class="bi bi-journal-text"></i>
-                  <h2>Curriculum Subjects & Units</h2>
+                <div class="island-header d-flex justify-content-between align-items-center">
+                  <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-journal-text"></i>
+                    <h2 class="mb-0">Curriculum Subjects & Units</h2>
+                  </div>
+                  <?php if (!empty($assessmentItems)): ?>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle small"><i class="bi bi-shield-check me-1"></i>Official Assessed Snapshot</span>
+                  <?php endif; ?>
                 </div>
                 <div class="island-body p-0">
                   <div class="table-responsive">
@@ -159,8 +164,11 @@ require_once __DIR__ . '/../components/header.php';
               <?php endif; ?>
 
               <div class="island minimal-card mb-4">
-                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3">
+                <div class="island-header bg-transparent border-bottom px-4 pt-4 pb-3 d-flex justify-content-between align-items-center">
                   <h2 class="mb-0 fs-5 fw-bold text-dark"><i class="bi bi-receipt me-2 text-primary"></i>Fee Breakdown</h2>
+                  <?php if (!empty($assessmentItems)): ?>
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle small"><i class="bi bi-lock-fill me-1"></i>Locked Snapshot</span>
+                  <?php endif; ?>
                 </div>
                 <div class="island-body p-0">
                   <ul class="list-group list-group-flush border-0">

@@ -1,25 +1,51 @@
 <?php
 require_once __DIR__ . '/../../components/header.php';
 
-$totalCount = count($students);
-$collegeCount = 0;
-$shsCount = 0;
-$enrolledCount = 0;
-$approvedCount = 0;
+// Global KPI counts passed from RegistrarController:
+$totalCount = $totalCount ?? 0;
+$collegeCount = $collegeCount ?? 0;
+$shsCount = $shsCount ?? 0;
+$enrolledCount = $enrolledCount ?? 0;
+$approvedCount = $approvedCount ?? 0;
+$programCount = count($programs ?? []);
 
-foreach ($students as $s) {
-    if (($s['academic_level'] ?? '') === 'College') {
-        $collegeCount++;
-    } elseif (($s['academic_level'] ?? '') === 'Senior High School') {
-        $shsCount++;
-    }
-    if (($s['status'] ?? '') === 'enrolled') {
-        $enrolledCount++;
-    } elseif (($s['status'] ?? '') === 'approved') {
-        $approvedCount++;
-    }
-}
-$programCount = count($programs);
+// Pagination variables
+$page = $page ?? 1;
+$perPage = $perPage ?? 25;
+$totalPages = $totalPages ?? 1;
+$totalFiltered = $totalFiltered ?? count($students ?? []);
+$startRecord = $startRecord ?? ($totalFiltered > 0 ? 1 : 0);
+$endRecord = $endRecord ?? count($students ?? []);
+
+// Active filter state
+$curSearch = $filters['search'] ?? '';
+$curLevel = $filters['level'] ?? 'all';
+$curGrade = $filters['grade'] ?? 'all';
+$curStrand = $filters['strand'] ?? 'all';
+$curStatus = $filters['status'] ?? 'all';
+
+$buildPageUrl = function($p, $pp = null) use ($filters, $perPage) {
+    $params = $filters;
+    $params['page'] = $p;
+    $params['per_page'] = $pp ?? $perPage;
+    return 'students.php?' . http_build_query($params);
+};
+
+$activeSummaries = [];
+if ($curLevel !== 'all' && $curLevel !== '') $activeSummaries[] = 'Level: ' . $curLevel;
+if ($curGrade !== 'all' && $curGrade !== '') $activeSummaries[] = 'Grade: ' . $curGrade;
+if ($curStrand !== 'all' && $curStrand !== '') $activeSummaries[] = 'Program: ' . strtoupper($curStrand);
+if ($curStatus !== 'all' && $curStatus !== '') $activeSummaries[] = 'Status: ' . strtoupper($curStatus);
+if ($curSearch !== '') $activeSummaries[] = 'Search: "' . $curSearch . '"';
+$activeScopeText = !empty($activeSummaries) ? implode(' • ', $activeSummaries) : 'All Departments • All Programs • All Statuses';
+
+$exportQuery = http_build_query([
+    'search' => $curSearch,
+    'level' => $curLevel,
+    'grade' => $curGrade,
+    'strand' => $curStrand,
+    'status' => $curStatus
+]);
 ?>
 
 <style>
@@ -253,10 +279,10 @@ $programCount = count($programs);
             <strong>Date Generated:</strong> <?= date('F j, Y — h:i A') ?>
           </div>
           <div class="col-4 text-center">
-            <strong>Scope / Filter:</strong> <span id="printFilterScope">All Departments • All Programs • All Statuses</span>
+            <strong>Scope / Filter:</strong> <span id="printFilterScope"><?= htmlspecialchars($activeScopeText, ENT_QUOTES, 'UTF-8') ?></span>
           </div>
           <div class="col-4 text-end">
-            <strong>Total Records:</strong> <span id="printRecordCount"><?= $totalCount ?></span> Active Students
+            <strong>Total Records:</strong> <span id="printRecordCount"><?= number_format($totalFiltered) ?></span> Active Students (Page <?= $page ?> of <?= $totalPages ?>)
           </div>
         </div>
       </div>
@@ -276,7 +302,7 @@ $programCount = count($programs);
           </tr>
         </thead>
         <tbody id="printTableBody">
-          <?php $idx = 1; foreach ($students as $student): ?>
+          <?php $idx = $startRecord; foreach ($students as $student): ?>
             <?php
               $idDisplay = !empty($student['student_number']) ? $student['student_number'] : (!empty($student['lrn']) ? $student['lrn'] : $student['reference_number']);
               $fullName = $student['last_name'] . ', ' . $student['first_name'];
@@ -346,7 +372,7 @@ $programCount = count($programs);
           <p class="text-muted mb-0">Live roster of all officially enrolled and approved students across academic departments.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
-          <a href="students_export.php" id="csvExportBtn" class="btn btn-outline-success fw-semibold shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center">
+          <a href="students_export.php?<?= $exportQuery ?>" id="csvExportBtn" class="btn btn-outline-success fw-semibold shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center">
             <i class="bi bi-file-earmark-excel-fill me-2 fs-5"></i> Export CSV
           </a>
           <button type="button" onclick="triggerMasterlistPrint()" class="btn btn-primary fw-semibold shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center">
@@ -414,77 +440,88 @@ $programCount = count($programs);
       <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
         <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 3px;"></div>
         <div class="island-body p-3 p-lg-4">
-          <div class="row g-3 align-items-center">
-            
-            <div class="col-12 col-md-3">
-              <label class="form-label small fw-bold text-muted text-uppercase mb-1">Search Student</label>
-              <div class="input-group">
-                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                <input type="text" id="searchName" class="form-control border-start-0 ps-0" placeholder="Name, Student No, or LRN...">
+          <form method="GET" action="students.php" id="filterForm">
+            <input type="hidden" name="page" value="1">
+            <input type="hidden" name="per_page" id="formPerPage" value="<?= esc($perPage) ?>">
+
+            <div class="row g-3 align-items-center">
+              
+              <div class="col-12 col-md-3">
+                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Search Student</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                  <input type="text" name="search" id="searchName" class="form-control border-start-0 ps-0" placeholder="Name, Student No, or LRN..." value="<?= esc($curSearch) ?>">
+                </div>
               </div>
-            </div>
 
-            <div class="col-6 col-md-2">
-              <label class="form-label small fw-bold text-muted text-uppercase mb-1">Level</label>
-              <select id="filterLevel" class="form-select">
-                <option value="all">All Levels</option>
-                <option value="Senior High School">Senior High School</option>
-                <option value="College">College</option>
-              </select>
-            </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Level</label>
+                <select name="level" id="filterLevel" class="form-select" onchange="this.form.submit()">
+                  <option value="all" <?= $curLevel === 'all' ? 'selected' : '' ?>>All Levels</option>
+                  <option value="Senior High School" <?= $curLevel === 'Senior High School' ? 'selected' : '' ?>>Senior High School</option>
+                  <option value="College" <?= $curLevel === 'College' ? 'selected' : '' ?>>College</option>
+                </select>
+              </div>
 
-            <div class="col-6 col-md-2">
-              <label class="form-label small fw-bold text-muted text-uppercase mb-1">Grade / Year</label>
-              <select id="filterGrade" class="form-select">
-                <option value="all">All Grades/Years</option>
-                <option value="Grade 11">Grade 11</option>
-                <option value="Grade 12">Grade 12</option>
-                <option value="1st Year">1st Year</option>
-                <option value="2nd Year">2nd Year</option>
-                <option value="3rd Year">3rd Year</option>
-                <option value="4th Year">4th Year</option>
-              </select>
-            </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Grade / Year</label>
+                <select name="grade" id="filterGrade" class="form-select" onchange="this.form.submit()">
+                  <option value="all" <?= $curGrade === 'all' ? 'selected' : '' ?>>All Grades/Years</option>
+                  <option value="Grade 11" <?= $curGrade === 'Grade 11' ? 'selected' : '' ?>>Grade 11</option>
+                  <option value="Grade 12" <?= $curGrade === 'Grade 12' ? 'selected' : '' ?>>Grade 12</option>
+                  <option value="1st Year" <?= $curGrade === '1st Year' ? 'selected' : '' ?>>1st Year</option>
+                  <option value="2nd Year" <?= $curGrade === '2nd Year' ? 'selected' : '' ?>>2nd Year</option>
+                  <option value="3rd Year" <?= $curGrade === '3rd Year' ? 'selected' : '' ?>>3rd Year</option>
+                  <option value="4th Year" <?= $curGrade === '4th Year' ? 'selected' : '' ?>>4th Year</option>
+                </select>
+              </div>
 
-            <div class="col-6 col-md-2">
-              <label class="form-label small fw-bold text-muted text-uppercase mb-1">Program / Strand</label>
-              <select id="filterStrand" class="form-select">
-                <option value="all">All Programs</option>
-                <?php foreach ($programs as $prog): ?>
-                  <option value="<?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?>">
-                    <?= htmlspecialchars(strtoupper($prog['code']), ENT_QUOTES, 'UTF-8') ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Program / Strand</label>
+                <select name="strand" id="filterStrand" class="form-select" onchange="this.form.submit()">
+                  <option value="all" <?= $curStrand === 'all' ? 'selected' : '' ?>>All Programs</option>
+                  <?php foreach ($programs as $prog): ?>
+                    <option value="<?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?>" <?= strtolower($curStrand) === strtolower($prog['code']) ? 'selected' : '' ?>>
+                      <?= htmlspecialchars(strtoupper($prog['code']), ENT_QUOTES, 'UTF-8') ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+              </div>
 
-            <div class="col-6 col-md-2">
-              <label class="form-label small fw-bold text-muted text-uppercase mb-1">Status</label>
-              <select id="filterStatus" class="form-select">
-                <option value="all">All Statuses</option>
-                <option value="enrolled">Officially Enrolled</option>
-                <option value="approved">Approved</option>
-                <option value="under_review">Under Review</option>
-                <option value="pending">Pending</option>
-                <option value="correction_required">Correction Required</option>
-              </select>
-            </div>
+              <div class="col-6 col-md-2">
+                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Status</label>
+                <select name="status" id="filterStatus" class="form-select" onchange="this.form.submit()">
+                  <option value="all" <?= $curStatus === 'all' ? 'selected' : '' ?>>All Statuses</option>
+                  <option value="enrolled" <?= $curStatus === 'enrolled' ? 'selected' : '' ?>>Officially Enrolled</option>
+                  <option value="approved" <?= $curStatus === 'approved' ? 'selected' : '' ?>>Approved</option>
+                  <option value="under_review" <?= $curStatus === 'under_review' ? 'selected' : '' ?>>Under Review</option>
+                  <option value="pending" <?= $curStatus === 'pending' ? 'selected' : '' ?>>Pending</option>
+                  <option value="correction_required" <?= $curStatus === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
+                </select>
+              </div>
 
-            <div class="col-12 col-md-1 d-flex align-items-end">
-              <button type="button" id="btnResetFilters" class="btn btn-outline-secondary w-100" title="Reset All Filters">
-                <i class="bi bi-arrow-counterclockwise"></i>
-              </button>
-            </div>
+              <div class="col-12 col-md-1 d-flex align-items-end gap-1">
+                <button type="submit" class="btn btn-primary w-50" title="Apply Filters">
+                  <i class="bi bi-funnel-fill"></i>
+                </button>
+                <a href="students.php" id="btnResetFilters" class="btn btn-outline-secondary w-50" title="Reset All Filters">
+                  <i class="bi bi-arrow-counterclockwise"></i>
+                </a>
+              </div>
 
-          </div>
+            </div>
+          </form>
 
           <!-- Active Filter Status Indicator -->
           <div class="d-flex align-items-center justify-content-between mt-3 pt-3 border-top small text-muted">
             <div>
-              <i class="bi bi-funnel text-primary me-1"></i> Showing <strong id="visibleCount" class="text-dark"><?= $totalCount ?></strong> of <?= $totalCount ?> students
+              <i class="bi bi-funnel text-primary me-1"></i> Showing <strong id="visibleCount" class="text-dark"><?= $startRecord ?>–<?= $endRecord ?></strong> of <strong class="text-dark"><?= number_format($totalFiltered) ?></strong> students
+              <?php if ($totalFiltered < $totalCount): ?>
+                <span class="text-muted fst-italic ms-1">(filtered from <?= number_format($totalCount) ?> total)</span>
+              <?php endif; ?>
             </div>
             <div id="filterSummaryText" class="text-truncate ps-2 fst-italic">
-              Showing all records
+              <?= htmlspecialchars(!empty($activeSummaries) ? 'Active filters: ' . $activeScopeText : 'Showing all records', ENT_QUOTES, 'UTF-8') ?>
             </div>
           </div>
 
@@ -531,7 +568,7 @@ $programCount = count($programs);
                     </td>
                   </tr>
                   <?php 
-                    $rowNum = 1; 
+                    $rowNum = $startRecord; 
                     $avatarColors = [
                       'bg-primary bg-opacity-10 text-primary',
                       'bg-success bg-opacity-10 text-success',
@@ -635,6 +672,89 @@ $programCount = count($programs);
               </tbody>
             </table>
           </div>
+
+          <!-- Server-Side Pagination Bar -->
+          <div class="d-flex flex-column flex-md-row align-items-center justify-content-between p-3 p-lg-4 border-top gap-3">
+            <div class="d-flex align-items-center gap-3">
+              <span class="small text-muted">
+                Showing <strong class="text-dark"><?= $startRecord ?></strong> to <strong class="text-dark"><?= $endRecord ?></strong> of <strong class="text-dark"><?= number_format($totalFiltered) ?></strong> students
+                <?php if ($totalFiltered < $totalCount): ?>
+                  <span class="text-muted fst-italic">(filtered from <?= number_format($totalCount) ?> total)</span>
+                <?php endif; ?>
+              </span>
+              <div class="d-flex align-items-center gap-2 border-start ps-3">
+                <label for="perPageSelector" class="small text-muted text-nowrap mb-0">Records per page:</label>
+                <select id="perPageSelector" class="form-select form-select-sm" style="width: 85px;" onchange="window.location.href = '<?= $buildPageUrl(1) ?>&per_page=' + this.value">
+                  <option value="25" <?= $perPage === 25 ? 'selected' : '' ?>>25</option>
+                  <option value="50" <?= $perPage === 50 ? 'selected' : '' ?>>50</option>
+                  <option value="100" <?= $perPage === 100 ? 'selected' : '' ?>>100</option>
+                </select>
+              </div>
+            </div>
+
+            <?php if ($totalPages > 1): ?>
+              <nav aria-label="Student records pagination">
+                <ul class="pagination pagination-sm mb-0 gap-1">
+                  <!-- First Page -->
+                  <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl(1) ?>" title="First Page">
+                      <i class="bi bi-chevron-double-left"></i>
+                    </a>
+                  </li>
+                  <!-- Previous Page -->
+                  <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl(max(1, $page - 1)) ?>" title="Previous Page">
+                      <i class="bi bi-chevron-left"></i>
+                    </a>
+                  </li>
+
+                  <!-- Numbered Pages -->
+                  <?php
+                    $startP = max(1, $page - 2);
+                    $endP = min($totalPages, $page + 2);
+                    if ($startP > 1): ?>
+                      <li class="page-item">
+                        <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl(1) ?>">1</a>
+                      </li>
+                      <?php if ($startP > 2): ?>
+                        <li class="page-item disabled"><span class="page-link border-0">...</span></li>
+                      <?php endif; ?>
+                    <?php endif; ?>
+
+                    <?php for ($p = $startP; $p <= $endP; $p++): ?>
+                      <li class="page-item <?= $p === $page ? 'active' : '' ?>">
+                        <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl($p) ?>">
+                          <?= $p ?>
+                        </a>
+                      </li>
+                    <?php endfor; ?>
+
+                    <?php if ($endP < $totalPages): ?>
+                      <?php if ($endP < $totalPages - 1): ?>
+                        <li class="page-item disabled"><span class="page-link border-0">...</span></li>
+                      <?php endif; ?>
+                      <li class="page-item">
+                        <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl($totalPages) ?>"><?= $totalPages ?></a>
+                      </li>
+                    <?php endif; ?>
+
+                  <!-- Next Page -->
+                  <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl(min($totalPages, $page + 1)) ?>" title="Next Page">
+                      <i class="bi bi-chevron-right"></i>
+                    </a>
+                  </li>
+                  <!-- Last Page -->
+                  <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl($totalPages) ?>" title="Last Page">
+                      <i class="bi bi-chevron-double-right"></i>
+                    </a>
+                  </li>
+                </ul>
+              </nav>
+            <?php endif; ?>
+          </div>
+
         </div>
       </div>
 
@@ -645,123 +765,6 @@ $programCount = count($programs);
 </main>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchName = document.getElementById('searchName');
-    const filterLevel = document.getElementById('filterLevel');
-    const filterGrade = document.getElementById('filterGrade');
-    const filterStrand = document.getElementById('filterStrand');
-    const filterStatus = document.getElementById('filterStatus');
-    const btnResetFilters = document.getElementById('btnResetFilters');
-    const csvExportBtn = document.getElementById('csvExportBtn');
-    
-    const rows = document.querySelectorAll('.student-row');
-    const printRows = document.querySelectorAll('.print-row');
-    const emptyRow = document.getElementById('emptyRow');
-    const visibleCountEl = document.getElementById('visibleCount');
-    const filterSummaryText = document.getElementById('filterSummaryText');
-    
-    const printFilterScope = document.getElementById('printFilterScope');
-    const printRecordCount = document.getElementById('printRecordCount');
- 
-    function filterTable() {
-        const query = searchName ? searchName.value.toLowerCase().trim() : '';
-        const level = filterLevel ? filterLevel.value : 'all';
-        const grade = filterGrade ? filterGrade.value : 'all';
-        const strand = filterStrand ? filterStrand.value : 'all';
-        const status = filterStatus ? filterStatus.value : 'all';
-        let visibleCount = 0;
- 
-        // Filter Screen Rows
-        rows.forEach(row => {
-            const rowData = row.dataset.name || '';
-            const searchMatch = query === '' || rowData.includes(query);
-            const levelMatch = level === 'all' || row.dataset.level === level;
-            const gradeMatch = grade === 'all' || row.dataset.grade === grade;
-            const strandMatch = strand === 'all' || (row.dataset.strand || '').toLowerCase() === strand.toLowerCase();
-            const statusMatch = status === 'all' || row.dataset.status === status;
- 
-            if (searchMatch && levelMatch && gradeMatch && strandMatch && statusMatch) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
-            }
-        });
-
-        // Synchronize Print Rows
-        let printIdx = 1;
-        printRows.forEach(pRow => {
-            const rowData = pRow.dataset.name || '';
-            const searchMatch = query === '' || rowData.includes(query);
-            const levelMatch = level === 'all' || pRow.dataset.level === level;
-            const gradeMatch = grade === 'all' || pRow.dataset.grade === grade;
-            const strandMatch = strand === 'all' || (pRow.dataset.strand || '').toLowerCase() === strand.toLowerCase();
-            const statusMatch = status === 'all' || pRow.dataset.status === status;
-
-            if (searchMatch && levelMatch && gradeMatch && strandMatch && statusMatch) {
-                pRow.style.display = '';
-                const numCell = pRow.querySelector('td:first-child');
-                if (numCell) numCell.textContent = printIdx++;
-            } else {
-                pRow.style.display = 'none';
-            }
-        });
- 
-        if (emptyRow && rows.length > 0) {
-            emptyRow.style.display = visibleCount === 0 ? '' : 'none';
-        }
-
-        if (visibleCountEl) {
-            visibleCountEl.textContent = visibleCount;
-        }
-        if (printRecordCount) {
-            printRecordCount.textContent = visibleCount;
-        }
-
-        // Summary Scope Description
-        const scopeParts = [];
-        if (level !== 'all') scopeParts.push('Level: ' + level);
-        if (grade !== 'all') scopeParts.push('Grade/Year: ' + grade);
-        if (strand !== 'all') scopeParts.push('Program: ' + strand.toUpperCase());
-        if (status !== 'all') scopeParts.push('Status: ' + status.toUpperCase());
-        if (query !== '') scopeParts.push('Search: "' + query + '"');
-
-        const scopeString = scopeParts.length > 0 ? scopeParts.join(' • ') : 'All Departments • All Programs • All Statuses';
-        
-        if (filterSummaryText) {
-            filterSummaryText.textContent = scopeParts.length > 0 ? 'Active filters: ' + scopeString : 'Showing all records';
-        }
-        if (printFilterScope) {
-            printFilterScope.textContent = scopeString;
-        }
-
-        // Dynamically build the CSV Export query string parameters matching active filters
-        if (csvExportBtn) {
-            csvExportBtn.href = `students_export.php?search=${encodeURIComponent(query)}&level=${encodeURIComponent(level)}&grade=${encodeURIComponent(grade)}&strand=${encodeURIComponent(strand)}&status=${encodeURIComponent(status)}`;
-        }
-    }
- 
-    if (searchName) searchName.addEventListener('input', filterTable);
-    if (filterLevel) filterLevel.addEventListener('change', filterTable);
-    if (filterGrade) filterGrade.addEventListener('change', filterTable);
-    if (filterStrand) filterStrand.addEventListener('change', filterTable);
-    if (filterStatus) filterStatus.addEventListener('change', filterTable);
-
-    if (btnResetFilters) {
-        btnResetFilters.addEventListener('click', function() {
-            if (searchName) searchName.value = '';
-            if (filterLevel) filterLevel.value = 'all';
-            if (filterGrade) filterGrade.value = 'all';
-            if (filterStrand) filterStrand.value = 'all';
-            if (filterStatus) filterStatus.value = 'all';
-            filterTable();
-        });
-    }
-
-    // Run filter immediately to set CSV Export link values on page load
-    filterTable();
-});
-
 function triggerMasterlistPrint() {
     window.print();
 }

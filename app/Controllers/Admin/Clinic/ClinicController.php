@@ -111,10 +111,12 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
     public function process(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/admin/clinic/medical_clearance.php");
-    return;
-}
+        requirePermission('medical.review');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $response->redirect("/sia/admin/clinic/medical_clearance.php");
+            return;
+        }
 
 
 

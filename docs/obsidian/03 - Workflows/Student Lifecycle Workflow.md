@@ -10,8 +10,8 @@ This document outlines the complete, end-to-end operational lifecycle of a stude
 flowchart TD
     subgraph Phase 1: Onboarding & Identity
         A1[1. Public Registration: /auth/register.php] --> A2[2. 6-Digit Email OTP Verification: /auth/verify_email.php]
-        A2 --> A3[3. Admission Application Form: /applicant/application_form.php]
-        A3 --> A4[4. Document Requirements Upload: /applicant/requirements.php]
+        A2 --> A3[3. Admission Application Form: /applicant/enroll.php]
+        A3 --> A4[4. Document Requirements Upload: /applicant/documents.php]
         A4 --> A5[5. Health Information Submission: /applicant/health_info.php]
     end
 
@@ -24,15 +24,15 @@ flowchart TD
 
     subgraph Phase 3: Academic Enrollment & Assessment
         C1 -->|Yes| D1[8. Subject Schedule & Section Selection: /applicant/enroll.php]
-        D1 --> D2[9. Dynamic Tuition Assessment: student_assessments]
-        D2 --> D3[10. Payment / Proof Upload & Cashier Verification: /admin/finance/]
+        D1 --> D2[9. AssessmentService Freezes assessment_items Snapshots]
+        D2 --> D3[10. Cashier Verifies Payment: applications.status = payment_verified]
     end
 
-    subgraph Phase 4: Final Admission & LMS Provisioning
-        D3 --> E1[11. Admissions Finalizes Enrollment: applications.status = enrolled]
-        E1 --> E2[12. Auto-Generate Student ID & Institutional TTU Email]
-        E2 --> E3[13. Dispatch Welcome Credentials Email: sendStudentCredentialsEmail]
-        E3 --> E4[14. Auto-Provision LMS Courses: College & SHS Repositories]
+    subgraph Phase 4: Registrar Final Admission & Credential Provisioning
+        D3 --> E1[11. Registrar Finalizes Enrollment: /admin/registrar/finalize_enrollment.php]
+        E1 --> E2[12. StudentNumberService Generates Atomic ID & TTU Email]
+        E2 --> E3[13. Dispatch Welcome Credentials Email & Set force_password_reset = 1]
+        E3 --> E4[14. Auto-Provision Subject Enrollments & LMS Courses]
     end
 
     subgraph Phase 5: LMS Academic Delivery

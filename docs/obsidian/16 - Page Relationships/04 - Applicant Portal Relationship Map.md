@@ -30,33 +30,34 @@ Renders: app/Views/applicant/dashboard.php with Step Progress Bar (1 to 5)
 
 ---
 
-## 2. Application Form (`/applicant/application_form.php`)
+## 2. Online Application Wizard (`/applicant/enroll.php`)
 
 ### Page Identity
-- **File Path:** [`app/Views/applicant/application_form.php`](file:///c:/xampp/htdocs/sia/app/Views/applicant/application_form.php)
-- **Controller:** [`app/Controllers/ApplicantController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/ApplicantController.php) (`form()`, `saveForm()`)
-- **Routes:** `GET /applicant/application_form.php`, `POST /applicant/application_form.php`
+- **File Path:** [`app/Views/applicant/enroll.php`](file:///c:/xampp/htdocs/sia/app/Views/applicant/enroll.php)
+- **Controller:** [`app/Controllers/EnrollController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/EnrollController.php) (`showForm()`, `processForm()`)
+- **Routes:** `GET /applicant/enroll.php`, `POST /applicant/enroll_process.php`
 
 ### Tracing Chain & Data Flow
 ```text
-POST /applicant/application_form.php (academic_level, strand/program, grade_level, demographics, LRN, address, guardian)
+POST /applicant/enroll_process.php (academic_level, strand/program, grade_level, demographics, LRN, address, guardian, irregular subjects)
     ↓
-ApplicantController@saveForm
+EnrollController@processForm
     ↓
-Validation:
+Validation & Debouncing:
     ├── validateLRN($lrn) -> 12 numeric digits
     ├── validatePHPhone($contact) -> 11 digits starting with 09
-    └── Required fields check
+    └── Step validation auto-navigation & submit button debouncing
     ↓
 Generate Unique Ref Number: generateReferenceNumber() -> e.g. "APP-2026-0012"
     ↓
-Database Operation:
-    ├── [IF NEW]: PDO INSERT INTO applications (user_id, reference_number, academic_level, grade_level, school_year, semester, strand, status, ...)
+Database Transaction (Atomic PDO):
+    ├── [IF NEW]: PDO INSERT INTO applications (user_id, reference_number, academic_level, grade_level, school_year, semester, strand, nstp, status, ...)
+    ├── [IF IRREGULAR]: PDO INSERT INTO application_subject_requests (application_id, subject_id)
     └── [IF EDIT]: PDO UPDATE applications SET ... WHERE id = ?
     ↓
 logActivity($userId, 'Application Submitted', 'Submitted application form for ' . $academicLevel)
     ↓
-Redirect: /applicant/documents.php
+Redirect: /applicant/status.php (or /applicant/documents.php)
 ```
 
 ---
@@ -65,12 +66,12 @@ Redirect: /applicant/documents.php
 
 ### Page Identity
 - **File Path:** [`app/Views/applicant/documents.php`](file:///c:/xampp/htdocs/sia/app/Views/applicant/documents.php)
-- **Controller:** [`app/Controllers/DocumentController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/DocumentController.php) (`index()`, `upload()`)
-- **Routes:** `GET /applicant/documents.php`, `POST /applicant/documents_upload.php`
+- **Controller:** [`app/Controllers/DocumentController.php`](file:///c:/xampp/htdocs/sia/app/Controllers/DocumentController.php) (`index()`, `upload()`, `workflow()`)
+- **Routes:** `GET /applicant/documents.php`, `POST /applicant/document_upload.php`, `POST /applicant/document_workflow.php`
 
 ### Tracing Chain & File Storage
 ```text
-POST /applicant/documents_upload.php (multipart/form-data: document_name, document_file)
+POST /applicant/document_upload.php (multipart/form-data: document_name, document_file)
     ↓
 DocumentController@upload
     ↓

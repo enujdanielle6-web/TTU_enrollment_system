@@ -319,7 +319,7 @@ class DocumentController extends BaseController
                 return;
             }
 
-            $filepath = __DIR__ . '/../../../uploads/documents/' . basename($document['file_path']);
+            $filepath = dirname(__DIR__, 2) . '/uploads/documents/' . basename($document['file_path']);
 
             if (!file_exists($filepath)) {
                 $response->setStatusCode(404);

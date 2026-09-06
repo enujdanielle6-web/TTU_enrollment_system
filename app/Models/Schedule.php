@@ -29,9 +29,9 @@ class Schedule
         if (!empty($conditions)) {
             $where = implode(' OR ', $conditions);
             if ($academicLevel === 'Senior High School') {
-                $offStmt = $pdo->prepare("SELECT id, subject_id, day, start_time, end_time, capacity FROM shs_section_subjects WHERE $where");
+                $offStmt = $pdo->prepare("SELECT id, shs_section_id as section_id, subject_id, day, start_time, end_time, capacity FROM shs_section_subjects WHERE $where");
             } else {
-                $offStmt = $pdo->prepare("SELECT id, subject_id, day, start_time, end_time, capacity FROM college_section_subjects WHERE $where");
+                $offStmt = $pdo->prepare("SELECT id, college_section_id as section_id, subject_id, day, start_time, end_time, capacity FROM college_section_subjects WHERE $where");
             }
             $offStmt->execute($params);
             $offerings = $offStmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -49,7 +49,7 @@ class Schedule
         }
         
         foreach ($offerings as $off) {
-            $capStmt->execute([$off['id'], $off['subject_id']]);
+            $capStmt->execute([$off['section_id'], $off['subject_id']]);
             $enrolledCount = (int)$capStmt->fetchColumn();
             if ($enrolledCount >= (int)$off['capacity']) {
                 $errors[] = "Schedule #{$off['id']} has reached its maximum capacity.";

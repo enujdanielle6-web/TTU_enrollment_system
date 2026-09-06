@@ -23,9 +23,9 @@ $pageTitle = 'System Admin Dashboard - Triple T University';
     public function users(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-        
+        requirePermission('users.manage');
 
-$pageTitle = 'User Management - Administrator';
+        $pageTitle = 'User Management - Administrator';
 
         return $this->render('admin/system/users', get_defined_vars());
     }
@@ -122,25 +122,29 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
     public function processUser(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/admin/system/users.php");
-    return;
-}
+        requirePermission('users.manage');
 
-$action = $_POST['action'] ?? '';
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $response->redirect("/sia/admin/system/users.php");
+            return;
+        }
 
+        $action = $_POST['action'] ?? '';
 
+        try {
+            if ($action === 'create_user') {
+                $firstName = trim($_POST['first_name'] ?? '');
+                $lastName = trim($_POST['last_name'] ?? '');
+                $email = trim($_POST['email'] ?? '');
+                $password = $_POST['password'] ?? '';
+                $role = trim($_POST['role'] ?? 'applicant');
+                $department = trim($_POST['department'] ?? '');
+                $permissions = isset($_POST['permissions']) && is_array($_POST['permissions']) ? json_encode($_POST['permissions']) : null;
+                if ($department === '') $department = null;
 
-try {
-    if ($action === 'create_user') {
-        $firstName = trim($_POST['first_name'] ?? '');
-        $lastName = trim($_POST['last_name'] ?? '');
-        $email = trim($_POST['email'] ?? '');
-        $password = $_POST['password'] ?? '';
-        $role = trim($_POST['role'] ?? 'applicant');
-        $department = trim($_POST['department'] ?? '');
-        $permissions = isset($_POST['permissions']) && is_array($_POST['permissions']) ? json_encode($_POST['permissions']) : null;
-        if ($department === '') $department = null;
+                if ($role === 'superadmin' && ($_SESSION['user_role'] ?? '') !== 'superadmin') {
+                    throw new Exception('Only Superadministrators can create or assign the Superadmin role.');
+                }
 
         if ($firstName === '' || $lastName === '' || $email === '' || $password === '') {
             throw new Exception('All fields are required to create a new user.');
@@ -210,6 +214,10 @@ try {
 
         if ($userId <= 0 || $firstName === '' || $lastName === '' || $email === '') {
             throw new Exception('Missing required user information for update.');
+        }
+
+        if ($role === 'superadmin' && ($_SESSION['user_role'] ?? '') !== 'superadmin') {
+            throw new Exception('Only Superadministrators can elevate accounts to Superadmin.');
         }
 
         // Check if email exists for another user
@@ -475,7 +483,7 @@ try {
         }
 
         // Fetch old settings
-        $oldSettingsList = getSystemSettings($pdo, ['active_school_year', 'enrollment_status', 'college_cost_per_unit']);
+        $oldSettingsList = getSystemSettings($pdo, ['active_school_year', 'enrollment_status']);
 
         // Upsert syntax
         $stmt = $pdo->prepare('
@@ -491,17 +499,6 @@ try {
             'active_school_year' => $activeSchoolYear,
             'enrollment_status' => $enrollmentStatus
         ];
-
-        if (isset($_POST['college_cost_per_unit'])) {
-            $costPerUnitFloat = (float)$_POST['college_cost_per_unit'];
-            if ($costPerUnitFloat < 0) {
-                throw new Exception('College cost per unit cannot be negative.');
-            }
-            $costPerUnit = number_format($costPerUnitFloat, 2, '.', '');
-            $stmt->execute(['key' => 'college_cost_per_unit', 'val' => $costPerUnit]);
-            $newSettings['college_cost_per_unit'] = $costPerUnit;
-        }
-
 
         logActivity(
             (int)$_SESSION['user_id'], 

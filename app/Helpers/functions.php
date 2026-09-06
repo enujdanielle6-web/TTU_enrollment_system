@@ -22,6 +22,7 @@ function formatApplicationStatus(string $status): string
         'under_review' => 'Under Review',
         'correction_required' => 'Correction Required',
         'approved' => 'Approved',
+        'payment_verified' => 'Payment Verified',
         'rejected' => 'Rejected',
         'enrolled' => 'Enrolled',
     ];
@@ -36,6 +37,7 @@ function getApplicationStatusBadgeClass(string $status): string
         'under_review' => 'bg-info text-dark',
         'correction_required' => 'bg-warning text-dark',
         'approved' => 'bg-success',
+        'payment_verified' => 'bg-primary',
         'rejected' => 'bg-danger',
         'enrolled' => 'bg-success',
     ];
@@ -49,7 +51,8 @@ function getApplicationStatusMessage(string $status): string
         'pending' => 'Your application has been submitted and is waiting for review.',
         'under_review' => 'The admissions team is currently reviewing your application.',
         'correction_required' => 'Please update your application based on the admin feedback.',
-        'approved' => 'Congratulations! Your application has been approved.',
+        'approved' => 'Congratulations! Your application has been approved. Please proceed to payment.',
+        'payment_verified' => 'Your payment has been verified. The Registrar is preparing your official enrollment and credentials.',
         'rejected' => 'Your application was not approved. Contact the admissions office for details.',
         'enrolled' => 'You are officially enrolled. Welcome to the school!',
     ];
@@ -379,8 +382,16 @@ function logActivity(
 ): void {
     global $pdo;
     
+    if (!$pdo && class_exists('App\Core\Database')) {
+        try {
+            $pdo = \App\Core\Database::getConnection();
+        } catch (\Throwable $e) {
+            // fallback
+        }
+    }
+
     if (!$pdo) {
-        error_log('logActivity failed: PDO connection is not available in the global scope.');
+        error_log('logActivity failed: PDO connection is not available.');
         return;
     }
 
@@ -568,26 +579,7 @@ function getDetailedChecklist(int $appId): array
  */
 function generateStudentNumber(PDO $pdo): string
 {
-    $currentYear = date('Y');
-    $prefix = $currentYear . '-';
-
-    try {
-        $stmt = $pdo->prepare('SELECT student_number FROM users WHERE student_number LIKE :prefix ORDER BY student_number DESC LIMIT 1');
-        $stmt->execute(['prefix' => $prefix . '%']);
-        $lastNumber = $stmt->fetchColumn();
-
-        if ($lastNumber) {
-            $lastSequence = (int) substr($lastNumber, 5);
-            $newSequence = $lastSequence + 1;
-        } else {
-            $newSequence = 1;
-        }
-
-        return $prefix . str_pad((string)$newSequence, 6, '0', STR_PAD_LEFT);
-    } catch (PDOException $e) {
-        error_log('generateStudentNumber failed: ' . $e->getMessage());
-        return $prefix . '000000'; // fallback, though it may cause unique constraint violation
-    }
+    return \App\Services\StudentNumberService::generate((int)date('Y'), $pdo);
 }
 
 /**
@@ -596,34 +588,7 @@ function generateStudentNumber(PDO $pdo): string
  */
 function finalizeStudentEnrollment(PDO $pdo, int $userId, int $applicationId): void
 {
-    // 1. Update Application status to 'enrolled'
-    $updApp = $pdo->prepare('UPDATE applications SET status = "enrolled" WHERE id = :id');
-    $updApp->execute(['id' => $applicationId]);
-
-    // 2. Generate and assign Student Number if empty
-    $uStmt = $pdo->prepare('SELECT student_number, first_name, last_name, email FROM users WHERE id = :id LIMIT 1');
-    $uStmt->execute(['id' => $userId]);
-    $userRow = $uStmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$userRow) return;
-
-    $studentNumber = $userRow['student_number'] ?? '';
-    if (empty($studentNumber)) {
-        $studentNumber = generateStudentNumber($pdo);
-        $updUser = $pdo->prepare('UPDATE users SET student_number = :student_number WHERE id = :id');
-        $updUser->execute(['student_number' => $studentNumber, 'id' => $userId]);
-
-        // Activity log
-        $logStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, "bi-person-vcard-fill text-success", "Student Number Assigned", :description)');
-        $logStmt->execute([
-            'user_id' => $userId,
-            'description' => "Your official student number is {$studentNumber}."
-        ]);
-    }
-
-    // 3. Activity log for Enrollment Complete
-    $logEnrolled = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, "bi-patch-check-fill text-success", "Enrollment Complete", "Congratulations! You are officially enrolled as a student at Triple T University.")');
-    $logEnrolled->execute(['user_id' => $userId]);
+    \App\Services\EnrollmentService::finalizeEnrollment($applicationId, $userId, $pdo);
 }
 
 /**
@@ -751,7 +716,7 @@ function recalculateStudentAssessment(int $userId, \PDO $pdo): void
 {
     // Find active assessment for user
     $assStmt = $pdo->prepare('
-        SELECT sa.* 
+        SELECT sa.*, a.school_year, a.semester 
         FROM student_assessments sa
         JOIN applications a ON sa.application_id = a.id
         WHERE sa.user_id = :user_id 
@@ -766,14 +731,14 @@ function recalculateStudentAssessment(int $userId, \PDO $pdo): void
     $assessmentId = $assessment['id'];
     
     // Find active scholarships for user
-    $sysStmt = $pdo->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('active_academic_year_id', 'active_semester')");
+    $sysStmt = $pdo->query("SELECT setting_key, setting_value FROM system_settings WHERE setting_key IN ('active_school_year', 'active_academic_year_id', 'active_semester')");
     $settings = [];
     foreach ($sysStmt->fetchAll() as $row) {
         $settings[$row['setting_key']] = $row['setting_value'];
     }
 
-    $activeAy = $settings['active_academic_year_id'] ?? 0;
-    $activeSem = $settings['active_semester'] ?? '';
+    $activeAy = $settings['active_school_year'] ?? $settings['active_academic_year_id'] ?? ($assessment['school_year'] ?? '2026-2027');
+    $activeSem = $settings['active_semester'] ?? ($assessment['semester'] ?? 'First');
 
     $scholStmt = $pdo->prepare('
         SELECT s.* 
@@ -848,6 +813,165 @@ function recalculateStudentAssessment(int $userId, \PDO $pdo): void
         'status' => $paymentStatus,
         'id' => $assessmentId
     ]);
+
+    // Sync discount in assessment_items snapshot
+    try {
+        $delDisc = $pdo->prepare("DELETE FROM assessment_items WHERE assessment_id = :id AND item_type = 'discount'");
+        $delDisc->execute(['id' => $assessmentId]);
+
+        if ($totalDiscount > 0) {
+            $scholarshipNames = array_column($activeScholarships, 'name');
+            $discName = !empty($scholarshipNames) ? implode(', ', $scholarshipNames) . ' Discount' : 'Scholarship / Grant Discount';
+            $insDisc = $pdo->prepare("
+                INSERT INTO assessment_items (assessment_id, item_type, item_code, item_name, units, rate_per_unit, amount) 
+                VALUES (:id, 'discount', 'DISCOUNT', :name, 0.00, 0.00, :amount)
+            ");
+            $insDisc->execute([
+                'id' => $assessmentId,
+                'name' => $discName,
+                'amount' => $totalDiscount
+            ]);
+        }
+    } catch (\PDOException $e) {
+        error_log('Failed to sync discount to assessment_items: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Concurrency-safe atomic receipt number generator using sequence table.
+ * Format: REC-YYYYMMDD-XXXX
+ */
+function generateAtomicReceiptNumber(\PDO $pdo): string
+{
+    $year = (int) date('Y');
+    $datePrefix = date('Ymd');
+
+    // Atomically increment the sequence for the current year
+    $pdo->prepare("
+        INSERT INTO receipt_sequences (sequence_year, current_value) 
+        VALUES (:year, 1) 
+        ON DUPLICATE KEY UPDATE current_value = current_value + 1
+    ")->execute(['year' => $year]);
+
+    $stmt = $pdo->prepare("SELECT current_value FROM receipt_sequences WHERE sequence_year = :year LIMIT 1");
+    $stmt->execute(['year' => $year]);
+    $seq = (int) $stmt->fetchColumn();
+
+    return sprintf("REC-%s-%04d", $datePrefix, $seq);
+}
+
+/**
+ * Creates an immutable snapshot of all billed subjects, fees, and discounts in assessment_items.
+ */
+function snapshotAssessmentItems(\PDO $pdo, int $assessmentId, int $applicationId, array $templateData, array $enrolledSubjectsList, float $tuitionFee, float $miscFee, float $regFee, float $labFee, float $otherFees, float $discount = 0.00): void
+{
+    // Clear any existing snapshot items for this assessment
+    $del = $pdo->prepare("DELETE FROM assessment_items WHERE assessment_id = :aid");
+    $del->execute(['aid' => $assessmentId]);
+
+    $ins = $pdo->prepare("
+        INSERT INTO assessment_items (assessment_id, item_type, item_code, item_name, units, rate_per_unit, amount) 
+        VALUES (:aid, :type, :code, :name, :units, :rate, :amount)
+    ");
+
+    $isPerUnit = !empty($templateData['is_per_unit']);
+    $unitRate = (float)($templateData['tuition_fee'] ?? 0.00);
+
+    // 1. Snapshot Subjects / Tuition
+    if (!empty($enrolledSubjectsList)) {
+        foreach ($enrolledSubjectsList as $sub) {
+            $u = (float)($sub['units'] ?? 0);
+            $subRate = $isPerUnit ? $unitRate : 0.00;
+            $subAmt = $isPerUnit ? ($u * $unitRate) : 0.00;
+            $ins->execute([
+                'aid' => $assessmentId,
+                'type' => 'tuition',
+                'code' => $sub['subject_code'] ?? 'SUBJ',
+                'name' => $sub['subject_name'] ?? 'Enrolled Subject',
+                'units' => $u,
+                'rate' => $subRate,
+                'amount' => $subAmt
+            ]);
+        }
+    }
+
+    // If fixed tuition and not per-unit, add fixed tuition item
+    if (!$isPerUnit && $tuitionFee > 0) {
+        $ins->execute([
+            'aid' => $assessmentId,
+            'type' => 'tuition',
+            'code' => 'TUITION_FIXED',
+            'name' => 'Tuition Fee (Fixed)',
+            'units' => 0.00,
+            'rate' => 0.00,
+            'amount' => $tuitionFee
+        ]);
+    }
+
+    // 2. Registration Fee
+    if ($regFee > 0) {
+        $ins->execute([
+            'aid' => $assessmentId,
+            'type' => 'registration',
+            'code' => 'REG_FEE',
+            'name' => 'Registration Fee',
+            'units' => 0.00,
+            'rate' => 0.00,
+            'amount' => $regFee
+        ]);
+    }
+
+    // 3. Miscellaneous Fee
+    if ($miscFee > 0) {
+        $ins->execute([
+            'aid' => $assessmentId,
+            'type' => 'miscellaneous',
+            'code' => 'MISC_FEE',
+            'name' => 'Miscellaneous Fee',
+            'units' => 0.00,
+            'rate' => 0.00,
+            'amount' => $miscFee
+        ]);
+    }
+
+    // 4. Laboratory Fee
+    if ($labFee > 0) {
+        $ins->execute([
+            'aid' => $assessmentId,
+            'type' => 'laboratory',
+            'code' => 'LAB_FEE',
+            'name' => 'Laboratory Fee',
+            'units' => 0.00,
+            'rate' => 0.00,
+            'amount' => $labFee
+        ]);
+    }
+
+    // 5. Other Fees
+    if ($otherFees > 0) {
+        $ins->execute([
+            'aid' => $assessmentId,
+            'type' => 'other',
+            'code' => 'OTHER_FEES',
+            'name' => 'Other School Fees',
+            'units' => 0.00,
+            'rate' => 0.00,
+            'amount' => $otherFees
+        ]);
+    }
+
+    // 6. Discount
+    if ($discount > 0) {
+        $ins->execute([
+            'aid' => $assessmentId,
+            'type' => 'discount',
+            'code' => 'DISCOUNT',
+            'name' => 'Scholarship / Grant Discount',
+            'units' => 0.00,
+            'rate' => 0.00,
+            'amount' => $discount
+        ]);
+    }
 }
 
 /**
@@ -1205,3 +1329,92 @@ function sendPasswordResetOtpEmail(
         return false;
     }
 }
+
+/**
+ * Displays a styled application error page and halts execution.
+ *
+ * @param string $title Error headline / title
+ * @param string $message Detailed description of the error
+ * @param int $statusCode HTTP status code (defaults to 500)
+ * @return void
+ */
+function showErrorPage(string $title, string $message, int $statusCode = 500): void
+{
+    if (!headers_sent()) {
+        http_response_code($statusCode);
+    }
+    
+    $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+    $safeMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+    
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    
+    echo <<<HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{$safeTitle} - Triple T University</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+        .error-card {
+            background: #ffffff;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e2e8f0;
+            max-width: 32rem;
+            width: 100%;
+            padding: 2.5rem;
+            text-align: center;
+        }
+        .error-icon {
+            width: 4.5rem;
+            height: 4.5rem;
+            border-radius: 50%;
+            background-color: #fef2f2;
+            color: #ef4444;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.25rem;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-card">
+        <div class="error-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <h1 class="h4 fw-bold text-dark mb-2">{$safeTitle}</h1>
+        <p class="text-muted mb-4">{$safeMessage}</p>
+        <div class="d-flex justify-content-center gap-2">
+            <button onclick="window.history.back()" class="btn btn-outline-secondary px-4 rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> Go Back
+            </button>
+            <a href="/sia/" class="btn btn-primary px-4 rounded-pill">
+                <i class="bi bi-house-door me-1"></i> Home
+            </a>
+        </div>
+    </div>
+</body>
+</html>
+HTML;
+    exit;
+}
+

@@ -30,9 +30,10 @@ class EnrollController extends BaseController
             return;
         }
 
-        $appStatement = $pdo->prepare('SELECT status FROM applications WHERE user_id = :user_id LIMIT 1');
+        $appStatement = $pdo->prepare('SELECT id, status, student_type FROM applications WHERE user_id = :user_id LIMIT 1');
         $appStatement->execute(['user_id' => $userId]);
-        $existingStatus = $appStatement->fetchColumn();
+        $existingApp = $appStatement->fetch(\PDO::FETCH_ASSOC);
+        $existingStatus = $existingApp['status'] ?? null;
 
         if ($existingStatus && !in_array($existingStatus, ['pending', 'correction_required'], true)) {
             $response->redirect('/sia/applicant/dashboard.php');
@@ -42,6 +43,21 @@ class EnrollController extends BaseController
         $errors = $_SESSION['enroll_errors'] ?? [];
         $old = $_SESSION['enroll_old'] ?? [];
         unset($_SESSION['enroll_errors'], $_SESSION['enroll_old']);
+
+        if (empty($old) && !empty($existingApp)) {
+            $fullAppStmt = $pdo->prepare('SELECT * FROM applications WHERE id = :id LIMIT 1');
+            $fullAppStmt->execute(['id' => $existingApp['id']]);
+            $old = $fullAppStmt->fetch(\PDO::FETCH_ASSOC) ?: [];
+
+            if (!empty($old) && ($old['student_type'] ?? '') === 'Irregular') {
+                $asrStmt = $pdo->prepare("SELECT asr.subject_id as id, asr.section_id, s.subject_code as code, s.subject_name as name, s.units 
+                                          FROM application_subject_requests asr 
+                                          JOIN subjects s ON s.id = asr.subject_id 
+                                          WHERE asr.application_id = ?");
+                $asrStmt->execute([$existingApp['id']]);
+                $old['selected_subjects'] = $asrStmt->fetchAll(\PDO::FETCH_ASSOC);
+            }
+        }
 
         if (empty($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -285,10 +301,14 @@ class EnrollController extends BaseController
         ];
 
         try {
+            $pdo->beginTransaction();
+
+            $targetAppId = 0;
             if ($isUpdate) {
                 $appData['status'] = $existing['status'] === 'correction_required' ? 'under_review' : 'pending';
                 $appData['id'] = $existingAppId;
                 Application::updateFull($appData);
+                $targetAppId = $existingAppId;
 
                 $logDesc = $existing['status'] === 'correction_required' 
                     ? 'You successfully resubmitted your application with the requested corrections.' 
@@ -298,13 +318,30 @@ class EnrollController extends BaseController
             } else {
                 $appData['user_id'] = $userId;
                 $appData['status'] = 'pending';
-                Application::createFull($appData);
+                $targetAppId = (int) Application::createFull($appData);
                 
                 User::logActivity($userId, 'Application Submitted', 'You successfully completed the online enrollment application.', 'bi-file-earmark-check');
             }
 
+            // Persist irregular student requested subjects
+            $delSubStmt = $pdo->prepare('DELETE FROM application_subject_requests WHERE application_id = ?');
+            $delSubStmt->execute([$targetAppId]);
+
+            if ($studentType === 'Irregular' && !empty($selectedSubjects) && is_array($selectedSubjects)) {
+                $insSubStmt = $pdo->prepare('INSERT INTO application_subject_requests (application_id, subject_id, section_id) VALUES (?, ?, ?)');
+                foreach ($selectedSubjects as $subjId => $secId) {
+                    $secVal = !empty($secId) ? (int)$secId : null;
+                    $insSubStmt->execute([$targetAppId, (int)$subjId, $secVal]);
+                }
+            }
+
+            $pdo->commit();
+
             $response->redirect('/sia/applicant/status.php');
         } catch (\Exception $exception) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             error_log('Enrollment insertion failed: ' . $exception->getMessage());
             $_SESSION['enroll_errors'] = ['Application submission failed. Please try again.'];
             $_SESSION['enroll_old'] = $oldData;
@@ -393,6 +430,19 @@ class EnrollController extends BaseController
         $statusMessage = $application ? getApplicationStatusMessage($application['status']) : '';
         $adminFeedback = $application ? ($application['admin_feedback'] ?? null) : null;
 
+        // Fetch uploaded application documents and review remarks
+        $documents = [];
+        if ($application) {
+            $docStmt = $pdo->prepare('
+                SELECT id, document_name, file_path, status, feedback, created_at, updated_at 
+                FROM application_documents 
+                WHERE application_id = :app_id 
+                ORDER BY id ASC
+            ');
+            $docStmt->execute(['app_id' => (int)$application['id']]);
+            $documents = $docStmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
         return $this->render('applicant/status', [
             'application' => $application,
             'timelineSteps' => $timelineSteps,
@@ -400,7 +450,8 @@ class EnrollController extends BaseController
             'statusBadgeClass' => $statusBadgeClass,
             'statusMessage' => $statusMessage,
             'adminFeedback' => $adminFeedback,
-            'docMethod' => $docMethod
+            'docMethod' => $docMethod,
+            'documents' => $documents
         ]);
     }
 }

@@ -11,9 +11,12 @@
 declare(strict_types=1);
 
 ini_set('max_execution_time', '300');
-ini_set('memory_limit', '512M');
+if (php_sapi_name() !== 'cli') {
+    http_response_code(403);
+    exit('Access Denied: Migration scripts can only be executed via CLI.');
+}
 
-$isCli = (php_sapi_name() === 'cli');
+$isCli = true;
 
 function out(string $message, string $type = 'info'): void {
     global $isCli;

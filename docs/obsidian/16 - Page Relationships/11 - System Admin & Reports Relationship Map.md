@@ -42,9 +42,10 @@ Renders Chart.js enrollment analytics and KPI cards
 ```text
 POST /admin/system/user_process.php (first_name, last_name, email, role, department, permissions[])
     ↓
-SystemController@saveUser
+SystemController@processUser
     ↓
-Validation:
+Validation & Security:
+    ├── Superadmin role creation defense (only superadmin can create superadmin)
     ├── Unique email verification in users table
     └── isPasswordStrong($password)
     ↓
@@ -78,16 +79,16 @@ Queries `activity_logs` joined with `users` to display an immutable chronologica
 
 ### Page Identity
 - **File Path:** [`app/Views/admin/system/backup.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/system/backup.php)
-- **Controller:** `SystemController@backup`, `SystemController@exportBackup`, `SystemController@importBackup`
-- **Routes:** `GET /admin/system/backup.php`, `GET /admin/system/backup_export.php`, `POST /admin/system/backup_import.php`
+- **Controller:** `SystemController@backup`, `SystemController@processBackup`
+- **Routes:** `GET /admin/system/backup.php`, `POST /admin/system/backup_process.php`
 
 ### Backup Export Engine Traced
 ```text
-GET /admin/system/backup_export.php
+POST /admin/system/backup_process.php (action='export')
     ↓
-SystemController@exportBackup
+SystemController@processBackup
     ↓
-1. Query SHOW FULL TABLES (Fetches all 42 tables and views)
+1. Query SHOW FULL TABLES (Fetches all 45 tables and views)
 2. Disable foreign key checks: SET FOREIGN_KEY_CHECKS = 0;
 3. For each table:
    ├── Query SHOW CREATE TABLE `{tableName}`
@@ -104,14 +105,14 @@ SystemController@exportBackup
 
 ### Page Identity
 - **File Path:** [`app/Views/admin/system/settings.php`](file:///c:/xampp/htdocs/sia/app/Views/admin/system/settings.php)
-- **Controller:** `SystemController@settings`, `SystemController@saveSettings`
-- **Routes:** `GET /admin/system/settings.php`, `POST /admin/system/settings_save.php`
+- **Controller:** `SystemController@settings`, `SystemController@processSettings`
+- **Routes:** `GET /admin/system/settings.php`, `POST /admin/system/settings_process.php`
 
 ### Tracing Chain
 ```text
-POST /admin/system/settings_save.php (active_school_year, enrollment_status, college_cost_per_unit)
+POST /admin/system/settings_process.php (active_school_year, enrollment_status)
     ↓
-SystemController@saveSettings
+SystemController@processSettings
     ↓
 Loop through key-value pairs:
     INSERT INTO system_settings (setting_key, setting_value) VALUES (?, ?)

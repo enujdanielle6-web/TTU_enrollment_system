@@ -24,18 +24,22 @@ The Applicant Portal is the dedicated self-service interface for prospective and
 | Endpoint | Method | Controller & Action | Description |
 |---|---|---|---|
 | `/applicant/dashboard.php` | GET | `ApplicantController@dashboard` | Master dashboard displaying status tracker, next step action banners, and progress bar. |
-| `/applicant/application_form.php` | GET | `ApplicantController@applicationForm` | Comprehensive admission application form. |
-| `/applicant/application_process.php` | POST | `ApplicantController@processApplication` | Processes application submission and updates database. |
-| `/applicant/requirements.php` | GET | `ApplicantController@requirements` | Document requirement upload interface. |
-| `/applicant/upload_document.php` | POST | `ApplicantController@uploadDocument` | Handles secure document file upload to `/uploads/documents/`. |
+| `/applicant/enroll.php` | GET | `EnrollController@showForm` | Application wizard, academic program selection, and section/subject schedule builder. |
+| `/applicant/enroll_process.php` | POST | `EnrollController@processForm` | Submits application data and enrolled subjects into database. |
+| `/applicant/status.php` | GET | `EnrollController@status` | Application tracking and lifecycle status details. |
+| `/applicant/documents.php` | GET | `DocumentController@index` | Document requirement upload interface. |
+| `/applicant/document_upload.php` | POST | `DocumentController@upload` | Handles secure document file upload to `storage/documents/`. |
+| `/applicant/document_workflow.php` | POST | `DocumentController@workflow` | Document submission preference selection (Physical vs. Digital). |
+| `/applicant/document_view.php` | GET | `DocumentController@viewDocument` | Secure inline document delivery. |
 | `/applicant/health_info.php` | GET | `HealthController@index` | Medical background and health declaration form. |
 | `/applicant/health_process.php` | POST | `HealthController@process` | Saves `health_records` and routes to next workflow step. |
-| `/applicant/enroll.php` | GET | `EnrollController@showForm` | Subject schedule builder and section selection. |
-| `/applicant/enroll_process.php` | POST | `EnrollController@processForm` | Submits enrolled subjects into `college_enrollments` / `shs_enrollments`. |
 | `/applicant/assessment.php` | GET | `ApplicantController@assessment` | Financial assessment statement with dynamic unit breakdown. |
-| `/applicant/payment_process.php` | POST | `ApplicantController@processPayment` | Uploads proof of payment to `/uploads/payments/`. |
+| `/applicant/payment_process.php` | POST | `ApplicantController@processPayment` | Uploads proof of payment to `storage/payments/`. |
 | `/applicant/print_slip.php` | GET | `ApplicantController@printSlip` | Printable Certificate of Matriculation / Enrollment Assessment Slip. |
-| `/applicant/scholarships.php` | GET | `ApplicantController@scholarships` | Available scholarships catalog and application form. |
+| `/applicant/scholarships.php` | GET | `ApplicantController@scholarships` | Available scholarships catalog. |
+| `/applicant/scholarship_apply.php` | POST | `ApplicantController@applyScholarship` | Processes scholarship application submission. |
+| `/applicant/profile.php` | GET | `ApplicantController@profile` | Applicant personal profile and password reset. |
+| `/applicant/profile_process.php` | POST | `ApplicantController@updateProfile` | Updates profile details and password. |
 
 ---
 

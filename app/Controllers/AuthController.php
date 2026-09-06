@@ -126,6 +126,13 @@ class AuthController extends BaseController
 
         User::updateLastLogin((int)$user['id']);
 
+        if (!empty($user['force_password_reset'])) {
+            $_SESSION['force_password_reset_required'] = true;
+            $_SESSION['profile_errors'] = ['Security Notice: Please set a new personal password before accessing your account.'];
+            $response->redirect('/sia/applicant/profile.php');
+            return;
+        }
+
         $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
         if (in_array($user['role'], $adminRoles, true)) {
             User::logActivity((int)$user['id'], "Logged In", "Administrator logged into the system.", "bi-box-arrow-in-right");
@@ -639,8 +646,8 @@ class AuthController extends BaseController
         $code = sprintf('%06d', random_int(100000, 999999));
         $upd = $pdo->prepare("
             UPDATE users 
-            SET reset_password_code = :code, 
-                reset_password_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) 
+            SET reset_token = :code, 
+                reset_token_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) 
             WHERE id = :id
         ");
         $upd->execute([
@@ -774,8 +781,8 @@ class AuthController extends BaseController
             return;
         }
 
-        $storedCode = (string)($user['reset_password_code'] ?? '');
-        $expiresAt = (string)($user['reset_password_expires_at'] ?? '');
+        $storedCode = (string)($user['reset_token'] ?? '');
+        $expiresAt = (string)($user['reset_token_expires_at'] ?? '');
         $now = date('Y-m-d H:i:s');
 
         if ($storedCode === '' || $storedCode !== $code || ($expiresAt !== '' && $expiresAt < $now)) {
@@ -789,8 +796,8 @@ class AuthController extends BaseController
         $upd = $pdo->prepare("
             UPDATE users 
             SET password = :pwd, 
-                reset_password_code = NULL, 
-                reset_password_expires_at = NULL,
+                reset_token = NULL, 
+                reset_token_expires_at = NULL,
                 email_verified = 1 
             WHERE id = :id
         ");
@@ -850,8 +857,8 @@ class AuthController extends BaseController
         $newCode = sprintf('%06d', random_int(100000, 999999));
         $upd = $pdo->prepare("
             UPDATE users 
-            SET reset_password_code = :code, 
-                reset_password_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) 
+            SET reset_token = :code, 
+                reset_token_expires_at = DATE_ADD(NOW(), INTERVAL 15 MINUTE) 
             WHERE id = :id
         ");
         $upd->execute([

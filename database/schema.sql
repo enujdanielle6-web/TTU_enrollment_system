@@ -58,9 +58,11 @@ CREATE TABLE `activity_logs` (
   `description` text DEFAULT NULL,
   `old_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `new_value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `reason` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `fk_activity_logs_user_id` (`user_id`),
+  KEY `idx_activity_logs_user_created` (`user_id`, `created_at`),
   CONSTRAINT `fk_activity_logs_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -365,7 +367,7 @@ CREATE TABLE `applications` (
   `nstp` varchar(50) DEFAULT NULL,
   `section_id` int(10) unsigned DEFAULT NULL,
   `college_curriculum_id` int(10) unsigned DEFAULT NULL,
-  `status` enum('pending','under_review','correction_required','approved','rejected','enrolled') NOT NULL DEFAULT 'pending',
+  `status` enum('pending','under_review','correction_required','approved','payment_verified','rejected','enrolled') NOT NULL DEFAULT 'pending',
   `document_submission_method` enum('online','on_campus') NOT NULL DEFAULT 'online',
   `admin_feedback` text DEFAULT NULL,
   `internal_notes` text DEFAULT NULL,
@@ -399,9 +401,24 @@ CREATE TABLE `applications` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `reference_number` (`reference_number`),
   KEY `user_id` (`user_id`),
+  KEY `idx_app_status_level` (`status`, `academic_level`),
   KEY `fk_app_curr` (`college_curriculum_id`),
   CONSTRAINT `fk_app_curr` FOREIGN KEY (`college_curriculum_id`) REFERENCES `college_curricula` (`id`) ON DELETE SET NULL,
   CONSTRAINT `fk_applications_user_id` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `application_subject_requests`;
+CREATE TABLE `application_subject_requests` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `application_id` int(10) unsigned NOT NULL,
+  `subject_id` int(10) unsigned NOT NULL,
+  `section_id` int(10) unsigned DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_asr_application` (`application_id`),
+  KEY `idx_asr_subject` (`subject_id`),
+  CONSTRAINT `fk_asr_application` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_asr_subject` FOREIGN KEY (`subject_id`) REFERENCES `subjects` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `application_documents`;
@@ -513,10 +530,27 @@ CREATE TABLE `student_assessments` (
   KEY `application_id` (`application_id`),
   KEY `fee_template_id` (`fee_template_id`),
   KEY `scholarship_id` (`scholarship_id`),
+  KEY `idx_assessment_payment_status` (`payment_status`),
   CONSTRAINT `student_assessments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `student_assessments_ibfk_2` FOREIGN KEY (`application_id`) REFERENCES `applications` (`id`) ON DELETE CASCADE,
   CONSTRAINT `student_assessments_ibfk_3` FOREIGN KEY (`fee_template_id`) REFERENCES `fee_templates` (`id`) ON DELETE SET NULL,
   CONSTRAINT `student_assessments_ibfk_4` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarships` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `assessment_items`;
+CREATE TABLE `assessment_items` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `assessment_id` int(10) unsigned NOT NULL,
+  `item_type` enum('tuition','miscellaneous','laboratory','registration','other','discount') NOT NULL,
+  `item_code` varchar(50) DEFAULT NULL,
+  `item_name` varchar(150) NOT NULL,
+  `units` decimal(4,2) NOT NULL DEFAULT 0.00,
+  `rate_per_unit` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `amount` decimal(10,2) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_assessment_id` (`assessment_id`),
+  CONSTRAINT `fk_assessment_items_assessment` FOREIGN KEY (`assessment_id`) REFERENCES `student_assessments` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `payment_records`;
@@ -542,6 +576,24 @@ CREATE TABLE `payment_records` (
   CONSTRAINT `payment_records_ibfk_1` FOREIGN KEY (`assessment_id`) REFERENCES `student_assessments` (`id`) ON DELETE CASCADE,
   CONSTRAINT `payment_records_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `payment_records_ibfk_3` FOREIGN KEY (`cashier_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `receipt_sequences`;
+CREATE TABLE `receipt_sequences` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sequence_year` int(10) unsigned NOT NULL UNIQUE,
+  `current_value` int(10) unsigned NOT NULL DEFAULT 0,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+DROP TABLE IF EXISTS `student_number_sequences`;
+CREATE TABLE `student_number_sequences` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `sequence_year` int(10) unsigned NOT NULL UNIQUE,
+  `current_value` int(10) unsigned NOT NULL DEFAULT 0,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 DROP TABLE IF EXISTS `scholarship_applications`;
@@ -571,6 +623,7 @@ CREATE TABLE `scholarship_recipients` (
   `academic_year_id` varchar(50) NOT NULL,
   `semester` varchar(50) NOT NULL,
   `status` varchar(50) NOT NULL DEFAULT 'Active',
+  `remarks` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
@@ -578,22 +631,6 @@ CREATE TABLE `scholarship_recipients` (
   KEY `scholarship_id` (`scholarship_id`),
   CONSTRAINT `scholarship_recipients_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   CONSTRAINT `scholarship_recipients_ibfk_2` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarships` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-DROP TABLE IF EXISTS `student_scholarships`;
-CREATE TABLE `student_scholarships` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(10) unsigned NOT NULL,
-  `scholarship_id` int(10) unsigned NOT NULL,
-  `academic_year` varchar(50) NOT NULL,
-  `semester` varchar(50) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`),
-  KEY `scholarship_id` (`scholarship_id`),
-  CONSTRAINT `student_scholarships_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `student_scholarships_ibfk_2` FOREIGN KEY (`scholarship_id`) REFERENCES `scholarships` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
@@ -839,14 +876,25 @@ SELECT
     a.grade_level,
     a.strand,
     a.status AS enrollment_status,
-    sec.section_code,
-    (SELECT COALESCE(SUM(s.units), 0) 
-     FROM college_enrollments ce 
-     JOIN subjects s ON ce.subject_id = s.id 
-     WHERE ce.application_id = a.id) AS total_enrolled_units
+    COALESCE(csec.section_code, ssec.section_code) AS section_code,
+    CASE 
+        WHEN a.academic_level = 'Senior High School' THEN (
+            SELECT COALESCE(SUM(s.units), 0)
+            FROM shs_enrollments se
+            JOIN subjects s ON se.subject_id = s.id
+            WHERE se.application_id = a.id
+        )
+        ELSE (
+            SELECT COALESCE(SUM(s.units), 0)
+            FROM college_enrollments ce
+            JOIN subjects s ON ce.subject_id = s.id
+            WHERE ce.application_id = a.id
+        )
+    END AS total_enrolled_units
 FROM users u
 JOIN applications a ON u.id = a.user_id
-LEFT JOIN college_sections sec ON a.section_id = sec.id;
+LEFT JOIN college_sections csec ON a.section_id = csec.id AND a.academic_level = 'College'
+LEFT JOIN shs_sections ssec ON a.section_id = ssec.id AND a.academic_level = 'Senior High School';
 
 -- ----------------------------------------------------------------------------
 -- 7. FOREIGN KEY CONSTRAINTS ON USERS

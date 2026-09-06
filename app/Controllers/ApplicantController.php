@@ -309,8 +309,9 @@ class ApplicantController extends BaseController
 
                 if (empty($errors)) {
                     $hashed = password_hash($newPass, PASSWORD_DEFAULT);
-                    $updStmt = $pdo->prepare('UPDATE users SET password = ? WHERE id = ?');
+                    $updStmt = $pdo->prepare('UPDATE users SET password = ?, force_password_reset = 0 WHERE id = ?');
                     $updStmt->execute([$hashed, $userId]);
+                    unset($_SESSION['force_password_reset_required']);
                     $successMsg = 'Password changed successfully.';
                     User::logActivity($userId, 'Security Update', 'Changed account password.', 'bi-shield-lock');
                 }
@@ -352,137 +353,17 @@ if ($userAppStatus && in_array($userAppStatus, ['approved', 'enrolled'], true)) 
 // Fetch the applicant's assessment
 $assessment = null;
 $payments = [];
+$assessment = null;
+$assessmentItems = [];
+$enrolledSubjects = [];
+
 try {
-    $stmt = $pdo->prepare('
-        SELECT sa.*, a.reference_number, a.academic_level, a.grade_level, a.strand, a.school_year, a.semester, s.name as scholarship_name, ft.is_per_unit, ft.tuition_fee as template_tuition_rate
-        FROM student_assessments sa
-        INNER JOIN applications a ON sa.application_id = a.id
-        LEFT JOIN scholarships s ON sa.scholarship_id = s.id
-        LEFT JOIN fee_templates ft ON sa.fee_template_id = ft.id
-        WHERE sa.user_id = :user_id
-        ORDER BY sa.created_at DESC LIMIT 1
-    ');
-    $stmt->execute(['user_id' => $userId]);
-    $assessment = $stmt->fetch();
-
-    if ($assessment) {
-        $payStmt = $pdo->prepare('SELECT * FROM payment_records WHERE assessment_id = :assessment_id ORDER BY created_at DESC');
-        $payStmt->execute(['assessment_id' => $assessment['id']]);
-        $payments = $payStmt->fetchAll();
-        
-        // Fetch Enrolled / Curriculum Subjects
-        $enrolledSubjects = [];
-        if ($assessment['academic_level'] === 'College') {
-            $subStmt = $pdo->prepare('
-                SELECT s.subject_code, s.subject_name, s.units 
-                FROM college_enrollments es
-                JOIN subjects s ON es.subject_id = s.id
-                WHERE es.application_id = :app_id
-            ');
-            $subStmt->execute(['app_id' => $assessment['application_id']]);
-            $enrolledSubjects = $subStmt->fetchAll();
-
-            if (empty($enrolledSubjects)) {
-                $appSecStmt = $pdo->prepare('SELECT section_id FROM applications WHERE id = :app_id');
-                $appSecStmt->execute(['app_id' => $assessment['application_id']]);
-                $secId = $appSecStmt->fetchColumn();
-                if ($secId) {
-                    $secSubStmt = $pdo->prepare('
-                        SELECT s.subject_code, s.subject_name, s.units
-                        FROM college_section_subjects css
-                        JOIN subjects s ON css.subject_id = s.id
-                        WHERE css.college_section_id = :sec_id
-                    ');
-                    $secSubStmt->execute(['sec_id' => $secId]);
-                    $enrolledSubjects = $secSubStmt->fetchAll();
-                }
-            }
-
-            if (empty($enrolledSubjects)) {
-                $currSubStmt = $pdo->prepare('
-                    SELECT s.subject_code, s.subject_name, s.units
-                    FROM college_curriculum_subjects ccs
-                    JOIN subjects s ON ccs.subject_id = s.id
-                    JOIN college_curricula cc ON ccs.curriculum_id = cc.id
-                    JOIN college_programs p ON cc.program_id = p.id
-                    WHERE p.code = :strand AND ccs.year_level = :year_level AND ccs.semester = :semester
-                    ORDER BY ccs.display_order ASC
-                ');
-                $currSubStmt->execute([
-                    'strand' => $assessment['strand'],
-                    'year_level' => $assessment['grade_level'],
-                    'semester' => $assessment['semester'] ?? 'First'
-                ]);
-                $enrolledSubjects = $currSubStmt->fetchAll();
-            }
-        } elseif ($assessment['academic_level'] === 'Senior High School') {
-            $subStmt = $pdo->prepare('
-                SELECT s.subject_code, s.subject_name, s.units 
-                FROM shs_enrollments es
-                JOIN subjects s ON es.subject_id = s.id
-                WHERE es.application_id = :app_id
-            ');
-            $subStmt->execute(['app_id' => $assessment['application_id']]);
-            $enrolledSubjects = $subStmt->fetchAll();
-
-            if (empty($enrolledSubjects)) {
-                $appSecStmt = $pdo->prepare('SELECT section_id FROM applications WHERE id = :app_id');
-                $appSecStmt->execute(['app_id' => $assessment['application_id']]);
-                $secId = $appSecStmt->fetchColumn();
-                if ($secId) {
-                    $secSubStmt = $pdo->prepare('
-                        SELECT s.subject_code, s.subject_name, s.units
-                        FROM shs_section_subjects ss
-                        JOIN subjects s ON ss.subject_id = s.id
-                        WHERE ss.shs_section_id = :sec_id
-                    ');
-                    $secSubStmt->execute(['sec_id' => $secId]);
-                    $enrolledSubjects = $secSubStmt->fetchAll();
-                }
-            }
-
-            if (empty($enrolledSubjects)) {
-                $currSubStmt = $pdo->prepare('
-                    SELECT s.subject_code, s.subject_name, s.units
-                    FROM shs_curriculum_subjects scs
-                    JOIN subjects s ON scs.subject_id = s.id
-                    JOIN shs_curricula sc ON scs.curriculum_id = sc.id
-                    JOIN shs_strands st ON sc.strand_id = st.id
-                    WHERE st.code = :strand AND scs.grade_level = :grade_level AND scs.semester = :semester
-                    ORDER BY scs.display_order ASC
-                ');
-                $currSubStmt->execute([
-                    'strand' => $assessment['strand'],
-                    'grade_level' => $assessment['grade_level'],
-                    'semester' => $assessment['semester'] ?? 'First'
-                ]);
-                $enrolledSubjects = $currSubStmt->fetchAll();
-            }
-        }
-
-        // Auto-sync dynamic tuition fee if rate per unit template is active
-        if (!empty($assessment['is_per_unit']) && !empty($enrolledSubjects)) {
-            $calcUnits = (int) array_sum(array_column($enrolledSubjects, 'units'));
-            $unitRate = (float)($assessment['template_tuition_rate'] ?? 500.0);
-            $calculatedTuition = $calcUnits * $unitRate;
-
-            if (((float)$assessment['tuition_fee'] !== $calculatedTuition || (float)$assessment['total_amount'] <= 0) && $calculatedTuition > 0) {
-                $calculatedTotal = $calculatedTuition + (float)$assessment['miscellaneous_fee'] + (float)$assessment['registration_fee'] + (float)$assessment['laboratory_fee'] + (float)$assessment['other_fees'];
-                $calculatedNet = $calculatedTotal - (float)$assessment['discount_amount'];
-
-                $syncStmt = $pdo->prepare('UPDATE student_assessments SET tuition_fee = :tuition, total_amount = :total, net_amount = :net WHERE id = :id');
-                $syncStmt->execute([
-                    'tuition' => $calculatedTuition,
-                    'total' => $calculatedTotal,
-                    'net' => $calculatedNet,
-                    'id' => $assessment['id']
-                ]);
-
-                $assessment['tuition_fee'] = $calculatedTuition;
-                $assessment['total_amount'] = $calculatedTotal;
-                $assessment['net_amount'] = $calculatedNet;
-            }
-        }
+    $breakdown = \App\Services\AssessmentService::getAssessmentBreakdown($pdo, null, $userId);
+    if ($breakdown) {
+        $assessment = $breakdown['assessment'];
+        $payments = $breakdown['payments'];
+        $assessmentItems = $breakdown['assessment_items'];
+        $enrolledSubjects = $breakdown['enrolled_subjects'];
     }
 } catch (PDOException $e) {
     error_log('Applicant assessment fetch failed: ' . $e->getMessage());

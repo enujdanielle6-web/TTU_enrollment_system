@@ -299,9 +299,22 @@ public function detail(Request $request, Response $response)
         }
 
         $allSubjects = [];
+        $requestedSubjects = [];
         if (($app['student_type'] ?? '') === 'Irregular') {
             $stmtAllSubs = $pdo->query("SELECT id, subject_code, subject_name, units FROM subjects WHERE status = 1 ORDER BY subject_code ASC");
             $allSubjects = $stmtAllSubs->fetchAll(PDO::FETCH_ASSOC);
+
+            $reqStmt = $pdo->prepare("
+                SELECT asr.id, asr.subject_id, asr.section_id, s.subject_code, s.subject_name, s.units,
+                       sec.section_code
+                FROM application_subject_requests asr
+                INNER JOIN subjects s ON s.id = asr.subject_id
+                LEFT JOIN college_sections sec ON sec.id = asr.section_id
+                WHERE asr.application_id = :app_id
+                ORDER BY s.subject_code ASC
+            ");
+            $reqStmt->execute(['app_id' => $appId]);
+            $requestedSubjects = $reqStmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         return $this->render('admin/admissions/detail', [
@@ -312,7 +325,8 @@ public function detail(Request $request, Response $response)
             'feeTemplates' => $feeTemplates,
             'availableSections' => $availableSections,
             'health' => $health,
-            'allSubjects' => $allSubjects
+            'allSubjects' => $allSubjects,
+            'requestedSubjects' => $requestedSubjects
         ]);
     }
 
@@ -375,6 +389,18 @@ if ($action === 'update_subjects') {
                 }
             }
         }
+
+        // Also synchronize application_subject_requests
+        $delReqStmt = $pdo->prepare('DELETE FROM application_subject_requests WHERE application_id = :app_id');
+        $delReqStmt->execute(['app_id' => $appId]);
+
+        if (!empty($subjects)) {
+            $insReqStmt = $pdo->prepare('INSERT INTO application_subject_requests (application_id, subject_id, section_id) VALUES (:app_id, :sub_id, :sec_id)');
+            foreach ($subjects as $subId => $secSubId) {
+                $secSubIdVal = !empty($secSubId) ? (int)$secSubId : null;
+                $insReqStmt->execute(['app_id' => $appId, 'sub_id' => (int)$subId, 'sec_id' => $secSubIdVal]);
+            }
+        }
         
         $logStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, :icon, :title, :description)');
         $logStmt->execute([
@@ -425,6 +451,20 @@ try {
         }
     }
 
+    // 0.55. Verify medical clearance from clinic before allowing approval
+    if ($status === 'approved' || $status === 'enrolled') {
+        $healthStmt = $pdo->prepare('SELECT status FROM health_records WHERE application_id = :app_id LIMIT 1');
+        $healthStmt->execute(['app_id' => $appId]);
+        $healthStatus = $healthStmt->fetchColumn();
+
+        if ($healthStatus && $healthStatus !== 'verified') {
+            $statusText = $status === 'enrolled' ? 'enroll' : 'approve';
+            $_SESSION['admin_error'] = "Cannot {$statusText} applicant. Medical clearance from the Clinic is pending (current status: " . ucfirst($healthStatus) . ").";
+            $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+            return;
+        }
+    }
+
     // 0.6. Verify document requirements if changing to approved or enrolled
     if ($status === 'approved' || $status === 'enrolled') {
         $docMethodStmt = $pdo->prepare('SELECT document_submission_method FROM applications WHERE id = :id');
@@ -457,7 +497,7 @@ try {
     }
 
     // Fetch old application state
-    $oldAppStmt = $pdo->prepare('SELECT academic_level, status, admin_feedback, internal_notes, strand FROM applications WHERE id = :id');
+    $oldAppStmt = $pdo->prepare('SELECT academic_level, status, admin_feedback, internal_notes, strand, student_type, section_id, nstp FROM applications WHERE id = :id');
     $oldAppStmt->execute(['id' => $appId]);
     $oldApp = $oldAppStmt->fetch(PDO::FETCH_ASSOC);
 
@@ -474,6 +514,8 @@ try {
         return;
     }
 
+    $pdo->beginTransaction();
+
     // 0. Process Section Assignment
     $assignSectionId = (int)($_POST['assign_section'] ?? 0);
     if ($assignSectionId === 0 && !empty($oldApp['section_id'])) {
@@ -483,7 +525,42 @@ try {
     if ($assignSectionId > 0) {
         $stmt = $pdo->prepare('UPDATE applications SET section_id = :section_id WHERE id = :id');
         $stmt->execute(['section_id' => $assignSectionId, 'id' => $appId]);
+    }
 
+    if (($oldApp['student_type'] ?? '') === 'Irregular') {
+        // Irregular student: Preserve and enroll custom requested subjects
+        $reqSubStmt = $pdo->prepare('SELECT subject_id, section_id FROM application_subject_requests WHERE application_id = :app_id');
+        $reqSubStmt->execute(['app_id' => $appId]);
+        $requestedSubs = $reqSubStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($requestedSubs)) {
+            if ($oldApp['academic_level'] === 'Senior High School') {
+                $delStmt = $pdo->prepare('DELETE FROM shs_enrollments WHERE application_id = :app_id');
+                $delStmt->execute(['app_id' => $appId]);
+
+                $insSubStmt = $pdo->prepare('INSERT INTO shs_enrollments (application_id, subject_id, shs_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                foreach ($requestedSubs as $row) {
+                    $insSubStmt->execute([
+                        'app_id' => $appId,
+                        'sub_id' => (int)$row['subject_id'],
+                        'sec_id' => !empty($row['section_id']) ? (int)$row['section_id'] : ($assignSectionId > 0 ? $assignSectionId : null)
+                    ]);
+                }
+            } else {
+                $delStmt = $pdo->prepare('DELETE FROM college_enrollments WHERE application_id = :app_id');
+                $delStmt->execute(['app_id' => $appId]);
+
+                $insSubStmt = $pdo->prepare('INSERT INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                foreach ($requestedSubs as $row) {
+                    $insSubStmt->execute([
+                        'app_id' => $appId,
+                        'sub_id' => (int)$row['subject_id'],
+                        'sec_id' => !empty($row['section_id']) ? (int)$row['section_id'] : ($assignSectionId > 0 ? $assignSectionId : null)
+                    ]);
+                }
+            }
+        }
+    } elseif ($assignSectionId > 0) {
         if ($oldApp['academic_level'] === 'Senior High School') {
             $delStmt = $pdo->prepare('DELETE FROM shs_enrollments WHERE application_id = :app_id');
             $delStmt->execute(['app_id' => $appId]);
@@ -746,169 +823,8 @@ try {
 
     // 2. Process Assessment Generation (Automatic)
     $generateAssessment = ($status === 'approved' || $status === 'enrolled');
-    
     if ($generateAssessment) {
-        // Check if an assessment already exists
-        $assCheckStmt = $pdo->prepare('SELECT id FROM student_assessments WHERE application_id = :app_id LIMIT 1');
-        $assCheckStmt->execute(['app_id' => $appId]);
-        
-        if (!$assCheckStmt->fetch()) {
-            // Fetch applicant details to find matching template
-            $appStmt = $pdo->prepare('SELECT academic_level, grade_level, strand, semester, section_id FROM applications WHERE id = :id LIMIT 1');
-            $appStmt->execute(['id' => $appId]);
-            $appData = $appStmt->fetch();
-
-            if ($appData) {
-                // Fetch the exact template matching grade level, strand, and optionally semester
-                $sql = 'SELECT * FROM fee_templates WHERE grade_level = :grade_level AND (strand = :strand OR (strand IS NULL AND :strand_null IS NULL))';
-                $params = [
-                    'grade_level' => $appData['grade_level'],
-                    'strand' => $appData['strand'],
-                    'strand_null' => $appData['strand']
-                ];
-                
-                if ($appData['academic_level'] === 'College') {
-                    $sql .= ' AND semester = :semester';
-                    $params['semester'] = $appData['semester'] ?? 'First';
-                }
-                $sql .= ' LIMIT 1';
-
-                $ftStmt = $pdo->prepare($sql);
-                $ftStmt->execute($params);
-                $template = $ftStmt->fetch();
-                
-                if ($template) {
-                    $academicLevel = $appData['academic_level'];
-                    $feeTemplateId = (int)$template['id'];
-
-                $tuitionFee = (float)$template['tuition_fee'];
-                $isPerUnit = !empty($template['is_per_unit']);
-
-                if ($isPerUnit) {
-                    $totalUnits = 0;
-                    if ($academicLevel === 'College') {
-                        $unitsStmt = $pdo->prepare('
-                            SELECT SUM(s.units) 
-                            FROM college_enrollments ce 
-                            JOIN subjects s ON ce.subject_id = s.id 
-                            WHERE ce.application_id = :app_id
-                        ');
-                        $unitsStmt->execute(['app_id' => $appId]);
-                        $totalUnits = (int)$unitsStmt->fetchColumn();
-
-                        if ($totalUnits === 0 && !empty($appData['section_id'])) {
-                            $unitsStmt = $pdo->prepare('
-                                SELECT SUM(s.units) 
-                                FROM college_section_subjects css 
-                                JOIN subjects s ON css.subject_id = s.id 
-                                WHERE css.college_section_id = :sec_id
-                            ');
-                            $unitsStmt->execute(['sec_id' => $appData['section_id']]);
-                            $totalUnits = (int)$unitsStmt->fetchColumn();
-                        }
-
-                        if ($totalUnits === 0) {
-                            $unitsStmt = $pdo->prepare('
-                                SELECT SUM(s.units)
-                                FROM college_curriculum_subjects ccs
-                                JOIN subjects s ON ccs.subject_id = s.id
-                                JOIN college_curricula cc ON ccs.curriculum_id = cc.id
-                                JOIN college_programs p ON cc.program_id = p.id
-                                WHERE p.code = :strand AND ccs.year_level = :year_level AND ccs.semester = :semester
-                            ');
-                            $unitsStmt->execute([
-                                'strand' => $appData['strand'],
-                                'year_level' => $appData['grade_level'],
-                                'semester' => $appData['semester'] ?? 'First'
-                            ]);
-                            $totalUnits = (int)$unitsStmt->fetchColumn();
-                        }
-                    } elseif ($academicLevel === 'Senior High School') {
-                        $unitsStmt = $pdo->prepare('
-                            SELECT SUM(s.units) 
-                            FROM shs_enrollments se 
-                            JOIN subjects s ON se.subject_id = s.id 
-                            WHERE se.application_id = :app_id
-                        ');
-                        $unitsStmt->execute(['app_id' => $appId]);
-                        $totalUnits = (int)$unitsStmt->fetchColumn();
-
-                        if ($totalUnits === 0 && !empty($appData['section_id'])) {
-                            $unitsStmt = $pdo->prepare('
-                                SELECT SUM(s.units) 
-                                FROM shs_section_subjects ss 
-                                JOIN subjects s ON ss.subject_id = s.id 
-                                WHERE ss.shs_section_id = :sec_id
-                            ');
-                            $unitsStmt->execute(['sec_id' => $appData['section_id']]);
-                            $totalUnits = (int)$unitsStmt->fetchColumn();
-                        }
-
-                        if ($totalUnits === 0) {
-                            $unitsStmt = $pdo->prepare('
-                                SELECT SUM(s.units)
-                                FROM shs_curriculum_subjects scs
-                                JOIN subjects s ON scs.subject_id = s.id
-                                JOIN shs_curricula sc ON scs.curriculum_id = sc.id
-                                JOIN shs_strands st ON sc.strand_id = st.id
-                                WHERE st.code = :strand AND scs.grade_level = :grade_level AND scs.semester = :semester
-                            ');
-                            $unitsStmt->execute([
-                                'strand' => $appData['strand'],
-                                'grade_level' => $appData['grade_level'],
-                                'semester' => $appData['semester'] ?? 'First'
-                            ]);
-                            $totalUnits = (int)$unitsStmt->fetchColumn();
-                        }
-                    }
-
-                    if ($totalUnits > 0) {
-                        $tuitionFee = $totalUnits * (float)$template['tuition_fee'];
-                    } else {
-                        $tuitionFee = 0;
-                    }
-                }
-
-                $miscFee = (float)$template['miscellaneous_fee'];
-                $regFee = (float)$template['registration_fee'];
-                $labFee = (float)$template['laboratory_fee'];
-                $otherFees = (float)$template['other_fees'];
-                
-                $totalAmount = $tuitionFee + $miscFee + $regFee + $labFee + $otherFees;
-
-                $insertAssStmt = $pdo->prepare('
-                    INSERT INTO student_assessments 
-                    (user_id, application_id, fee_template_id, tuition_fee, miscellaneous_fee, registration_fee, laboratory_fee, other_fees, total_amount, discount_amount, net_amount)
-                    VALUES 
-                    (:user_id, :app_id, :fee_id, :tuition, :misc, :reg, :lab, :other, :total_amount, 0, :net_amount)
-                ');
-                $insertAssStmt->execute([
-                    'user_id' => $userId,
-                    'app_id' => $appId,
-                    'fee_id' => $feeTemplateId,
-                    'tuition' => $tuitionFee,
-                    'misc' => $miscFee,
-                    'reg' => $regFee,
-                    'lab' => $labFee,
-                    'other' => $otherFees,
-                    'total_amount' => $totalAmount,
-                    'net_amount' => $totalAmount
-                ]);
-
-                // Immediately recalculate assessment in case they already have active scholarships
-                recalculateStudentAssessment($userId, $pdo);
-                
-                // Log Assessment Generation
-                $logDocStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:user_id, :icon, :title, :description)');
-                $logDocStmt->execute([
-                    'user_id' => $userId,
-                    'icon' => 'bi-cash-stack text-success',
-                    'title' => "Financial Assessment Generated",
-                    'description' => "Your financial assessment has been generated and is ready for review."
-                ]);
-            }
-        }
-        }
+        \App\Services\AssessmentService::generateAssessment($appId, $userId, $pdo);
     }
 
     // 3. Generate Timeline Log for the Applicant
@@ -952,9 +868,13 @@ try {
         );
     }
 
+    $pdo->commit();
     $_SESSION['admin_success'] = "Application successfully updated to '{$statusTitle}'.";
 
-} catch (PDOException $e) {
+} catch (\Exception $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
     error_log('Admin action failed: ' . $e->getMessage());
     $_SESSION['admin_error'] = 'A database error occurred: ' . $e->getMessage();
 }
