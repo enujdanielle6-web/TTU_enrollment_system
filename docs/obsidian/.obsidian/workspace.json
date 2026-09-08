@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "00 - Home/TTU Enrollment System Home.md",
+                "file": "10 - Bugs & Issues/Known Issues.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "TTU Enrollment System Home"
+              "title": "Known Issues"
             }
           }
         ]
@@ -187,12 +187,12 @@
   },
   "active": "094ecf3ffec287db",
   "lastOpenFiles": [
+    "00 - Home/TTU Enrollment System Home.md",
     "04 - Database/Applications Table.md",
     "10 - Bugs & Issues/Known Issues.md",
     "14 - Architecture Decisions/ADR Index.md",
     "14 - Architecture Decisions/ADR-005 Curriculum Versioning and Subject Catalog Immutability.md",
     "04 - Database/Entity Relationship Architecture.md",
-    "00 - Home/TTU Enrollment System Home.md",
     "16 - Page Relationships/13 - LMS Faculty Portal Relationship Map.md",
     "16 - Page Relationships/12 - LMS Student Portal Relationship Map.md",
     "16 - Page Relationships/11 - System Admin & Reports Relationship Map.md",

@@ -161,11 +161,17 @@ This document tracks architectural debt, bugs discovered during development, and
 - **Root Cause:** `RegistrarController::students()` executed an unpaginated query, delegating filtering to client-side DOM manipulation.
 - **Resolution:** Implemented server-side pagination (25, 50, 100 records per page) with parameterized dynamic filtering, global KPI aggregate counts, records-per-page selection, pagination navigation with parameter preservation, and synchronized CSV export.
 
+### Issue 27: Public Landing Page Empty Academic Cards (Non-Existent Column Queries)
+- **Module:** [[Landing Page & Program Card Customization]] / `HomeController.php` & `home.php`
+- **Symptoms:** The public university landing page (`/`) displayed empty notice blocks: *"No College degree programs are currently available"* and *"No Senior High School strands are currently available"*.
+- **Root Cause:** `HomeController::index()` selected `icon`, `careers`, and `custom_tuition` from `college_programs` and `shs_strands`. These columns did not exist in the database schema, causing both queries to fail with `1054 Unknown column` and fall into silent `try...catch` error logging.
+- **Resolution:** Removed non-existent column selections from `HomeController.php`, allowing existing columns (`id`, `code`, `name`, `description`, and joined fee template fields) to load cleanly. Leveraged `home.php` view fallback helper closures to format modern icons, career highlights, and tuition ranges dynamically.
+
 ---
 
 ## 2. Active Technical Debt & Discovered Codebase Defects
 
-*(All documented active codebase defects have been remediated and verified. All 26 issues are 100% resolved.)*
+*(All documented active codebase defects have been remediated and verified. All 27 issues are 100% resolved.)*
 
 ---
 **Related:**
