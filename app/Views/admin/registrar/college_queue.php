@@ -98,18 +98,31 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       <span class="badge bg-warning text-dark rounded-pill px-2 py-1 small">Needs Finalization</span>
                     </td>
                     <td class="pe-4 text-end">
-                      <div class="d-inline-flex align-items-center gap-2">
-                        <a href="../admissions/application_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="View Details">
-                          <i class="bi bi-eye"></i>
-                        </a>
-                        <form method="POST" action="finalize_enrollment.php" class="d-inline form-finalize" data-student-name="<?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8'); ?>" data-ref-number="<?= htmlspecialchars($app['reference_number'], ENT_QUOTES, 'UTF-8'); ?>">
-                          <?= getCsrfInput() ?>
-                          <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
-                          <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
-                            <i class="bi bi-check-circle me-1"></i> Finalize
-                          </button>
-                        </form>
-                      </div>
+                      <?php 
+                        $appDetails = [
+                          'id' => $app['id'],
+                          'ref_number' => $app['reference_number'],
+                          'name' => $app['last_name'] . ', ' . $app['first_name'],
+                          'email' => $app['email'] ?? '',
+                          'academic_level' => $app['academic_level'],
+                          'program' => strtoupper($app['strand'] ?? ''),
+                          'grade_level' => $app['grade_level'] ?? '',
+                          'student_type' => $app['student_type'] ?? 'Regular',
+                          'section' => $app['section_code'] ?? 'Not Assigned',
+                          'payment_status' => $app['payment_status'] === 'paid' ? 'Fully Paid' : 'Partially Paid',
+                          'total_paid' => '₱' . number_format((float)($app['total_paid'] ?? 0), 2),
+                          'total_assessment' => !empty($app['total_assessment']) ? '₱' . number_format((float)$app['total_assessment'], 2) : 'N/A',
+                          'medical_status' => ucfirst($app['medical_status'] ?? 'Not Submitted'),
+                          'date_applied' => date('M d, Y', strtotime($app['created_at']))
+                        ];
+                      ?>
+                      <form method="POST" action="finalize_enrollment.php" class="d-inline form-finalize" data-app="<?= htmlspecialchars(json_encode($appDetails), ENT_QUOTES, 'UTF-8'); ?>">
+                        <?= getCsrfInput() ?>
+                        <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
+                        <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
+                          <i class="bi bi-check-circle me-1"></i> Finalize
+                        </button>
+                      </form>
                     </td>
                   </tr>
                 <?php endforeach; ?>

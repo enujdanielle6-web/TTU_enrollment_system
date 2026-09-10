@@ -368,14 +368,20 @@ try {
             a.academic_level,
             a.strand, 
             a.grade_level,
+            a.student_type,
             a.created_at, 
             u.first_name, 
             u.last_name,
+            u.email,
             sa.payment_status,
-            sa.total_paid
+            sa.total_paid,
+            sa.total_assessment,
+            cs.section_code,
+            (SELECT h.status FROM health_records h WHERE h.application_id = a.id LIMIT 1) as medical_status
         FROM applications a
         INNER JOIN users u ON u.id = a.user_id
         INNER JOIN student_assessments sa ON sa.application_id = a.id
+        LEFT JOIN college_sections cs ON cs.id = a.section_id
         $whereSQL
         ORDER BY $orderBy
         LIMIT :limit OFFSET :offset
@@ -460,14 +466,20 @@ try {
             a.academic_level,
             a.strand, 
             a.grade_level,
+            a.student_type,
             a.created_at, 
             u.first_name, 
             u.last_name,
+            u.email,
             sa.payment_status,
-            sa.total_paid
+            sa.total_paid,
+            sa.total_assessment,
+            ss.section_code,
+            (SELECT h.status FROM health_records h WHERE h.application_id = a.id LIMIT 1) as medical_status
         FROM applications a
         INNER JOIN users u ON u.id = a.user_id
         INNER JOIN student_assessments sa ON sa.application_id = a.id
+        LEFT JOIN shs_sections ss ON ss.id = a.section_id
         $whereSQL
         ORDER BY $orderBy
         LIMIT :limit OFFSET :offset

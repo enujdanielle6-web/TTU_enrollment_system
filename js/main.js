@@ -122,9 +122,6 @@ document.addEventListener('submit', function (e) {
     e.preventDefault();
     e.stopPropagation();
 
-    const studentName = form.dataset.studentName || 'this student';
-    const refNumber = form.dataset.refNumber || '';
-
     function escapeHtml(str) {
         if (!str) return '';
         const div = document.createElement('div');
@@ -132,31 +129,113 @@ document.addEventListener('submit', function (e) {
         return div.innerHTML;
     }
 
+    let app = {};
+    if (form.dataset.app) {
+        try {
+            app = JSON.parse(form.dataset.app);
+        } catch (err) {
+            console.error('Failed to parse application details', err);
+        }
+    }
+
+    const studentName = app.name || form.dataset.studentName || 'Applicant';
+    const refNumber = app.ref_number || form.dataset.refNumber || '';
+    const email = app.email || 'N/A';
+    const academicLevel = app.academic_level || 'N/A';
+    const program = app.program || 'N/A';
+    const studentType = app.student_type || 'Regular';
+    const section = app.section || 'Not Assigned';
+    const paymentStatus = app.payment_status || 'Paid';
+    const totalPaid = app.total_paid || '₱0.00';
+    const totalAssessment = app.total_assessment || 'N/A';
+    const medicalStatus = app.medical_status || 'Not Submitted';
+    const dateApplied = app.date_applied || 'N/A';
+    const appId = app.id || '';
+
+    const isMedVerified = medicalStatus.toLowerCase() === 'verified';
+    const isFullyPaid = paymentStatus.toLowerCase().includes('fully');
+
     if (typeof Swal !== 'undefined') {
         Swal.fire({
-            title: 'Finalize Official Enrollment?',
+            title: '<div class="h4 fw-bold mb-0 text-dark">Review & Finalize Official Enrollment</div>',
+            width: '640px',
             html: `
-                <div class="text-start p-2">
-                    <p class="mb-2 text-muted">Are you sure you want to finalize official enrollment for:</p>
-                    <div class="p-3 bg-light rounded-3 border mb-3">
-                        <div class="fw-bold text-dark fs-6">${escapeHtml(studentName)}</div>
-                        <div class="text-muted small font-monospace mt-1"><i class="bi bi-hash"></i>${escapeHtml(refNumber)}</div>
+                <div class="text-start mt-2">
+                    <!-- Student Identity Card -->
+                    <div class="p-3 bg-light rounded-4 border mb-3">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                            <div>
+                                <div class="fw-bold text-dark fs-5 mb-0">${escapeHtml(studentName)}</div>
+                                <div class="text-muted small"><i class="bi bi-envelope me-1"></i>${escapeHtml(email)}</div>
+                            </div>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle font-monospace px-3 py-2 rounded-pill fs-7">
+                                <i class="bi bi-hash"></i>${escapeHtml(refNumber)}
+                            </span>
+                        </div>
                     </div>
-                    <div class="alert alert-info py-2 px-3 small mb-0 rounded-3 border-0 bg-info-subtle text-info-emphasis">
-                        <i class="bi bi-info-circle-fill me-1"></i>
-                        This will assign their official student number, provision their institutional <code>@ttu.edu.ph</code> email, and send welcome credentials.
+
+                    <!-- Application Details Grid -->
+                    <div class="card border rounded-4 shadow-none mb-3 overflow-hidden">
+                        <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center">
+                            <span class="small fw-bold text-uppercase text-muted"><i class="bi bi-card-checklist me-1 text-primary"></i> Application Summary</span>
+                            ${appId ? `<a href="../admissions/application_detail.php?id=${appId}" target="_blank" class="small text-decoration-none text-primary fw-medium"><i class="bi bi-box-arrow-up-right me-1"></i>Full Dossier</a>` : ''}
+                        </div>
+                        <div class="card-body p-3 bg-white">
+                            <div class="row g-2 small">
+                                <div class="col-6">
+                                    <span class="text-muted d-block" style="font-size: 0.75rem;">LEVEL & PROGRAM</span>
+                                    <span class="fw-semibold text-dark">${escapeHtml(academicLevel)} &bull; ${escapeHtml(program)}</span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block" style="font-size: 0.75rem;">STUDENT TYPE</span>
+                                    <span class="fw-semibold text-dark">${escapeHtml(studentType)}</span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block" style="font-size: 0.75rem;">ASSIGNED SECTION</span>
+                                    <span class="fw-semibold ${section !== 'Not Assigned' ? 'text-primary' : 'text-danger'}">
+                                        <i class="bi bi-diagram-3 me-1"></i>${escapeHtml(section)}
+                                    </span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block" style="font-size: 0.75rem;">DATE APPLIED</span>
+                                    <span class="fw-semibold text-dark">${escapeHtml(dateApplied)}</span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block" style="font-size: 0.75rem;">PAYMENT STATUS</span>
+                                    <span class="badge ${isFullyPaid ? 'bg-success' : 'bg-info text-dark'} rounded-pill px-2 py-1">
+                                        ${escapeHtml(paymentStatus)}
+                                    </span>
+                                    <span class="text-dark fw-medium ms-1">${escapeHtml(totalPaid)}</span>
+                                </div>
+                                <div class="col-6">
+                                    <span class="text-muted d-block" style="font-size: 0.75rem;">CLINIC CLEARANCE</span>
+                                    <span class="badge ${isMedVerified ? 'bg-success' : 'bg-warning text-dark'} rounded-pill px-2 py-1">
+                                        ${escapeHtml(medicalStatus)}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Institutional Provisioning Notice -->
+                    <div class="alert alert-success bg-success-subtle border-0 rounded-4 p-3 mb-0 text-success-emphasis small">
+                        <div class="fw-bold mb-1"><i class="bi bi-shield-fill-check me-1"></i> Actions Executed Upon Finalization:</div>
+                        <ul class="mb-0 ps-3">
+                            <li>Generate official Student ID Number (<code>YYYY-XXXXXX</code>)</li>
+                            <li>Provision institutional university email (<code>@ttu.edu.ph</code>)</li>
+                            <li>Enroll in class section timetable & dispatch credentials</li>
+                        </ul>
                     </div>
                 </div>
             `,
-            icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '<i class="bi bi-mortarboard-fill me-1"></i> Yes, Finalize Enrollment',
+            confirmButtonText: '<i class="bi bi-mortarboard-fill me-1"></i> Yes, Finalize Official Enrollment',
             cancelButtonText: 'Cancel',
             reverseButtons: true,
             buttonsStyling: false,
             focusCancel: true,
             customClass: {
-                popup: 'rounded-4 shadow-lg border-0 p-3',
+                popup: 'rounded-4 shadow-lg border-0 p-4',
                 confirmButton: 'btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm',
                 cancelButton: 'btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold me-2'
             }
@@ -181,3 +260,4 @@ document.addEventListener('submit', function (e) {
         }
     }
 }, true);
+
