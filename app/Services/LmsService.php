@@ -63,14 +63,31 @@ class LmsService
             SELECT 
                 lc.id as lms_course_id,
                 lc.academic_level,
+                lc.academic_section_id,
+                lc.subject_id,
+                s.subject_code, 
+                s.subject_name,
                 s.subject_code as code, 
                 s.subject_name as name,
-                COALESCE(cs.section_code, ss.section_code) as section_name
+                s.units,
+                COALESCE(cs.section_code, ss.section_code) as section_code,
+                COALESCE(cs.section_code, ss.section_code) as section_name,
+                u.first_name,
+                u.last_name,
+                u.email,
+                (
+                    SELECT COUNT(DISTINCT a.user_id) 
+                    FROM applications a 
+                    WHERE a.section_id = lc.academic_section_id 
+                      AND a.status IN ('enrolled', 'approved')
+                ) as enrolled_count
             FROM lms_courses lc
             JOIN subjects s ON lc.subject_id = s.id
             LEFT JOIN college_sections cs ON lc.academic_level = 'College' AND lc.academic_section_id = cs.id
-            LEFT JOIN shs_sections ss ON lc.academic_level = 'SHS' AND lc.academic_section_id = ss.id
+            LEFT JOIN shs_sections ss ON (lc.academic_level = 'SHS' OR lc.academic_level = 'Senior High School') AND lc.academic_section_id = ss.id
+            LEFT JOIN users u ON lc.faculty_user_id = u.id
             WHERE lc.faculty_user_id = :fid AND lc.status = 'active'
+            ORDER BY s.subject_code ASC
         ");
         $stmt->execute(['fid' => $facultyUserId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -592,5 +609,146 @@ class LmsService
         });
 
         return array_slice($updates, 0, $limit);
+    }
+
+    public function getFacultyPendingSubmissionsCount(int $facultyUserId): int
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT COUNT(*) 
+            FROM lms_submissions sub
+            JOIN lms_assignments a ON sub.assignment_id = a.id
+            JOIN lms_courses lc ON a.lms_course_id = lc.id
+            WHERE lc.faculty_user_id = :fid
+              AND sub.status IN ('SUBMITTED', 'RESUBMITTED')
+        ");
+        $stmt->execute(['fid' => $facultyUserId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    public function getFacultyRecentSubmissions(int $facultyUserId, int $limit = 5): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                sub.id as submission_id,
+                sub.assignment_id,
+                sub.status,
+                sub.submitted_at,
+                sub.file_name,
+                a.title as assignment_title,
+                a.lms_course_id,
+                s.subject_code,
+                s.subject_name,
+                u.first_name as student_first,
+                u.last_name as student_last,
+                u.email as student_email
+            FROM lms_submissions sub
+            JOIN lms_assignments a ON sub.assignment_id = a.id
+            JOIN lms_courses lc ON a.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            LEFT JOIN users u ON sub.student_id = u.id
+            WHERE lc.faculty_user_id = :fid
+            ORDER BY sub.submitted_at DESC
+            LIMIT :limit
+        ");
+        $stmt->bindValue(':fid', $facultyUserId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getFacultyRecentAnnouncements(int $facultyUserId, int $limit = 5): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT 
+                ann.id,
+                ann.title,
+                ann.content,
+                ann.status,
+                ann.created_at,
+                ann.lms_course_id,
+                s.subject_code,
+                s.subject_name
+            FROM lms_announcements ann
+            JOIN lms_courses lc ON ann.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            WHERE lc.faculty_user_id = :fid
+            ORDER BY ann.created_at DESC
+            LIMIT :limit
+        ");
+        $stmt->bindValue(':fid', $facultyUserId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getFacultyRecentActivity(int $facultyUserId, int $limit = 6): array
+    {
+        $courses = $this->getFacultyCourses($facultyUserId);
+        if (empty($courses)) {
+            return [];
+        }
+
+        $activities = [];
+
+        // 1. Recent Student Submissions
+        $stmtSub = $this->pdo->prepare("
+            SELECT 
+                sub.id,
+                CONCAT(COALESCE(u.first_name, 'Student'), ' submitted \"', a.title, '\"') as title,
+                sub.submitted_at as created_at,
+                a.lms_course_id,
+                s.subject_code,
+                COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Student') as student_name,
+                'submission' as type,
+                CONCAT('/sia/lms/faculty/course/', a.lms_course_id, '/assignments/', a.id, '/submissions') as url,
+                sub.status
+            FROM lms_submissions sub
+            JOIN lms_assignments a ON sub.assignment_id = a.id
+            JOIN lms_courses lc ON a.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            LEFT JOIN users u ON sub.student_id = u.id
+            WHERE lc.faculty_user_id = :fid
+            ORDER BY sub.submitted_at DESC
+            LIMIT :limit
+        ");
+        $stmtSub->bindValue(':fid', $facultyUserId, PDO::PARAM_INT);
+        $stmtSub->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmtSub->execute();
+        foreach ($stmtSub->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $activities[] = $row;
+        }
+
+        // 2. Recent Announcements
+        $stmtAnn = $this->pdo->prepare("
+            SELECT 
+                ann.id,
+                ann.title,
+                ann.created_at,
+                ann.lms_course_id,
+                s.subject_code,
+                'You' as student_name,
+                'announcement' as type,
+                CONCAT('/sia/lms/faculty/course/', ann.lms_course_id, '/announcements') as url,
+                ann.status
+            FROM lms_announcements ann
+            JOIN lms_courses lc ON ann.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            WHERE lc.faculty_user_id = :fid
+            ORDER BY ann.created_at DESC
+            LIMIT :limit
+        ");
+        $stmtAnn->bindValue(':fid', $facultyUserId, PDO::PARAM_INT);
+        $stmtAnn->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmtAnn->execute();
+        foreach ($stmtAnn->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $activities[] = $row;
+        }
+
+        // Sort combined activities by created_at DESC
+        usort($activities, function ($a, $b) {
+            return strtotime($b['created_at']) <=> strtotime($a['created_at']);
+        });
+
+        return array_slice($activities, 0, $limit);
     }
 }

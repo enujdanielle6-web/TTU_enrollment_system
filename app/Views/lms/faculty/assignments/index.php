@@ -1,12 +1,20 @@
-<?php require_once __DIR__ . '/../../../../Views/components/header.php'; ?>
+<?php require_once __DIR__ . '/../layout_header.php'; ?>
 
-<div class="container py-5">
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Assignments</li>
+        </ol>
+    </nav>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 fw-bold text-dark mb-1">Assignments: <?= htmlspecialchars($course['subject_code']) ?></h1>
             <p class="text-muted mb-0"><?= htmlspecialchars($course['subject_name']) ?> &bull; Section <?= htmlspecialchars($course['section_code']) ?></p>
         </div>
-        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/create" class="btn btn-primary shadow-sm">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
             <i class="bi bi-plus-circle me-1"></i> New Assignment
         </a>
     </div>
@@ -40,18 +48,18 @@
                                     </td>
                                     <td>
                                         <?php if ($assignment['status'] === 'published'): ?>
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Published</span>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1">Published</span>
                                         <?php else: ?>
-                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Draft</span>
+                                            <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 px-2.5 py-1">Draft</span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?= esc($assignment['due_date'] ? date('M d, Y h:i A', strtotime($assignment['due_date'])) : '<span class="text-muted">No due date</span>') ?>
+                                        <?= esc($assignment['due_date'] ? date('M d, Y h:i A', strtotime($assignment['due_date'])) : 'No due date') ?>
                                     </td>
                                     <td><?= esc($assignment['max_score']) ?> pts</td>
                                     <td class="text-end pe-4">
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/edit" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submissions" class="btn btn-sm btn-info text-white ms-1">View Submissions</a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/edit" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Edit</a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submissions" class="btn btn-sm btn-primary rounded-pill px-3 ms-1">View Submissions</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -63,4 +71,4 @@
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../../../../Views/components/footer.php'; ?>
+<?php require_once __DIR__ . '/../layout_footer.php'; ?>

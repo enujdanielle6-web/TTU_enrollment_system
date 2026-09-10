@@ -12,10 +12,20 @@ class FacultyController extends BaseController
     public function dashboard(Request $request, Response $response)
     {
         $lmsService = new \App\Services\LmsService();
-        $facultyUserId = $_SESSION['user_id'] ?? 0;
+        $facultyUserId = (int)($_SESSION['user_id'] ?? $_SESSION['lms_user_id'] ?? 0);
 
         $faculty_courses = $lmsService->getFacultyCourses($facultyUserId);
         
+        $totalCourses = count($faculty_courses);
+        $totalStudents = 0;
+        foreach ($faculty_courses as $fc) {
+            $totalStudents += (int)($fc['enrolled_count'] ?? 0);
+        }
+
+        $pendingSubmissionsCount = $lmsService->getFacultyPendingSubmissionsCount($facultyUserId);
+        $recentSubmissions = $lmsService->getFacultyRecentSubmissions($facultyUserId, 5);
+        $recentAnnouncements = $lmsService->getFacultyRecentAnnouncements($facultyUserId, 5);
+
         $pageTitle = 'Faculty Dashboard - TTU LMS';
 
         return $this->render('lms/faculty/dashboard', get_defined_vars());

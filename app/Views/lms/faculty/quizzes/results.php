@@ -1,11 +1,14 @@
-<?php require_once __DIR__ . '/../../../../Views/components/header.php'; ?>
+<?php require_once __DIR__ . '/../layout_header.php'; ?>
 
-<div class="container py-5">
-    <div class="mb-4">
-        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="text-decoration-none">
-            <i class="bi bi-arrow-left me-1"></i> Back to Quizzes
-        </a>
-    </div>
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="text-decoration-none text-muted">Quizzes</a></li>
+            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Results</li>
+        </ol>
+    </nav>
 
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4 bg-light border-bottom rounded-top-4">
@@ -67,4 +70,4 @@
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../../../../Views/components/footer.php'; ?>
+<?php require_once __DIR__ . '/../layout_footer.php'; ?>

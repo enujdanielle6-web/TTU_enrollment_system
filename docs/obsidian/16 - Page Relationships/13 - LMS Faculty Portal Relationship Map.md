@@ -19,20 +19,33 @@ GET /lms/faculty/dashboard.php
     ↓
 FacultyController@dashboard
     ↓
+LmsService:
 1. Query active assigned courses:
-   SELECT c.*, s.subject_code, s.subject_name, sec.section_code
-   FROM lms_courses c
-   JOIN subjects s ON c.subject_id = s.id
-   LEFT JOIN college_sections sec ON c.college_section_id = sec.id
-   WHERE c.instructor_id = ?
+   SELECT lc.id as lms_course_id, lc.academic_level, lc.academic_section_id, lc.subject_id,
+          s.subject_code, s.subject_name, s.units,
+          COALESCE(cs.section_code, ss.section_code) as section_code,
+          u.first_name, u.last_name, u.email,
+          (SELECT COUNT(DISTINCT a.user_id) FROM applications a 
+           WHERE a.section_id = lc.academic_section_id AND a.status IN ('enrolled', 'approved')) as enrolled_count
+   FROM lms_courses lc
+   JOIN subjects s ON lc.subject_id = s.id
+   LEFT JOIN college_sections cs ON lc.academic_level = 'College' AND lc.academic_section_id = cs.id
+   LEFT JOIN shs_sections ss ON (lc.academic_level = 'SHS' OR lc.academic_level = 'Senior High School') AND lc.academic_section_id = ss.id
+   LEFT JOIN users u ON lc.faculty_user_id = u.id
+   WHERE lc.faculty_user_id = :fid AND lc.status = 'active'
 2. Query pending grading count:
-   SELECT COUNT(*) as pending_count 
-   FROM lms_submissions sub
-   JOIN lms_assignments a ON sub.lms_assignment_id = a.id
-   JOIN lms_courses c ON a.lms_course_id = c.id
-   WHERE c.instructor_id = ? AND sub.grade IS NULL
+   SELECT COUNT(*) FROM lms_submissions sub
+   JOIN lms_assignments a ON sub.assignment_id = a.id
+   JOIN lms_courses lc ON a.lms_course_id = lc.id
+   WHERE lc.faculty_user_id = :fid AND sub.status IN ('SUBMITTED', 'RESUBMITTED')
+3. Query recent student submissions (LIMIT 5)
+4. Query recent course notices/announcements (LIMIT 5)
     ↓
-Renders assigned class roster cards, enrollment counts, and pending grading alerts
+Renders modern 2-column layout aligned with Student LMS:
+- Welcome Hero banner with teaching metrics (Total Courses, Enrolled Students, To Grade)
+- Quick Action shortcut cards (Teaching, Calendar, Messages, Profile)
+- Course cards with vibrant gradients, academic level badges, units, section, enrolled counts
+- Grading Queue and Course Notices side widgets
 ```
 
 ---

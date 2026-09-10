@@ -104,6 +104,7 @@ if ($role === 'student') {
             $_SESSION['lms_user_id'] = $user['id'];
             $_SESSION['lms_role'] = 'student';
             $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
+            $_SESSION['lms_email'] = $user['email'];
             $response->redirect("/sia/lms/student/dashboard.php");
             return;
         } else {
@@ -142,6 +143,7 @@ if ($role === 'student') {
         $_SESSION['lms_user_id'] = $user['id'];
         $_SESSION['lms_role'] = 'faculty';
         $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
+        $_SESSION['lms_email'] = $user['email'];
         $response->redirect("/sia/auth/../lms/faculty/dashboard.php");
         return;
     } else {

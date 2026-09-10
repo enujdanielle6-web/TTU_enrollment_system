@@ -1,19 +1,18 @@
 <?php require_once __DIR__ . '/layout_header.php'; ?>
 
 <div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="dashboard.php" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($course['subject_code']) ?> - Modules</li>
-        </ol>
-    </nav>
+    <!-- Course Header & Horizontal Navigation -->
+    <?php 
+    $active_tab = 'modules';
+    require __DIR__ . '/components/course_header.php'; 
+    ?>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="h3 fw-bold text-dark mb-1"><?= htmlspecialchars($course['subject_code']) ?>: <?= htmlspecialchars($course['subject_name']) ?></h1>
-            <p class="text-muted mb-0">Section <?= htmlspecialchars($course['section_code']) ?></p>
+            <h2 class="h4 fw-bold text-dark mb-1">Learning Modules &amp; Materials</h2>
+            <p class="text-muted mb-0">Organize units, lessons, and downloadable course resources.</p>
         </div>
-        <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#createModuleModal">
+        <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" data-bs-toggle="modal" data-bs-target="#createModuleModal">
             <i class="bi bi-plus-lg me-1"></i> New Module
         </button>
     </div>

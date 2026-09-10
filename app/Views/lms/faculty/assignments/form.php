@@ -1,11 +1,14 @@
-<?php require_once __DIR__ . '/../../../../Views/components/header.php'; ?>
+<?php require_once __DIR__ . '/../layout_header.php'; ?>
 
-<div class="container py-5">
-    <div class="mb-4">
-        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="text-decoration-none">
-            <i class="bi bi-arrow-left me-1"></i> Back to Assignments
-        </a>
-    </div>
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="text-decoration-none text-muted">Assignments</a></li>
+            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page"><?= esc($assignment ? 'Edit Assignment' : 'Create Assignment') ?></li>
+        </ol>
+    </nav>
 
     <div class="card border-0 shadow-sm rounded-4">
         <div class="card-header bg-white border-bottom p-4">
@@ -45,12 +48,12 @@
                 <hr class="mb-4">
 
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="btn btn-light">Cancel</a>
-                    <button type="submit" class="btn btn-primary px-4"><?= esc($assignment ? 'Save Changes' : 'Create Assignment') ?></button>
+                    <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="btn btn-light rounded-pill px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm fw-bold"><?= esc($assignment ? 'Save Changes' : 'Create Assignment') ?></button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../../../../Views/components/footer.php'; ?>
+<?php require_once __DIR__ . '/../layout_footer.php'; ?>

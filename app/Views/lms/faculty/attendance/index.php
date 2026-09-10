@@ -1,12 +1,20 @@
-<?php require_once __DIR__ . '/../../../../Views/components/header.php'; ?>
+<?php require_once __DIR__ . '/../layout_header.php'; ?>
 
-<div class="container py-5">
+<div class="container-fluid py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Attendance</li>
+        </ol>
+    </nav>
+
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
             <h1 class="h3 fw-bold text-dark mb-1">Attendance: <?= htmlspecialchars($course['subject_code']) ?></h1>
             <p class="text-muted mb-0"><?= htmlspecialchars($course['subject_name']) ?> &bull; Section <?= htmlspecialchars($course['section_code']) ?></p>
         </div>
-        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/create" class="btn btn-primary shadow-sm">
+        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
             <i class="bi bi-plus-circle me-1"></i> New Session
         </a>
     </div>
@@ -65,4 +73,4 @@
     </div>
 </div>
 
-<?php require_once __DIR__ . '/../../../../Views/components/footer.php'; ?>
+<?php require_once __DIR__ . '/../layout_footer.php'; ?>
