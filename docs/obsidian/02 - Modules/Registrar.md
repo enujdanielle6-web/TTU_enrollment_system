@@ -23,19 +23,25 @@ The Registrar module is the administrative core for managing the academic catalo
 4. **Enrollment Queues & Finalization Authority:**
    - **Enrollment Queue:** Monitors verified applicants (`a.status = 'payment_verified'`) across College and Senior High School.
    - **Authoritative Finalization:** Registrar exclusively owns final student enrollment via `finalize_enrollment.php` (delegated to `App\Services\EnrollmentService`), generating the permanent student number (`YYYY-XXXXXX`), provisioning institutional email, configuring password reset, and assigning enrolled section subjects.
-5. **Student Masterlist & Server-Side Pagination:**
-   - Powers the official student roster (`students.php`) with server-side pagination (25, 50, 100 per page), preventing client-side DOM freezes on large rosters.
-   - Includes real-time multi-criteria filtering (Level, Grade/Year, Strand/Program, Status, Search) and global aggregate KPI metric calculations.
-   - Synchronizes filtered exports to CSV via `students_export.php` (supporting both GET and POST requests).
+5. **Student Masterlist (Strictly Enrolled Students):**
+   - Powers the official student roster (`students.php`) strictly scoped to verified, finalized enrollees (`a.status = 'enrolled'`), excluding applicants with non-finalized statuses (`approved`, `under_review`, `pending`).
+   - Features high-performance server-side pagination (25, 50, 100 per page) preventing client-side DOM freezes.
+   - Provides targeted filtering across Academic Level, Grade/Year, Program/Strand, and search query (name, student number, or LRN).
+   - Real-time aggregate KPI metrics display Total Enrolled, College Dept, Senior High, and Official Student IDs issued.
+   - Synchronizes filtered exports to CSV via `students_export.php` enforcing the same enrolled-only constraint.
+6. **Registrar Command Center Dashboard:**
+   - Pure Hybrid MVC implementation: all database queries and aggregations are centralized in `RegistrarController@dashboard`.
+   - Displays real-time metrics for Total Enrolled, Enrollment Queue, Active Sections, and Registered Student IDs.
+   - Features a balanced 50%/50% Department Control Hub (College & Senior High shortcuts) and a live preview of recently enrolled students.
 
 ---
 
 ## 2. Core Endpoints & Actions
 | Endpoint | Method | Controller & Action | Description |
 |---|---|---|---|
-| `/admin/registrar/registrar_dashboard.php` | GET | `RegistrarController@dashboard` | Master registrar overview and curriculum counts. |
-| `/admin/registrar/students.php` | GET | `RegistrarController@students` | Server-side paginated masterlist of all enrolled and approved students. |
-| `/admin/registrar/students_export.php` | GET/POST | `RegistrarController@exportStudents` | Exports filtered student roster to CSV file. |
+| `/admin/registrar/registrar_dashboard.php` | GET | `RegistrarController@dashboard` | Executive command center with core academic stats, department hubs, and recent enrolled roster. |
+| `/admin/registrar/students.php` | GET | `RegistrarController@students` | Server-side paginated masterlist of all officially enrolled students (`status = 'enrolled'`). |
+| `/admin/registrar/students_export.php` | GET/POST | `RegistrarController@exportStudents` | Exports filtered enrolled student roster to CSV file. |
 | `/admin/registrar/college_enrollment_queue.php` | GET | `RegistrarController@collegeQueue` | College enrollment queue for `payment_verified` applicants. |
 | `/admin/registrar/shs_enrollment_queue.php` | GET | `RegistrarController@shsQueue` | SHS enrollment queue for `payment_verified` applicants. |
 | `/admin/registrar/finalize_enrollment.php` | POST | `RegistrarController@finalizeEnrollment` | Finalizes enrollment, generates student number and institutional credentials. |

@@ -5,8 +5,7 @@ require_once __DIR__ . '/../../components/header.php';
 $totalCount = $totalCount ?? 0;
 $collegeCount = $collegeCount ?? 0;
 $shsCount = $shsCount ?? 0;
-$enrolledCount = $enrolledCount ?? 0;
-$approvedCount = $approvedCount ?? 0;
+$officialIdCount = $officialIdCount ?? 0;
 $programCount = count($programs ?? []);
 
 // Pagination variables
@@ -22,7 +21,6 @@ $curSearch = $filters['search'] ?? '';
 $curLevel = $filters['level'] ?? 'all';
 $curGrade = $filters['grade'] ?? 'all';
 $curStrand = $filters['strand'] ?? 'all';
-$curStatus = $filters['status'] ?? 'all';
 
 $buildPageUrl = function($p, $pp = null) use ($filters, $perPage) {
     $params = $filters;
@@ -35,215 +33,160 @@ $activeSummaries = [];
 if ($curLevel !== 'all' && $curLevel !== '') $activeSummaries[] = 'Level: ' . $curLevel;
 if ($curGrade !== 'all' && $curGrade !== '') $activeSummaries[] = 'Grade: ' . $curGrade;
 if ($curStrand !== 'all' && $curStrand !== '') $activeSummaries[] = 'Program: ' . strtoupper($curStrand);
-if ($curStatus !== 'all' && $curStatus !== '') $activeSummaries[] = 'Status: ' . strtoupper($curStatus);
 if ($curSearch !== '') $activeSummaries[] = 'Search: "' . $curSearch . '"';
-$activeScopeText = !empty($activeSummaries) ? implode(' • ', $activeSummaries) : 'All Departments • All Programs • All Statuses';
+$activeScopeText = !empty($activeSummaries) ? implode(' • ', $activeSummaries) : 'All Enrolled Students • All Departments • All Programs';
 
 $exportQuery = http_build_query([
     'search' => $curSearch,
     'level' => $curLevel,
     'grade' => $curGrade,
-    'strand' => $curStrand,
-    'status' => $curStatus
+    'strand' => $curStrand
 ]);
 ?>
 
-<style>
-/* --- Screen Styling --- */
-.stat-card {
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 16px;
-    background: #ffffff;
-}
-.stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-}
-.stat-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.35rem;
-}
-.avatar-initials {
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    font-weight: 700;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.student-id-mono {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    letter-spacing: 0.5px;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-.custom-table th {
-    font-size: 0.75rem;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: #64748b;
-    font-weight: 700;
-    padding-top: 0.85rem;
-    padding-bottom: 0.85rem;
-}
-.custom-table td {
-    padding-top: 0.85rem;
-    padding-bottom: 0.85rem;
-}
+<?php require_once __DIR__ . '/../../components/admin_navbar.php'; ?>
 
-/* --- Print-Specific Layout for Official Academic Masterlist --- */
-@media screen {
-    .print-only { display: none !important; }
-}
+<main class="py-5 bg-light min-vh-100">
+  <style>
+  /* --- Print-Specific Layout for Official Academic Masterlist --- */
+  @media screen {
+      .print-only { display: none !important; }
+  }
 
-@media print {
-    @page {
-        size: landscape;
-        margin: 12mm 12mm 15mm 12mm;
-    }
-    *, ::after, ::before {
-        text-shadow: none !important;
-        box-shadow: none !important;
-    }
-    body {
-        background: #ffffff !important;
-        color: #0f172a !important;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
-        font-size: 9.5pt !important;
-        line-height: 1.3 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-    }
-    .no-print, .no-print * {
-        display: none !important;
-    }
-    .print-only {
-        display: block !important;
-    }
-    main {
-        padding: 0 !important;
-        background: transparent !important;
-    }
-    .container-fluid {
-        padding: 0 !important;
-        max-width: 100% !important;
-    }
-    .island {
-        border: none !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-        background: transparent !important;
-    }
+  @media print {
+      @page {
+          size: landscape;
+          margin: 12mm 12mm 15mm 12mm;
+      }
+      *, ::after, ::before {
+          text-shadow: none !important;
+          box-shadow: none !important;
+      }
+      body {
+          background: #ffffff !important;
+          color: #0f172a !important;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+          font-size: 9.5pt !important;
+          line-height: 1.3 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+      }
+      .no-print, .no-print *, .admin-sidebar, #adminSidebar, .admin-main > .sticky-top, .sidebar-minimize-btn {
+          display: none !important;
+      }
+      .print-only {
+          display: block !important;
+      }
+      main {
+          padding: 0 !important;
+          background: transparent !important;
+      }
+      .container-fluid {
+          padding: 0 !important;
+          max-width: 100% !important;
+      }
+      .island {
+          border: none !important;
+          box-shadow: none !important;
+          padding: 0 !important;
+          background: transparent !important;
+      }
 
-    /* Print Header & Letterhead */
-    .official-letterhead {
-        border-bottom: 3px double #1e293b;
-        padding-bottom: 12px;
-        margin-bottom: 15px;
-    }
-    .university-crest {
-        width: 60px;
-        height: 60px;
-    }
-    .print-meta-grid {
-        background-color: #f8fafc !important;
-        border: 1px solid #cbd5e1 !important;
-        border-radius: 6px;
-        padding: 10px 14px;
-        margin-bottom: 15px;
-        font-size: 8.5pt;
-    }
+      /* Print Header & Letterhead */
+      .official-letterhead {
+          border-bottom: 3px double #1e293b;
+          padding-bottom: 12px;
+          margin-bottom: 15px;
+      }
+      .university-crest {
+          width: 60px;
+          height: 60px;
+      }
+      .print-meta-grid {
+          background-color: #f8fafc !important;
+          border: 1px solid #cbd5e1 !important;
+          border-radius: 6px;
+          padding: 10px 14px;
+          margin-bottom: 15px;
+          font-size: 8.5pt;
+      }
 
-    /* Print Table Styling */
-    .print-table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        margin-bottom: 20px !important;
-        font-size: 8.5pt !important;
-    }
-    .print-table thead th {
-        background-color: #0f172a !important;
-        color: #ffffff !important;
-        border: 1px solid #0f172a !important;
-        padding: 6px 8px !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        font-size: 8pt !important;
-        letter-spacing: 0.5px !important;
-    }
-    .print-table tbody td {
-        border: 1px solid #cbd5e1 !important;
-        padding: 5px 8px !important;
-        vertical-align: middle !important;
-    }
-    .print-table tbody tr:nth-child(even) td {
-        background-color: #f8fafc !important;
-    }
-    .print-badge {
-        font-size: 7.5pt !important;
-        padding: 2px 6px !important;
-        border: 1px solid #475569 !important;
-        border-radius: 4px !important;
-        font-weight: 600 !important;
-        text-transform: uppercase !important;
-        display: inline-block !important;
-    }
+      /* Print Table Styling */
+      .print-table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+          margin-bottom: 20px !important;
+          font-size: 8.5pt !important;
+      }
+      .print-table thead th {
+          background-color: #0f172a !important;
+          color: #ffffff !important;
+          border: 1px solid #0f172a !important;
+          padding: 6px 8px !important;
+          font-weight: 700 !important;
+          text-transform: uppercase !important;
+          font-size: 8pt !important;
+          letter-spacing: 0.5px !important;
+      }
+      .print-table tbody td {
+          border: 1px solid #cbd5e1 !important;
+          padding: 5px 8px !important;
+          vertical-align: middle !important;
+      }
+      .print-table tbody tr:nth-child(even) td {
+          background-color: #f8fafc !important;
+      }
+      .print-badge {
+          font-size: 7.5pt !important;
+          padding: 2px 6px !important;
+          border: 1px solid #475569 !important;
+          border-radius: 4px !important;
+          font-weight: 600 !important;
+          text-transform: uppercase !important;
+          display: inline-block !important;
+      }
 
-    /* Print Signatory Section */
-    .print-signatories {
-        margin-top: 30px;
-        page-break-inside: avoid;
-    }
-    .signature-line {
-        border-bottom: 1.5px solid #0f172a;
-        width: 80%;
-        margin-top: 40px;
-        margin-bottom: 5px;
-    }
-    .seal-box {
-        width: 100px;
-        height: 60px;
-        border: 1px dashed #94a3b8;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 7pt;
-        color: #64748b;
-        margin: 0 auto;
-        text-transform: uppercase;
-    }
+      /* Print Signatory Section */
+      .print-signatories {
+          margin-top: 30px;
+          page-break-inside: avoid;
+      }
+      .signature-line {
+          border-bottom: 1.5px solid #0f172a;
+          width: 80%;
+          margin-top: 40px;
+          margin-bottom: 5px;
+      }
+      .seal-box {
+          width: 100px;
+          height: 60px;
+          border: 1px dashed #94a3b8;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 7pt;
+          color: #64748b;
+          margin: 0 auto;
+          text-transform: uppercase;
+      }
 
-    /* Footer & Page Numbering */
-    .print-footer {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        border-top: 1px solid #e2e8f0;
-        padding-top: 6px;
-        font-size: 7.5pt;
-        color: #64748b;
-    }
-}
-</style>
+      /* Footer & Page Numbering */
+      .print-footer {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          border-top: 1px solid #e2e8f0;
+          padding-top: 6px;
+          font-size: 7.5pt;
+          color: #64748b;
+      }
+  }
+  </style>
 
-<div class="no-print">
-  <?php require_once __DIR__ . '/../../components/admin_navbar.php'; ?>
-</div>
-
-<main class="py-4 py-lg-5 bg-light min-vh-100">
-  <div class="container-fluid px-3 px-lg-5">
+  <div class="container-fluid px-lg-5">
     
     <!-- ==================== OFFICIAL PRINT-ONLY DOCUMENT LAYOUT ==================== -->
     <div class="print-only">
@@ -369,7 +312,7 @@ $exportQuery = http_build_query([
             <i class="bi bi-mortarboard-fill"></i> Office of the University Registrar
           </div>
           <h1 class="h3 fw-bold text-dark mb-1">Official Student Masterlist</h1>
-          <p class="text-muted mb-0">Live roster of all officially enrolled and approved students across academic departments.</p>
+          <p class="text-muted mb-0">Live roster of all officially enrolled students across academic departments.</p>
         </div>
         <div class="d-flex flex-wrap gap-2">
           <a href="students_export.php?<?= $exportQuery ?>" id="csvExportBtn" class="btn btn-outline-success fw-semibold shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center">
@@ -386,13 +329,13 @@ $exportQuery = http_build_query([
         <div class="col-6 col-xl-3">
           <div class="stat-card p-3 p-lg-4 shadow-sm">
             <div class="d-flex align-items-center justify-content-between mb-2">
-              <span class="text-muted small fw-bold text-uppercase">Total Students</span>
+              <span class="text-muted small fw-bold text-uppercase">Total Enrolled</span>
               <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                 <i class="bi bi-people-fill"></i>
               </div>
             </div>
             <div class="h3 fw-bold text-dark mb-0"><?= number_format($totalCount) ?></div>
-            <div class="small text-muted mt-1">Official masterlist records</div>
+            <div class="small text-muted mt-1">Enrolled masterlist records</div>
           </div>
         </div>
 
@@ -405,7 +348,7 @@ $exportQuery = http_build_query([
               </div>
             </div>
             <div class="h3 fw-bold text-dark mb-0"><?= number_format($collegeCount) ?></div>
-            <div class="small text-muted mt-1">Undergraduate students</div>
+            <div class="small text-muted mt-1">Enrolled undergraduates</div>
           </div>
         </div>
 
@@ -413,32 +356,32 @@ $exportQuery = http_build_query([
           <div class="stat-card p-3 p-lg-4 shadow-sm">
             <div class="d-flex align-items-center justify-content-between mb-2">
               <span class="text-muted small fw-bold text-uppercase">Senior High</span>
-              <div class="stat-icon-wrapper bg-purple bg-opacity-10 text-purple" style="background: rgba(147, 51, 234, 0.1); color: #9333ea;">
+              <div class="stat-icon-wrapper bg-secondary bg-opacity-10 text-secondary">
                 <i class="bi bi-journal-bookmark-fill"></i>
               </div>
             </div>
             <div class="h3 fw-bold text-dark mb-0"><?= number_format($shsCount) ?></div>
-            <div class="small text-muted mt-1">Grades 11 & 12 students</div>
+            <div class="small text-muted mt-1">Enrolled Grades 11 & 12</div>
           </div>
         </div>
 
         <div class="col-6 col-xl-3">
           <div class="stat-card p-3 p-lg-4 shadow-sm">
             <div class="d-flex align-items-center justify-content-between mb-2">
-              <span class="text-muted small fw-bold text-uppercase">Officially Enrolled</span>
+              <span class="text-muted small fw-bold text-uppercase">Official Student IDs</span>
               <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                 <i class="bi bi-patch-check-fill"></i>
               </div>
             </div>
-            <div class="h3 fw-bold text-dark mb-0"><?= number_format($enrolledCount) ?></div>
-            <div class="small text-muted mt-1"><?= number_format($approvedCount) ?> approved for enrollment</div>
+            <div class="h3 fw-bold text-dark mb-0"><?= number_format($officialIdCount) ?></div>
+            <div class="small text-muted mt-1">Assigned institutional numbers</div>
           </div>
         </div>
       </div>
 
       <!-- Filters & Search Toolbar -->
       <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-        <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 3px;"></div>
+        <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
         <div class="island-body p-3 p-lg-4">
           <form method="GET" action="students.php" id="filterForm">
             <input type="hidden" name="page" value="1">
@@ -446,7 +389,7 @@ $exportQuery = http_build_query([
 
             <div class="row g-3 align-items-center">
               
-              <div class="col-12 col-md-3">
+              <div class="col-12 col-md-4">
                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">Search Student</label>
                 <div class="input-group">
                   <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
@@ -476,7 +419,7 @@ $exportQuery = http_build_query([
                 </select>
               </div>
 
-              <div class="col-6 col-md-2">
+              <div class="col-6 col-md-3">
                 <label class="form-label small fw-bold text-muted text-uppercase mb-1">Program / Strand</label>
                 <select name="strand" id="filterStrand" class="form-select" onchange="this.form.submit()">
                   <option value="all" <?= $curStrand === 'all' ? 'selected' : '' ?>>All Programs</option>
@@ -485,18 +428,6 @@ $exportQuery = http_build_query([
                       <?= htmlspecialchars(strtoupper($prog['code']), ENT_QUOTES, 'UTF-8') ?>
                     </option>
                   <?php endforeach; ?>
-                </select>
-              </div>
-
-              <div class="col-6 col-md-2">
-                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Status</label>
-                <select name="status" id="filterStatus" class="form-select" onchange="this.form.submit()">
-                  <option value="all" <?= $curStatus === 'all' ? 'selected' : '' ?>>All Statuses</option>
-                  <option value="enrolled" <?= $curStatus === 'enrolled' ? 'selected' : '' ?>>Officially Enrolled</option>
-                  <option value="approved" <?= $curStatus === 'approved' ? 'selected' : '' ?>>Approved</option>
-                  <option value="under_review" <?= $curStatus === 'under_review' ? 'selected' : '' ?>>Under Review</option>
-                  <option value="pending" <?= $curStatus === 'pending' ? 'selected' : '' ?>>Pending</option>
-                  <option value="correction_required" <?= $curStatus === 'correction_required' ? 'selected' : '' ?>>Correction Required</option>
                 </select>
               </div>
 
@@ -530,20 +461,21 @@ $exportQuery = http_build_query([
 
       <!-- Masterlist Records Table -->
       <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
+        <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
         <div class="island-body p-0">
           <div class="table-responsive">
             <table class="table table-hover align-middle mb-0 custom-table" id="studentsTable">
-              <thead class="bg-light border-bottom">
+              <thead class="table-light text-muted small text-uppercase">
                 <tr>
-                  <th scope="col" class="ps-4 py-3" style="width: 5%;">#</th>
-                  <th scope="col" class="py-3" style="width: 16%;">ID / Reference</th>
-                  <th scope="col" class="py-3" style="width: 25%;">Student Name</th>
-                  <th scope="col" class="py-3" style="width: 14%;">Academic Level</th>
-                  <th scope="col" class="py-3" style="width: 12%;">Grade/Year</th>
-                  <th scope="col" class="py-3" style="width: 10%;">Program</th>
-                  <th scope="col" class="py-3" style="width: 8%;">Gender</th>
-                  <th scope="col" class="py-3" style="width: 10%;">Status</th>
-                  <th scope="col" class="pe-4 py-3 text-end" style="width: 10%;">Actions</th>
+                  <th scope="col" class="ps-4 py-3 fw-semibold" style="width: 50px;">#</th>
+                  <th scope="col" class="py-3 fw-semibold" style="width: 170px;">ID / Reference</th>
+                  <th scope="col" class="py-3 fw-semibold">Student Name</th>
+                  <th scope="col" class="py-3 fw-semibold" style="width: 140px;">Academic Level</th>
+                  <th scope="col" class="py-3 fw-semibold" style="width: 120px;">Grade / Year</th>
+                  <th scope="col" class="py-3 fw-semibold" style="width: 110px;">Program</th>
+                  <th scope="col" class="py-3 fw-semibold" style="width: 90px;">Gender</th>
+                  <th scope="col" class="py-3 fw-semibold" style="width: 130px;">Status</th>
+                  <th scope="col" class="pe-4 py-3 text-end fw-semibold" style="width: 110px;">Actions</th>
                 </tr>
               </thead>
               <tbody class="border-top-0">
@@ -554,7 +486,7 @@ $exportQuery = http_build_query([
                         <i class="bi bi-people fs-1 text-secondary"></i>
                       </div>
                       <h5 class="fw-bold text-dark mb-1">No Students Found</h5>
-                      <p class="small text-muted mb-0">There are no approved or enrolled students currently in the masterlist database.</p>
+                      <p class="small text-muted mb-0">There are no officially enrolled students currently in the masterlist database.</p>
                     </td>
                   </tr>
                 <?php else: ?>
@@ -569,13 +501,6 @@ $exportQuery = http_build_query([
                   </tr>
                   <?php 
                     $rowNum = $startRecord; 
-                    $avatarColors = [
-                      'bg-primary bg-opacity-10 text-primary',
-                      'bg-success bg-opacity-10 text-success',
-                      'bg-info bg-opacity-10 text-info',
-                      'bg-warning bg-opacity-10 text-warning-emphasis',
-                      'bg-danger bg-opacity-10 text-danger',
-                    ];
                   ?>
                   <?php foreach ($students as $student): ?>
                     <?php
@@ -585,8 +510,8 @@ $exportQuery = http_build_query([
                       
                       $fInitial = strtoupper(substr($student['first_name'] ?? 'S', 0, 1));
                       $lInitial = strtoupper(substr($student['last_name'] ?? 'N', 0, 1));
-                      $colorIdx = (ord($fInitial) + ord($lInitial)) % count($avatarColors);
-                      $avatarColorClass = $avatarColors[$colorIdx];
+
+                      $isCollege = (($student['academic_level'] ?? '') === 'College');
                     ?>
                     <tr class="student-row" 
                         data-level="<?= htmlspecialchars($student['academic_level'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" 
@@ -598,23 +523,27 @@ $exportQuery = http_build_query([
                       <td class="ps-4 fw-semibold text-muted small"><?= $rowNum++ ?></td>
 
                       <td>
-                        <span class="student-id-mono text-dark"><?= esc($idDisplay) ?></span>
-                        <?php if (!empty($student['student_number'])): ?>
-                          <span class="badge bg-primary bg-opacity-10 text-primary ms-1" style="font-size: 0.65rem;">Official</span>
-                        <?php endif; ?>
+                        <div class="d-inline-flex align-items-center gap-1">
+                          <span class="student-id-mono text-dark fw-bold"><?= esc($idDisplay) ?></span>
+                          <?php if (!empty($student['student_number'])): ?>
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-0.5 small ms-1" style="font-size: 0.7rem;">
+                              <i class="bi bi-patch-check-fill me-0.5"></i>Official
+                            </span>
+                          <?php endif; ?>
+                        </div>
                       </td>
 
                       <td>
                         <div class="d-flex align-items-center gap-2.5">
-                          <div class="avatar-initials <?= $avatarColorClass ?>">
+                          <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-bold" style="width: 36px; height: 36px; font-size: 0.8rem; flex-shrink: 0;">
                             <?= $fInitial . $lInitial ?>
                           </div>
                           <div>
-                            <div class="fw-bold text-dark mb-0">
+                            <div class="fw-semibold text-dark mb-0">
                               <?= htmlspecialchars($student['last_name'] . ', ' . $student['first_name'], ENT_QUOTES, 'UTF-8'); ?>
                             </div>
                             <?php if (!empty($student['contact_number'])): ?>
-                              <div class="small text-muted" style="font-size: 0.78rem;">
+                              <div class="text-muted small" style="font-size: 0.78rem;">
                                 <i class="bi bi-telephone me-1"></i><?= htmlspecialchars($student['contact_number'], ENT_QUOTES, 'UTF-8') ?>
                               </div>
                             <?php endif; ?>
@@ -623,13 +552,19 @@ $exportQuery = http_build_query([
                       </td>
 
                       <td>
-                        <span class="badge <?= ($student['academic_level'] ?? '') === 'College' ? 'bg-info bg-opacity-10 text-info border border-info border-opacity-25' : 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25' ?> rounded-pill px-2.5 py-1">
-                          <?= htmlspecialchars($student['academic_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
-                        </span>
+                        <?php if ($isCollege): ?>
+                          <span class="badge bg-light text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1">
+                            College
+                          </span>
+                        <?php else: ?>
+                          <span class="badge bg-light text-secondary border border-secondary border-opacity-25 rounded-pill px-2.5 py-1">
+                            Senior High School
+                          </span>
+                        <?php endif; ?>
                       </td>
 
                       <td>
-                        <span class="text-dark fw-medium small">
+                        <span class="text-muted small">
                           <?= htmlspecialchars($student['grade_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
                         </span>
                       </td>
@@ -641,28 +576,18 @@ $exportQuery = http_build_query([
                       </td>
 
                       <td>
-                        <?php $gender = strtolower($student['gender'] ?? ''); ?>
-                        <span class="text-muted small">
-                          <?php if ($gender === 'male'): ?>
-                            <i class="bi bi-gender-male text-primary me-1"></i> Male
-                          <?php elseif ($gender === 'female'): ?>
-                            <i class="bi bi-gender-female text-danger me-1"></i> Female
-                          <?php else: ?>
-                            <?= htmlspecialchars(ucfirst($student['gender'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?>
-                          <?php endif; ?>
-                        </span>
+                        <span class="text-muted small"><?= htmlspecialchars(ucfirst($student['gender'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></span>
                       </td>
 
                       <td>
-                        <span class="badge <?= esc($badgeClass) ?> px-2.5 py-1.5 rounded-pill fw-semibold">
-                          <i class="bi <?= ($student['status'] ?? '') === 'enrolled' ? 'bi-patch-check-fill' : 'bi-check2-circle' ?> me-1"></i>
+                        <span class="badge <?= esc($badgeClass) ?> px-2.5 py-1 rounded-pill small">
                           <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </span>
                       </td>
 
                       <td class="pe-4 text-end">
-                        <a href="../admissions/application_detail.php?id=<?= esc($student['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
-                          <i class="bi bi-person-badge me-1"></i> Profile
+                        <a href="../admissions/application_detail.php?id=<?= esc($student['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                          Profile <i class="bi bi-arrow-right-short"></i>
                         </a>
                       </td>
 
@@ -694,61 +619,40 @@ $exportQuery = http_build_query([
 
             <?php if ($totalPages > 1): ?>
               <nav aria-label="Student records pagination">
-                <ul class="pagination pagination-sm mb-0 gap-1">
-                  <!-- First Page -->
+                <ul class="pagination pagination-sm mb-0">
                   <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl(1) ?>" title="First Page">
-                      <i class="bi bi-chevron-double-left"></i>
-                    </a>
-                  </li>
-                  <!-- Previous Page -->
-                  <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl(max(1, $page - 1)) ?>" title="Previous Page">
-                      <i class="bi bi-chevron-left"></i>
-                    </a>
+                    <a class="page-link" href="<?= $buildPageUrl(max(1, $page - 1)) ?>">Previous</a>
                   </li>
 
-                  <!-- Numbered Pages -->
                   <?php
                     $startP = max(1, $page - 2);
                     $endP = min($totalPages, $page + 2);
                     if ($startP > 1): ?>
                       <li class="page-item">
-                        <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl(1) ?>">1</a>
+                        <a class="page-link" href="<?= $buildPageUrl(1) ?>">1</a>
                       </li>
                       <?php if ($startP > 2): ?>
-                        <li class="page-item disabled"><span class="page-link border-0">...</span></li>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
                       <?php endif; ?>
                     <?php endif; ?>
 
                     <?php for ($p = $startP; $p <= $endP; $p++): ?>
                       <li class="page-item <?= $p === $page ? 'active' : '' ?>">
-                        <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl($p) ?>">
-                          <?= $p ?>
-                        </a>
+                        <a class="page-link" href="<?= $buildPageUrl($p) ?>"><?= $p ?></a>
                       </li>
                     <?php endfor; ?>
 
                     <?php if ($endP < $totalPages): ?>
                       <?php if ($endP < $totalPages - 1): ?>
-                        <li class="page-item disabled"><span class="page-link border-0">...</span></li>
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
                       <?php endif; ?>
                       <li class="page-item">
-                        <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl($totalPages) ?>"><?= $totalPages ?></a>
+                        <a class="page-link" href="<?= $buildPageUrl($totalPages) ?>"><?= $totalPages ?></a>
                       </li>
                     <?php endif; ?>
 
-                  <!-- Next Page -->
                   <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl(min($totalPages, $page + 1)) ?>" title="Next Page">
-                      <i class="bi bi-chevron-right"></i>
-                    </a>
-                  </li>
-                  <!-- Last Page -->
-                  <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                    <a class="page-link rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" href="<?= $buildPageUrl($totalPages) ?>" title="Last Page">
-                      <i class="bi bi-chevron-double-right"></i>
-                    </a>
+                    <a class="page-link" href="<?= $buildPageUrl(min($totalPages, $page + 1)) ?>">Next</a>
                   </li>
                 </ul>
               </nav>

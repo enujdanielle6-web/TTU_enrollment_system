@@ -10,50 +10,71 @@
         const toggleBtn = document.getElementById('sidebarToggle');
         
         if (sidebar && mainContent) {
-            // Check preference
+            // Check preference on desktop
+            const isMobile = window.innerWidth < 992;
             const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
             
-            if (isCollapsed) {
+            if (!isMobile && isCollapsed) {
                 sidebar.classList.add('collapsed');
                 mainContent.classList.add('collapsed');
-            } else {
-                // Auto collapse after 3 seconds if not already collapsed by preference
-                setTimeout(() => {
-                    if (!sidebar.classList.contains('collapsed')) {
-                        sidebar.classList.add('collapsed');
-                        mainContent.classList.add('collapsed');
-                        localStorage.setItem('sidebarCollapsed', 'true');
-                    }
-                }, 3000);
             }
 
-            // Hover to expand
-            sidebar.addEventListener('mouseenter', function() {
-                if (sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.remove('collapsed');
-                    sidebar.dataset.hoverExpanded = 'true';
-                }
-            });
-
-            sidebar.addEventListener('mouseleave', function() {
-                if (sidebar.dataset.hoverExpanded === 'true') {
-                    sidebar.classList.add('collapsed');
-                    sidebar.dataset.hoverExpanded = 'false';
-                }
-            });
-
-            if (toggleBtn) {
-                toggleBtn.addEventListener('click', function() {
+            document.addEventListener('click', function(e) {
+                const toggle = e.target.closest('#sidebarToggle');
+                if (!toggle) return;
+                e.preventDefault();
+                if (window.innerWidth < 992) {
+                    sidebar.classList.toggle('show');
+                } else {
                     sidebar.classList.toggle('collapsed');
                     mainContent.classList.toggle('collapsed');
-                    
-                    // Clear the hover flag so it stays open/closed properly
-                    sidebar.dataset.hoverExpanded = 'false';
-                    
-                    // Save preference
                     localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-                });
-            }
+                }
+            });
+
+            // Sidebar Notification Dropup Toggle & Dismissal
+            document.addEventListener('click', function(e) {
+                const notifBtn = e.target.closest('#sidebarNotificationBtn');
+                const closeBtn = e.target.closest('#closeNotificationPanel');
+                const notifLink = e.target.closest('.lms-notification-item');
+                const panel = document.getElementById('sidebarNotificationPanel');
+
+                if (notifBtn) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (panel) {
+                        panel.classList.toggle('show');
+                        notifBtn.setAttribute('aria-expanded', panel.classList.contains('show'));
+                    }
+                    return;
+                }
+
+                if (closeBtn || notifLink) {
+                    if (panel) panel.classList.remove('show');
+                    const btn = document.getElementById('sidebarNotificationBtn');
+                    if (btn) btn.setAttribute('aria-expanded', 'false');
+                    return;
+                }
+
+                if (panel && panel.classList.contains('show')) {
+                    if (!panel.contains(e.target)) {
+                        panel.classList.remove('show');
+                        const btn = document.getElementById('sidebarNotificationBtn');
+                        if (btn) btn.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    const panel = document.getElementById('sidebarNotificationPanel');
+                    if (panel && panel.classList.contains('show')) {
+                        panel.classList.remove('show');
+                        const btn = document.getElementById('sidebarNotificationBtn');
+                        if (btn) btn.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
         }
     });
 </script>

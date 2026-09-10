@@ -17,15 +17,32 @@ This document traces the code relationships, data models, and database interacti
 ```text
 GET /admin/registrar/registrar_dashboard.php
     ↓
-RegistrarController@dashboard
+RegistrarController@dashboard (Pure Controller Data Aggregation)
     ↓
-1. SELECT COUNT(*) as total_students FROM users WHERE student_number IS NOT NULL
-2. SELECT COUNT(*) as total_college_programs FROM college_programs WHERE is_active = 1
-3. SELECT COUNT(*) as total_shs_strands FROM shs_strands WHERE is_active = 1
-4. SELECT COUNT(*) as total_subjects FROM subjects WHERE status = 1
-5. SELECT COUNT(*) as total_curricula FROM college_curricula WHERE status = 'active'
+1. Enrolled counts:
+   SELECT COUNT(*), SUM(College), SUM(Senior High) FROM applications WHERE status = 'enrolled'
+2. Clearance Queue counts:
+   SELECT COUNT(*), SUM(College), SUM(Senior High) FROM applications a 
+   JOIN student_assessments sa ON a.id = sa.application_id 
+   WHERE (a.status = 'payment_verified' OR (a.status = 'approved' AND sa.payment_status IN ('partial', 'paid')))
+3. Active Sections:
+   SELECT COUNT(*) FROM college_sections WHERE status = 1
+   SELECT COUNT(*) FROM shs_sections WHERE status = 1
+4. Registered Students with Official Number:
+   SELECT COUNT(*) FROM applications a JOIN users u ON u.id = a.user_id 
+   WHERE a.status = 'enrolled' AND u.student_number IS NOT NULL AND u.student_number != ''
+5. Academic Catalog Totals:
+   SELECT COUNT(*) FROM subjects
+   SELECT COUNT(*) FROM college_programs WHERE is_active = 1
+   SELECT COUNT(*) FROM shs_strands WHERE is_active = 1
+6. Recent Enrolled Students Preview (Last 5 records):
+   SELECT a.id, a.reference_number, a.lrn, a.academic_level, a.grade_level, a.strand,
+          u.first_name, u.last_name, u.student_number, u.email, a.contact_number
+   FROM applications a JOIN users u ON u.id = a.user_id WHERE a.status = 'enrolled' ORDER BY a.id DESC LIMIT 5
+7. Active Academic Year & System Settings:
+   SELECT setting_key, setting_value FROM system_settings
     ↓
-Renders: app/Views/admin/registrar/dashboard.php
+Renders: app/Views/admin/registrar/dashboard.php (Zero raw SQL queries in view)
 ```
 
 ---
@@ -39,35 +56,34 @@ Renders: app/Views/admin/registrar/dashboard.php
 
 ### Tracing Chain, Server-Side Pagination & CSV Stream
 ```text
-GET /admin/registrar/students.php?page=1&per_page=25&search=...&academic_level=...&strand=...
+GET /admin/registrar/students.php?page=1&per_page=25&search=...&level=...&grade=...&strand=...
     ↓
 RegistrarController@students
     ↓
-1. Global KPIs (Independent of pagination & filters):
-   - total_enrolled: SELECT COUNT(*) FROM applications WHERE status = 'enrolled'
-   - college_enrolled: SELECT COUNT(*) FROM applications WHERE status = 'enrolled' AND academic_level = 'College'
-   - shs_enrolled: SELECT COUNT(*) FROM applications WHERE status = 'enrolled' AND academic_level = 'Senior High School'
+1. Global KPIs (Enrolled Students Only, independent of pagination & filters):
+   - total_count: SELECT COUNT(*) FROM applications a JOIN users u ON u.id = a.user_id WHERE a.status = 'enrolled'
+   - college_count: COALESCE(SUM(CASE WHEN a.academic_level = 'College' THEN 1 ELSE 0 END), 0)
+   - shs_count: COALESCE(SUM(CASE WHEN a.academic_level = 'Senior High School' THEN 1 ELSE 0 END), 0)
+   - official_id_count: COALESCE(SUM(CASE WHEN u.student_number IS NOT NULL AND u.student_number != '' THEN 1 ELSE 0 END), 0)
 2. Filtered Count:
-   SELECT COUNT(*) FROM users u JOIN applications a ON u.id = a.user_id AND a.status = 'enrolled' ... [WHERE filters]
+   SELECT COUNT(a.id) FROM applications a JOIN users u ON u.id = a.user_id 
+   WHERE a.status = 'enrolled' [AND search AND level AND grade AND strand]
 3. Paginated Data Retrieval:
-   SELECT u.id, u.student_number, u.first_name, u.last_name, u.email, u.ttu_email, 
-          a.reference_number, a.academic_level, a.grade_level, a.strand, a.status,
-          COALESCE(cs.section_code, ss.section_code, 'Unassigned') AS section_code
-   FROM users u
-   JOIN applications a ON u.id = a.user_id AND a.status = 'enrolled'
-   LEFT JOIN college_sections cs ON a.section_id = cs.id AND a.academic_level = 'College'
-   LEFT JOIN shs_sections ss ON a.section_id = ss.id AND a.academic_level = 'Senior High School'
-   [WHERE search AND academic_level AND strand]
-   ORDER BY u.last_name ASC, u.first_name ASC
+   SELECT a.id, a.reference_number, a.lrn, a.status, a.academic_level, a.strand, 
+          a.grade_level, a.gender, a.contact_number, u.first_name, u.last_name, u.student_number
+   FROM applications a
+   JOIN users u ON u.id = a.user_id
+   WHERE a.status = 'enrolled' [AND search AND level AND grade AND strand]
+   ORDER BY a.grade_level ASC, a.strand ASC, u.last_name ASC
    LIMIT :limit OFFSET :offset
     ↓
 Renders: app/Views/admin/registrar/students.php with pagination controls (25, 50, 100 rows/page)
     ↓
 GET|POST /admin/registrar/students_export.php
     ↓
-Direct Stream to Browser (respects active search & dropdown filters):
-    ├── header('Content-Type: text/csv')
-    ├── header('Content-Disposition: attachment; filename="students_masterlist_YYYY-MM-DD.csv"')
+Direct Stream to Browser (strictly enrolled: WHERE a.status = 'enrolled' AND filters):
+    ├── header('Content-Type: text/csv; charset=utf-8')
+    ├── header('Content-Disposition: attachment; filename="ttu_student_records_YYYYMMDD_HHMMSS.csv"')
     └── fputcsv($output, ['Student Number', 'Last Name', 'First Name', 'Institutional Email', 'Personal Email', 'Academic Level', 'Grade/Year Level', 'Program / Strand', 'Section'])
 ```
 

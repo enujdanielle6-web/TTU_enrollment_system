@@ -1,44 +1,14 @@
 <?php require_once __DIR__ . '/layout_header.php'; ?>
 
 <div class="container-fluid py-4">
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="dashboard.php" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="my_courses.php" class="text-decoration-none">My Courses</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><?= htmlspecialchars($course['subject_code']) ?></li>
-        </ol>
-    </nav>
+    <!-- Unified Course Header & Horizontal Navigation (Option A) -->
+    <?php 
+    $active_tab = 'modules';
+    require __DIR__ . '/components/course_header.php'; 
+    ?>
 
-    <!-- Course Banner -->
-    <div class="lms-banner mb-4 text-white p-5 rounded-4 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--lms-primary) 0%, #0a58ca 100%);">
-        <div class="position-absolute" style="top: -50px; right: -50px; width: 250px; height: 250px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(20px);"></div>
-        <div class="position-relative z-1 row align-items-center">
-            <div class="col-md-8">
-                <span class="badge bg-white text-primary mb-2 px-3 py-2 rounded-pill fw-bold shadow-sm">
-                    <?= htmlspecialchars($course['section_code'] ?? 'Global Section') ?>
-                </span>
-                <h1 class="display-5 fw-bold mb-2 text-white"><?= htmlspecialchars($course['subject_name']) ?></h1>
-                <p class="fs-5 mb-0 opacity-75 fw-semibold"><?= htmlspecialchars($course['subject_code']) ?> &bull; <?= esc((int)$course['units']) ?> Units</p>
-            </div>
-            <div class="col-md-4 text-md-end mt-4 mt-md-0 d-none d-md-block">
-                 <div class="bg-white text-dark p-3 rounded-4 shadow-sm d-inline-block text-start">
-                     <p class="small text-muted fw-bold text-uppercase mb-1">Instructor</p>
-                     <div class="d-flex align-items-center gap-3">
-                         <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px;">
-                             <?= esc(substr($instructor_name, 0, 1)) ?>
-                         </div>
-                         <div>
-                             <h6 class="mb-0 fw-bold"><?= htmlspecialchars($instructor_name) ?></h6>
-                             <small class="text-muted"><?= htmlspecialchars($instructor_email) ?></small>
-                         </div>
-                     </div>
-                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row g-4">
+    <div id="course-tab-content" class="course-tab-content">
+        <div class="row g-4">
         <!-- Main Content (Overview + Modules) -->
         <div class="col-lg-8">
             <!-- Welcome Overview -->
@@ -126,6 +96,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <?php require_once __DIR__ . '/layout_footer.php'; ?>

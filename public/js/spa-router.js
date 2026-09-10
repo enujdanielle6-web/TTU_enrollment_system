@@ -37,6 +37,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+// SPA Progress Bar Helpers
+function getProgressBar() {
+    let bar = document.getElementById('spa-progress-bar');
+    if (!bar) {
+        bar = document.createElement('div');
+        bar.id = 'spa-progress-bar';
+        document.body.appendChild(bar);
+    }
+    return bar;
+}
+
+function startProgressBar() {
+    const bar = getProgressBar();
+    bar.classList.add('active');
+    bar.style.width = '0%';
+    bar.style.opacity = '1';
+    requestAnimationFrame(() => {
+        bar.style.width = '70%';
+    });
+}
+
+function completeProgressBar() {
+    const bar = getProgressBar();
+    bar.style.width = '100%';
+    setTimeout(() => {
+        bar.style.opacity = '0';
+        setTimeout(() => {
+            bar.classList.remove('active');
+            bar.style.width = '0%';
+        }, 250);
+    }, 120);
+}
+
 async function navigateTo(url, pushHistory = true) {
     const mainContainer = document.getElementById('spa-main');
     if (!mainContainer) {
@@ -45,9 +78,7 @@ async function navigateTo(url, pushHistory = true) {
     }
 
     try {
-        // Show Loading State
-        mainContainer.style.opacity = '0.4';
-        mainContainer.style.pointerEvents = 'none';
+        startProgressBar();
 
         const response = await fetch(url, {
             headers: {
@@ -72,19 +103,65 @@ async function navigateTo(url, pushHistory = true) {
             return;
         }
 
-        // Cleanup before DOM replacement
+        // Smart Course Sub-Tab Navigation (prevents banner/header flashing)
+        const currentTabContent = document.getElementById('course-tab-content');
+        const newTabContent = doc.getElementById('course-tab-content');
+
+        if (currentTabContent && newTabContent) {
+            // Update active tab styling immediately
+            const targetUrl = new URL(url);
+            document.querySelectorAll('.course-nav-link').forEach(link => {
+                const linkUrl = new URL(link.href);
+                if (linkUrl.pathname === targetUrl.pathname && linkUrl.search === targetUrl.search) {
+                    link.classList.add('active');
+                } else if (linkUrl.pathname === targetUrl.pathname && !linkUrl.search && !targetUrl.search) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+
+            // Smoothly cross-fade only the inner tab content
+            currentTabContent.classList.add('tab-fade-out');
+            setTimeout(() => {
+                cleanupEnvironment();
+                currentTabContent.innerHTML = newTabContent.innerHTML;
+                currentTabContent.classList.remove('tab-fade-out');
+                currentTabContent.classList.add('tab-fade-in');
+
+                executeInlineScripts(currentTabContent);
+                completeProgressBar();
+
+                if (pushHistory) {
+                    history.pushState(null, doc.title, url);
+                }
+                document.title = doc.title;
+                document.dispatchEvent(new Event('spa:navigated'));
+
+                setTimeout(() => {
+                    currentTabContent.classList.remove('tab-fade-in');
+                }, 220);
+            }, 80);
+            return;
+        }
+
+        // Global Page Swap (e.g. from Course to Dashboard)
         cleanupEnvironment();
-
-        // Swap Content
         mainContainer.innerHTML = newMain.innerHTML;
-        mainContainer.style.opacity = '1';
-        mainContainer.style.pointerEvents = 'auto';
 
-        // Swap Sidebar if present (fixes dynamic course menus not appearing)
+        completeProgressBar();
+
+        // Swap Sidebar if present (LMS or Admin)
         const currentSidebar = document.getElementById('lmsSidebar');
         const newSidebar = doc.getElementById('lmsSidebar');
         if (currentSidebar && newSidebar) {
             currentSidebar.innerHTML = newSidebar.innerHTML;
+        }
+
+        const currentAdminSidebar = document.getElementById('adminSidebar');
+        const newAdminSidebar = doc.getElementById('adminSidebar');
+        if (currentAdminSidebar && newAdminSidebar) {
+            currentAdminSidebar.innerHTML = newAdminSidebar.innerHTML;
         }
         
         // Update URL
@@ -94,7 +171,7 @@ async function navigateTo(url, pushHistory = true) {
         document.title = doc.title;
 
         // Update sidebar active states
-        document.querySelectorAll('.nav-link').forEach(link => {
+        document.querySelectorAll('.lms-nav-link, .admin-sidebar .nav-link').forEach(link => {
             if (link.href) {
                 const linkBase = link.href.split('?')[0];
                 const currentBase = window.location.href.split('?')[0];
@@ -112,12 +189,12 @@ async function navigateTo(url, pushHistory = true) {
         // Announce completion
         document.dispatchEvent(new Event('spa:navigated'));
         
-        // Scroll to top
-        window.scrollTo(0, 0);
+        // Smooth scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
     } catch (error) {
         console.error('SPA Navigation Error:', error);
-        window.location.href = url; // Fallback to normal navigation
+        window.location.href = url;
     }
 }
 

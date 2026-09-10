@@ -1330,7 +1330,7 @@
 }
 
 .text-info {
-  color: var(--color-primary-light) !important;
+  color: #0284c7 !important;
 }
 
 .text-muted {
@@ -1341,3 +1341,74 @@ body {
   background-color: var(--color-background);
   color: var(--color-text);
 }
+
+/* --- Global Print & Screen Utilities --- */
+.print-only {
+  display: none !important;
+}
+
+@media print {
+  .no-print, .no-print *, .admin-sidebar, #adminSidebar, .admin-main > .sticky-top, .sidebar-minimize-btn {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* --- Student Masterlist & Admin Stat Components --- */
+.stat-card {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  background: #ffffff;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+.stat-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.avatar-initials {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.student-id-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  letter-spacing: 0.5px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.custom-table th {
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.custom-table td {
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}

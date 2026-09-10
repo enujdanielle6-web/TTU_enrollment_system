@@ -228,24 +228,24 @@ This document provides complete, verified file-level documentation for all **38 
 - **File:** `RegistrarController.php`
 - **Path:** `app/Controllers/Admin/Registrar/RegistrarController.php`
 - **Module:** Registrar (Admin)
-- **Feature:** Enrolled Masterlist, Server-Side Pagination, Final Enrollment Concurrence
-- **Purpose:** Authoritative registrar operations controller managing institutional matriculation and student academic records.
+- **Feature:** Enrolled Masterlist, Server-Side Pagination, Command Center Dashboard, Final Enrollment Concurrence
+- **Purpose:** Authoritative registrar operations controller managing institutional matriculation, academic catalog analytics, and student records.
 - **Responsibilities:**
-  - Displays Registrar analytics dashboard.
-  - Renders the Enrolled Students Masterlist with high-performance server-side pagination (25/50/100 rows/page), dynamic search, and filter queries.
-  - Computes global KPI counts (Total Enrolled, College, SHS) independently of active pagination bounds.
-  - Streams CSV exports of student records via GET and POST (`exportStudents`).
+  - Displays executive Registrar Command Center dashboard aggregating core KPIs (enrolled, clearance queue, active sections, official IDs), balanced department shortcut hubs, and recently enrolled students live preview.
+  - Renders the Enrolled Students Masterlist strictly scoped to finalized students (`a.status = 'enrolled'`) with server-side pagination (25/50/100 rows/page), dynamic search, and level/grade/program filters.
+  - Computes global KPI counts (Total Enrolled, College, SHS, Official Student IDs) independently of active pagination bounds.
+  - Streams CSV exports of enrolled student records via GET and POST (`exportStudents`).
   - Displays College and Senior High School Pending Finalization Queues (`payment_verified`).
   - Executes authoritative enrollment finalization (`finalizeEnrollment`), delegating to `EnrollmentService` to transition status to `enrolled`, allocate student IDs, provision emails, and assign section offerings.
 - **Key Methods:**
-  - `dashboard(Request $request, Response $response): string` — Renders `admin/registrar/dashboard.php`.
-  - `students(Request $request, Response $response): string` — Executes paginated SQL query; renders `admin/registrar/students.php`.
-  - `exportStudents(Request $request, Response $response): void` — Streams CSV masterlist download to browser.
+  - `dashboard(Request $request, Response $response): string` — Aggregates academic metrics, recent enrollees, and settings; renders `admin/registrar/dashboard.php`.
+  - `students(Request $request, Response $response): string` — Executes enrolled-only paginated SQL query; renders `admin/registrar/students.php`.
+  - `exportStudents(Request $request, Response $response): void` — Streams enrolled students CSV masterlist download to browser.
   - `collegeQueue(Request $request, Response $response): string` — Renders College finalization queue `admin/registrar/college_queue.php`.
   - `shsQueue(Request $request, Response $response): string` — Renders SHS finalization queue `admin/registrar/shs_queue.php`.
   - `finalizeEnrollment(Request $request, Response $response): void` — Executes final matriculation transaction via `EnrollmentService`.
 - **Dependencies & Imports:** `App\Core\BaseController`, `App\Services\EnrollmentService`, `App\Services\StudentNumberService`, `App\Core\Database`
-- **Database Interaction:** Reads/Writes `users`, `applications`, `college_sections`, `shs_sections`, `student_number_sequences`, `activity_logs`.
+- **Database Interaction:** Reads/Writes `users`, `applications`, `college_sections`, `shs_sections`, `college_programs`, `shs_strands`, `subjects`, `student_assessments`, `student_number_sequences`, `activity_logs`.
 - **Authorized Roles:** `admin`, `superadmin`
 - **Used By:** Routes under `/admin/registrar/*`
 - **Related Files:** `app/Views/admin/registrar/dashboard.php`, `students.php`, `college_queue.php`, `shs_queue.php`

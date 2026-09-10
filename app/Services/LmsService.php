@@ -487,4 +487,110 @@ class LmsService
         $count = (int)$stmt->fetchColumn();
         return max(1, $count);
     }
+
+    /**
+     * Retrieves recent updates posted by professors across enrolled courses (announcements, assignments, quizzes).
+     */
+    public function getStudentProfessorUpdates(int $userId, int $limit = 8): array
+    {
+        $courses = $this->getStudentCourses($userId);
+        if (empty($courses)) {
+            return [];
+        }
+
+        $courseIds = array_column($courses, 'lms_course_id');
+        if (empty($courseIds)) {
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
+        $updates = [];
+
+        // 1. Announcements by Professors
+        $stmtAnn = $this->pdo->prepare("
+            SELECT 
+                ann.id,
+                ann.title,
+                ann.content,
+                ann.created_at,
+                ann.lms_course_id,
+                s.subject_code,
+                COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Instructor') as professor_name,
+                'announcement' as type,
+                CONCAT('/sia/lms/student/course/', ann.lms_course_id, '/announcements') as url,
+                NULL as due_date
+            FROM lms_announcements ann
+            JOIN lms_courses lc ON ann.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            LEFT JOIN users u ON ann.author_user_id = u.id
+            WHERE ann.lms_course_id IN ($placeholders)
+              AND ann.status = 'published'
+            ORDER BY ann.created_at DESC
+            LIMIT $limit
+        ");
+        $stmtAnn->execute($courseIds);
+        foreach ($stmtAnn->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $updates[] = $row;
+        }
+
+        // 2. Assignments Published by Professors
+        $stmtAsg = $this->pdo->prepare("
+            SELECT 
+                a.id,
+                a.title,
+                a.description as content,
+                a.created_at,
+                a.lms_course_id,
+                s.subject_code,
+                COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Instructor') as professor_name,
+                'assignment' as type,
+                CONCAT('/sia/lms/student/course/', a.lms_course_id, '/assignments/', a.id) as url,
+                a.due_date
+            FROM lms_assignments a
+            JOIN lms_courses lc ON a.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            LEFT JOIN users u ON lc.faculty_user_id = u.id
+            WHERE a.lms_course_id IN ($placeholders)
+              AND a.status = 'published'
+            ORDER BY a.created_at DESC
+            LIMIT $limit
+        ");
+        $stmtAsg->execute($courseIds);
+        foreach ($stmtAsg->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $updates[] = $row;
+        }
+
+        // 3. Quizzes Published by Professors
+        $stmtQz = $this->pdo->prepare("
+            SELECT 
+                q.id,
+                q.title,
+                q.description as content,
+                q.created_at,
+                q.lms_course_id,
+                s.subject_code,
+                COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Instructor') as professor_name,
+                'quiz' as type,
+                CONCAT('/sia/lms/student/course/', q.lms_course_id, '/quizzes/', q.id) as url,
+                q.end_date as due_date
+            FROM lms_quizzes q
+            JOIN lms_courses lc ON q.lms_course_id = lc.id
+            JOIN subjects s ON lc.subject_id = s.id
+            LEFT JOIN users u ON lc.faculty_user_id = u.id
+            WHERE q.lms_course_id IN ($placeholders)
+              AND q.status = 'published'
+            ORDER BY q.created_at DESC
+            LIMIT $limit
+        ");
+        $stmtQz->execute($courseIds);
+        foreach ($stmtQz->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $updates[] = $row;
+        }
+
+        // Sort combined updates by created_at DESC
+        usort($updates, function ($a, $b) {
+            return strtotime($b['created_at']) <=> strtotime($a['created_at']);
+        });
+
+        return array_slice($updates, 0, $limit);
+    }
 }

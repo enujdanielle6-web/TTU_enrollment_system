@@ -71,6 +71,28 @@ class StudentController extends BaseController
             $modules = [];
         }
 
+        // 4. Badge Counts for Course Navigation Tabs
+        $announcementService = new \App\Services\LmsAnnouncementService();
+        $quizService = new \App\Services\LmsQuizService();
+
+        try {
+            $assignment_count = count($lmsService->getAssignmentsByCourse($lms_course_id, true));
+        } catch (\Throwable $e) {
+            $assignment_count = 0;
+        }
+
+        try {
+            $quiz_count = count($quizService->getQuizzesByCourse($lms_course_id, true));
+        } catch (\Throwable $e) {
+            $quiz_count = 0;
+        }
+
+        try {
+            $announcement_count = count($announcementService->getCourseAnnouncements($lms_course_id, true));
+        } catch (\Throwable $e) {
+            $announcement_count = 0;
+        }
+
         $pageTitle = $course['subject_code'] . ' - TTU LMS';
         $current_page = 'my_courses.php'; // Highlight "My Courses" in sidebar
 

@@ -71,8 +71,8 @@ This document provides a complete, exhaustive inventory of all **104 PHP view te
 ### Registrar Admin
 | View Template Path | Rendering Controller & Action | Layout Wrapper | Functional Purpose |
 |---|---|---|---|
-| `app/Views/admin/registrar/dashboard.php` | `RegistrarController@dashboard` | `components/admin_navbar.php`, `sidebar.php` | Registrar academic statistics, curriculum counts, and enrollment metrics. |
-| `app/Views/admin/registrar/students.php` | `RegistrarController@students` | `components/admin_navbar.php`, `sidebar.php` | Server-side paginated enrolled students masterlist (25/50/100 rows) with CSV export. |
+| `app/Views/admin/registrar/dashboard.php` | `RegistrarController@dashboard` | `components/admin_navbar.php` | Executive Registrar Command Center with real-time KPIs, balanced department hubs, and live enrolled roster. |
+| `app/Views/admin/registrar/students.php` | `RegistrarController@students` | `components/admin_navbar.php` | Official Student Masterlist strictly for enrolled students (`status = 'enrolled'`), with server-side pagination and CSV export. |
 | `app/Views/admin/registrar/college_queue.php` | `RegistrarController@collegeQueue` | `components/admin_navbar.php`, `sidebar.php` | College pending finalization queue (`payment_verified` state). |
 | `app/Views/admin/registrar/shs_queue.php` | `RegistrarController@shsQueue` | `components/admin_navbar.php`, `sidebar.php` | Senior High School pending finalization queue. |
 | `app/Views/admin/registrar/subjects.php` | `SubjectController@index` | `components/admin_navbar.php`, `sidebar.php` | Universal subjects catalog with create, edit, and soft-delete modals. |
@@ -122,6 +122,8 @@ This document provides a complete, exhaustive inventory of all **104 PHP view te
 |---|---|---|---|
 | `app/Views/lms/student/layout_header.php` | Include Partial | Header component | Student portal sidebar, navbar, and SPA navigation wrapper. |
 | `app/Views/lms/student/layout_footer.php` | Include Partial | Footer component | Student portal script dependencies and closing markup. |
+| `app/Views/lms/student/components/course_header.php` | Include Partial | Course partial | Course banner, professor details, and quick stats header. |
+| `app/Views/lms/student/components/course_nav.php` | Include Partial | Course partial | Course sub-navigation tabs (Modules, Announcements, Assignments, Quizzes, Attendance, Gradebook). |
 | `app/Views/lms/student/dashboard.php` | `StudentController@dashboard` | `layout_header.php`, `layout_footer.php` | Interactive student dashboard with study streak, upcoming deadlines, announcements. |
 | `app/Views/lms/student/course.php` | `StudentController@course` | `layout_header.php`, `layout_footer.php` | Course homepage with collapsible module chapters and downloadable materials. |
 | `app/Views/lms/student/my_courses.php` | `StudentController@myCourses` | `layout_header.php`, `layout_footer.php` | Card grid of all enrolled semester courses. |
