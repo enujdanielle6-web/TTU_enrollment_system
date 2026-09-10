@@ -138,7 +138,7 @@ class DocumentController extends BaseController
         }
 
         try {
-            $appStmt = $pdo->prepare('SELECT id FROM applications WHERE user_id = :user_id LIMIT 1');
+            $appStmt = $pdo->prepare('SELECT id, status, academic_level, student_type, strand FROM applications WHERE user_id = :user_id LIMIT 1');
             $appStmt->execute(['user_id' => $userId]);
             $app = $appStmt->fetch();
 
@@ -171,7 +171,30 @@ class DocumentController extends BaseController
                 $docId = ApplicationDocument::saveUpload($appId, $documentName, $newFilename);
                 User::logActivity($userId, 'Document Uploaded', "You successfully uploaded your {$documentName}.", 'bi-cloud-arrow-up');
                 
-                $respond(true, "{$documentName} uploaded successfully.", ['doc_id' => $docId]);
+                // Recalculate if all mandatory documents have been submitted
+                $requiredDocs = $this->getRequiredDocuments($app['academic_level'], $app['student_type'], $app['strand']);
+                $uploadedDocs = ApplicationDocument::findByApplicationId($appId);
+
+                $docStatus = [];
+                foreach ($uploadedDocs as $d) {
+                    $docStatus[$d['document_name']] = $d['status'];
+                }
+
+                $allMandatorySubmitted = true;
+                foreach ($requiredDocs as $req) {
+                    if ($req['required']) {
+                        if (!isset($docStatus[$req['name']]) || $docStatus[$req['name']] === 'rejected') {
+                            $allMandatorySubmitted = false;
+                            break;
+                        }
+                    }
+                }
+
+                $respond(true, "{$documentName} uploaded successfully.", [
+                    'doc_id' => $docId,
+                    'document_name' => $documentName,
+                    'all_mandatory_submitted' => $allMandatorySubmitted
+                ]);
             } else {
                 $respond(false, 'Failed to move uploaded file. Check directory permissions.');
             }

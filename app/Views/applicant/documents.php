@@ -316,9 +316,9 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php else: ?>
             
-            <?php if ($allMandatorySubmitted && !$isLocked): ?>
+            <?php if (!$isLocked): ?>
               <!-- Ready for Submission Notification Card -->
-              <div class="island mb-4 p-4 shadow-sm rounded-4 border-0 bg-success bg-opacity-10 border border-success border-opacity-25 fade-in-up" style="animation-delay: 0.2s;">
+              <div id="allDocsUploadedBanner" class="island mb-4 p-4 shadow-sm rounded-4 border-0 bg-success bg-opacity-10 border border-success border-opacity-25 fade-in-up" style="animation-delay: 0.2s; <?= $allMandatorySubmitted ? '' : 'display: none;' ?>">
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
                   <div class="d-flex align-items-center gap-3">
                     <div class="rounded-circle d-flex align-items-center justify-content-center bg-success text-white flex-shrink-0" style="width: 48px; height: 48px;">
@@ -665,6 +665,18 @@ require_once __DIR__ . '/../components/header.php';
         };
       }
 
+      // Delegate click in case button is dynamically revealed
+      document.addEventListener('click', function(e) {
+        const btn = e.target.closest('#btnSubmitAllDocs');
+        if (btn && confirmSubmitDocsModalEl) {
+          e.preventDefault();
+          if (submitDocsConsentCheck) submitDocsConsentCheck.checked = false;
+          if (confirmSubmitDocsBtn) confirmSubmitDocsBtn.disabled = true;
+          const modalInstance = bootstrap.Modal.getOrCreateInstance(confirmSubmitDocsModalEl);
+          modalInstance.show();
+        }
+      });
+
       if (submitDocsConsentCheck && confirmSubmitDocsBtn) {
         submitDocsConsentCheck.onchange = function() {
           confirmSubmitDocsBtn.disabled = !this.checked;
@@ -716,13 +728,83 @@ require_once __DIR__ . '/../components/header.php';
               const card = form.closest('.doc-card');
               if (card) {
                 card.classList.add('border-success');
+                const docIcon = card.querySelector('.doc-icon i');
+                if (docIcon) {
+                  docIcon.className = 'bi bi-file-earmark-check-fill';
+                }
                 const badge = card.querySelector('.badge-status');
                 if (badge) {
                   badge.className = 'badge badge-status bg-warning text-dark rounded-pill';
                   badge.textContent = 'Pending';
                 }
+
+                // Remove rejection feedback if previously present
+                card.querySelectorAll('.alert-warning, p.text-danger').forEach(el => el.remove());
+
+                // Add View Current File button if not already present
+                const uploadCol = card.querySelector('.custom-file-upload');
+                if (uploadCol && data.doc_id && !uploadCol.querySelector('a[href*="document_view.php"]')) {
+                  const viewWrap = document.createElement('div');
+                  viewWrap.className = 'mb-2';
+                  viewWrap.innerHTML = `
+                    <a href="document_view.php?id=${data.doc_id}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 fw-semibold shadow-sm btn-sm">
+                      <i class="bi bi-eye me-1"></i> View Current File
+                    </a>
+                  `;
+                  uploadCol.insertBefore(viewWrap, uploadCol.firstChild);
+                }
               }
               if (btn) btn.innerHTML = '<i class="bi bi-upload me-1"></i> Replace';
+
+              // Reset file input
+              const fileInput = form.querySelector('input[type="file"]');
+              if (fileInput) fileInput.value = '';
+
+              // Check if all mandatory documents are now uploaded
+              function checkAllCardsSubmitted() {
+                const badges = document.querySelectorAll('.doc-card .badge-status');
+                if (badges.length === 0) return false;
+                for (let b of badges) {
+                  const txt = b.textContent.trim().toLowerCase();
+                  if (txt === 'missing' || txt === 'rejected') {
+                    return false;
+                  }
+                }
+                return true;
+              }
+
+              const isAllSubmitted = (data.all_mandatory_submitted !== undefined)
+                ? data.all_mandatory_submitted
+                : checkAllCardsSubmitted();
+
+              if (isAllSubmitted) {
+                const banner = document.getElementById('allDocsUploadedBanner');
+                if (banner && (banner.style.display === 'none' || banner.classList.contains('d-none'))) {
+                  banner.style.display = 'block';
+                  banner.classList.remove('d-none');
+                  banner.classList.add('fade-in-up');
+                  setTimeout(() => {
+                    banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }, 150);
+
+                  if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                      icon: 'success',
+                      title: 'All Mandatory Documents Uploaded!',
+                      text: 'You have uploaded all required requirements. Click below to formally submit your documents for Admissions review.',
+                      confirmButtonText: '<i class="bi bi-send-check me-1"></i> Submit for Verification',
+                      showCancelButton: true,
+                      cancelButtonText: 'Review First',
+                      confirmButtonColor: '#198754'
+                    }).then((result) => {
+                      if (result.isConfirmed) {
+                        const submitBtn = document.getElementById('btnSubmitAllDocs');
+                        if (submitBtn) submitBtn.click();
+                      }
+                    });
+                  }
+                }
+              }
             } else {
               alert(data.message || 'Upload failed');
               if (btn) btn.innerHTML = originalBtnHtml;
