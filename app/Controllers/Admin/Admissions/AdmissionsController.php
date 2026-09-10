@@ -451,15 +451,15 @@ try {
         }
     }
 
-    // 0.55. Verify medical clearance from clinic before allowing approval
-    if ($status === 'approved' || $status === 'enrolled') {
+    // 0.55. Verify medical clearance from clinic before allowing final enrollment (Medical validation occurs post-approval)
+    if ($status === 'enrolled') {
         $healthStmt = $pdo->prepare('SELECT status FROM health_records WHERE application_id = :app_id LIMIT 1');
         $healthStmt->execute(['app_id' => $appId]);
         $healthStatus = $healthStmt->fetchColumn();
 
-        if ($healthStatus && $healthStatus !== 'verified') {
-            $statusText = $status === 'enrolled' ? 'enroll' : 'approve';
-            $_SESSION['admin_error'] = "Cannot {$statusText} applicant. Medical clearance from the Clinic is pending (current status: " . ucfirst($healthStatus) . ").";
+        if ($healthStatus !== 'verified') {
+            $currStatus = $healthStatus ? ucfirst($healthStatus) : 'Not Submitted';
+            $_SESSION['admin_error'] = "Cannot enroll applicant. Medical clearance from the Clinic is required and must be verified (current status: {$currStatus}).";
             $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
             return;
         }

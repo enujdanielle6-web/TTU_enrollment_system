@@ -177,7 +177,7 @@ This document provides complete, verified file-level documentation for all **38 
 - **Purpose:** Authoritative admissions processing controller managing intake, document validation, and student assessment creation.
 - **Responsibilities:**
   - Displays Admissions review queues filtered by academic level, strand, and status.
-  - Enforces mandatory clinic medical clearance gate (`health_records.status = 'verified'`) before permitting application approval.
+  - Enforces mandatory clinic medical clearance gate (`health_records.status = 'verified'`) post-approval before permitting final enrollment.
   - Displays requested subjects for irregular/transferee applicants.
   - Assigns official class sections (`college_sections` / `shs_sections`).
   - Calls `AssessmentService` to generate tuition billing and freeze line items in `assessment_items`.
@@ -186,7 +186,7 @@ This document provides complete, verified file-level documentation for all **38 
   - `index(Request $request, Response $response): string` — Renders `admin/admissions/dashboard.php`.
   - `review(Request $request, Response $response): string` — Renders filterable intake table `admin/admissions/review.php`.
   - `detail(Request $request, Response $response): string` — Renders applicant file `admin/admissions/detail.php`.
-  - `process(Request $request, Response $response): void` — Approves/rejects application, enforces clinic gate, assigns section, triggers assessment.
+  - `process(Request $request, Response $response): void` — Approves/rejects application, assigns section, triggers assessment, enforces clinic gate upon enrollment.
   - `bulkProcess(Request $request, Response $response): void` — Processes multiple applications in batch.
   - `viewDocument(Request $request, Response $response): void` — Streams document binary for admissions officer inspection.
   - `uploadDocument(Request $request, Response $response): void` — Allows admissions staff to upload verified on-campus physical documents.
