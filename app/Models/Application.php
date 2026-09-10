@@ -151,36 +151,6 @@ class Application extends BaseModel
         
         $appId = (int) $pdo->lastInsertId();
 
-        // Also save health record if provided
-        if (!empty($data['special_needs']) || !empty($data['medical_conditions']) || !empty($data['allergies'])) {
-            try {
-                HealthRecord::save((int)$data['user_id'], $appId, [
-                    'height' => null,
-                    'weight' => null,
-                    'blood_type' => null,
-                    'has_allergies' => !empty($data['allergies']) ? 1 : 0,
-                    'has_asthma' => 0,
-                    'has_diabetes' => 0,
-                    'has_hypertension' => 0,
-                    'has_heart_disease' => 0,
-                    'has_physical_disability' => !empty($data['special_needs']) ? 1 : 0,
-                    'has_existing_condition' => !empty($data['medical_conditions']) ? 1 : 0,
-                    'has_previous_surgery' => 0,
-                    'has_maintenance_medication' => 0,
-                    'has_hospitalized' => 0,
-                    'medical_conditions' => $data['medical_conditions'] ?? null,
-                    'allergies_details' => $data['allergies'] ?? null,
-                    'current_medications' => null,
-                    'other_notes' => $data['special_needs'] ?? null,
-                    'emergency_name' => $params['emergency_name'] ?? 'Emergency Contact',
-                    'emergency_relationship' => $params['emergency_relationship'] ?? 'Guardian',
-                    'emergency_contact' => $params['emergency_contact'] ?? $params['contact_number']
-                ]);
-            } catch (\Exception $e) {
-                error_log('Health record auto-save non-fatal error: ' . $e->getMessage());
-            }
-        }
-
         return $appId;
     }
 
