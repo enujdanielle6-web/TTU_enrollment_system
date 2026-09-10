@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Application;
 use App\Models\Schedule;
 use App\Core\Database;
+use PDO;
 
 class EnrollController extends BaseController
 {
