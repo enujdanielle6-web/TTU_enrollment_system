@@ -109,3 +109,75 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// 4. Custom SweetAlert2 for Enrollment Finalization
+document.addEventListener('submit', function (e) {
+    const form = e.target.closest('.form-finalize');
+    if (!form) return;
+
+    if (form.dataset.confirmed === 'true') {
+        return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const studentName = form.dataset.studentName || 'this student';
+    const refNumber = form.dataset.refNumber || '';
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: 'Finalize Official Enrollment?',
+            html: `
+                <div class="text-start p-2">
+                    <p class="mb-2 text-muted">Are you sure you want to finalize official enrollment for:</p>
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="fw-bold text-dark fs-6">${escapeHtml(studentName)}</div>
+                        <div class="text-muted small font-monospace mt-1"><i class="bi bi-hash"></i>${escapeHtml(refNumber)}</div>
+                    </div>
+                    <div class="alert alert-info py-2 px-3 small mb-0 rounded-3 border-0 bg-info-subtle text-info-emphasis">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        This will assign their official student number, provision their institutional <code>@ttu.edu.ph</code> email, and send welcome credentials.
+                    </div>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-mortarboard-fill me-1"></i> Yes, Finalize Enrollment',
+            cancelButtonText: 'Cancel',
+            reverseButtons: true,
+            buttonsStyling: false,
+            focusCancel: true,
+            customClass: {
+                popup: 'rounded-4 shadow-lg border-0 p-3',
+                confirmButton: 'btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm',
+                cancelButton: 'btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold me-2'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                form.dataset.confirmed = 'true';
+                if (typeof form.requestSubmit === 'function') {
+                    form.requestSubmit();
+                } else {
+                    form.submit();
+                }
+            }
+        });
+    } else {
+        if (confirm(`Finalize official enrollment for ${studentName} (${refNumber})?\n\nThis will generate their student number, create institutional email, and send welcome credentials.`)) {
+            form.dataset.confirmed = 'true';
+            if (typeof form.requestSubmit === 'function') {
+                form.requestSubmit();
+            } else {
+                form.submit();
+            }
+        }
+    }
+}, true);

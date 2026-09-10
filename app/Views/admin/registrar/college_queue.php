@@ -102,7 +102,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                         <a href="../admissions/application_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-2" title="View Details">
                           <i class="bi bi-eye"></i>
                         </a>
-                        <form method="POST" action="finalize_enrollment.php" class="d-inline" onsubmit="return confirm('Finalize official enrollment for this student? This will generate their student number, create institutional email, and send welcome credentials.');">
+                        <form method="POST" action="finalize_enrollment.php" class="d-inline form-finalize" data-student-name="<?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8'); ?>" data-ref-number="<?= htmlspecialchars($app['reference_number'], ENT_QUOTES, 'UTF-8'); ?>">
                           <?= getCsrfInput() ?>
                           <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
                           <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 shadow-sm">
