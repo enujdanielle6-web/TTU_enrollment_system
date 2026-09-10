@@ -123,19 +123,20 @@ async function navigateTo(url, pushHistory = true) {
 
             // Smoothly cross-fade only the inner tab content
             currentTabContent.classList.add('tab-fade-out');
-            setTimeout(() => {
+            setTimeout(async () => {
                 cleanupEnvironment();
                 currentTabContent.innerHTML = newTabContent.innerHTML;
                 currentTabContent.classList.remove('tab-fade-out');
                 currentTabContent.classList.add('tab-fade-in');
 
-                executeInlineScripts(currentTabContent);
+                await executeInlineScripts(currentTabContent);
                 completeProgressBar();
 
                 if (pushHistory) {
                     history.pushState(null, doc.title, url);
                 }
                 document.title = doc.title;
+                document.dispatchEvent(new Event('DOMContentLoaded'));
                 document.dispatchEvent(new Event('spa:navigated'));
 
                 setTimeout(() => {
@@ -148,6 +149,26 @@ async function navigateTo(url, pushHistory = true) {
         // Global Page Swap (e.g. from Course to Dashboard)
         cleanupEnvironment();
         mainContainer.innerHTML = newMain.innerHTML;
+
+        // Carry over any modals that were placed in doc.body outside #spa-main
+        doc.querySelectorAll('body > .modal, body > div.modal').forEach(modal => {
+            if (!mainContainer.querySelector('#' + modal.id)) {
+                mainContainer.appendChild(modal.cloneNode(true));
+            }
+        });
+
+        // Carry over any page-specific scripts that were placed outside #spa-main
+        doc.querySelectorAll('body script, head script').forEach(script => {
+            const src = script.getAttribute('src') || '';
+            // Skip core persistent scripts
+            if (src.includes('spa-router.js') || src.includes('main.js') || src.includes('bootstrap.bundle.min.js')) {
+                return;
+            }
+            if (newMain.contains(script)) {
+                return;
+            }
+            mainContainer.appendChild(script.cloneNode(true));
+        });
 
         completeProgressBar();
 
@@ -184,9 +205,10 @@ async function navigateTo(url, pushHistory = true) {
         });
 
         // Force script execution sequentially
-        executeInlineScripts(mainContainer);
+        await executeInlineScripts(mainContainer);
 
-        // Announce completion
+        // Announce completion and fire ready events for loaded components
+        document.dispatchEvent(new Event('DOMContentLoaded'));
         document.dispatchEvent(new Event('spa:navigated'));
         
         // Smooth scroll to top
@@ -212,34 +234,54 @@ function cleanupEnvironment() {
 }
 
 function executeInlineScripts(container) {
-    const scripts = Array.from(container.querySelectorAll('script'));
-    
-    const loadScript = (index) => {
-        if (index >= scripts.length) return;
-        
-        const oldScript = scripts[index];
-        const newScript = document.createElement('script');
-        
-        // Copy attributes
-        Array.from(oldScript.attributes).forEach(attr => {
-            newScript.setAttribute(attr.name, attr.value);
-        });
-        
-        // Copy content
-        if (oldScript.innerHTML) {
-            newScript.innerHTML = oldScript.innerHTML;
+    return new Promise((resolve) => {
+        const scripts = Array.from(container.querySelectorAll('script'));
+        if (scripts.length === 0) {
+            resolve();
+            return;
         }
         
-        // If it's an external script, wait for it to load before proceeding
-        if (newScript.src) {
-            newScript.onload = () => loadScript(index + 1);
-            newScript.onerror = () => loadScript(index + 1); // Continue even if one fails
-            oldScript.parentNode.replaceChild(newScript, oldScript);
-        } else {
-            oldScript.parentNode.replaceChild(newScript, oldScript);
-            loadScript(index + 1);
-        }
-    };
-    
-    loadScript(0);
+        const loadScript = (index) => {
+            if (index >= scripts.length) {
+                resolve();
+                return;
+            }
+            
+            const oldScript = scripts[index];
+            const newScript = document.createElement('script');
+            
+            // Copy attributes
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            
+            // Avoid clobbering existing libraries if already loaded in window
+            const src = newScript.src || '';
+            if (src.includes('jquery.min.js') && window.jQuery) {
+                loadScript(index + 1);
+                return;
+            }
+            if (src.includes('bootstrap.bundle.min.js') && window.bootstrap) {
+                loadScript(index + 1);
+                return;
+            }
+            
+            // Copy content
+            if (oldScript.innerHTML) {
+                newScript.innerHTML = oldScript.innerHTML;
+            }
+            
+            // If it's an external script, wait for it to load before proceeding
+            if (newScript.src) {
+                newScript.onload = () => loadScript(index + 1);
+                newScript.onerror = () => loadScript(index + 1); // Continue even if one fails
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            } else {
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+                loadScript(index + 1);
+            }
+        };
+        
+        loadScript(0);
+    });
 }

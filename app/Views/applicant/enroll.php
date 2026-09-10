@@ -677,7 +677,6 @@ require_once __DIR__ . '/../components/header.php';
       </div>
     </div>
   </div>
-</main>
 
 <!-- Schedule Preview Modal -->
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true">
@@ -773,8 +772,11 @@ require_once __DIR__ . '/../components/header.php';
   });
 </script>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  function initEnrollmentAcademicControls() {
     const academicLevelSelect = document.getElementById('academicLevel');
+    if (!academicLevelSelect || academicLevelSelect.dataset.controlsBound === 'true') return;
+    academicLevelSelect.dataset.controlsBound = 'true';
+
     const gradeLevelSelect = document.getElementById('gradeLevel');
     const strandSelect = document.getElementById('strand');
 
@@ -1523,13 +1525,23 @@ require_once __DIR__ . '/../components/header.php';
       updateOptions();
       updateSectionVisibility();
     }
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initEnrollmentAcademicControls);
+  } else {
+    initEnrollmentAcademicControls();
+  }
+  document.addEventListener('spa:navigated', initEnrollmentAcademicControls);
 </script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+  function initPreviousSchoolLogic() {
     // Previous School Logic
     const prevSchoolLevel = document.getElementById('previousSchoolLevel');
+    if (!prevSchoolLevel || prevSchoolLevel.dataset.schoolBound === 'true') return;
+    prevSchoolLevel.dataset.schoolBound = 'true';
+
     const strandCourseContainer = document.getElementById('strandCourseContainer');
     const prevStrandCourse = document.getElementById('previousStrandCourse');
     const strandCourseLabel = document.getElementById('strandCourseLabel');
@@ -1666,16 +1678,25 @@ require_once __DIR__ . '/../components/header.php';
       enrollForm.addEventListener('input', saveFormData);
       enrollForm.addEventListener('change', saveFormData);
     }
+  }
 
-  });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPreviousSchoolLogic);
+  } else {
+    initPreviousSchoolLogic();
+  }
+  document.addEventListener('spa:navigated', initPreviousSchoolLogic);
 </script>
 
 <script>
 // Wizard Navigation and Review Logic
-document.addEventListener('DOMContentLoaded', function() {
+function initEnrollmentWizard() {
+  const form = document.getElementById('enrollmentForm');
+  if (!form || form.dataset.wizardBound === 'true') return;
+  form.dataset.wizardBound = 'true';
+
   const totalSteps = 7;
   let currentStep = 1;
-  const form = document.getElementById('enrollmentForm');
   
   function updateWizardUI() {
     // Update steps visibility
@@ -1849,7 +1870,14 @@ document.addEventListener('DOMContentLoaded', function() {
        });
      });
   });
-});
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initEnrollmentWizard);
+} else {
+  initEnrollmentWizard();
+}
+document.addEventListener('spa:navigated', initEnrollmentWizard);
 
 function autoFillEnrollment() {
   const form = document.getElementById('enrollmentForm');
@@ -1996,5 +2024,9 @@ function autoFillEnrollment() {
     alert('Form fields auto-filled successfully with valid test data!');
   }
 }
+
+// Guarantee global availability in all execution scopes
+window.autoFillEnrollment = autoFillEnrollment;
 </script>
+</main>
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

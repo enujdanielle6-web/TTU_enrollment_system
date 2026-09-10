@@ -214,13 +214,14 @@ require_once __DIR__ . '/../components/applicant_navbar.php';
     <?php endif; ?>
 
   </div>
-</main>
 
 <script src="/sia/public/vendor/jquery/jquery.min.js"></script>
 <script>
-$(document).ready(function() {
+function initHealthInfoValidations() {
     var forms = document.querySelectorAll('.needs-validation');
     Array.prototype.slice.call(forms).forEach(function (form) {
+        if (form.dataset.bound === 'true') return;
+        form.dataset.bound = 'true';
         form.addEventListener('submit', function (event) {
             if (!form.checkValidity()) {
                 event.preventDefault();
@@ -229,8 +230,16 @@ $(document).ready(function() {
             form.classList.add('was-validated');
         }, false);
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initHealthInfoValidations);
+} else {
+    initHealthInfoValidations();
+}
+document.addEventListener('spa:navigated', initHealthInfoValidations);
 </script>
+</main>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
 

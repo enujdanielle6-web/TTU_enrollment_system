@@ -161,7 +161,6 @@ require_once __DIR__ . '/../components/header.php';
     <?php endif; ?>
 
   </div>
-</main>
 
 <!-- Application Modal -->
 <div class="modal fade" id="applyModal" tabindex="-1">
@@ -203,11 +202,12 @@ require_once __DIR__ . '/../components/header.php';
   </div>
 </div>
 
-<?php require_once __DIR__ . '/../components/footer.php'; ?>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initScholarshipsPage() {
     const applyBtns = document.querySelectorAll('.apply-btn');
     applyBtns.forEach(btn => {
+        if (btn.dataset.bound === 'true') return;
+        btn.dataset.bound = 'true';
         btn.addEventListener('click', function() {
             document.getElementById('modal_scholarship_id').value = this.getAttribute('data-id');
             document.getElementById('modal_scholarship_name').innerText = this.getAttribute('data-name');
@@ -215,7 +215,15 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('modal_requirements_text').innerText = req ? req : 'No specific documents listed, but upload any necessary files.';
         });
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScholarshipsPage);
+} else {
+    initScholarshipsPage();
+}
+document.addEventListener('spa:navigated', initScholarshipsPage);
 </script>
-</body>
-</html>
+</main>
+
+<?php require_once __DIR__ . '/../components/footer.php'; ?>

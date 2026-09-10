@@ -198,32 +198,42 @@ require_once __DIR__ . '/../components/header.php';
       </div>
     </div>
   </div>
-</main>
 
 <script src="/sia/public/vendor/jquery/jquery.min.js"></script>
 <script>
-  $(function () {
-    // Client-side bootstrap validations
+  function initProfileValidations() {
     var forms = $('.needs-validation');
-    forms.on('submit', function (event) {
+    forms.each(function() {
       var form = this;
-      
-      if (form.id === 'passwordForm') {
-        var newPass = $('#newPassword').val();
-        var confPass = $('#confirmPassword').val();
-        $('#confirmPassword')[0].setCustomValidity(
-          newPass === confPass ? '' : 'Passwords do not match.'
-        );
-      }
+      if (form.dataset.bound === 'true') return;
+      form.dataset.bound = 'true';
 
-      if (!form.checkValidity()) {
-        event.preventDefault();
-        event.stopPropagation();
-      }
-      $(form).addClass('was-validated');
+      $(form).on('submit', function (event) {
+        if (form.id === 'passwordForm') {
+          var newPass = $('#newPassword').val();
+          var confPass = $('#confirmPassword').val();
+          $('#confirmPassword')[0].setCustomValidity(
+            newPass === confPass ? '' : 'Passwords do not match.'
+          );
+        }
+
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        $(form).addClass('was-validated');
+      });
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initProfileValidations);
+  } else {
+    initProfileValidations();
+  }
+  document.addEventListener('spa:navigated', initProfileValidations);
 </script>
+</main>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
 
