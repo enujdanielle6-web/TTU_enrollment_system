@@ -375,7 +375,7 @@ try {
             u.email,
             sa.payment_status,
             sa.total_paid,
-            sa.total_assessment,
+            sa.net_amount as total_assessment,
             cs.section_code,
             (SELECT h.status FROM health_records h WHERE h.application_id = a.id LIMIT 1) as medical_status
         FROM applications a
@@ -473,7 +473,7 @@ try {
             u.email,
             sa.payment_status,
             sa.total_paid,
-            sa.total_assessment,
+            sa.net_amount as total_assessment,
             ss.section_code,
             (SELECT h.status FROM health_records h WHERE h.application_id = a.id LIMIT 1) as medical_status
         FROM applications a
