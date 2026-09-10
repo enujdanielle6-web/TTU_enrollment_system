@@ -37,7 +37,11 @@
 
                 <?php if ($quiz['passing_score'] !== null): ?>
                     <h5 class="fw-bold mt-3 <?= esc($passed ? 'text-success' : 'text-danger') ?>">
-                        <?= esc($passed ? '<i class="bi bi-check-circle-fill me-1"></i> Passed' : '<i class="bi bi-x-circle-fill me-1"></i> Failed') ?>
+                        <?php if ($passed): ?>
+                            <i class="bi bi-check-circle-fill me-1"></i> Passed
+                        <?php else: ?>
+                            <i class="bi bi-x-circle-fill me-1"></i> Failed
+                        <?php endif; ?>
                     </h5>
                     <p class="text-muted small">Passing score: <?= esc($quiz['passing_score']) ?>%</p>
                 <?php endif; ?>

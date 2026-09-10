@@ -83,7 +83,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                       <?php endif; ?>
                     </td>
                     <td>
-                      <?= esc($scholarship['slots'] ? (int)$scholarship['slots'] : '<span class="text-muted">Unlimited</span>') ?>
+                      <?= !empty($scholarship['slots']) ? esc((int)$scholarship['slots']) : '<span class="text-muted">Unlimited</span>' ?>
                     </td>
                     <td>
                       <?php 
@@ -118,18 +118,17 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 <!-- Unified Create/Edit Scholarship Modal -->
 <div class="modal fade" id="scholarshipModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-    <div class="modal-content border-0 shadow-lg">
-      <form action="scholarship_process.php" method="POST">
-        <?= getCsrfInput() ?>
-        <input type="hidden" name="action" id="modal_action" value="create_scholarship">
-        <input type="hidden" name="id" id="modal_id" value="">
-        
-        <div class="modal-header bg-light border-bottom-0 pb-3">
-          <h5 class="modal-title fw-bold text-dark" id="modal_title"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Create New Scholarship</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-        </div>
-        
-        <div class="modal-body p-4 pt-2">
+    <form action="scholarship_process.php" method="POST" class="modal-content border-0 shadow-lg" id="scholarshipForm" style="max-height: 90vh;">
+      <?= getCsrfInput() ?>
+      <input type="hidden" name="action" id="modal_action" value="create_scholarship">
+      <input type="hidden" name="id" id="modal_id" value="">
+      
+      <div class="modal-header bg-light border-bottom py-3 px-4">
+        <h5 class="modal-title fw-bold text-dark" id="modal_title"><i class="bi bi-plus-circle-fill text-primary me-2"></i>Create New Scholarship</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      
+      <div class="modal-body p-4" style="overflow-y: auto;">
             
             <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">1. Basic Information</h6>
             <div class="row mb-3">
@@ -254,12 +253,11 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             </div>
             
         </div>
-        <div class="modal-footer border-top-0 pt-0 px-4 pb-4">
+        <div class="modal-footer bg-light border-top py-3 px-4">
           <button type="button" class="btn btn-light px-4 rounded-pill fw-medium" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary px-4 rounded-pill fw-medium shadow-sm" id="modal_submit_btn">Save Scholarship</button>
         </div>
-      </form>
-    </div>
+    </form>
   </div>
 </div>
 

@@ -55,10 +55,10 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?= esc($attempt['submitted_at'] ? date('M d, Y h:i A', strtotime($attempt['submitted_at'])) : '<span class="text-muted">-</span>') ?>
+                                        <?= !empty($attempt['submitted_at']) ? esc(date('M d, Y h:i A', strtotime($attempt['submitted_at']))) : '<span class="text-muted">-</span>' ?>
                                     </td>
                                     <td class="text-end pe-4 fw-bold">
-                                        <?= esc($attempt['score'] !== null ? $attempt['score'] . ' pts' : '<span class="text-muted">-</span>') ?>
+                                        <?= $attempt['score'] !== null ? esc($attempt['score'] . ' pts') : '<span class="text-muted">-</span>' ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

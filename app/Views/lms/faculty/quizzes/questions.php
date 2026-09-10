@@ -48,7 +48,9 @@
                                             <li class="mb-2 <?= esc($c['is_correct'] ? 'text-success fw-bold' : 'text-muted') ?>">
                                                 <i class="bi <?= esc($c['is_correct'] ? 'bi-check-circle-fill' : 'bi-circle') ?> me-2"></i>
                                                 <?= htmlspecialchars($c['choice_text']) ?>
-                                                <?= esc($c['is_correct'] ? ' <span class="badge bg-success ms-1">Correct Answer</span>' : '') ?>
+                                                <?php if ($c['is_correct']): ?>
+                                                    <span class="badge bg-success ms-1">Correct Answer</span>
+                                                <?php endif; ?>
                                             </li>
                                         <?php endforeach; ?>
                                     </ul>

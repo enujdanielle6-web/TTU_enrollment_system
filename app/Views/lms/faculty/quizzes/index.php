@@ -54,7 +54,7 @@
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?= esc($quiz['time_limit'] ? $quiz['time_limit'] . ' mins' : '<span class="text-muted">Unlimited</span>') ?>
+                                        <?= !empty($quiz['time_limit']) ? esc($quiz['time_limit'] . ' mins') : '<span class="text-muted">Unlimited</span>' ?>
                                     </td>
                                     <td class="small">
                                         <?php if ($quiz['start_date']): ?>

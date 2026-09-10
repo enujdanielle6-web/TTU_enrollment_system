@@ -66,6 +66,7 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
         $defaultFacultyId = (int)$facStmt->fetchColumn() ?: 18;
 
         $courses = [];
+        $seenCourseIds = [];
         foreach ($enrollments as $enr) {
             $secId = (int)$enr['college_section_id'];
             $subId = (int)$enr['subject_id'];
@@ -104,6 +105,11 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
                 $firstName = $lmsCourse['first_name'] ?? 'Faculty';
                 $lastName = $lmsCourse['last_name'] ?? 'Instructor';
             }
+
+            if (isset($seenCourseIds[$lmsCourseId])) {
+                continue;
+            }
+            $seenCourseIds[$lmsCourseId] = true;
 
             $courses[] = [
                 'lms_course_id' => $lmsCourseId,

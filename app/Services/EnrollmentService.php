@@ -206,25 +206,39 @@ class EnrollmentService
         if ($academicLevel === 'College') {
             $secSubs = $pdo->prepare('SELECT subject_id FROM college_section_subjects WHERE college_section_id = :sec_id');
             $secSubs->execute(['sec_id' => $sectionId]);
-            $subIds = $secSubs->fetchAll(PDO::FETCH_COLUMN);
+            $subIds = array_map('intval', $secSubs->fetchAll(PDO::FETCH_COLUMN));
 
             if (!empty($subIds)) {
-                $insCe = $pdo->prepare('INSERT IGNORE INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
-                foreach ($subIds as $sId) {
-                    $insCe->execute(['app_id' => $applicationId, 'sub_id' => $sId, 'sec_id' => $sectionId]);
-                    $enrolledCount++;
+                $existingStmt = $pdo->prepare('SELECT subject_id FROM college_enrollments WHERE application_id = :app_id');
+                $existingStmt->execute(['app_id' => $applicationId]);
+                $existingSubIds = array_map('intval', $existingStmt->fetchAll(PDO::FETCH_COLUMN));
+
+                $toInsert = array_diff($subIds, $existingSubIds);
+                if (!empty($toInsert)) {
+                    $insCe = $pdo->prepare('INSERT IGNORE INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                    foreach ($toInsert as $sId) {
+                        $insCe->execute(['app_id' => $applicationId, 'sub_id' => $sId, 'sec_id' => $sectionId]);
+                        $enrolledCount++;
+                    }
                 }
             }
         } else {
             $secSubs = $pdo->prepare('SELECT subject_id FROM shs_section_subjects WHERE shs_section_id = :sec_id');
             $secSubs->execute(['sec_id' => $sectionId]);
-            $subIds = $secSubs->fetchAll(PDO::FETCH_COLUMN);
+            $subIds = array_map('intval', $secSubs->fetchAll(PDO::FETCH_COLUMN));
 
             if (!empty($subIds)) {
-                $insSe = $pdo->prepare('INSERT IGNORE INTO shs_enrollments (application_id, subject_id, shs_section_id) VALUES (:app_id, :sub_id, :sec_id)');
-                foreach ($subIds as $sId) {
-                    $insSe->execute(['app_id' => $applicationId, 'sub_id' => $sId, 'sec_id' => $sectionId]);
-                    $enrolledCount++;
+                $existingStmt = $pdo->prepare('SELECT subject_id FROM shs_enrollments WHERE application_id = :app_id');
+                $existingStmt->execute(['app_id' => $applicationId]);
+                $existingSubIds = array_map('intval', $existingStmt->fetchAll(PDO::FETCH_COLUMN));
+
+                $toInsert = array_diff($subIds, $existingSubIds);
+                if (!empty($toInsert)) {
+                    $insSe = $pdo->prepare('INSERT IGNORE INTO shs_enrollments (application_id, subject_id, shs_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                    foreach ($toInsert as $sId) {
+                        $insSe->execute(['app_id' => $applicationId, 'sub_id' => $sId, 'sec_id' => $sectionId]);
+                        $enrolledCount++;
+                    }
                 }
             }
         }
