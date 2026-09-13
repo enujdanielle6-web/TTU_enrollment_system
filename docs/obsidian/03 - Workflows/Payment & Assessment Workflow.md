@@ -52,8 +52,9 @@ $$\text{Net Amount Payable} = \text{Gross Assessment} - \text{Scholarship Discou
 - The upload is stored in `/uploads/payments/` and creates a `payment_records` row with `status = 'pending'`.
 
 ### Step 3: Cashier Review & Verification (`/admin/finance/cashier_payments.php`)
-- Cashier accesses the payments ledger and clicks on pending transactions to inspect the uploaded payment slip in a modal viewer.
-- Entering the Official Receipt (OR) Number and submitting verification updates `payment_records.status = 'verified'` and sets `verified_by` to the cashier's user ID.
+- Cashier accesses the payments ledger and inspects the uploaded payment slip in the verification modal.
+- Approving the payment automatically invokes `generateAtomicReceiptNumber($pdo)` (guaranteeing monotonic `REC-YYYYMMDD-XXXX`), updates `payment_records.status = 'verified'`, records the cashier's ID in `payment_records.cashier_id`, updates `student_assessments.total_paid`, and transitions `applications.status = 'payment_verified'`.
+- Rejecting requires an explicit reason and marks `payment_records.status = 'rejected'`, notifying the student to resubmit valid proof.
 
 ### Step 4: Official Receipt & Matriculation Slip
 - The student can immediately view and print their official payment receipt (`/admin/finance/cashier_receipt.php`) and Certificate of Matriculation (`/applicant/print_slip.php`).

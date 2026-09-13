@@ -17,17 +17,28 @@ class StudentCalendarController extends BaseController
 
     public function index(Request $request, Response $response)
     {
-        $userId = $_SESSION['user_id'] ?? 0;
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $lmsService = new \App\Services\LmsService();
         
         $month = $request->input('month', date('m'));
         $year = $request->input('year', date('Y'));
         
+        // Pad month to 2 digits
+        $month = str_pad($month, 2, '0', STR_PAD_LEFT);
+        
         $events = $this->calendarService->getStudentCalendarEvents($userId, $month, $year);
+        $upcomingDeadlines = $lmsService->getStudentUpcomingDeadlines($userId, 6);
+        $studentCourses = $lmsService->getStudentCourses($userId);
+        
+        $pageTitle = 'Academic Calendar - TTU LMS';
 
         return $this->render('lms/student/calendar/index', [
+            'pageTitle' => $pageTitle,
             'month' => $month,
             'year' => $year,
-            'events' => $events
+            'events' => $events,
+            'upcomingDeadlines' => $upcomingDeadlines,
+            'studentCourses' => $studentCourses
         ]);
     }
 }

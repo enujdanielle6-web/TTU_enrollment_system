@@ -59,6 +59,14 @@ This document defines the architectural conventions, PHP coding standards, secur
 - Guard all administrative routes with `RoleMiddleware`.
 
 ---
+
+## 6. Documentation Maintenance Standard
+- Source code is authoritative. Documentation describes the verified current implementation.
+- All code, database schema, or workflow modifications require updating the corresponding documentation in `docs/obsidian/` and `.agents/skills/`.
+- Refer to [[Documentation Maintenance Standard]] for the full synchronization matrix and AI agent guidelines.
+
+
+---
 **Related:**
 - [[System Architecture]]
 - [[Security Overview]]

@@ -48,16 +48,15 @@ sequenceDiagram
     autonumber
     actor Cashier as Cashier Officer
     participant Controller as FinanceController
-    participant Seq as FinanceController::generateAtomicReceiptNumber
+    participant Seq as generateAtomicReceiptNumber($pdo)
     participant DB as MariaDB (sia)
     participant Registrar as Registrar Finalization Queue
 
     Cashier->>Controller: POST cashier_process.php (action='record_payment', assessment_id, amount, payment_method)
     Controller->>DB: Begin PDO Transaction
-    Controller->>Seq: generateAtomicReceiptNumber($currentYear)
-    Seq->>DB: SELECT current_sequence FROM receipt_sequences WHERE receipt_year = ? FOR UPDATE
-    Seq->>DB: UPDATE receipt_sequences SET current_sequence = current_sequence + 1
-    Seq-->>Controller: Returns guaranteed unique 'OR-YYYY-XXXXXX'
+    Controller->>Seq: generateAtomicReceiptNumber($pdo)
+    Seq->>DB: INSERT INTO receipt_sequences (sequence_year, current_value) VALUES (?, 1) ON DUPLICATE KEY UPDATE current_value = current_value + 1
+    Seq-->>Controller: Returns guaranteed unique 'REC-YYYYMMDD-XXXX'
     Controller->>DB: INSERT INTO payment_records (assessment_id, user_id, cashier_id, amount, receipt_number, status='verified')
     Controller->>DB: UPDATE student_assessments SET total_paid = total_paid + ?, payment_status = (CASE WHEN total_paid >= net_amount THEN 'paid' ELSE 'partial' END)
     

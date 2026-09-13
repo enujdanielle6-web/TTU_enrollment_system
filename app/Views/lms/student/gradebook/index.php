@@ -49,27 +49,31 @@
         $totalGradedItems = $gradedAssignCount + $gradedQuizCount;
         $evalProgress = $totalItems > 0 ? ($totalGradedItems / $totalItems) * 100 : 0;
 
-        // Transmutation Scale
-        if ($overallPercentage >= 97) {
+        // Transmutation Scale (Philippine Higher Education 1.00 - 5.00 Grading System)
+        if ($totalGradedItems === 0) {
+            $transmutedGrade = '—';
+            $gradeLabel = 'Course In Progress';
+            $gradeBadgeClass = 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25';
+        } elseif ($overallPercentage >= 97) {
             $transmutedGrade = '1.00';
             $gradeLabel = 'Excellent';
-            $gradeBadgeClass = 'bg-success';
+            $gradeBadgeClass = 'bg-success text-white';
         } elseif ($overallPercentage >= 93) {
             $transmutedGrade = '1.25';
             $gradeLabel = 'Superior';
-            $gradeBadgeClass = 'bg-success';
+            $gradeBadgeClass = 'bg-success text-white';
         } elseif ($overallPercentage >= 89) {
             $transmutedGrade = '1.50';
             $gradeLabel = 'Very Good';
-            $gradeBadgeClass = 'bg-success';
+            $gradeBadgeClass = 'bg-success text-white';
         } elseif ($overallPercentage >= 85) {
             $transmutedGrade = '1.75';
             $gradeLabel = 'Good';
-            $gradeBadgeClass = 'bg-primary';
+            $gradeBadgeClass = 'bg-primary text-white';
         } elseif ($overallPercentage >= 80) {
             $transmutedGrade = '2.00';
             $gradeLabel = 'Satisfactory';
-            $gradeBadgeClass = 'bg-primary';
+            $gradeBadgeClass = 'bg-primary text-white';
         } elseif ($overallPercentage >= 75) {
             $transmutedGrade = '3.00';
             $gradeLabel = 'Passing';
@@ -77,7 +81,7 @@
         } else {
             $transmutedGrade = '5.00';
             $gradeLabel = 'Below Passing';
-            $gradeBadgeClass = 'bg-danger';
+            $gradeBadgeClass = 'bg-danger text-white';
         }
         ?>
 
@@ -87,9 +91,13 @@
             <div class="col-xl-4 col-lg-5">
                 <div class="grade-stat-card grade-hero-card p-4 d-flex flex-column justify-content-between">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <span class="text-uppercase small fw-bold text-muted">Current Standing</span>
+                        <span class="text-uppercase small fw-bold text-muted" style="letter-spacing: 0.04em;">Academic Standing</span>
                         <span class="badge rounded-pill <?= esc($gradeBadgeClass) ?> px-3 py-1 fw-bold">
-                            <?= esc($transmutedGrade) ?> &bull; <?= esc($gradeLabel) ?>
+                            <?php if ($totalGradedItems === 0): ?>
+                                <i class="bi bi-clock-history me-1"></i> <?= esc($gradeLabel) ?>
+                            <?php else: ?>
+                                <?= esc($transmutedGrade) ?> &bull; <?= esc($gradeLabel) ?>
+                            <?php endif; ?>
                         </span>
                     </div>
 
@@ -100,26 +108,50 @@
                                 <path stroke-width="3.5" stroke="currentColor" fill="none"
                                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                     style="stroke: #e2e8f0;" />
+                                <?php if ($totalGradedItems > 0 && $overallPercentage > 0): ?>
                                 <path stroke-dasharray="<?= esc(round($overallPercentage, 1)) ?>, 100" stroke-width="3.5" stroke-linecap="round" fill="none"
                                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                     style="stroke: <?= esc($overallPercentage >= 75 ? 'var(--lms-primary)' : '#ef4444') ?>; transition: stroke-dasharray 0.6s ease;" />
+                                <?php endif; ?>
                             </svg>
                             <div class="position-absolute text-center">
-                                <span class="fw-bold fs-5 text-dark"><?= esc(round($overallPercentage, 0)) ?>%</span>
+                                <?php if ($totalGradedItems > 0): ?>
+                                    <span class="fw-bold fs-5 text-dark"><?= esc(round($overallPercentage, 0)) ?>%</span>
+                                <?php else: ?>
+                                    <span class="fw-bold fs-5 text-secondary">0%</span>
+                                <?php endif; ?>
                             </div>
                         </div>
 
                         <div>
-                            <div class="display-6 fw-bold text-dark mb-0"><?= number_format($overallPercentage, 1) ?>%</div>
-                            <div class="text-muted small fw-semibold">
-                                <i class="bi bi-bullseye me-1 text-primary"></i> <?= esc($totalEarned) ?> / <?= esc($totalPossible) ?> Total Points
-                            </div>
+                            <?php if ($totalGradedItems > 0): ?>
+                                <div class="display-6 fw-bold text-dark mb-0"><?= number_format($overallPercentage, 1) ?>%</div>
+                                <div class="text-muted small fw-semibold">
+                                    <i class="bi bi-bullseye me-1 text-primary"></i> <?= esc($totalEarned) ?> / <?= esc($totalPossible) ?> Total Points
+                                </div>
+                            <?php else: ?>
+                                <div class="display-6 fw-bold text-dark mb-0">0.0%</div>
+                                <div class="text-secondary small fw-semibold">
+                                    <i class="bi bi-info-circle me-1 text-primary"></i> No assessments graded yet
+                                </div>
+                                <div class="text-muted smaller mt-1">
+                                    <i class="bi bi-bullseye me-1"></i> 0 / <?= esc($totalPossible) ?> Course Points
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
-                    <div class="pt-3 mt-2 border-top d-flex justify-content-between align-items-center text-muted small">
-                        <span><i class="bi bi-check-circle-fill text-success me-1"></i> Graded Tasks</span>
-                        <span class="fw-bold text-dark"><?= esc($totalGradedItems) ?> of <?= esc($totalItems) ?> Items</span>
+                    <div class="pt-3 mt-2 border-top d-flex justify-content-between align-items-center small">
+                        <?php if ($totalGradedItems === 0): ?>
+                            <span class="text-muted"><i class="bi bi-hourglass text-muted me-1"></i> Graded Tasks</span>
+                            <span class="badge bg-light text-secondary border px-2 py-1 fw-semibold">0 of <?= esc($totalItems) ?> Items</span>
+                        <?php elseif ($totalGradedItems < $totalItems): ?>
+                            <span class="text-muted"><i class="bi bi-hourglass-split text-warning me-1"></i> Partially Graded</span>
+                            <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 px-2 py-1 fw-semibold"><?= esc($totalGradedItems) ?> of <?= esc($totalItems) ?> Items</span>
+                        <?php else: ?>
+                            <span class="text-muted"><i class="bi bi-check-circle-fill text-success me-1"></i> All Assessments Graded</span>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2 py-1 fw-semibold"><?= esc($totalGradedItems) ?> of <?= esc($totalItems) ?> Items</span>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -138,9 +170,15 @@
                                         </div>
                                         <h6 class="fw-bold mb-0 text-dark">Assignments</h6>
                                     </div>
-                                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 fw-bold">
-                                        <?= esc(round($assignPercentage, 1)) ?>%
-                                    </span>
+                                    <?php if ($gradedAssignCount > 0): ?>
+                                        <span class="badge bg-primary text-white rounded-pill px-3 py-1 fw-bold">
+                                            <?= esc(round($assignPercentage, 1)) ?>%
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-muted border rounded-pill px-3 py-1 fw-semibold">
+                                            0.0%
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="fs-4 fw-bold text-dark mb-1">
                                     <?= esc($totalAssignEarned) ?> <span class="fs-6 fw-normal text-muted">/ <?= esc($totalAssignPossible) ?> pts</span>
@@ -151,7 +189,7 @@
                                     <div class="progress-bar bg-primary" role="progressbar" style="width: <?= esc(min(100, $assignPercentage)) ?>%;"></div>
                                 </div>
                                 <div class="d-flex justify-content-between text-muted small">
-                                    <span>Graded</span>
+                                    <span>Graded Status</span>
                                     <span class="fw-semibold text-dark"><?= esc($gradedAssignCount) ?> of <?= esc(count($assignments)) ?> assignments</span>
                                 </div>
                             </div>
@@ -169,9 +207,15 @@
                                         </div>
                                         <h6 class="fw-bold mb-0 text-dark">Online Quizzes</h6>
                                     </div>
-                                    <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-1 fw-bold">
-                                        <?= esc(round($quizPercentage, 1)) ?>%
-                                    </span>
+                                    <?php if ($gradedQuizCount > 0): ?>
+                                        <span class="badge bg-info text-white rounded-pill px-3 py-1 fw-bold">
+                                            <?= esc(round($quizPercentage, 1)) ?>%
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-muted border rounded-pill px-3 py-1 fw-semibold">
+                                            0.0%
+                                        </span>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="fs-4 fw-bold text-dark mb-1">
                                     <?= esc($totalQuizEarned) ?> <span class="fs-6 fw-normal text-muted">/ <?= esc($totalQuizPossible) ?> pts</span>
@@ -182,7 +226,7 @@
                                     <div class="progress-bar bg-info" role="progressbar" style="width: <?= esc(min(100, $quizPercentage)) ?>%;"></div>
                                 </div>
                                 <div class="d-flex justify-content-between text-muted small">
-                                    <span>Graded</span>
+                                    <span>Graded Status</span>
                                     <span class="fw-semibold text-dark"><?= esc($gradedQuizCount) ?> of <?= esc(count($quizzes)) ?> quizzes</span>
                                 </div>
                             </div>
@@ -226,8 +270,11 @@
                     <!-- Assignments List -->
                     <?php foreach ($assignments as $a): 
                         $score = $myGrades ? ($myGrades['assignments'][$a['id']] ?? null) : null;
+                        $sub = $myGrades ? ($myGrades['assignment_submissions'][$a['id']] ?? null) : null;
                         $maxScore = (float)$a['max_score'];
                         $itemPct = ($score !== null && $maxScore > 0) ? ($score / $maxScore) * 100 : 0;
+                        $isSubmitted = ($sub !== null && !empty($sub['status']));
+                        $isGraded = ($score !== null);
                     ?>
                         <div class="assessment-item-card assessment-item" data-type="assignment">
                             <div class="row align-items-center g-3">
@@ -237,13 +284,13 @@
                                             <i class="bi bi-journal-text"></i>
                                         </div>
                                         <div>
-                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                                                 <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-0 small fw-bold">Assignment</span>
                                                 <?php if (!empty($a['due_date'])): ?>
                                                     <small class="text-muted"><i class="bi bi-clock me-1"></i>Due <?= date('M d, Y', strtotime($a['due_date'])) ?></small>
                                                 <?php endif; ?>
                                             </div>
-                                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($a['id']) ?>" class="fw-bold text-dark text-decoration-none">
+                                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($a['id']) ?>" class="fw-bold text-dark text-decoration-none hover-primary">
                                                 <?= htmlspecialchars($a['title']) ?>
                                             </a>
                                         </div>
@@ -251,24 +298,30 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <?php if ($score !== null): ?>
+                                    <?php if ($isGraded): ?>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="progress flex-grow-1" style="height: 6px; background: #e2e8f0; border-radius: 10px;">
                                                 <div class="progress-bar <?= esc($itemPct >= 75 ? 'bg-success' : 'bg-warning') ?>" role="progressbar" style="width: <?= esc(min(100, $itemPct)) ?>%;"></div>
                                             </div>
                                             <small class="text-muted fw-bold"><?= esc(round($itemPct, 0)) ?>%</small>
                                         </div>
+                                    <?php elseif ($isSubmitted): ?>
+                                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 rounded-pill px-3 py-1 small fw-semibold">
+                                            <i class="bi bi-hourglass-split text-warning me-1"></i> Turned In &bull; Pending Grade
+                                        </span>
                                     <?php else: ?>
-                                        <small class="text-muted"><i class="bi bi-dash"></i> No score recorded</small>
+                                        <span class="badge bg-light text-muted border rounded-pill px-3 py-1 small">
+                                            <i class="bi bi-dash me-1"></i> Not Submitted
+                                        </span>
                                     <?php endif; ?>
                                 </div>
 
                                 <div class="col-md-2 text-md-center">
-                                    <?php if ($score !== null): ?>
+                                    <?php if ($isGraded): ?>
                                         <div class="fw-bold fs-6 text-dark"><?= esc($score) ?> <span class="text-muted small fw-normal">/ <?= esc($maxScore) ?> pts</span></div>
                                     <?php else: ?>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-1">
-                                            Not Graded
+                                        <span class="badge bg-light text-muted border rounded-pill px-3 py-1 small">
+                                            — / <?= esc($maxScore) ?> pts
                                         </span>
                                     <?php endif; ?>
                                 </div>
@@ -285,8 +338,11 @@
                     <!-- Quizzes List -->
                     <?php foreach ($quizzes as $q): 
                         $score = $myGrades ? ($myGrades['quizzes'][$q['id']] ?? null) : null;
+                        $attempts = $myGrades ? ($myGrades['quiz_attempts'][$q['id']] ?? []) : [];
                         $maxPts = (float)($data['quiz_max_points'][$q['id']] ?? 0);
                         $itemPct = ($score !== null && $maxPts > 0) ? ($score / $maxPts) * 100 : 0;
+                        $isGraded = ($score !== null);
+                        $hasAttempted = !empty($attempts);
                     ?>
                         <div class="assessment-item-card assessment-item" data-type="quiz">
                             <div class="row align-items-center g-3">
@@ -296,13 +352,13 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </div>
                                         <div>
-                                            <div class="d-flex align-items-center gap-2 mb-1">
+                                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                                                 <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-2 py-0 small fw-bold">Online Quiz</span>
                                                 <?php if (!empty($q['end_date'])): ?>
                                                     <small class="text-muted"><i class="bi bi-clock me-1"></i>Closes <?= date('M d, Y', strtotime($q['end_date'])) ?></small>
                                                 <?php endif; ?>
                                             </div>
-                                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="fw-bold text-dark text-decoration-none">
+                                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="fw-bold text-dark text-decoration-none hover-primary">
                                                 <?= htmlspecialchars($q['title']) ?>
                                             </a>
                                         </div>
@@ -310,24 +366,30 @@
                                 </div>
 
                                 <div class="col-md-3">
-                                    <?php if ($score !== null): ?>
+                                    <?php if ($isGraded): ?>
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="progress flex-grow-1" style="height: 6px; background: #e2e8f0; border-radius: 10px;">
                                                 <div class="progress-bar <?= esc($itemPct >= 75 ? 'bg-success' : 'bg-warning') ?>" role="progressbar" style="width: <?= esc(min(100, $itemPct)) ?>%;"></div>
                                             </div>
                                             <small class="text-muted fw-bold"><?= esc(round($itemPct, 0)) ?>%</small>
                                         </div>
+                                    <?php elseif ($hasAttempted): ?>
+                                        <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 rounded-pill px-3 py-1 small fw-semibold">
+                                            <i class="bi bi-hourglass-split text-warning me-1"></i> Attempted &bull; Pending Review
+                                        </span>
                                     <?php else: ?>
-                                        <small class="text-muted"><i class="bi bi-dash"></i> No score recorded</small>
+                                        <span class="badge bg-light text-muted border rounded-pill px-3 py-1 small">
+                                            <i class="bi bi-dash me-1"></i> Not Attempted
+                                        </span>
                                     <?php endif; ?>
                                 </div>
 
                                 <div class="col-md-2 text-md-center">
-                                    <?php if ($score !== null): ?>
+                                    <?php if ($isGraded): ?>
                                         <div class="fw-bold fs-6 text-dark"><?= esc($score) ?> <span class="text-muted small fw-normal">/ <?= esc($maxPts) ?> pts</span></div>
                                     <?php else: ?>
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-1">
-                                            Not Graded
+                                        <span class="badge bg-light text-muted border rounded-pill px-3 py-1 small">
+                                            — / <?= esc($maxPts) ?> pts
                                         </span>
                                     <?php endif; ?>
                                 </div>

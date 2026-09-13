@@ -57,9 +57,9 @@ flowchart TD
 - **Actors:** Applicant, Cashiers (`cashier`), Scholarship Officers (`scholarship`).
 - **Key Actions:** Applicant selects timetable sections from available curriculum offerings; system calculates tuition dynamically using enrolled units $\times$ rate per unit; optional scholarship discounts are applied; applicant uploads bank payment proof; cashier verifies payment and issues official receipt.
 
-### Phase 4: Final Admission & LMS Provisioning
-- **Actors:** Admissions, Background Mailer Service.
-- **Key Actions:** Admissions marks enrollment as finalized; system generates official Student Number (`YYYY-XXXXXX`), sets up institutional TTU email, dispatches welcome credentials email, and auto-provisions active course records in `lms_courses`.
+### Phase 4: Registrar Final Admission & LMS Provisioning
+- **Actors:** Registrar (`admin`, `superadmin`), `App\Services\EnrollmentService`, Background Mailer Service.
+- **Key Actions:** Registrar officer confirms verified tuition payment in the enrollment queue (`applications.status = 'payment_verified'`) and triggers `RegistrarController@finalizeEnrollment` (delegating to `EnrollmentService::finalizeEnrollment`); system atomically assigns official Student Number (`YYYY-XXXXXX`), provisions institutional TTU email, sets `users.force_password_reset = 1`, logs student activity, dispatches welcome credentials email, and auto-provisions enrolled courses.
 
 ### Phase 5: LMS Academic Delivery
 - **Actors:** Enrolled Student (`applicant` / `student`), Faculty Instructors (`faculty`).

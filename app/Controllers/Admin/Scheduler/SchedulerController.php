@@ -361,7 +361,7 @@ try {
         }
 
         $subStmt = $pdo->prepare('
-            SELECT ss.id, ss.subject_id, ss.capacity, ss.day, ss.start_time, ss.end_time, ss.room, ss.instructor, ss.delivery_mode, 
+            SELECT ss.id, ss.subject_id, ss.capacity, ss.day, ss.start_time, ss.end_time, ss.room, ss.instructor, ss.faculty_user_id, ss.delivery_mode, 
                    sub.subject_code, sub.subject_name, sub.units, c.semester
             FROM shs_section_subjects ss
             JOIN subjects sub ON ss.subject_id = sub.id
@@ -416,7 +416,7 @@ try {
 
         // Fetch subjects using curriculum display_order
         $subStmt = $pdo->prepare('
-            SELECT ss.id, ss.subject_id, ss.capacity, ss.day, ss.start_time, ss.end_time, ss.room, ss.instructor, ss.delivery_mode, 
+            SELECT ss.id, ss.subject_id, ss.capacity, ss.day, ss.start_time, ss.end_time, ss.room, ss.instructor, ss.faculty_user_id, ss.delivery_mode, 
                    sub.subject_code, sub.subject_name, sub.units, ? as semester, ccs.display_order
             FROM college_section_subjects ss
             JOIN subjects sub ON ss.subject_id = sub.id
@@ -432,6 +432,18 @@ try {
         $subjects = $subStmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Fetch active faculty catalog for schedule builder dropdown
+    $facultyStmt = $pdo->query("
+        SELECT u.id, CONCAT(u.first_name, ' ', u.last_name) AS full_name, 
+               COALESCE(u.employee_id, u.student_number) AS employee_id,
+               fp.academic_rank
+        FROM users u
+        LEFT JOIN faculty_profiles fp ON fp.user_id = u.id
+        WHERE u.role = 'faculty' AND u.is_active = 1
+        ORDER BY u.last_name ASC, u.first_name ASC
+    ");
+    $facultyList = $facultyStmt->fetchAll(PDO::FETCH_ASSOC);
+
 } catch (PDOException $e) {
     error_log('Database error: ' . $e->getMessage());
     $_SESSION['admin_error'] = 'Database error loading schedule builder.';
@@ -443,6 +455,42 @@ $pageTitle = 'Schedule Builder - Admin';
 
         return $this->render('admin/scheduler/schedule_builder', get_defined_vars());
     }
+    private function decomposeDays(?string $dayString): array
+    {
+        if (empty($dayString)) {
+            return [];
+        }
+        $cleaned = strtoupper(trim($dayString));
+        if ($cleaned === 'TBA' || empty($cleaned)) {
+            return [];
+        }
+        $map = [
+            'MONDAY' => ['M'],
+            'TUESDAY' => ['T'],
+            'WEDNESDAY' => ['W'],
+            'THURSDAY' => ['TH'],
+            'FRIDAY' => ['F'],
+            'SATURDAY' => ['S'],
+            'SUNDAY' => ['SU']
+        ];
+        if (isset($map[$cleaned])) {
+            return $map[$cleaned];
+        }
+
+        $days = [];
+        if (str_contains($cleaned, 'TH')) {
+            $days[] = 'TH';
+            $cleaned = str_replace('TH', '', $cleaned);
+        }
+        for ($i = 0; $i < strlen($cleaned); $i++) {
+            $char = $cleaned[$i];
+            if (in_array($char, ['M', 'T', 'W', 'F', 'S'])) {
+                $days[] = $char;
+            }
+        }
+        return array_unique($days);
+    }
+
     public function process(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
@@ -454,114 +502,173 @@ $pageTitle = 'Schedule Builder - Admin';
         }
         
         $type = $_POST['type'] ?? 'college';
-    $sectionId = (int)($_POST['section_id'] ?? 0);
-    $schedules = json_decode($_POST['schedules'] ?? '[]', true);
-    $deletedIds = json_decode($_POST['deleted_ids'] ?? '[]', true);
-    
-    if ($sectionId <= 0 || !is_array($schedules)) {
-        echo json_encode(['success' => false, 'message' => 'Invalid payload.']);
-        return;
-    }
+        $sectionId = (int)($_POST['section_id'] ?? 0);
+        $schedules = json_decode($_POST['schedules'] ?? '[]', true);
+        $deletedIds = json_decode($_POST['deleted_ids'] ?? '[]', true);
+        
+        if ($sectionId <= 0 || !is_array($schedules)) {
+            echo json_encode(['success' => false, 'message' => 'Invalid payload.']);
+            return;
+        }
 
-    if ($type === 'shs') {
-        requirePermission('shs_sections.manage');
-        $table = 'shs_section_subjects';
-        $secIdCol = 'shs_section_id';
-        $secTable = 'shs_sections';
-    } else {
-        requirePermission('college_sections.manage');
-        $table = 'college_section_subjects';
-        $secIdCol = 'college_section_id';
-        $secTable = 'college_sections';
-    }
-    
-    try {
-        $pdo->beginTransaction();
-        
-        $rmConfStmt = $pdo->prepare('
-            SELECT sec.section_code, sub.subject_code 
-            FROM ' . $table . ' ss
-            JOIN ' . $secTable . ' sec ON ss.' . $secIdCol . ' = sec.id
-            JOIN subjects sub ON ss.subject_id = sub.id
-            WHERE ss.room = ? AND ss.' . $secIdCol . ' != ? AND ss.day = ? AND ss.day IS NOT NULL
-              AND (ss.start_time < ? AND ss.end_time > ?)
-        ');
-        
-        $instConfStmt = $pdo->prepare('
-            SELECT sec.section_code, sub.subject_code 
-            FROM ' . $table . ' ss
-            JOIN ' . $secTable . ' sec ON ss.' . $secIdCol . ' = sec.id
-            JOIN subjects sub ON ss.subject_id = sub.id
-            WHERE ss.instructor = ? AND ss.' . $secIdCol . ' != ? AND ss.day = ? AND ss.day IS NOT NULL
-              AND (ss.start_time < ? AND ss.end_time > ?)
-        ');
-        
-        $updateStmt = $pdo->prepare('
-            UPDATE ' . $table . ' 
-            SET day = ?, start_time = ?, end_time = ?, room = ?, instructor = ?, delivery_mode = ?
-            WHERE id = ? AND ' . $secIdCol . ' = ?
-        ');
-        
-        $insertStmt = $pdo->prepare('
-            INSERT INTO ' . $table . ' (' . $secIdCol . ', subject_id, day, start_time, end_time, room, instructor, delivery_mode)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ');
-        
-        if (is_array($deletedIds) && !empty($deletedIds)) {
-            $delIn = str_repeat('?,', count($deletedIds) - 1) . '?';
-            $delStmt = $pdo->prepare('DELETE FROM ' . $table . ' WHERE id IN (' . $delIn . ') AND ' . $secIdCol . ' = ?');
-            $delParams = array_values($deletedIds);
-            $delParams[] = $sectionId;
-            $delStmt->execute($delParams);
+        if ($type === 'shs') {
+            requirePermission('shs_sections.manage');
+            $table = 'shs_section_subjects';
+            $secIdCol = 'shs_section_id';
+            $secTable = 'shs_sections';
+            $academicLevel = 'SHS';
+        } else {
+            requirePermission('college_sections.manage');
+            $table = 'college_section_subjects';
+            $secIdCol = 'college_section_id';
+            $secTable = 'college_sections';
+            $academicLevel = 'College';
         }
         
-        foreach ($schedules as $sched) {
-            $id = (int)$sched['id'];
-            $subjectId = (int)($sched['subject_id'] ?? 0);
-            $day = !empty(trim($sched['day'] ?? '')) ? trim($sched['day']) : null;
-            $start = !empty(trim($sched['start_time'] ?? '')) ? trim($sched['start_time']) : null;
-            $end = !empty(trim($sched['end_time'] ?? '')) ? trim($sched['end_time']) : null;
-            $room = !empty(trim($sched['room'] ?? '')) ? trim($sched['room']) : null;
-            $instructor = !empty(trim($sched['instructor'] ?? '')) ? trim($sched['instructor']) : null;
-            $mode = trim($sched['delivery_mode'] ?? 'Face-to-Face');
+        try {
+            $pdo->beginTransaction();
             
-            if ($day || $start || $end) {
-                if (!$day || !$start || !$end) {
-                    throw new Exception("Incomplete schedule. Provide Day, Start, End, or leave all blank.");
-                }
-                
-                if ($room) {
-                    $rmConfStmt->execute([$room, $sectionId, $day, $end, $start]);
-                    if ($conflict = $rmConfStmt->fetch(PDO::FETCH_ASSOC)) {
-                        throw new Exception("Room Conflict: Room {$room} is booked by {$conflict['section_code']} ({$conflict['subject_code']}) at this time.");
+            $updateStmt = $pdo->prepare('
+                UPDATE ' . $table . ' 
+                SET day = ?, start_time = ?, end_time = ?, room = ?, faculty_user_id = ?, instructor = ?, delivery_mode = ?
+                WHERE id = ? AND ' . $secIdCol . ' = ?
+            ');
+            
+            $insertStmt = $pdo->prepare('
+                INSERT INTO ' . $table . ' (' . $secIdCol . ', subject_id, day, start_time, end_time, room, faculty_user_id, instructor, delivery_mode)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ');
+
+            $lmsUpsertStmt = $pdo->prepare("
+                INSERT INTO lms_courses (academic_level, academic_section_id, subject_id, faculty_user_id, status)
+                VALUES (?, ?, ?, ?, 'active')
+                ON DUPLICATE KEY UPDATE faculty_user_id = VALUES(faculty_user_id), status = 'active'
+            ");
+            
+            if (is_array($deletedIds) && !empty($deletedIds)) {
+                $delIn = str_repeat('?,', count($deletedIds) - 1) . '?';
+                $delStmt = $pdo->prepare('DELETE FROM ' . $table . ' WHERE id IN (' . $delIn . ') AND ' . $secIdCol . ' = ?');
+                $delParams = array_values($deletedIds);
+                $delParams[] = $sectionId;
+                $delStmt->execute($delParams);
+            }
+            
+            foreach ($schedules as $sched) {
+                $id = (int)$sched['id'];
+                $subjectId = (int)($sched['subject_id'] ?? 0);
+                $day = !empty(trim($sched['day'] ?? '')) ? trim($sched['day']) : null;
+                $start = !empty(trim($sched['start_time'] ?? '')) ? trim($sched['start_time']) : null;
+                $end = !empty(trim($sched['end_time'] ?? '')) ? trim($sched['end_time']) : null;
+                $room = !empty(trim($sched['room'] ?? '')) ? trim($sched['room']) : null;
+                $facultyUserId = !empty($sched['faculty_user_id']) ? (int)$sched['faculty_user_id'] : null;
+                $instructor = !empty(trim($sched['instructor'] ?? '')) ? trim($sched['instructor']) : null;
+                $mode = trim($sched['delivery_mode'] ?? 'Face-to-Face');
+
+                // Dual-resolution: resolve name from faculty_user_id or vice versa
+                if ($facultyUserId && empty($instructor)) {
+                    $uStmt = $pdo->prepare("SELECT CONCAT(first_name, ' ', last_name) FROM users WHERE id = ?");
+                    $uStmt->execute([$facultyUserId]);
+                    $instructor = $uStmt->fetchColumn() ?: 'TBA';
+                } elseif (!$facultyUserId && !empty($instructor) && strtoupper($instructor) !== 'TBA') {
+                    $uStmt = $pdo->prepare("SELECT id FROM users WHERE role = 'faculty' AND (CONCAT(first_name, ' ', last_name) = ? OR TRIM(last_name) = ?) LIMIT 1");
+                    $uStmt->execute([$instructor, $instructor]);
+                    $matchedId = $uStmt->fetchColumn();
+                    if ($matchedId) {
+                        $facultyUserId = (int)$matchedId;
                     }
                 }
                 
-                if ($instructor) {
-                    $instConfStmt->execute([$instructor, $sectionId, $day, $end, $start]);
-                    if ($conflict = $instConfStmt->fetch(PDO::FETCH_ASSOC)) {
-                        throw new Exception("Instructor Conflict: {$instructor} is teaching {$conflict['section_code']} ({$conflict['subject_code']}) at this time.");
+                if ($day || $start || $end) {
+                    if (!$day || !$start || !$end) {
+                        throw new Exception("Incomplete schedule. Provide Day, Start, End, or leave all blank.");
                     }
+
+                    $inputDays = $this->decomposeDays($day);
+                    
+                    // Room Conflict Check (Decomposed Days)
+                    if ($room) {
+                        $rmStmt = $pdo->prepare('
+                            SELECT sec.section_code, sub.subject_code, ss.day, ss.start_time, ss.end_time
+                            FROM ' . $table . ' ss
+                            JOIN ' . $secTable . ' sec ON ss.' . $secIdCol . ' = sec.id
+                            JOIN subjects sub ON ss.subject_id = sub.id
+                            WHERE ss.room = ? AND ss.' . $secIdCol . ' != ? AND ss.day IS NOT NULL
+                        ');
+                        $rmStmt->execute([$room, $sectionId]);
+                        $existingRooms = $rmStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        foreach ($existingRooms as $er) {
+                            $exDays = $this->decomposeDays($er['day']);
+                            $common = array_intersect($inputDays, $exDays);
+                            if (!empty($common) && ($start < $er['end_time'] && $end > $er['start_time'])) {
+                                throw new Exception("Room Conflict: Room {$room} is booked by {$er['section_code']} ({$er['subject_code']}) on " . implode(',', $common) . " ({$er['start_time']} - {$er['end_time']}).");
+                            }
+                        }
+                    }
+                    
+                    // Faculty / Instructor Conflict Check (Decomposed Days)
+                    if ($facultyUserId) {
+                        $facStmt = $pdo->prepare('
+                            SELECT sec.section_code, sub.subject_code, ss.day, ss.start_time, ss.end_time
+                            FROM ' . $table . ' ss
+                            JOIN ' . $secTable . ' sec ON ss.' . $secIdCol . ' = sec.id
+                            JOIN subjects sub ON ss.subject_id = sub.id
+                            WHERE ss.faculty_user_id = ? AND ss.' . $secIdCol . ' != ? AND ss.day IS NOT NULL
+                        ');
+                        $facStmt->execute([$facultyUserId, $sectionId]);
+                        $existingFac = $facStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        foreach ($existingFac as $ef) {
+                            $exDays = $this->decomposeDays($ef['day']);
+                            $common = array_intersect($inputDays, $exDays);
+                            if (!empty($common) && ($start < $ef['end_time'] && $end > $ef['start_time'])) {
+                                $facName = $instructor ?: "Faculty #{$facultyUserId}";
+                                throw new Exception("Instructor Conflict: {$facName} is teaching {$ef['section_code']} ({$ef['subject_code']}) on " . implode(',', $common) . " ({$ef['start_time']} - {$ef['end_time']}).");
+                            }
+                        }
+                    } elseif ($instructor && strtoupper($instructor) !== 'TBA') {
+                        $instStmt = $pdo->prepare('
+                            SELECT sec.section_code, sub.subject_code, ss.day, ss.start_time, ss.end_time
+                            FROM ' . $table . ' ss
+                            JOIN ' . $secTable . ' sec ON ss.' . $secIdCol . ' = sec.id
+                            JOIN subjects sub ON ss.subject_id = sub.id
+                            WHERE ss.instructor = ? AND ss.' . $secIdCol . ' != ? AND ss.day IS NOT NULL
+                        ');
+                        $instStmt->execute([$instructor, $sectionId]);
+                        $existingInst = $instStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                        foreach ($existingInst as $ei) {
+                            $exDays = $this->decomposeDays($ei['day']);
+                            $common = array_intersect($inputDays, $exDays);
+                            if (!empty($common) && ($start < $ei['end_time'] && $end > $ei['start_time'])) {
+                                throw new Exception("Instructor Conflict: {$instructor} is teaching {$ei['section_code']} ({$ei['subject_code']}) on " . implode(',', $common) . " ({$ei['start_time']} - {$ei['end_time']}).");
+                            }
+                        }
+                    }
+                }
+                
+                if ($id <= 0) {
+                    if ($subjectId <= 0) {
+                        throw new Exception("Invalid subject ID for new schedule session.");
+                    }
+                    $insertStmt->execute([$sectionId, $subjectId, $day, $start, $end, $room, $facultyUserId, $instructor, $mode]);
+                } else {
+                    $updateStmt->execute([$day, $start, $end, $room, $facultyUserId, $instructor, $mode, $id, $sectionId]);
+                }
+
+                // Automated LMS Course Synchronization
+                if ($facultyUserId && $subjectId > 0) {
+                    $lmsUpsertStmt->execute([$academicLevel, $sectionId, $subjectId, $facultyUserId]);
                 }
             }
             
-            if ($id <= 0) {
-                if ($subjectId <= 0) {
-                    throw new Exception("Invalid subject ID for new schedule session.");
-                }
-                $insertStmt->execute([$sectionId, $subjectId, $day, $start, $end, $room, $instructor, $mode]);
-            } else {
-                $updateStmt->execute([$day, $start, $end, $room, $instructor, $mode, $id, $sectionId]);
-            }
+            $pdo->commit();
+            echo json_encode(['success' => true, 'message' => 'Schedule saved and LMS courses synchronized successfully.']);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
-        
-        $pdo->commit();
-        echo json_encode(['success' => true, 'message' => 'Schedule saved successfully.']);
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
-}
 }
 
 

@@ -25,6 +25,9 @@ class HomeController extends BaseController
                     s.code,
                     s.name,
                     s.description,
+                    s.icon,
+                    s.careers,
+                    s.custom_tuition,
                     f.tuition_fee,
                     f.is_per_unit,
                     f.total_amount
@@ -42,6 +45,9 @@ class HomeController extends BaseController
                     p.code,
                     p.name,
                     p.description,
+                    p.icon,
+                    p.careers,
+                    p.custom_tuition,
                     f.tuition_fee,
                     f.is_per_unit,
                     f.total_amount

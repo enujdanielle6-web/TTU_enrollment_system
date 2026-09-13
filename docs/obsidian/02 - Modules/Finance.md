@@ -20,7 +20,7 @@ $$\text{Total Assessment} = (\text{Total Enrolled Units} \times \text{Tuition Ra
 - **SHS & College Compatibility:** Queries both `college_enrollments` and `shs_enrollments`, ensuring SHS strands and College degrees compute accurate breakdowns.
 - **Decoupled Payment Verification (`payment_verified`):** When an initial or full payment is verified, the assessment payment status updates to `partial` or `paid`, and the application status transitions to `payment_verified`. Cashier explicitly **does not** mark the student as `enrolled` or assign student credentials, routing the student to the Registrar's enrollment queue.
 - **Financial Immutability via `assessment_items`:** Rather than re-querying live unit rates or curriculum subjects on every view, line items (tuition, miscellaneous, laboratory, registration, and discounts) are immutably snapshotted into `assessment_items` upon assessment generation. Both applicant and cashier views render from `assessment_items` with a "Locked / Finalized" badge.
-- **Atomic Receipt Sequences (`receipt_sequences`):** Receipts are generated via `generateAtomicReceiptNumber()` using the dedicated `receipt_sequences` table and `INSERT ... ON DUPLICATE KEY UPDATE`, guaranteeing strictly monotonic and collision-free receipt numbers (`REC-YYYYMMDD-XXXX`).
+- **Atomic Receipt Sequences (`receipt_sequences`):** Receipts are generated via `generateAtomicReceiptNumber($pdo)` (defined in `app/Helpers/functions.php`) using the dedicated `receipt_sequences` table (`sequence_year`, `current_value`) and atomic upsert `INSERT ... ON DUPLICATE KEY UPDATE current_value = current_value + 1`, guaranteeing strictly monotonic and collision-free receipt numbers (`REC-YYYYMMDD-XXXX`).
 - **Submit Debouncing:** Approve and Reject modal submit actions on `cashier_payments.php` feature instant debouncing with loading spinner states to prevent duplicate payment approvals or double-ledger transactions.
 
 ---
@@ -31,7 +31,7 @@ $$\text{Total Assessment} = (\text{Total Enrolled Units} \times \text{Tuition Ra
 | `/admin/finance/cashier_dashboard.php` | GET | `FinanceController@dashboard` | Financial KPI widgets, daily collections, payment verification queue. |
 | `/admin/finance/cashier_assessment.php` | GET | `FinanceController@assessment` | Displays individual student assessment breakdown from immutable `assessment_items`. |
 | `/admin/finance/cashier_payments.php` | GET | `FinanceController@payments` | Payment ledger and bank transfer proof verification queue with debounced modals. |
-| `/admin/finance/cashier_receipt.php` | GET | `FinanceController@receipt` | Official printable payment receipt (OR) layout. |
+| `/admin/finance/cashier_receipt.php` | GET | `FinanceController@receipt` | Official printable payment receipt (OR) layout. Renders `app/Views/admin/finance/receipt.php`. |
 | `/admin/finance/cashier_process.php` | POST | `FinanceController@process` | Records payments, verifies uploaded bank slips, generates atomic receipt numbers. |
 | `/admin/finance/fees.php` | GET | `FeeController@index` | Fee templates management table by program/strand, year level, and semester. |
 | `/admin/finance/fee_process.php` | POST | `FeeController@process` | Creates and updates fee templates with per-unit flags and semester scoping. |
@@ -41,9 +41,9 @@ $$\text{Total Assessment} = (\text{Total Enrolled Units} \times \text{Tuition Ra
 ## 3. Database Ledger Tables
 - **`fee_templates`**: Standard fee matrix per academic level, program, year level, and semester.
 - **`student_assessments`**: Stores the aggregate assessment records tied to an `application_id`.
-- **`assessment_items`**: Immutable line-item snapshot table capturing tuition, misc, lab, registration, and discount line items.
-- **`receipt_sequences`**: Concurrency-safe atomic sequence tracking table per calendar day (`sequence_date`, `current_value`).
-- **`payment_records` / `payments`**: Individual payment transactions, receipt numbers (`REC-YYYYMMDD-XXXX`), payment channels (Cash, Bank Transfer, GCash), proof image paths, and verification statuses (`verified`, `pending`, `rejected`).
+- **`assessment_items`**: Immutable line-item snapshot table capturing tuition, misc, lab, registration, and discount line items (`item_type`, `item_code`, `item_name`, `units`, `rate_per_unit`, `amount`).
+- **`receipt_sequences`**: Concurrency-safe atomic sequence tracking table per calendar year (`sequence_year`, `current_value`).
+- **`payment_records`**: Individual payment transactions, receipt numbers (`REC-YYYYMMDD-XXXX`), payment channels (Cash, Bank Transfer, GCash), proof image paths, `cashier_id`, and verification statuses (`verified`, `pending`, `rejected`).
 
 ---
 **Related:**

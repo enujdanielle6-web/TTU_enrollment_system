@@ -137,6 +137,20 @@ class AuthController extends BaseController
         if (in_array($user['role'], $adminRoles, true)) {
             User::logActivity((int)$user['id'], "Logged In", "Administrator logged into the system.", "bi-box-arrow-in-right");
             $response->redirect('/sia/admin/dashboard.php');
+        } elseif ($user['role'] === 'faculty') {
+            $_SESSION['lms_logged_in'] = true;
+            $_SESSION['lms_user_id'] = (int)$user['id'];
+            $_SESSION['lms_role'] = 'faculty';
+            $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
+            $_SESSION['lms_email'] = $user['email'];
+            $response->redirect('/sia/lms/faculty/dashboard.php');
+        } elseif ($user['role'] === 'student') {
+            $_SESSION['lms_logged_in'] = true;
+            $_SESSION['lms_user_id'] = (int)$user['id'];
+            $_SESSION['lms_role'] = 'student';
+            $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
+            $_SESSION['lms_email'] = $user['email'];
+            $response->redirect('/sia/lms/student/dashboard.php');
         } else {
             $response->redirect('/sia/applicant/dashboard.php');
         }

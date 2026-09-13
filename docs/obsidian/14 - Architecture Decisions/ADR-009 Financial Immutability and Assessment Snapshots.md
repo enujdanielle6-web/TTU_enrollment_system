@@ -18,16 +18,16 @@ This approach introduced severe financial audit liabilities:
 We established a strict **Financial Immutability Architecture** centered on frozen line-item snapshots and atomic receipt sequences:
 
 1. **Dedicated `assessment_items` Snapshot Table:**
-   - Created the `assessment_items` table with foreign key linkage to `student_assessments.id`.
-   - Columns: `id`, `assessment_id`, `item_name`, `item_type` (`tuition`, `miscellaneous`, `laboratory`, `registration`, `other`), `unit_rate`, `units`, `total_amount`, `created_at`.
+   - Created the `assessment_items` table with foreign key linkage to `student_assessments.id` (`ON DELETE CASCADE`).
+   - Columns: `id`, `assessment_id`, `item_type` (`tuition`, `miscellaneous`, `laboratory`, `registration`, `other`, `discount`), `item_code`, `item_name`, `units` (DECIMAL(4,2)), `rate_per_unit` (DECIMAL(10,2)), `amount` (DECIMAL(10,2)), `created_at`.
    - When an assessment is generated via `AssessmentService::generateAssessment()`, every line item is permanently inserted into `assessment_items`.
 2. **Immutable Receipt & Billing Reads:**
-   - Cashier receipt views (`cashier_receipt.php`) and student billing breakdowns read directly from `assessment_items`.
+   - Cashier receipt views (`cashier_receipt.php` rendering `receipt.php`) and student billing breakdowns read directly from `assessment_items`.
    - Fee template modifications or per-unit price increases have zero retroactive effect on existing assessments.
 3. **Atomic Receipt Number Sequences:**
-   - Created the dedicated sequence table `receipt_sequences` (`receipt_year` PK, `current_sequence`, `updated_at`).
-   - Implemented `FinanceController::generateAtomicReceiptNumber($year)` utilizing row-level locking (`SELECT current_sequence FROM receipt_sequences WHERE receipt_year = ? FOR UPDATE`).
-   - Generates standardized, collision-proof receipt numbers formatted as `OR-YYYY-XXXXXX` (e.g. `OR-2026-000001`).
+   - Created the dedicated sequence table `receipt_sequences` (`id` PK AUTO_INC, `sequence_year` UNIQUE, `current_value`, `updated_at`).
+   - Implemented `generateAtomicReceiptNumber(PDO $pdo)` in `app/Helpers/functions.php` utilizing atomic sequence increment (`INSERT INTO receipt_sequences (sequence_year, current_value) VALUES (:year, 1) ON DUPLICATE KEY UPDATE current_value = current_value + 1`).
+   - Generates standardized, collision-proof receipt numbers formatted as `REC-YYYYMMDD-XXXX`.
 
 ```text
 Student Assessment Creation:
@@ -39,7 +39,7 @@ INSERT INTO student_assessments (tuition_fee, misc_fee, total_amount, ...)
          ↓
 snapshotAssessmentItems()
          ↓
-INSERT INTO assessment_items (assessment_id, item_name, item_type, unit_rate, units, total_amount)
+INSERT INTO assessment_items (assessment_id, item_type, item_code, item_name, units, rate_per_unit, amount)
 [PERMANENTLY FROZEN LINE-ITEM RECORD]
 ```
 

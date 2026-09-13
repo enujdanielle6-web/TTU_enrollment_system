@@ -4,6 +4,9 @@ Welcome to the technical source of truth for the **Triple T University (TTU) Enr
 
 This repository documentation maps out how the codebase, database, authentication pipeline, and academic business rules interact to support the complete student lifecycle.
 
+> [!NOTE]
+> **Authoritative System Audit Completed (September 13, 2026)**: A full documentation-for-codebase reverse-engineering audit was performed, reconciling all 47 database tables, domain service layers, atomic sequences, and `.agents` skills. Review the [[DOCUMENTATION_AUDIT_REPORT_2026|Documentation Audit Report 2026]] for complete audit findings, coverage assessment, and maintenance standards.
+
 ---
 
 ## Master Documentation Index
@@ -22,6 +25,7 @@ This repository documentation maps out how the codebase, database, authenticatio
 - **[[Admissions]]**: Application review, document verification, approval/rejection, and automated credential dispatch.
 - **[[Clinic]]**: Health information evaluation, medical clearances, and applicant clearance gating.
 - **[[Registrar]]**: Curriculum architecture, College programs, SHS strands, subjects, and student academic records.
+- **[[Landing Page & Program Card Customization]]**: Public landing page courses card builder and customizer for College Programs and SHS Strands.
 - **[[Scheduler]]**: Section management, timetable matrix, faculty advisers, and room assignments.
 - **[[Finance]]**: Fee templates, dynamic tuition rate-per-unit assessments, cashier verification, and receipts.
 - **[[Scholarship]]**: Financial aid programs, application evaluations, and discount deductions.
@@ -34,13 +38,14 @@ This repository documentation maps out how the codebase, database, authenticatio
 - **[[Workflow Index]]**: Directory of core business workflows.
 - **[[Student Lifecycle Workflow]]**: End-to-end journey from applicant registration to enrollment and LMS access.
 - **[[Applicant Registration Workflow]]**: Registration, 6-digit OTP email generation, and verification.
+- **[[Document Submission Preference Workflow]]**: Online upload vs. on-campus physical submission selection.
 - **[[Health Submission & Clearance Workflow]]**: Medical clearance submission and clinic review.
 - **[[Payment & Assessment Workflow]]**: Assessment math, bank proof upload, and cashier confirmation.
 
 ### 4. Database & Curriculum
 - **[[Database Overview]]**: The "Application as Term" concept and relational architecture.
 - **[[Entity Relationship Architecture]]**: High-level and domain-level Mermaid ER diagrams, cardinality, and foreign key topology.
-- **[[Data Dictionary]]**: Complete technical specifications for all 45 database tables and views.
+- **[[Data Dictionary]]**: Complete technical specifications for all 47 database tables and views.
 - **[[Curriculum Architecture]]**: College programs vs. SHS strands, versioning, and curriculum immutability.
 - **[[Users Table]]**: Identity root, roles enum, and OTP verification columns.
 - **[[Applications Table]]**: Lifecycle anchor and student enrollment state.
@@ -50,6 +55,7 @@ This repository documentation maps out how the codebase, database, authenticatio
 - **[[API Documentation]]**: Complete reference for all internal JSON & HTML AJAX endpoints.
 - **[[Business Rules]]**: Comprehensive catalog of confirmed and enforced business rules.
 - **[[Coding Standards]]**: Hybrid MVC Fat Controller guidelines, input escaping, and security requirements.
+- **[[Documentation Maintenance Standard]]**: Authoritative code-documentation synchronization protocol.
 - **[[Testing Strategy]]**: Manual testing matrix, test scenarios, and verification plans.
 - **[[Known Issues]]**: Documented bugs, runtime edge-cases, and technical debt log.
 
@@ -93,11 +99,12 @@ This repository documentation maps out how the codebase, database, authenticatio
 - **[[00 - File Reference Index]]**: Master developer index and standard file-level metadata documentation framework.
 - **[[01 - Controllers Reference]]**: Deep technical specifications for all 38 application controllers (methods, tables, roles, view chains).
 - **[[02 - Models Reference]]**: Complete documentation for all 10 active database models (`User`, `Application`, `StudentAssessment`, `HealthRecord`, `BaseModel`, etc.).
-- **[[03 - Services Reference]]**: In-depth specifications for all 9 core domain services (`StudentNumberService`, `AssessmentService`, `EnrollmentService`, and 6 LMS engine services).
+- **[[03 - Services Reference]]**: In-depth specifications for all 9 core domain services (`StudentNumberService`, `AssessmentService`, `EnrollmentService`, and 6 LMS engine services) and 2 domain repositories.
 - **[[04 - Core & Middleware Reference]]**: Architectural contracts for the 6 core framework engines (`Router`, `Database`, `Request`, `Response`, `Session`, `View`) and 6 middleware security layers.
 - **[[05 - Views Catalog & Template Mapping]]**: Complete mapping of all 104 views across admin, applicant, auth, and LMS portals with layout and controller dependencies.
 
 ---
 
 ## High-Level System Summary
-The TTU system manages both **College** and **Senior High School (SHS)** students. It is a monolithic **Hybrid MVC** Vanilla PHP web application using MariaDB/MySQL (45 tables/views), Bootstrap 5, Chart.js, Vanilla JavaScript, and PHPMailer SMTP. The database acts as the single source of truth across administrative, applicant, and LMS domains.
+The TTU system manages both **College** and **Senior High School (SHS)** students. It is a monolithic **Hybrid MVC** Vanilla PHP web application using MariaDB/MySQL (47 tables/views), Bootstrap 5, Chart.js, Vanilla JavaScript, and PHPMailer SMTP. The database acts as the single source of truth across administrative, applicant, and academic domains.
+

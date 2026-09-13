@@ -15,16 +15,16 @@ In accordance with TTU's **Hybrid MVC architecture**, Domain Services encapsulat
 - **Feature:** Atomic, Race-Free Sequential Student ID Generation
 - **Purpose:** Generates unique institutional student numbers formatted as `YYYY-XXXXXX` (e.g. `2026-000001`) with absolute concurrency protection.
 - **Responsibilities:**
-  - Employs the dedicated `student_number_sequences` table in MariaDB (`year` INT PRIMARY KEY, `current_sequence` INT).
-  - Executes pessimistic row-level locking via `SELECT current_sequence FROM student_number_sequences WHERE year = ? FOR UPDATE` within the caller's active PDO transaction.
-  - Automatically initializes new sequence rows for newly encountered calendar years (`INSERT ... ON DUPLICATE KEY UPDATE`).
+  - Employs the dedicated `student_number_sequences` table in MariaDB (`id` PK AUTO_INC, `sequence_year` UNIQUE, `current_value` INT, `updated_at` TIMESTAMP).
+  - Executes atomic sequence increment via `INSERT INTO student_number_sequences (sequence_year, current_value) VALUES (:year, 1) ON DUPLICATE KEY UPDATE current_value = current_value + 1` within the caller's active PDO transaction.
   - Formats numbers with zero-padded 6-digit sequences, preventing sequence collisions under high concurrent admissions/finalization traffic.
+  - Automatically seeds the initial sequence value from the highest existing student number in `users` if an unseeded year is encountered.
 - **Key Methods:**
   - `static generate(int $year, PDO $pdo): string` — Primary generation method executing atomic lock, incrementing counter, and returning `YYYY-XXXXXX`.
-  - `static generateNumber(int $year, PDO $pdo): string` — Alias delegating directly to `generate()`.
+  - `generateNumber(int $year, PDO $pdo): string` — Instance wrapper method delegating directly to `generate()`.
   - `static getCurrentSequence(int $year, PDO $pdo): int` — Non-mutating inspection method reading the current sequence value.
-- **Dependencies & Imports:** PDO, `App\Core\Database`
-- **Database Interaction:** Reads/Updates `student_number_sequences` using `FOR UPDATE` row-level locks.
+- **Dependencies & Imports:** PDO, `PDOException`
+- **Database Interaction:** Reads/Updates `student_number_sequences` and queries fallback max `users.student_number`.
 - **Used By:** `App\Services\EnrollmentService`, `App\Controllers\Admin\Registrar\RegistrarController`.
 - **Related Documentation:** [[ADR-010 Domain Service Layer Extraction and Atomic Sequences]], [[ADR-008 Authoritative Enrollment State Machine and Cashier Decoupling]]
 
@@ -154,8 +154,43 @@ In accordance with TTU's **Hybrid MVC architecture**, Domain Services encapsulat
   - `getFacultyCalendarEvents(int $facultyId): array` — Returns event array for faculty teaching calendar.
 
 ---
+
+## 3. Domain Repositories (`app/Repositories/`)
+
+### `EnrollmentRepositoryInterface.php`
+- **Path:** `app/Repositories/EnrollmentRepositoryInterface.php`
+- **Module:** Domain Data Access Contract
+- **Purpose:** Defines the standardized interface for student course and subject retrieval across College and SHS academic tiers.
+- **Key Methods:**
+  - `getActiveStudentCourses(int $userId): array` — Fetches enrolled subjects with timetables and section metadata for the active term.
+
+---
+
+### `CollegeEnrollmentRepository.php`
+- **Path:** `app/Repositories/CollegeEnrollmentRepository.php`
+- **Implements:** `EnrollmentRepositoryInterface`
+- **Module:** College Academic Records & Portal Delivery
+- **Purpose:** Executes optimized SQL queries joining `college_enrollments`, `applications`, `subjects`, `college_sections`, and `college_section_subjects`.
+- **Key Methods:**
+  - `getActiveStudentCourses(int $userId): array` — Retrieves all enrolled subjects for a college student (`applications.status IN ('enrolled', 'approved')`), with graceful fallback to section-level subjects if individual enrollment rows are not yet populated.
+- **Database Tables:** `college_enrollments`, `applications`, `subjects`, `college_sections`, `college_section_subjects`.
+
+---
+
+### `ShsEnrollmentRepository.php`
+- **Path:** `app/Repositories/ShsEnrollmentRepository.php`
+- **Implements:** `EnrollmentRepositoryInterface`
+- **Module:** Senior High School Academic Records & Portal Delivery
+- **Purpose:** Executes queries joining `shs_enrollments`, `applications`, `subjects`, `shs_sections`, and `shs_section_subjects`.
+- **Key Methods:**
+  - `getActiveStudentCourses(int $userId): array` — Retrieves all enrolled subjects for an SHS student with fallback to `shs_section_subjects`.
+- **Database Tables:** `shs_enrollments`, `applications`, `subjects`, `shs_sections`, `shs_section_subjects`.
+
+---
 **Related:**
 - [[00 - File Reference Index]]
 - [[01 - Controllers Reference]]
 - [[02 - Models Reference]]
 - [[04 - Core & Middleware Reference]]
+- [[ADR-010 Domain Service Layer Extraction and Atomic Sequences]]
+

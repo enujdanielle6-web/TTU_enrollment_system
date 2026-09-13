@@ -44,7 +44,8 @@ class LmsCalendarService
 
         // 1. Fetch Assignments
         $sql = "
-            SELECT a.id, a.title, a.due_date, c.subject_id, s.subject_code
+            SELECT a.id, a.lms_course_id, a.title, a.description, a.due_date, a.max_score, 
+                   c.subject_id, s.subject_code, s.subject_name
             FROM lms_assignments a
             JOIN lms_courses c ON a.lms_course_id = c.id
             JOIN subjects s ON c.subject_id = s.id
@@ -63,17 +64,29 @@ class LmsCalendarService
         foreach ($assignments as $a) {
             $events[] = [
                 'type' => 'assignment',
-                'id' => $a['id'],
-                'title' => $a['subject_code'] . ' - ' . $a['title'],
+                'id' => (int)$a['id'],
+                'course_id' => (int)$a['lms_course_id'],
+                'course_code' => $a['subject_code'],
+                'course_name' => $a['subject_name'],
+                'title' => $a['title'],
+                'full_title' => $a['subject_code'] . ' - ' . $a['title'],
+                'description' => $a['description'] ?? '',
+                'max_score' => $a['max_score'] ?? null,
+                'time_limit' => null,
                 'date' => date('Y-m-d', strtotime($a['due_date'])),
                 'time' => date('h:i A', strtotime($a['due_date'])),
-                'color' => 'primary'
+                'datetime' => $a['due_date'],
+                'color' => 'primary',
+                'badge_icon' => 'bi-journal-text',
+                'url' => "/sia/lms/student/course/{$a['lms_course_id']}/assignments/{$a['id']}"
             ];
         }
 
         // 2. Fetch Quizzes (End Time)
         $sql = "
-            SELECT q.id, q.title, q.end_date as available_until, c.subject_id, s.subject_code
+            SELECT q.id, q.lms_course_id, q.title, q.description, q.time_limit, q.passing_score, 
+                   q.start_date, q.end_date as available_until, 
+                   c.subject_id, s.subject_code, s.subject_name
             FROM lms_quizzes q
             JOIN lms_courses c ON q.lms_course_id = c.id
             JOIN subjects s ON c.subject_id = s.id
@@ -91,17 +104,28 @@ class LmsCalendarService
         foreach ($quizzes as $q) {
             $events[] = [
                 'type' => 'quiz',
-                'id' => $q['id'],
-                'title' => $q['subject_code'] . ' - ' . $q['title'] . ' Due',
+                'id' => (int)$q['id'],
+                'course_id' => (int)$q['lms_course_id'],
+                'course_code' => $q['subject_code'],
+                'course_name' => $q['subject_name'],
+                'title' => $q['title'],
+                'full_title' => $q['subject_code'] . ' - ' . $q['title'],
+                'description' => $q['description'] ?? '',
+                'max_score' => null,
+                'passing_score' => $q['passing_score'] ?? null,
+                'time_limit' => $q['time_limit'] ?? null,
                 'date' => date('Y-m-d', strtotime($q['available_until'])),
                 'time' => date('h:i A', strtotime($q['available_until'])),
-                'color' => 'info'
+                'datetime' => $q['available_until'],
+                'color' => 'warning',
+                'badge_icon' => 'bi-ui-checks',
+                'url' => "/sia/lms/student/course/{$q['lms_course_id']}/quizzes/{$q['id']}"
             ];
         }
 
         // Sort by date
         usort($events, function($a, $b) {
-            return strtotime($a['date'] . ' ' . $a['time']) - strtotime($b['date'] . ' ' . $b['time']);
+            return strtotime($a['datetime']) - strtotime($b['datetime']);
         });
 
         return $events;

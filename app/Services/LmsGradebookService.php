@@ -97,6 +97,7 @@ class LmsGradebookService
                 $sub = $this->lmsService->getStudentSubmission($a['id'], $studentId);
                 $grade = ($sub && $sub['status'] === 'GRADED') ? (float)$sub['grade'] : null;
                 $studentData['assignments'][$a['id']] = $grade;
+                $studentData['assignment_submissions'][$a['id']] = $sub;
                 if ($grade !== null) $studentTotal += $grade;
             }
 
@@ -112,6 +113,7 @@ class LmsGradebookService
                     }
                 }
                 $studentData['quizzes'][$q['id']] = $bestScore;
+                $studentData['quiz_attempts'][$q['id']] = $attempts;
                 if ($bestScore !== null) $studentTotal += $bestScore;
             }
 

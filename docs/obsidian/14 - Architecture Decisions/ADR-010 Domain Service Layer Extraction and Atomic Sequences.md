@@ -18,8 +18,8 @@ We introduced a **Lightweight Domain Service Layer** located in `app/Services/` 
 
 1. **`App\Services\StudentNumberService`:**
    - Provides atomic, race-free student ID generation formatted as `YYYY-XXXXXX` (e.g. `2026-000001`).
-   - Relies on the dedicated `student_number_sequences` database table (`year` INT PRIMARY KEY, `current_sequence` INT, `updated_at` TIMESTAMP).
-   - Executes row-level locking via `SELECT current_sequence FROM student_number_sequences WHERE year = ? FOR UPDATE` within the caller's PDO transaction.
+   - Relies on the dedicated `student_number_sequences` database table (`id` INT PK AUTO_INC, `sequence_year` INT UNIQUE, `current_value` INT, `updated_at` TIMESTAMP).
+   - Executes atomic sequence increment via `INSERT INTO student_number_sequences (sequence_year, current_value) VALUES (:year, 1) ON DUPLICATE KEY UPDATE current_value = current_value + 1` within the caller's PDO transaction.
 2. **`App\Services\AssessmentService`:**
    - Encapsulates authoritative tuition and fee calculation math for both College and Senior High School programs.
    - Evaluates lecture units, lab fees, miscellaneous fees, and per-unit billing rates.

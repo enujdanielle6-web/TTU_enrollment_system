@@ -60,34 +60,45 @@ $password = $_POST['password'] ?? '';
 // $pdo is provided by config/database.php
 
 if ($role === 'student') {
-    $student_id = $_POST['student_id'] ?? '';
+    $student_id = trim((string)($_POST['student_id'] ?? ''));
     if (empty($student_id) || empty($password)) {
-        // Handle error (in reality we would use session errors and redirect back, simplified here)
-        echo "<script>alert('Please provide student ID and password.'); window.location.href='lms_student_login.php';</script>";
+        echo "<script>alert('Please provide student ID or email and password.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
         return;
     }
 
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE student_number = :sid AND is_active = 1 LIMIT 1");
-    $stmt->execute(['sid' => $student_id]);
+    $stmt = $pdo->prepare("
+        SELECT * FROM users 
+        WHERE (student_number = :sid1 OR email = :sid2 OR ttu_email = :sid3) 
+          AND is_active = 1 
+        LIMIT 1
+    ");
+    $stmt->execute([
+        'sid1' => $student_id,
+        'sid2' => $student_id,
+        'sid3' => $student_id
+    ]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     $isPasswordValid = false;
-    if ($user) {
-        if (password_verify($password, $user['password'])) {
-            $isPasswordValid = true;
-        }
+    if ($user && password_verify($password, $user['password'])) {
+        $isPasswordValid = true;
     }
 
     if ($user && $isPasswordValid) {
-        // Check if student has an approved or enrolled application
+        if ($user['lms_status'] === 'suspended') {
+            echo "<script>alert('Your LMS access has been suspended due to an academic or financial hold. Please contact the Registrar.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+            return;
+        }
+
+        // Check if student has an approved or enrolled application or active LMS status
         $enrStmt = $pdo->prepare("
             SELECT COUNT(*) FROM applications a
             WHERE a.user_id = :uid AND a.status IN ('enrolled', 'approved')
         ");
-        $enrStmt->execute(['uid' => $user['id']]);
+        $enrStmt->execute(['uid' => (int)$user['id']]);
         $enrolledCount = (int)$enrStmt->fetchColumn();
 
-        if ($enrolledCount > 0) {
+        if ($enrolledCount > 0 || $user['lms_status'] === 'active' || $user['role'] === 'student') {
             // Success
             session_regenerate_id(true);
             $_SESSION['logged_in'] = true;
@@ -96,38 +107,58 @@ if ($role === 'student') {
             $_SESSION['user_last_name'] = $user['last_name'];
             $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = 'student';
+            $_SESSION['user_role'] = $user['role'] === 'student' ? 'student' : $user['role'];
             $_SESSION['user_department'] = $user['department'] ?? 'None';
+            $_SESSION['student_number'] = $user['student_number'];
+            $_SESSION['lms_status'] = $user['lms_status'] ?? 'active';
             
             // Backward compatibility
             $_SESSION['lms_logged_in'] = true;
-            $_SESSION['lms_user_id'] = $user['id'];
+            $_SESSION['lms_user_id'] = (int)$user['id'];
             $_SESSION['lms_role'] = 'student';
             $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['lms_email'] = $user['email'];
             $response->redirect("/sia/lms/student/dashboard.php");
             return;
         } else {
-            echo "<script>alert('You are not officially enrolled yet.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+            echo "<script>alert('You are not officially enrolled yet. Please complete enrollment with the Admissions office.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
             return;
         }
     } else {
-        echo "<script>alert('Invalid Student ID or Password.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+        echo "<script>alert('Invalid Student ID / Email or Password.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
         return;
     }
 } elseif ($role === 'faculty') {
-    $employee_id = $_POST['employee_id'] ?? '';
+    $employee_id = trim((string)($_POST['employee_id'] ?? ''));
     if (empty($employee_id) || empty($password)) {
-        echo "<script>alert('Please provide Employee ID and password.'); window.location.href='lms_faculty_login.php';</script>";
+        echo "<script>alert('Please provide Employee ID / Email and password.'); window.location.href='/sia/auth/lms_faculty_login.php';</script>";
         return;
     }
 
-    // Checking 'faculty' role, using student_number column as the employee_id storage
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE student_number = :eid AND role = 'faculty' AND is_active = 1");
-    $stmt->execute(['eid' => $employee_id]);
+    // Checking 'faculty', 'superadmin', or 'admin' roles with distinct parameter markers
+    $stmt = $pdo->prepare("
+        SELECT u.*, fp.academic_rank, fp.employment_type, fp.max_teaching_units 
+        FROM users u 
+        LEFT JOIN faculty_profiles fp ON fp.user_id = u.id 
+        WHERE (u.employee_id = :eid1 OR u.student_number = :eid2 OR u.email = :eid3 OR u.ttu_email = :eid4) 
+          AND (u.role = 'faculty' OR u.role IN ('superadmin', 'admin')) 
+          AND u.is_active = 1 
+        LIMIT 1
+    ");
+    $stmt->execute([
+        'eid1' => $employee_id,
+        'eid2' => $employee_id,
+        'eid3' => $employee_id,
+        'eid4' => $employee_id
+    ]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($user && password_verify($password, $user['password'])) {
+        if ($user['lms_status'] === 'suspended') {
+            echo "<script>alert('Your faculty LMS access is suspended. Please contact Academic Affairs.'); window.location.href='/sia/auth/lms_faculty_login.php';</script>";
+            return;
+        }
+
         session_regenerate_id(true);
         $_SESSION['logged_in'] = true;
         $_SESSION['user_id'] = (int)$user['id'];
@@ -135,19 +166,24 @@ if ($role === 'student') {
         $_SESSION['user_last_name'] = $user['last_name'];
         $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
         $_SESSION['user_email'] = $user['email'];
-        $_SESSION['user_role'] = 'faculty'; // Force faculty role for LMS perspective
+        $_SESSION['user_role'] = $user['role']; // Retain admin/superadmin or faculty role
         $_SESSION['user_department'] = $user['department'] ?? 'None';
+        $_SESSION['user_permissions'] = !empty($user['permissions']) ? json_decode($user['permissions'], true) : ['*'];
+        $_SESSION['employee_id'] = $user['employee_id'] ?? ($user['student_number'] ?? 'EMP-' . $user['id']);
+        $_SESSION['academic_rank'] = $user['academic_rank'] ?? ($user['role'] === 'superadmin' ? 'Super Administrator' : ($user['role'] === 'admin' ? 'Administrator' : 'Instructor I'));
+        $_SESSION['lms_status'] = 'active';
         
-        // Backward compatibility
+        // Backward compatibility & LMS-specific session
         $_SESSION['lms_logged_in'] = true;
-        $_SESSION['lms_user_id'] = $user['id'];
-        $_SESSION['lms_role'] = 'faculty';
+        $_SESSION['lms_user_id'] = (int)$user['id'];
+        $_SESSION['lms_role'] = 'faculty'; // Grants faculty view access in LMS
         $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
         $_SESSION['lms_email'] = $user['email'];
-        $response->redirect("/sia/auth/../lms/faculty/dashboard.php");
+
+        $response->redirect("/sia/lms/faculty/dashboard.php");
         return;
     } else {
-        echo "<script>alert('Invalid Employee ID or Password.'); window.location.href='lms_faculty_login.php';</script>";
+        echo "<script>alert('Invalid Employee ID / Email or Password.'); window.location.href='/sia/auth/lms_faculty_login.php';</script>";
         return;
     }
 }

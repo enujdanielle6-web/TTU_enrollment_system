@@ -91,9 +91,8 @@ class EnrollmentService
                 ]);
             }
 
-            // 6. Generate Institutional TTU Email & Temp Password
+            // 6. Generate Institutional TTU Email (Preserving Applicant's Existing Password)
             $ttuEmail = $app['ttu_email'] ?? '';
-            $tempPassword = $studentNumber;
 
             if (empty($ttuEmail)) {
                 $cleanFirst = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $app['first_name']));
@@ -111,18 +110,19 @@ class EnrollmentService
                     $counter++;
                 }
 
-                $hashedPassword = password_hash($tempPassword, PASSWORD_DEFAULT);
-                $pdo->prepare('UPDATE users SET ttu_email = :ttu_email, password = :pwd, force_password_reset = 1 WHERE id = :id')
+                $pdo->prepare('UPDATE users SET ttu_email = :ttu_email WHERE id = :id')
                     ->execute([
                         'ttu_email' => $ttuEmail,
-                        'pwd' => $hashedPassword,
                         'id' => $userId
                     ]);
             }
 
-            // 7. Update application status to enrolled
+            // 7. Update application status to enrolled and synchronize user identity
             $pdo->prepare('UPDATE applications SET status = "enrolled" WHERE id = :id')
                 ->execute(['id' => $applicationId]);
+
+            $pdo->prepare('UPDATE users SET role = "student", lms_status = "active" WHERE id = :id')
+                ->execute(['id' => $userId]);
 
             // 8. Enroll in section subjects if section is assigned
             if (!empty($app['section_id'])) {

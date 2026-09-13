@@ -46,8 +46,8 @@
             <?= getCsrfInput() ?>
             <input type="hidden" name="role" value="faculty">
             <div class="mb-3">
-              <label class="form-label text-muted small fw-semibold" for="employee_id">Employee ID</label>
-              <input class="form-control" style="padding: 0.75rem 1rem; border-radius: 10px;" type="text" id="employee_id" name="employee_id" value="<?= htmlspecialchars($old['employee_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required placeholder="e.g. EMP-001">
+              <label class="form-label text-muted small fw-semibold" for="employee_id">Employee ID or Email</label>
+              <input class="form-control" style="padding: 0.75rem 1rem; border-radius: 10px;" type="text" id="employee_id" name="employee_id" value="<?= htmlspecialchars($old['employee_id'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required placeholder="e.g. FAC-2026-001 or admin@ttu.edu.ph">
             </div>
 
             <div class="mb-4">
@@ -63,10 +63,37 @@
               </div>
             </div>
 
-            <div class="mb-3 d-flex justify-content-end">
-              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="document.getElementById('employee_id').value='FAC-2026-001'; document.getElementById('password').value='password123';">
-                <i class="bi bi-magic me-1"></i> Auto-fill Test Faculty
+            <!-- Quick Auto-Fill Buttons -->
+            <div class="mb-3 d-flex flex-wrap gap-2 justify-content-between">
+              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-fill" onclick="document.getElementById('employee_id').value='FAC-2026-001'; document.getElementById('password').value='password123';">
+                <i class="bi bi-person-workspace me-1"></i> Auto-fill Faculty
               </button>
+              <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 flex-fill" onclick="document.getElementById('employee_id').value='admin@ttu.edu.ph'; document.getElementById('password').value='admin123';">
+                <i class="bi bi-shield-lock me-1"></i> Auto-fill Test Admin
+              </button>
+            </div>
+
+            <!-- Test Credentials Card -->
+            <div class="card bg-light border-0 rounded-3 p-3 mb-3 text-start">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-uppercase fw-bold text-muted" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-key-fill me-1"></i> Test Login Credentials</span>
+              </div>
+              <div class="row g-2" style="font-size: 0.8rem;">
+                <div class="col-12 col-sm-6">
+                  <div class="p-2 bg-white rounded border border-light-subtle shadow-xs">
+                    <div class="fw-semibold text-primary mb-1"><i class="bi bi-mortarboard me-1"></i> Faculty Instructor</div>
+                    <div><span class="text-muted">ID:</span> <code class="user-select-all">FAC-2026-001</code></div>
+                    <div><span class="text-muted">Pass:</span> <code>password123</code></div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="p-2 bg-white rounded border border-light-subtle shadow-xs">
+                    <div class="fw-semibold text-dark mb-1"><i class="bi bi-shield-check me-1"></i> Superadmin</div>
+                    <div><span class="text-muted">Email:</span> <code class="user-select-all">admin@ttu.edu.ph</code></div>
+                    <div><span class="text-muted">Pass:</span> <code>admin123</code></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <button class="btn btn-outline-primary w-100 fw-semibold" style="padding: 0.75rem 1rem; border-radius: 10px;" type="submit">

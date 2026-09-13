@@ -33,37 +33,77 @@ INSERT INTO `announcements` (`id`, `badge_label`, `badge_color`, `title`, `conte
 -- Default Password for Students/Faculty: password123 ($2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu)
 -- ----------------------------------------------------------------------------
 DELETE FROM `users`;
-INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `ttu_email`, `password`, `student_number`, `role`, `department`, `permissions`, `college_curriculum_id`, `email_verified`, `verification_code`, `verification_code_expires_at`, `reset_token`, `reset_token_expires_at`, `force_password_reset`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'System', 'Superadmin', 'admin@ttu.edu.ph', 'admin@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0001', 'superadmin', 'System Administration', '[\"*\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(2, 'Eleanor', 'Vance', 'admissions@ttu.edu.ph', 'admissions@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0002', 'admissions', 'Admissions Office', '[\"manage_admissions\",\"view_applications\",\"process_applications\",\"manage_documents\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(3, 'Marcus', 'Aurelius', 'registrar@ttu.edu.ph', 'registrar@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0003', 'admin', 'Registrar Office', '[\"manage_registrar\",\"manage_curriculum\",\"manage_subjects\",\"manage_students\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(4, 'Clara', 'Oswald', 'cashier@ttu.edu.ph', 'cashier@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0004', 'cashier', 'Finance & Accounting', '[\"manage_finance\",\"process_payments\",\"verify_payments\",\"issue_receipts\",\"manage_fees\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(5, 'Dr. Sarah', 'Palmer', 'clinic@ttu.edu.ph', 'clinic@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0005', 'clinic', 'University Health Services', '[\"manage_clinic\",\"verify_medical\",\"update_health_records\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(6, 'Theodore', 'Nott', 'scheduler@ttu.edu.ph', 'scheduler@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0006', 'scheduler', 'Academic Scheduling', '[\"manage_sections\",\"manage_schedules\",\"assign_rooms\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(7, 'Gwendolyn', 'Stacy', 'scholarship@ttu.edu.ph', 'scholarship@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0007', 'scholarship', 'Student Affairs & Grants', '[\"manage_scholarships\",\"review_scholarships\",\"award_grants\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(8, 'Alan', 'Turing', 'alan.turing@ttu.edu.ph', 'alan.turing@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', 'FAC-2026-001', 'faculty', 'Computer Science Dept', '[\"lms_faculty\",\"manage_courses\",\"grade_assignments\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(9, 'Ada', 'Lovelace', 'ada.lovelace@ttu.edu.ph', 'ada.lovelace@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', 'FAC-2026-002', 'faculty', 'Information Technology Dept', '[\"lms_faculty\",\"manage_courses\",\"grade_assignments\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(10, 'Dr. Grace', 'Hopper', 'grace.hopper@ttu.edu.ph', 'grace.hopper@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', 'FAC-2026-003', 'faculty', 'Computer Science Dept', '[\"lms_faculty\",\"manage_courses\",\"grade_assignments\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(11, 'John', 'Doe', 'john.doe@example.com', 'john.doe@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', '2026-000001', 'applicant', 'None', NULL, 1, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(12, 'Mary', 'Smith', 'mary.smith@example.com', 'mary.smith@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', '2026-000002', 'applicant', 'None', NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
-(13, 'Jane', 'Applicant', 'jane.applicant@example.com', NULL, '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', NULL, 'applicant', 'None', NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW());
+INSERT INTO `users` (`id`, `first_name`, `last_name`, `email`, `ttu_email`, `password`, `student_number`, `employee_id`, `role`, `lms_status`, `department`, `permissions`, `college_curriculum_id`, `email_verified`, `verification_code`, `verification_code_expires_at`, `reset_token`, `reset_token_expires_at`, `force_password_reset`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'System', 'Superadmin', 'admin@ttu.edu.ph', 'admin@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0001', NULL, 'superadmin', 'inactive', 'System Administration', '[\"*\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(2, 'Eleanor', 'Vance', 'admissions@ttu.edu.ph', 'admissions@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0002', NULL, 'admissions', 'inactive', 'Admissions Office', '[\"manage_admissions\",\"view_applications\",\"process_applications\",\"manage_documents\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(3, 'Marcus', 'Aurelius', 'registrar@ttu.edu.ph', 'registrar@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0003', NULL, 'admin', 'inactive', 'Registrar Office', '[\"manage_registrar\",\"manage_curriculum\",\"manage_subjects\",\"manage_students\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(4, 'Clara', 'Oswald', 'cashier@ttu.edu.ph', 'cashier@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0004', NULL, 'cashier', 'inactive', 'Finance & Accounting', '[\"manage_finance\",\"process_payments\",\"verify_payments\",\"issue_receipts\",\"manage_fees\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(5, 'Dr. Sarah', 'Palmer', 'clinic@ttu.edu.ph', 'clinic@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0005', NULL, 'clinic', 'inactive', 'University Health Services', '[\"manage_clinic\",\"verify_medical\",\"update_health_records\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(6, 'Theodore', 'Nott', 'scheduler@ttu.edu.ph', 'scheduler@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0006', NULL, 'scheduler', 'inactive', 'Academic Scheduling', '[\"manage_sections\",\"manage_schedules\",\"assign_rooms\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(7, 'Gwendolyn', 'Stacy', 'scholarship@ttu.edu.ph', 'scholarship@ttu.edu.ph', '$2y$10$2TckHB27daVTUY2s77cGLOP/D85YVJEUACV6npajBU6fLmRFdAArK', 'ADM-0007', NULL, 'scholarship', 'inactive', 'Student Affairs & Grants', '[\"manage_scholarships\",\"review_scholarships\",\"award_grants\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(8, 'Alan', 'Turing', 'alan.turing@ttu.edu.ph', 'alan.turing@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', NULL, 'FAC-2026-001', 'faculty', 'active', 'Computer Science Dept', '[\"lms_faculty\",\"manage_courses\",\"grade_assignments\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(9, 'Ada', 'Lovelace', 'ada.lovelace@ttu.edu.ph', 'ada.lovelace@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', NULL, 'FAC-2026-002', 'faculty', 'active', 'Information Technology Dept', '[\"lms_faculty\",\"manage_courses\",\"grade_assignments\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(10, 'Dr. Grace', 'Hopper', 'grace.hopper@ttu.edu.ph', 'grace.hopper@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', NULL, 'FAC-2026-003', 'faculty', 'active', 'Computer Science Dept', '[\"lms_faculty\",\"manage_courses\",\"grade_assignments\"]', NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(11, 'John', 'Doe', 'john.doe@example.com', 'john.doe@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', '2026-000001', NULL, 'student', 'active', 'None', NULL, 1, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(12, 'Mary', 'Smith', 'mary.smith@example.com', 'mary.smith@ttu.edu.ph', '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', '2026-000002', NULL, 'student', 'active', 'None', NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW()),
+(13, 'Jane', 'Applicant', 'jane.applicant@example.com', NULL, '$2y$10$WUOWe6NmQUF.xkOM3Bn52eVnrS55voa4/InCsvjZgqbENbSRRD9Eu', NULL, NULL, 'applicant', 'inactive', 'None', NULL, NULL, 1, NULL, NULL, NULL, NULL, 0, 1, NOW(), NOW());
+
+-- ----------------------------------------------------------------------------
+-- 3b. FACULTY PROFILES, AVAILABILITY & SPECIALIZATIONS
+-- ----------------------------------------------------------------------------
+DELETE FROM `faculty_specializations`;
+DELETE FROM `faculty_availability`;
+DELETE FROM `faculty_profiles`;
+
+INSERT INTO `faculty_profiles` (`id`, `user_id`, `employee_id`, `program_id`, `academic_rank`, `employment_type`, `max_teaching_units`, `specializations`, `status`, `created_at`, `updated_at`) VALUES
+(1, 8, 'FAC-2026-001', 2, 'Instructor I', 'full_time', 18.00, 'Algorithms, Theoretical Computing', 'active', NOW(), NOW()),
+(2, 9, 'FAC-2026-002', 1, 'Instructor I', 'full_time', 18.00, 'Web Systems, Database Architecture', 'active', NOW(), NOW()),
+(3, 10, 'FAC-2026-003', 2, 'Instructor I', 'full_time', 18.00, 'Programming Languages, Systems Engineering', 'active', NOW(), NOW());
+
+INSERT INTO `faculty_availability` (`id`, `faculty_user_id`, `day_of_week`, `start_time`, `end_time`, `is_available`, `created_at`) VALUES
+(1, 8, 'Monday', '07:00:00', '19:00:00', 1, NOW()),
+(2, 9, 'Monday', '07:00:00', '19:00:00', 1, NOW()),
+(3, 10, 'Monday', '07:00:00', '19:00:00', 1, NOW()),
+(4, 8, 'Tuesday', '07:00:00', '19:00:00', 1, NOW()),
+(5, 9, 'Tuesday', '07:00:00', '19:00:00', 1, NOW()),
+(6, 10, 'Tuesday', '07:00:00', '19:00:00', 1, NOW()),
+(7, 8, 'Wednesday', '07:00:00', '19:00:00', 1, NOW()),
+(8, 9, 'Wednesday', '07:00:00', '19:00:00', 1, NOW()),
+(9, 10, 'Wednesday', '07:00:00', '19:00:00', 1, NOW()),
+(10, 8, 'Thursday', '07:00:00', '19:00:00', 1, NOW()),
+(11, 9, 'Thursday', '07:00:00', '19:00:00', 1, NOW()),
+(12, 10, 'Thursday', '07:00:00', '19:00:00', 1, NOW()),
+(13, 8, 'Friday', '07:00:00', '19:00:00', 1, NOW()),
+(14, 9, 'Friday', '07:00:00', '19:00:00', 1, NOW()),
+(15, 10, 'Friday', '07:00:00', '19:00:00', 1, NOW()),
+(16, 8, 'Saturday', '07:00:00', '19:00:00', 1, NOW()),
+(17, 9, 'Saturday', '07:00:00', '19:00:00', 1, NOW()),
+(18, 10, 'Saturday', '07:00:00', '19:00:00', 1, NOW());
+
+INSERT INTO `faculty_specializations` (`id`, `faculty_user_id`, `subject_id`, `competency_level`, `years_experience`, `created_at`) VALUES
+(1, 9, 1, 'Primary', 5, NOW()),
+(2, 9, 5, 'Primary', 4, NOW()),
+(3, 8, 2, 'Primary', 8, NOW()),
+(4, 8, 6, 'Primary', 6, NOW()),
+(5, 10, 4, 'Primary', 10, NOW()),
+(6, 10, 8, 'Primary', 7, NOW());
 
 -- ----------------------------------------------------------------------------
 -- 4. ACADEMIC PROGRAMS & SHS STRANDS
 -- ----------------------------------------------------------------------------
 DELETE FROM `college_programs`;
-INSERT INTO `college_programs` (`id`, `code`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'BSIT', 'Bachelor of Science in Information Technology', 'Prepares students in network administration, web systems, database design, and cybersecurity.', 1, NOW(), NOW()),
-(2, 'BSCS', 'Bachelor of Science in Computer Science', 'Focuses on computing theory, algorithm design, software engineering, and artificial intelligence.', 1, NOW(), NOW()),
-(3, 'BSIS', 'Bachelor of Science in Information Systems', 'Integrates business management with enterprise computing architectures and business analytics.', 1, NOW(), NOW()),
-(4, 'BSHM', 'Bachelor of Science in Hospitality Management', 'Professional training in hotel operations, culinary arts, and tourism management.', 1, NOW(), NOW());
+INSERT INTO `college_programs` (`id`, `code`, `name`, `description`, `icon`, `careers`, `custom_tuition`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'BSIT', 'Bachelor of Science in Information Technology', 'Prepares students in network administration, web systems, database design, and cybersecurity.', 'bi-pc-display', 'Software Engineer, IT Analyst, System Admin', '₱500 / unit (Est. ₱6,000 / sem)', 1, NOW(), NOW()),
+(2, 'BSCS', 'Bachelor of Science in Computer Science', 'Focuses on computing theory, algorithm design, software engineering, and artificial intelligence.', 'bi-laptop', 'Data Scientist, Systems Architect, AI Researcher', '₱500 / unit (Est. ₱6,000 / sem)', 1, NOW(), NOW()),
+(3, 'BSIS', 'Bachelor of Science in Information Systems', 'Integrates business management with enterprise computing architectures and business analytics.', 'bi-diagram-3', 'Systems Analyst, ERP Consultant, IT Manager', '₱25,000 - ₱30,000 / sem', 1, NOW(), NOW()),
+(4, 'BSHM', 'Bachelor of Science in Hospitality Management', 'Professional training in hotel operations, culinary arts, and tourism management.', 'bi-cup-hot', 'Hotel Manager, F&B Director, Event Coordinator', '₱25,000 - ₱30,000 / sem', 1, NOW(), NOW());
 
 DELETE FROM `shs_strands`;
-INSERT INTO `shs_strands` (`id`, `code`, `name`, `description`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'STEM', 'Science, Technology, Engineering, and Mathematics', 'Academic track for engineering, pure sciences, and computing specializations.', 1, NOW(), NOW()),
-(2, 'ABM', 'Accountancy, Business, and Management', 'Academic track for entrepreneurship, financial management, and business administration.', 1, NOW(), NOW()),
-(3, 'HUMSS', 'Humanities and Social Sciences', 'Academic track for communication arts, law, journalism, and social sciences.', 1, NOW(), NOW()),
-(4, 'TVL-ICT', 'Technical-Vocational-Livelihood (ICT Strand)', 'Vocational track in computer programming, animation, and technical drafting.', 1, NOW(), NOW());
+INSERT INTO `shs_strands` (`id`, `code`, `name`, `description`, `icon`, `careers`, `custom_tuition`, `is_active`, `created_at`, `updated_at`) VALUES
+(1, 'STEM', 'Science, Technology, Engineering, and Mathematics', 'Academic track for engineering, pure sciences, and computing specializations.', 'bi-calculator', 'Engineer, Programmer, Architect', '₱16,500 / sem', 1, NOW(), NOW()),
+(2, 'ABM', 'Accountancy, Business, and Management', 'Academic track for entrepreneurship, financial management, and business administration.', 'bi-briefcase', 'Accountant, Entrepreneur, Manager', '₱15,000 - ₱20,000 / sem', 1, NOW(), NOW()),
+(3, 'HUMSS', 'Humanities and Social Sciences', 'Academic track for communication arts, law, journalism, and social sciences.', 'bi-chat-square-quote', 'Lawyer, Teacher, Psychologist', '₱15,000 - ₱20,000 / sem', 1, NOW(), NOW()),
+(4, 'TVL-ICT', 'Technical-Vocational-Livelihood (ICT Strand)', 'Vocational track in computer programming, animation, and technical drafting.', 'bi-laptop', 'Technician, Web Developer, IT Support', '₱15,000 / sem', 1, NOW(), NOW());
 
 -- ----------------------------------------------------------------------------
 -- 5. MASTER SUBJECTS CATALOG
@@ -124,13 +164,13 @@ INSERT INTO `college_sections` (`id`, `section_code`, `program_id`, `curriculum_
 (2, 'BSCS 1-A', 2, 2, '2026-2027', '1st Year', 'First', 40, 'Morning', 'Alan Turing', 1, NOW(), NOW());
 
 DELETE FROM `college_section_subjects`;
-INSERT INTO `college_section_subjects` (`id`, `college_section_id`, `subject_id`, `capacity`, `day`, `start_time`, `end_time`, `room`, `instructor`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 40, 'MWF', '08:00:00', '09:00:00', 'Lab 101', 'Ada Lovelace', NOW(), NOW()),
-(2, 1, 2, 40, 'MWF', '09:00:00', '10:00:00', 'Lab 102', 'Alan Turing', NOW(), NOW()),
-(3, 1, 4, 40, 'TTH', '10:30:00', '12:00:00', 'Room 305', 'Dr. Grace Hopper', NOW(), NOW()),
-(4, 2, 1, 40, 'MWF', '08:00:00', '09:00:00', 'Lab 101', 'Alan Turing', NOW(), NOW()),
-(5, 2, 2, 40, 'MWF', '09:00:00', '10:00:00', 'Lab 102', 'Alan Turing', NOW(), NOW()),
-(6, 2, 3, 40, 'TTH', '13:00:00', '14:30:00', 'Room 401', 'Dr. Grace Hopper', NOW(), NOW());
+INSERT INTO `college_section_subjects` (`id`, `college_section_id`, `subject_id`, `capacity`, `day`, `start_time`, `end_time`, `room`, `faculty_user_id`, `instructor`, `delivery_mode`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 40, 'MWF', '08:00:00', '09:00:00', 'Lab 101', 9, 'Ada Lovelace', 'Face-to-Face', NOW(), NOW()),
+(2, 1, 2, 40, 'MWF', '09:00:00', '10:00:00', 'Lab 102', 8, 'Alan Turing', 'Face-to-Face', NOW(), NOW()),
+(3, 1, 4, 40, 'TTH', '10:30:00', '12:00:00', 'Room 305', 10, 'Dr. Grace Hopper', 'Face-to-Face', NOW(), NOW()),
+(4, 2, 1, 40, 'MWF', '08:00:00', '09:00:00', 'Lab 101', 8, 'Alan Turing', 'Face-to-Face', NOW(), NOW()),
+(5, 2, 2, 40, 'MWF', '09:00:00', '10:00:00', 'Lab 102', 8, 'Alan Turing', 'Face-to-Face', NOW(), NOW()),
+(6, 2, 3, 40, 'TTH', '13:00:00', '14:30:00', 'Room 401', 10, 'Dr. Grace Hopper', 'Face-to-Face', NOW(), NOW());
 
 DELETE FROM `shs_sections`;
 INSERT INTO `shs_sections` (`id`, `section_code`, `strand_id`, `curriculum_id`, `grade_level`, `academic_year`, `capacity`, `schedule_type`, `adviser`, `status`, `created_at`, `updated_at`) VALUES
@@ -138,12 +178,12 @@ INSERT INTO `shs_sections` (`id`, `section_code`, `strand_id`, `curriculum_id`, 
 (2, 'TVL 11-A', 4, 2, 'Grade 11', '2026-2027', 40, 'Morning', 'Ada Lovelace', 1, NOW(), NOW());
 
 DELETE FROM `shs_section_subjects`;
-INSERT INTO `shs_section_subjects` (`id`, `shs_section_id`, `subject_id`, `capacity`, `day`, `start_time`, `end_time`, `room`, `instructor`, `created_at`, `updated_at`) VALUES
-(1, 1, 8, 40, 'MWF', '08:00:00', '09:30:00', 'SHS Room 1', 'Dr. Grace Hopper', NOW(), NOW()),
-(2, 1, 9, 40, 'MWF', '09:30:00', '11:00:00', 'Bio Lab', 'Dr. Grace Hopper', NOW(), NOW()),
-(3, 1, 10, 40, 'TTH', '08:00:00', '09:30:00', 'SHS Room 1', 'Ada Lovelace', NOW(), NOW()),
-(4, 2, 10, 40, 'TTH', '08:00:00', '09:30:00', 'SHS Room 2', 'Ada Lovelace', NOW(), NOW()),
-(5, 2, 11, 40, 'MWF', '10:00:00', '11:30:00', 'Comp Lab 3', 'Ada Lovelace', NOW(), NOW());
+INSERT INTO `shs_section_subjects` (`id`, `shs_section_id`, `subject_id`, `capacity`, `day`, `start_time`, `end_time`, `room`, `faculty_user_id`, `instructor`, `delivery_mode`, `created_at`, `updated_at`) VALUES
+(1, 1, 8, 40, 'MWF', '08:00:00', '09:30:00', 'SHS Room 1', 10, 'Dr. Grace Hopper', 'Face-to-Face', NOW(), NOW()),
+(2, 1, 9, 40, 'MWF', '09:30:00', '11:00:00', 'Bio Lab', 10, 'Dr. Grace Hopper', 'Face-to-Face', NOW(), NOW()),
+(3, 1, 10, 40, 'TTH', '08:00:00', '09:30:00', 'SHS Room 1', 9, 'Ada Lovelace', 'Face-to-Face', NOW(), NOW()),
+(4, 2, 10, 40, 'TTH', '08:00:00', '09:30:00', 'SHS Room 2', 9, 'Ada Lovelace', 'Face-to-Face', NOW(), NOW()),
+(5, 2, 11, 40, 'MWF', '10:00:00', '11:30:00', 'Comp Lab 3', 9, 'Ada Lovelace', 'Face-to-Face', NOW(), NOW());
 
 -- ----------------------------------------------------------------------------
 -- 8. FEE TEMPLATES & SCHOLARSHIPS

@@ -160,40 +160,45 @@ $pageTitle = 'SHS Strands - Administrator';
 
         try {
             if ($action === 'create_strand') {
-                $code = strtolower(trim($_POST['code'] ?? ''));
+                $code = strtoupper(trim($_POST['code'] ?? ''));
                 $name = trim($_POST['name'] ?? '');
                 $description = trim($_POST['description'] ?? '');
-                $icon = trim($_POST['icon'] ?? '');
+                $icon = trim($_POST['icon'] ?? 'bi-mortarboard');
+                if (empty($icon)) $icon = 'bi-mortarboard';
                 $careers = trim($_POST['careers'] ?? '');
                 $customTuition = trim($_POST['custom_tuition'] ?? '');
 
                 if ($code === '' || $name === '') {
-                    throw new Exception('Strand code and name are required.');
+                    throw new \Exception('Strand code and name are required.');
                 }
 
                 // Check if code exists
-                $stmt = $pdo->prepare('SELECT id FROM shs_strands WHERE code = :code');
+                $stmt = $pdo->prepare('SELECT id FROM shs_strands WHERE UPPER(code) = UPPER(:code)');
                 $stmt->execute(['code' => $code]);
                 if ($stmt->fetch()) {
-                    throw new Exception("A strand with code '{$code}' already exists.");
+                    throw new \Exception("A strand with code '{$code}' already exists.");
                 }
 
-                $insertStmt = $pdo->prepare('INSERT INTO shs_strands (code, name, description, icon, careers, custom_tuition, is_active) VALUES (:code, :name, :description, :icon, :careers, :custom_tuition, 1)');
+                $insertStmt = $pdo->prepare('
+                    INSERT INTO shs_strands (code, name, description, icon, careers, custom_tuition, is_active) 
+                    VALUES (:code, :name, :description, :icon, :careers, :custom_tuition, 1)
+                ');
                 $insertStmt->execute([
                     'code' => $code, 
                     'name' => $name,
                     'description' => $description !== '' ? $description : null,
-                    'icon' => $icon !== '' ? $icon : null,
+                    'icon' => $icon,
                     'careers' => $careers !== '' ? $careers : null,
                     'custom_tuition' => $customTuition !== '' ? $customTuition : null
                 ]);
 
-                logActivity((int)$_SESSION['user_id'], 'bi-mortarboard', 'SHS Strand Added', "Added SHS strand: " . strtoupper($code));
+                $userId = (int)($_SESSION['user_id'] ?? 0);
+                logActivity($userId, 'bi-mortarboard', 'SHS Strand Added', "Added SHS strand: " . $code);
                 $_SESSION['success_msg'] = 'Strand created successfully.';
             } 
             elseif ($action === 'update_strand' || $action === 'update_landing_card') {
                 $id = (int)($_POST['id'] ?? 0);
-                $code = strtolower(trim($_POST['code'] ?? ''));
+                $code = strtoupper(trim($_POST['code'] ?? ''));
                 $name = trim($_POST['name'] ?? '');
                 $description = trim($_POST['description'] ?? '');
                 $icon = trim($_POST['icon'] ?? '');
@@ -201,39 +206,70 @@ $pageTitle = 'SHS Strands - Administrator';
                 $customTuition = trim($_POST['custom_tuition'] ?? '');
 
                 if ($id <= 0) {
-                    throw new Exception('Missing required information to update strand.');
+                    throw new \Exception('Missing required information to update strand.');
+                }
+
+                // Verify strand exists
+                $checkStmt = $pdo->prepare('SELECT id, code, name, description, icon, careers, custom_tuition FROM shs_strands WHERE id = :id');
+                $checkStmt->execute(['id' => $id]);
+                $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                if (!$existing) {
+                    throw new \Exception('Strand not found.');
+                }
+
+                // If updating via basic strand form, preserve existing card icon/tuition if not submitted
+                if ($action === 'update_strand') {
+                    if (!isset($_POST['icon']) || $icon === '') {
+                        $icon = !empty($existing['icon']) ? $existing['icon'] : 'bi-mortarboard';
+                    }
+                    if (!isset($_POST['custom_tuition'])) {
+                        $customTuition = $existing['custom_tuition'] ?? '';
+                    }
+                } else {
+                    if ($icon === '') {
+                        $icon = !empty($existing['icon']) ? $existing['icon'] : 'bi-mortarboard';
+                    }
                 }
 
                 if ($code !== '' && $name !== '') {
                     // Check duplicate code
-                    $stmt = $pdo->prepare('SELECT id FROM shs_strands WHERE code = :code AND id != :id');
+                    $stmt = $pdo->prepare('SELECT id FROM shs_strands WHERE UPPER(code) = UPPER(:code) AND id != :id');
                     $stmt->execute(['code' => $code, 'id' => $id]);
                     if ($stmt->fetch()) {
-                        throw new Exception("The code '{$code}' is already used by another strand.");
+                        throw new \Exception("The code '{$code}' is already used by another strand.");
                     }
 
-                    $updateStmt = $pdo->prepare('UPDATE shs_strands SET code = :code, name = :name, description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition WHERE id = :id');
+                    $updateStmt = $pdo->prepare('
+                        UPDATE shs_strands 
+                        SET code = :code, name = :name, description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition 
+                        WHERE id = :id
+                    ');
                     $updateStmt->execute([
                         'code' => $code, 
                         'name' => $name, 
                         'description' => $description !== '' ? $description : null,
-                        'icon' => $icon !== '' ? $icon : null,
+                        'icon' => $icon,
                         'careers' => $careers !== '' ? $careers : null,
                         'custom_tuition' => $customTuition !== '' ? $customTuition : null,
                         'id' => $id
                     ]);
                 } else {
-                    $updateStmt = $pdo->prepare('UPDATE shs_strands SET description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition WHERE id = :id');
+                    $updateStmt = $pdo->prepare('
+                        UPDATE shs_strands 
+                        SET description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition 
+                        WHERE id = :id
+                    ');
                     $updateStmt->execute([
                         'description' => $description !== '' ? $description : null,
-                        'icon' => $icon !== '' ? $icon : null,
+                        'icon' => $icon,
                         'careers' => $careers !== '' ? $careers : null,
                         'custom_tuition' => $customTuition !== '' ? $customTuition : null,
                         'id' => $id
                     ]);
                 }
 
-                logActivity((int)$_SESSION['user_id'], 'bi-pencil', 'SHS Strand Updated', "Updated details/card for strand ID: " . $id);
+                $userId = (int)($_SESSION['user_id'] ?? 0);
+                logActivity($userId, 'bi-pencil', 'SHS Strand Updated', "Updated details/card for strand ID: " . $id);
                 $_SESSION['success_msg'] = 'Strand details & landing card updated successfully.';
             } 
             elseif ($action === 'toggle_strand') {
@@ -247,9 +283,9 @@ $pageTitle = 'SHS Strands - Administrator';
                 }
             } 
             else {
-                throw new Exception('Invalid action requested.');
+                throw new \Exception('Invalid action requested.');
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $_SESSION['error_msg'] = $e->getMessage();
         }
 

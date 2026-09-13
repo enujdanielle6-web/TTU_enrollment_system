@@ -57,5 +57,26 @@ Upon finalizing enrollment in Admissions:
 ---
 
 ## 6. Environment & Schema Reference
-- **Active Schema Dump:** [`schema_dump.sql`](file:///c:/xampp/htdocs/sia/schema_dump.sql) contains the complete 42-table and view structure.
+- **Canonical Schema:** [`database/schema.sql`](file:///c:/xampp/htdocs/sia/database/schema.sql) contains the complete 47-table and 2-view structure.
+- **Pre-Migration Cold Backup:** `backup_sia_pre_migration.sql` (229 KB).
 - **Configuration:** Copy `.env.example` or edit `.env` for database and Google SMTP credentials.
+
+---
+
+## 7. Option A+ Identity Separation & Relational Timetable Integration (September 2026)
+Following a comprehensive 21-phase architectural migration, the system operates under **Option A+ Architecture**:
+
+### Key Features & Architectural Enhancements:
+1. **Disentangled Identity:** `users.student_number` (student-only) and `users.employee_id` (faculty-only).
+2. **Granular LMS Access Gating:** `users.lms_status` (`inactive`, `active`, `suspended`). Allows granular holds without disabling institutional accounts.
+3. **Faculty Profile Extension:** `faculty_profiles` stores academic rank, employment type, and teaching unit limits (`max_teaching_units`).
+4. **Permanent Cascade Protection:** `lms_courses.faculty_user_id` enforced with `ON DELETE RESTRICT` (eliminating the catastrophic cascade deletion hazard).
+5. **Scheduler Faculty Catalog & Multi-Day Conflict Engine:**
+   - Visual schedule builder populated from relational `faculty_profiles`.
+   - `decomposeDays()` engine detects overlapping compound day schedules (`'MWF'` vs `'M'`).
+   - Timetable dual-write (`faculty_user_id` + legacy string `instructor`).
+   - Automated idempotent LMS course synchronization on save.
+6. **Enrollment Repository Bug Elimination:** Courses mapped strictly to the assigned timetable instructor rather than default lowest faculty ID.
+7. **Admissions Password Preservation:** Applicant registration password hashes are preserved upon enrollment completion; `users.role` synchronizes to `'student'`.
+8. **Documentation References:** See [`docs/codebase/FINAL_SYSTEM_MAP.md`](file:///c:/xampp/htdocs/sia/docs/codebase/FINAL_SYSTEM_MAP.md) and [`docs/migration/05_POST_MIGRATION_VERIFICATION.md`](file:///c:/xampp/htdocs/sia/docs/migration/05_POST_MIGRATION_VERIFICATION.md).
+

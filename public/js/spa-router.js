@@ -3,39 +3,46 @@
  * Converts standard MPA links into instantaneous AJAX fetches.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    
-    // Global click interceptor
-    document.addEventListener('click', async (e) => {
-        const link = e.target.closest('a');
-        
-        // Exclusions
-        if (!link) return;
-        if (!link.href) return;
-        if (link.hasAttribute('download')) return;
-        if (link.target === '_blank') return;
-        if (link.href.includes('#') && link.href.split('#')[0] === window.location.href.split('#')[0]) return;
-        if (link.dataset.spa === 'false') return;
-        if (link.href.includes('logout.php')) return;
-        
-        // Must be same origin
-        const url = new URL(link.href);
-        if (url.origin !== window.location.origin) return;
+if (!window.__TTU_SPA_INITIALIZED__) {
+    window.__TTU_SPA_INITIALIZED__ = true;
 
-        // Ensure we actually have a target container on this page
-        const mainContainer = document.getElementById('spa-main');
-        if (!mainContainer) return;
+    document.addEventListener('DOMContentLoaded', () => {
+        // Global click interceptor
+        document.addEventListener('click', async (e) => {
+            const link = e.target.closest('a');
+            
+            // Exclusions
+            if (!link) return;
+            if (!link.href) return;
+            if (link.hasAttribute('download')) return;
+            if (link.target === '_blank') return;
+            if (link.href.includes('#') && link.href.split('#')[0] === window.location.href.split('#')[0]) return;
+            if (link.dataset.spa === 'false') return;
+            if (link.href.includes('logout.php')) return;
+            
+            // Must be same origin
+            try {
+                const url = new URL(link.href, window.location.origin);
+                if (url.origin !== window.location.origin) return;
 
-        e.preventDefault();
-        
-        navigateTo(url.href);
+                // Ensure we actually have a target container on this page
+                const mainContainer = document.getElementById('spa-main');
+                if (!mainContainer) return;
+
+                e.preventDefault();
+                
+                navigateTo(url.href);
+            } catch (err) {
+                // Allow browser default navigation if URL parsing fails
+            }
+        });
+
+        // Handle Browser Back/Forward
+        window.addEventListener('popstate', () => {
+            navigateTo(window.location.href, false);
+        });
     });
-
-    // Handle Browser Back/Forward
-    window.addEventListener('popstate', (e) => {
-        navigateTo(window.location.href, false);
-    });
-});
+}
 
 // SPA Progress Bar Helpers
 function getProgressBar() {
@@ -108,18 +115,12 @@ async function navigateTo(url, pushHistory = true) {
         const newTabContent = doc.getElementById('course-tab-content');
 
         if (currentTabContent && newTabContent) {
-            // Update active tab styling immediately
-            const targetUrl = new URL(url);
-            document.querySelectorAll('.course-nav-link').forEach(link => {
-                const linkUrl = new URL(link.href);
-                if (linkUrl.pathname === targetUrl.pathname && linkUrl.search === targetUrl.search) {
-                    link.classList.add('active');
-                } else if (linkUrl.pathname === targetUrl.pathname && !linkUrl.search && !targetUrl.search) {
-                    link.classList.add('active');
-                } else {
-                    link.classList.remove('active');
-                }
-            });
+            // Directly synchronize the entire course sub-nav container from fresh server DOM
+            const currentNav = document.querySelector('.course-nav-container');
+            const newNav = doc.querySelector('.course-nav-container');
+            if (currentNav && newNav) {
+                currentNav.innerHTML = newNav.innerHTML;
+            }
 
             // Smoothly cross-fade only the inner tab content
             currentTabContent.classList.add('tab-fade-out');
@@ -136,8 +137,7 @@ async function navigateTo(url, pushHistory = true) {
                     history.pushState(null, doc.title, url);
                 }
                 document.title = doc.title;
-                document.dispatchEvent(new Event('DOMContentLoaded'));
-                document.dispatchEvent(new Event('spa:navigated'));
+                document.dispatchEvent(new CustomEvent('spa:navigated', { detail: { url } }));
 
                 setTimeout(() => {
                     currentTabContent.classList.remove('tab-fade-in');
@@ -208,8 +208,7 @@ async function navigateTo(url, pushHistory = true) {
         await executeInlineScripts(mainContainer);
 
         // Announce completion and fire ready events for loaded components
-        document.dispatchEvent(new Event('DOMContentLoaded'));
-        document.dispatchEvent(new Event('spa:navigated'));
+        document.dispatchEvent(new CustomEvent('spa:navigated', { detail: { url } }));
         
         // Smooth scroll to top
         window.scrollTo({ top: 0, behavior: 'smooth' });

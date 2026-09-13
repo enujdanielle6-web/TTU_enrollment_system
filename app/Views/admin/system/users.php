@@ -334,7 +334,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             </div>
             <div class="col-md-4">
               <label class="form-label small fw-semibold text-dark">Account Role</label>
-              <select name="role" class="form-select form-select-sm bg-light" required>
+              <select name="role" id="addRoleSelect" class="form-select form-select-sm bg-light" required onchange="toggleFacultyAddFields(this.value)">
                 <option value="applicant">Applicant</option>
                 <option value="admin">Registrar</option>
                 <option value="scheduler">Scheduler</option>
@@ -342,6 +342,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 <option value="scholarship">Scholarship Officer</option>
                 <option value="cashier">Cashier</option>
                 <option value="clinic">Clinic Officer</option>
+                <option value="faculty">Faculty</option>
                 <option value="superadmin">Super Administrator</option>
               </select>
             </div>
@@ -354,6 +355,20 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 <option value="Admissions">Admissions</option>
                 <option value="Finance">Finance</option>
                 <option value="Scholarship">Scholarship</option>
+              </select>
+            </div>
+            <div class="col-md-6 d-none" id="addFacultyEmpIdCol">
+              <label class="form-label small fw-semibold text-dark">Employee ID</label>
+              <input type="text" name="employee_id" class="form-control form-control-sm bg-light" placeholder="e.g. FAC-2026-004">
+            </div>
+            <div class="col-md-6 d-none" id="addFacultyRankCol">
+              <label class="form-label small fw-semibold text-dark">Academic Rank</label>
+              <select name="academic_rank" class="form-select form-select-sm bg-light">
+                <option value="Instructor I">Instructor I</option>
+                <option value="Instructor II">Instructor II</option>
+                <option value="Assistant Professor">Assistant Professor</option>
+                <option value="Associate Professor">Associate Professor</option>
+                <option value="Professor">Professor</option>
               </select>
             </div>
             <div class="col-12 mt-3">
@@ -430,6 +445,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 <option value="scholarship">Scholarship Officer</option>
                 <option value="cashier">Cashier</option>
                 <option value="clinic">Clinic Officer</option>
+                <option value="faculty">Faculty</option>
                 <option value="superadmin">Super Administrator</option>
               </select>
             </div>
@@ -527,6 +543,12 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         });
     }
   });
+
+  function toggleFacultyAddFields(role) {
+    const isFac = (role === 'faculty');
+    document.getElementById('addFacultyEmpIdCol').classList.toggle('d-none', !isFac);
+    document.getElementById('addFacultyRankCol').classList.toggle('d-none', !isFac);
+  }
 </script>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>

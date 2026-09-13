@@ -185,14 +185,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         <div class="d-flex align-items-center gap-2">
           <i class="bi bi-layout-text-window-reverse fs-5"></i>
           <div>
-            <h5 class="modal-title fw-bold mb-0">Customize Landing Page Card</h5>
-            <small class="opacity-75" id="cardModalProgramSubtitle">Customize how this program is presented to prospective students</small>
+            <h5 class="modal-title fw-bold mb-0 text-white">Customize Landing Page Card</h5>
+            <small class="opacity-75 text-white" id="cardModalProgramSubtitle">Customize how this program is presented to prospective students</small>
           </div>
         </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <form action="college_program_process.php" method="POST">
+      <form action="/sia/admin/registrar/college_program_process.php" method="POST">
         <div class="modal-body p-4">
           <input type="hidden" name="action" value="update_landing_card">
           <?= getCsrfInput() ?>
@@ -204,28 +204,28 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
               <div class="mb-3">
                 <label class="form-label small fw-bold text-dark">Card Tagline / Overview</label>
                 <textarea name="description" id="cardDescriptionInput" class="form-control bg-light" rows="3" placeholder="Brief blurb describing this program on the landing page..."></textarea>
-                <div class="form-text">Shown directly beneath the program title.</div>
+                <div class="form-text">Shown directly beneath the program title on the landing page.</div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label small fw-bold text-dark">Program Icon</label>
                 <div class="input-group mb-2">
-                  <span class="input-group-text bg-light text-primary" id="iconAddonPreview"><i class="bi bi-mortarboard" id="iconPreviewEl"></i></span>
-                  <input type="text" name="icon" id="cardIconInput" class="form-control bg-light" placeholder="e.g. bi-pc-display, bi-laptop, bi-calculator">
+                  <span class="input-group-text bg-white text-primary border-end-0" id="iconAddonPreview"><i class="bi bi-laptop fs-5" id="iconPreviewEl"></i></span>
+                  <input type="text" name="icon" id="cardIconInput" class="form-control bg-light border-start-0" placeholder="e.g. bi-pc-display, bi-laptop, bi-calculator">
                 </div>
-                <div class="d-flex flex-wrap gap-1 mt-2" id="iconPickerList">
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-pc-display"><i class="bi bi-pc-display"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-laptop"><i class="bi bi-laptop"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-diagram-3"><i class="bi bi-diagram-3"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-cup-hot"><i class="bi bi-cup-hot"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-calculator-fill"><i class="bi bi-calculator-fill"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-bar-chart-line"><i class="bi bi-bar-chart-line"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-book-half"><i class="bi bi-book-half"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-heart-pulse"><i class="bi bi-heart-pulse"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-building"><i class="bi bi-building"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-tools"><i class="bi bi-tools"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-lightning-charge"><i class="bi bi-lightning-charge"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-mortarboard"><i class="bi bi-mortarboard"></i></button>
+                <div class="d-flex flex-wrap gap-1 mt-2" id="cardIconPickerList">
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-pc-display" title="PC Display"><i class="bi bi-pc-display"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-laptop" title="Laptop"><i class="bi bi-laptop"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-diagram-3" title="Architecture"><i class="bi bi-diagram-3"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-cup-hot" title="Hospitality"><i class="bi bi-cup-hot"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-calculator-fill" title="Accountancy"><i class="bi bi-calculator-fill"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-bar-chart-line" title="Business"><i class="bi bi-bar-chart-line"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-book-half" title="Education"><i class="bi bi-book-half"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-heart-pulse" title="Nursing"><i class="bi bi-heart-pulse"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-building" title="Civil Engineering"><i class="bi bi-building"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-tools" title="Engineering"><i class="bi bi-tools"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-lightning-charge" title="Electrical"><i class="bi bi-lightning-charge"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-mortarboard" title="Mortarboard"><i class="bi bi-mortarboard"></i></button>
                 </div>
               </div>
 
@@ -249,7 +249,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                 <div class="card program-card shadow-sm border-0 bg-white" style="border-radius: 16px;">
                   <div class="card-body p-4">
                     <div class="program-icon mb-3 d-inline-flex align-items-center justify-content-center text-primary bg-primary bg-opacity-10 rounded-3" style="width: 48px; height: 48px; font-size: 1.5rem;" id="previewCardIconWrap">
-                      <i class="bi bi-mortarboard" id="previewCardIcon"></i>
+                      <i class="bi bi-laptop" id="previewCardIcon"></i>
                     </div>
                     <h3 class="h5 fw-bold text-primary mb-2" id="previewCardCode">CODE</h3>
                     <p class="text-secondary small mb-3" id="previewCardDesc" style="min-height: 48px;">Program description blurb will appear here...</p>
@@ -273,34 +273,77 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
 <!-- Add Program Modal -->
 <div class="modal fade" id="addProgramModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold text-dark">Add New Program</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form action="college_program_process.php" method="POST">
-        <div class="modal-body">
-          <input type="hidden" name="action" value="create_program">
-          <?= getCsrfInput() ?>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Program Code (e.g. BSIT, BSCS)</label>
-            <input type="text" name="code" class="form-control bg-light" required pattern="[A-Za-z0-9\-]+" title="Alphanumeric and dashes only.">
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Full Program Name</label>
-            <input type="text" name="name" class="form-control bg-light" required placeholder="e.g. Bachelor of Science in Information Technology">
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Landing Card Overview / Tagline</label>
-            <textarea name="description" class="form-control bg-light" rows="2" placeholder="Brief overview for the landing page card..."></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Career Paths (Optional)</label>
-            <input type="text" name="careers" class="form-control bg-light" placeholder="e.g. Software Engineer, Systems Architect">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-primary text-white border-bottom-0 pb-3">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-plus-circle-fill fs-5"></i>
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-white">Add New Degree Program</h5>
+            <small class="opacity-75 text-white">Define a new College academic degree program and customize its landing page presence.</small>
           </div>
         </div>
-        <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/sia/admin/registrar/college_program_process.php" method="POST">
+        <div class="modal-body p-4">
+          <input type="hidden" name="action" value="create_program">
+          <?= getCsrfInput() ?>
+          
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-dark">Program Code <span class="text-danger">*</span></label>
+              <input type="text" name="code" class="form-control bg-light text-uppercase fw-bold" required pattern="[A-Za-z0-9\-]+" placeholder="e.g. BSCE" oninput="this.value = this.value.toUpperCase();">
+              <div class="form-text">Alphanumeric (e.g. BSIT, BSCS, BSHM).</div>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label small fw-bold text-dark">Full Program Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" class="form-control bg-light" required placeholder="e.g. Bachelor of Science in Civil Engineering">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-dark">Landing Card Overview / Tagline</label>
+            <textarea name="description" class="form-control bg-light" rows="2" placeholder="Brief overview for the landing page card..."></textarea>
+            <div class="form-text">Shown directly beneath the program title on the landing page.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-dark">Program Icon</label>
+            <div class="input-group mb-2">
+              <span class="input-group-text bg-white text-primary border-end-0" id="addIconAddonPreview"><i class="bi bi-laptop fs-5" id="addProgIconPreviewEl"></i></span>
+              <input type="text" name="icon" id="addProgramIconInput" class="form-control bg-light border-start-0" placeholder="e.g. bi-pc-display" value="bi-laptop">
+            </div>
+            <div class="d-flex flex-wrap gap-1 mt-2" id="addProgIconPickerList">
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-pc-display" title="PC Display"><i class="bi bi-pc-display"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-laptop" title="Laptop"><i class="bi bi-laptop"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-diagram-3" title="Architecture"><i class="bi bi-diagram-3"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-cup-hot" title="Hospitality"><i class="bi bi-cup-hot"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-calculator-fill" title="Accountancy"><i class="bi bi-calculator-fill"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-bar-chart-line" title="Business"><i class="bi bi-bar-chart-line"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-book-half" title="Education"><i class="bi bi-book-half"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-heart-pulse" title="Nursing"><i class="bi bi-heart-pulse"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-building" title="Civil Engineering"><i class="bi bi-building"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-tools" title="Engineering"><i class="bi bi-tools"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-lightning-charge" title="Electrical"><i class="bi bi-lightning-charge"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-mortarboard" title="Mortarboard"><i class="bi bi-mortarboard"></i></button>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Career Paths (Optional)</label>
+              <input type="text" name="careers" class="form-control bg-light" placeholder="e.g. Software Engineer, Systems Architect">
+              <div class="form-text">Comma-separated target career paths.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Custom Tuition Override (Optional)</label>
+              <input type="text" name="custom_tuition" class="form-control bg-light" placeholder="e.g. ₱25,000 - ₱30,000 / sem">
+              <div class="form-text">Leave blank to use fee template defaults.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top bg-light pt-3">
           <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Save Program</button>
         </div>
@@ -311,36 +354,44 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
 <!-- Edit Program Modal -->
 <div class="modal fade" id="editProgramModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold text-dark">Edit Program Information</h5>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-light border-bottom pb-3">
+        <h5 class="modal-title fw-bold text-dark mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Edit Program Information</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="college_program_process.php" method="POST">
-        <div class="modal-body">
+      <form action="/sia/admin/registrar/college_program_process.php" method="POST">
+        <div class="modal-body p-4">
           <input type="hidden" name="action" value="update_program">
           <?= getCsrfInput() ?>
           <input type="hidden" name="id" id="editProgramId">
           
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Program Code</label>
-            <input type="text" name="code" id="editProgramCode" class="form-control bg-light" required pattern="[A-Za-z0-9\-]+">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-dark">Program Code</label>
+              <input type="text" name="code" id="editProgramCode" class="form-control bg-light text-uppercase fw-bold" required pattern="[A-Za-z0-9\-]+" oninput="this.value = this.value.toUpperCase();">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label small fw-bold text-dark">Full Program Name</label>
+              <input type="text" name="name" id="editProgramName" class="form-control bg-light" required>
+            </div>
           </div>
           <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Full Program Name</label>
-            <input type="text" name="name" id="editProgramName" class="form-control bg-light" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Landing Card Overview / Tagline</label>
+            <label class="form-label small fw-bold text-dark">Landing Card Overview / Tagline</label>
             <textarea name="description" id="editProgramDesc" class="form-control bg-light" rows="2"></textarea>
           </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Career Paths</label>
-            <input type="text" name="careers" id="editProgramCareers" class="form-control bg-light">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Career Paths</label>
+              <input type="text" name="careers" id="editProgramCareers" class="form-control bg-light">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Custom Tuition Override</label>
+              <input type="text" name="custom_tuition" id="editProgramTuition" class="form-control bg-light">
+            </div>
           </div>
         </div>
-        <div class="modal-footer border-top-0 pt-0">
+        <div class="modal-footer border-top bg-light pt-3">
           <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Save Changes</button>
         </div>
@@ -349,93 +400,187 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
   </div>
 </div>
 
-<script src="/sia/public/vendor/jquery/jquery.min.js"></script>
 <script>
-  $(document).ready(function() {
-    // Edit Program Basic Modal
-    $('.edit-program-btn').on('click', function() {
-      $('#editProgramId').val($(this).data('id'));
-      $('#editProgramCode').val($(this).data('code'));
-      $('#editProgramName').val($(this).data('name'));
-      $('#editProgramDesc').val($(this).data('description'));
-      $('#editProgramCareers').val($(this).data('careers'));
-    });
-
-    // Edit Landing Card Modal & Real-time Live Preview
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- Edit Landing Card Modal Setup & Live Preview ---
+    const editCardModal = document.getElementById('editLandingCardModal');
     let currentCode = '';
     let currentName = '';
 
     function updatePreview() {
       const code = currentCode || 'CODE';
-      const desc = $('#cardDescriptionInput').val().trim() || currentName || 'Program description blurb will appear here...';
-      const icon = $('#cardIconInput').val().trim() || 'bi-mortarboard';
-      const careers = $('#cardCareersInput').val().trim() || 'Industry Specialist, Professional Practitioner';
-      const tuition = $('#cardTuitionInput').val().trim() || '₱25,000 - ₱30,000 / sem';
+      const descInput = document.getElementById('cardDescriptionInput');
+      const iconInput = document.getElementById('cardIconInput');
+      const careersInput = document.getElementById('cardCareersInput');
+      const tuitionInput = document.getElementById('cardTuitionInput');
 
-      $('#previewCardCode').text(code);
-      $('#previewCardDesc').text(desc);
-      $('#previewCardCareers').text(careers);
-      $('#previewCardTuition').text(tuition);
+      const desc = (descInput ? descInput.value.trim() : '') || currentName || 'Program description blurb will appear here...';
+      const icon = (iconInput ? iconInput.value.trim() : '') || 'bi-laptop';
+      const careers = (careersInput ? careersInput.value.trim() : '') || 'Industry Specialist, Professional Practitioner';
+      const tuition = (tuitionInput ? tuitionInput.value.trim() : '') || '₱25,000 - ₱30,000 / sem';
 
-      $('#iconPreviewEl').attr('class', 'bi ' + icon);
-      $('#previewCardIcon').attr('class', 'bi ' + icon);
+      const previewCode = document.getElementById('previewCardCode');
+      const previewDesc = document.getElementById('previewCardDesc');
+      const previewCareers = document.getElementById('previewCardCareers');
+      const previewTuition = document.getElementById('previewCardTuition');
+      const iconPreviewEl = document.getElementById('iconPreviewEl');
+      const previewCardIcon = document.getElementById('previewCardIcon');
+
+      if (previewCode) previewCode.textContent = code;
+      if (previewDesc) previewDesc.textContent = desc;
+      if (previewCareers) previewCareers.textContent = careers;
+      if (previewTuition) previewTuition.textContent = tuition;
+
+      if (iconPreviewEl) iconPreviewEl.className = 'bi ' + icon + ' fs-5';
+      if (previewCardIcon) previewCardIcon.className = 'bi ' + icon;
+
+      // Update active chip highlight
+      document.querySelectorAll('#cardIconPickerList .icon-chip').forEach(chip => {
+        if (chip.getAttribute('data-icon') === icon) {
+          chip.classList.remove('btn-outline-secondary');
+          chip.classList.add('btn-primary', 'text-white');
+        } else {
+          chip.classList.remove('btn-primary', 'text-white');
+          chip.classList.add('btn-outline-secondary');
+        }
+      });
     }
 
-    $('.edit-card-btn').on('click', function() {
-      const id = $(this).data('id');
-      currentCode = $(this).data('code');
-      currentName = $(this).data('name');
-      const desc = $(this).data('description') || '';
-      const icon = $(this).data('icon') || '';
-      const careers = $(this).data('careers') || '';
-      const tuition = $(this).data('custom-tuition') || '';
+    if (editCardModal) {
+      editCardModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        if (!button) return;
 
-      $('#cardProgramId').val(id);
-      $('#cardModalProgramSubtitle').text(currentCode + ' - ' + currentName);
-      $('#cardDescriptionInput').val(desc);
-      $('#cardIconInput').val(icon);
-      $('#cardCareersInput').val(careers);
-      $('#cardTuitionInput').val(tuition);
+        const id = button.getAttribute('data-id') || '';
+        currentCode = (button.getAttribute('data-code') || '').toUpperCase();
+        currentName = button.getAttribute('data-name') || '';
+        const desc = button.getAttribute('data-description') || '';
+        const icon = button.getAttribute('data-icon') || 'bi-laptop';
+        const careers = button.getAttribute('data-careers') || '';
+        const tuition = button.getAttribute('data-custom-tuition') || '';
 
-      updatePreview();
+        const cardIdEl = document.getElementById('cardProgramId');
+        const subtitleEl = document.getElementById('cardModalProgramSubtitle');
+        const descInput = document.getElementById('cardDescriptionInput');
+        const iconInput = document.getElementById('cardIconInput');
+        const careersInput = document.getElementById('cardCareersInput');
+        const tuitionInput = document.getElementById('cardTuitionInput');
+
+        if (cardIdEl) cardIdEl.value = id;
+        if (subtitleEl) subtitleEl.textContent = currentCode + ' - ' + currentName;
+        if (descInput) descInput.value = desc;
+        if (iconInput) iconInput.value = icon;
+        if (careersInput) careersInput.value = careers;
+        if (tuitionInput) tuitionInput.value = tuition;
+
+        updatePreview();
+      });
+    }
+
+    ['cardDescriptionInput', 'cardIconInput', 'cardCareersInput', 'cardTuitionInput'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', updatePreview);
+      }
     });
 
-    $('#cardDescriptionInput, #cardIconInput, #cardCareersInput, #cardTuitionInput').on('input', updatePreview);
-
-    // Icon chip selection
-    $('.icon-chip').on('click', function() {
-      const icon = $(this).data('icon');
-      $('#cardIconInput').val(icon);
-      updatePreview();
+    // Icon chip selection for Edit Card Modal
+    document.addEventListener('click', function(e) {
+      const chip = e.target.closest('#cardIconPickerList .icon-chip');
+      if (chip) {
+        const icon = chip.getAttribute('data-icon');
+        const iconInput = document.getElementById('cardIconInput');
+        if (iconInput) {
+          iconInput.value = icon;
+          updatePreview();
+        }
+      }
     });
 
-    // Table Search filter
-    const searchInput = document.getElementById('tableSearch');
-    if(searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            const filter = this.value.toLowerCase();
-            const rows = document.querySelectorAll('.custom-table tbody tr');
-            let visibleCount = 0;
-            let hasDataRows = false;
-            
-            rows.forEach(row => {
-                if(row.id === 'noResultsRow' || row.querySelector('td[colspan]')) return;
-                hasDataRows = true;
-                
-                const text = row.textContent.toLowerCase();
-                if (text.includes(filter)) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            
-            const noResultsRow = document.getElementById('noResultsRow');
-            if (noResultsRow) {
-                noResultsRow.style.display = (visibleCount === 0 && hasDataRows) ? '' : 'none';
-            }
+    // --- Add Program Modal Icon Picker ---
+    document.addEventListener('click', function(e) {
+      const chip = e.target.closest('#addProgIconPickerList .add-icon-chip');
+      if (chip) {
+        const icon = chip.getAttribute('data-icon');
+        const iconInput = document.getElementById('addProgramIconInput');
+        const previewEl = document.getElementById('addProgIconPreviewEl');
+        if (iconInput) {
+          iconInput.value = icon;
+        }
+        if (previewEl) {
+          previewEl.className = 'bi ' + icon + ' fs-5';
+        }
+        document.querySelectorAll('#addProgIconPickerList .add-icon-chip').forEach(c => {
+          if (c.getAttribute('data-icon') === icon) {
+            c.classList.remove('btn-outline-secondary');
+            c.classList.add('btn-primary', 'text-white');
+          } else {
+            c.classList.remove('btn-primary', 'text-white');
+            c.classList.add('btn-outline-secondary');
+          }
         });
+      }
+    });
+
+    const addIconInput = document.getElementById('addProgramIconInput');
+    if (addIconInput) {
+      addIconInput.addEventListener('input', function() {
+        const icon = this.value.trim() || 'bi-laptop';
+        const previewEl = document.getElementById('addProgIconPreviewEl');
+        if (previewEl) previewEl.className = 'bi ' + icon + ' fs-5';
+      });
+    }
+
+    // --- Edit Program Basic Modal ---
+    const editProgramModal = document.getElementById('editProgramModal');
+    if (editProgramModal) {
+      editProgramModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        if (!button) return;
+
+        const idEl = document.getElementById('editProgramId');
+        const codeEl = document.getElementById('editProgramCode');
+        const nameEl = document.getElementById('editProgramName');
+        const descEl = document.getElementById('editProgramDesc');
+        const careersEl = document.getElementById('editProgramCareers');
+        const tuitionEl = document.getElementById('editProgramTuition');
+
+        if (idEl) idEl.value = button.getAttribute('data-id') || '';
+        if (codeEl) codeEl.value = button.getAttribute('data-code') || '';
+        if (nameEl) nameEl.value = button.getAttribute('data-name') || '';
+        if (descEl) descEl.value = button.getAttribute('data-description') || '';
+        if (careersEl) careersEl.value = button.getAttribute('data-careers') || '';
+        if (tuitionEl) tuitionEl.value = button.getAttribute('data-custom-tuition') || '';
+      });
+    }
+
+    // --- Table Search Filter ---
+    const searchInput = document.getElementById('tableSearch');
+    if (searchInput) {
+      searchInput.addEventListener('keyup', function() {
+        const filter = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.custom-table tbody tr');
+        let visibleCount = 0;
+        let hasDataRows = false;
+        
+        rows.forEach(row => {
+          if (row.id === 'noResultsRow' || row.querySelector('td[colspan]')) return;
+          hasDataRows = true;
+          
+          const text = row.textContent.toLowerCase();
+          if (text.includes(filter)) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        const noResultsRow = document.getElementById('noResultsRow');
+        if (noResultsRow) {
+          noResultsRow.style.display = (visibleCount === 0 && hasDataRows) ? '' : 'none';
+        }
+      });
     }
   });
 </script>

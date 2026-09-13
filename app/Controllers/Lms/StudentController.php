@@ -101,11 +101,28 @@ class StudentController extends BaseController
 
     public function myCourses(Request $request, Response $response)
     {
+        $pdo = Database::getConnection();
         $lmsService = new \App\Services\LmsService();
-        $userId = $_SESSION['user_id'] ?? 0;
+        $userId = (int)($_SESSION['user_id'] ?? 0);
 
         $enrolled_courses = $lmsService->getStudentCourses($userId);
         
+        // Fetch active academic profile details
+        $stmtApp = $pdo->prepare("
+            SELECT a.academic_level, a.grade_level, a.school_year, a.semester, a.student_type, a.strand,
+                   COALESCE(cs.section_code, ss.section_code) as section_code
+            FROM applications a
+            LEFT JOIN college_sections cs ON a.section_id = cs.id AND (a.academic_level = 'College' OR a.academic_level IS NULL)
+            LEFT JOIN shs_sections ss ON a.section_id = ss.id AND (a.academic_level = 'SHS' OR a.academic_level = 'Senior High School')
+            WHERE a.user_id = :uid AND a.status IN ('enrolled', 'approved')
+            ORDER BY a.id DESC LIMIT 1
+        ");
+        $stmtApp->execute(['uid' => $userId]);
+        $student_meta = $stmtApp->fetch(PDO::FETCH_ASSOC) ?: [];
+
+        $total_units = array_sum(array_column($enrolled_courses, 'units'));
+        $total_courses = count($enrolled_courses);
+
         $pageTitle = 'My Courses - TTU LMS';
 
         return $this->render('lms/student/my_courses', get_defined_vars());

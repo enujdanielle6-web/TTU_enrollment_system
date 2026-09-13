@@ -1,6 +1,6 @@
 # Database Data Dictionary
 
-This document serves as the authoritative, verified technical data dictionary for all **45 database tables and views** in the TTU database (`sia`).
+This document serves as the authoritative, verified technical data dictionary for all **47 database tables and views** in the TTU database (`sia`).
 
 ---
 
@@ -14,7 +14,8 @@ Central identity repository for all institutional accounts.
 * `email` (VARCHAR(255), UNIQUE, NOT NULL): Primary login and verification email.
 * `ttu_email` (VARCHAR(255), NULL): Institutional university email (`first.last@ttu.edu.ph`).
 * `password` (VARCHAR(255), NOT NULL): Bcrypt password hash.
-* `student_number` (VARCHAR(50), UNIQUE, NULL): Official Student ID (`YYYY-XXXXXX`) or Faculty Employee ID.
+* `student_number` (VARCHAR(50), UNIQUE, NULL): Official Student ID (`YYYY-XXXXXX`).
+* `employee_id` (VARCHAR(50), UNIQUE, NULL): Faculty / Staff Employee ID (`EMP-XXXX`).
 * `role` (ENUM('superadmin','admin','admissions','scholarship','cashier','clinic','faculty','scheduler','applicant','student'), NOT NULL, DEFAULT 'applicant')
 * `department` (VARCHAR(100), NULL, DEFAULT 'None'): Department assignment.
 * `permissions` (LONGTEXT / JSON, NULL): Granular permissions array.
@@ -25,6 +26,7 @@ Central identity repository for all institutional accounts.
 * `reset_token` (VARCHAR(255), NULL): 6-digit password reset OTP.
 * `reset_token_expires_at` (DATETIME, NULL): Password reset token expiry.
 * `force_password_reset` (TINYINT(1), NOT NULL, DEFAULT 0): Forces student password change on initial login.
+* `lms_status` (ENUM('active','inactive','suspended'), NOT NULL, DEFAULT 'active'): LMS portal access flag.
 * `is_active` (TINYINT(1), NOT NULL, DEFAULT 1): Account activation state.
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
@@ -39,6 +41,7 @@ Immutable institutional audit trail capturing critical mutations.
 * `description` (TEXT, NULL): Detailed description or comment.
 * `old_value` (LONGTEXT / JSON, NULL): Snapshot before change.
 * `new_value` (LONGTEXT / JSON, NULL): Snapshot after change.
+* `reason` (TEXT, NULL): Operational justification or admin reason for mutation.
 * `created_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
 ### `login_attempts`
@@ -67,8 +70,9 @@ Institutional broadcast notices.
 
 ### `student_number_sequences`
 Atomic sequence counter for concurrency-safe sequential student number allocation (`YYYY-XXXXXX`).
-* `year` (INT(11), PK): Academic enrollment year (e.g., `2026`).
-* `current_sequence` (INT(11), NOT NULL, DEFAULT 0): Incrementing sequence counter protected by `FOR UPDATE` row-level locks in `StudentNumberService`.
+* `id` (INT(10) UNSIGNED, PK, AUTO_INC)
+* `sequence_year` (INT(10) UNSIGNED, UNIQUE, NOT NULL): Academic or calendar year (e.g., `2026`).
+* `current_value` (INT(10) UNSIGNED, NOT NULL, DEFAULT 0): Incrementing sequence counter incremented atomically via `INSERT ... ON DUPLICATE KEY UPDATE current_value = current_value + 1` in `StudentNumberService`.
 * `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
 
 ---
@@ -89,11 +93,13 @@ Primary application and enrollment term record.
 * `nstp` (VARCHAR(50), NULL): CWTS, ROTC, LTS.
 * `section_id` (INT(10) UNSIGNED, NULL): Assigned section ID.
 * `college_curriculum_id` (INT(10) UNSIGNED, NULL, FK $\rightarrow$ `college_curricula.id`)
-* `status` (ENUM('pending','under_review','correction_required','approved','rejected','enrolled'), NOT NULL, DEFAULT 'pending')
+* `status` (ENUM('pending','under_review','correction_required','approved','payment_verified','rejected','enrolled'), NOT NULL, DEFAULT 'pending')
 * `document_submission_method` (ENUM('online','on_campus'), NOT NULL, DEFAULT 'online')
 * `admin_feedback` (TEXT, NULL): Feedback sent to applicant for corrections.
 * `internal_notes` (TEXT, NULL): Confidential notes for admissions staff.
-* Demographic & Contact Fields: `contact_number`, `telephone_number`, `birth_date`, `gender`, `civil_status`, `nationality`, `religion`, `place_of_birth`, address fields (`address_house_number`, `address_street`, `address_barangay`, `address_city`, `address_province`, `address_zip`, `address`), parent/guardian fields, previous education fields, `lrn` (12-digit LRN), emergency contact fields.
+* Demographic & Contact Fields: `contact_number`, `telephone_number`, `birth_date`, `gender`, `civil_status`, `nationality`, `religion`, `place_of_birth`, `address_house_number`, `address_street`, `address_barangay`, `address_city`, `address_province`, `address_zip`, `address`.
+* Guardian & Family Fields: `guardian_name`, `guardian_relationship`, `guardian_contact`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_number`.
+* Educational History & State ID: `lrn` (12-digit DepEd LRN), `previous_school`, `previous_school_year`, `previous_school_type` (Public/Private).
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
 ### `application_documents`
@@ -143,11 +149,14 @@ Master catalog of all teachable courses.
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
 ### `college_programs`
-Undergraduate degree programs.
+Undergraduate degree programs and public catalog cards.
 * `id` (INT(10) UNSIGNED, PK, AUTO_INC)
 * `code` (VARCHAR(50), UNIQUE, NOT NULL): E.g., `bscs`, `bsit`, `bshm`.
 * `name` (VARCHAR(255), NOT NULL)
 * `description` (TEXT, NULL)
+* `icon` (VARCHAR(50), NOT NULL, DEFAULT 'bi-book'): Bootstrap icon identifier for public landing page cards.
+* `careers` (TEXT, NULL): Comma-separated career outcomes displayed on program cards.
+* `custom_tuition` (VARCHAR(100), NULL): Custom tuition display override string.
 * `is_active` (TINYINT(1), NOT NULL, DEFAULT 1)
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
@@ -192,12 +201,14 @@ Scheduled subject offerings per college section.
 * `id` (INT(10) UNSIGNED, PK, AUTO_INC)
 * `college_section_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `college_sections.id`, ON DELETE CASCADE)
 * `subject_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `subjects.id`, ON DELETE CASCADE)
+* `faculty_user_id` (INT(10) UNSIGNED, NULL, FK $\rightarrow$ `users.id`, ON DELETE SET NULL)
 * `capacity` (INT(11), NOT NULL, DEFAULT 40)
 * `day` (VARCHAR(20), NOT NULL, DEFAULT 'TBA')
 * `start_time` (TIME, NOT NULL, DEFAULT '00:00:00')
 * `end_time` (TIME, NOT NULL, DEFAULT '00:00:00')
 * `room` (VARCHAR(50), NULL)
 * `instructor` (VARCHAR(150), NULL)
+* `delivery_mode` (VARCHAR(50), NOT NULL, DEFAULT 'Face to Face'): `Face to Face`, `Online Synchronous`, `Blended`, `Asynchronous`.
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
 ### `college_enrollments`
@@ -209,13 +220,43 @@ Official subject enrollment bridge for College students.
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
 ### Parallel Senior High School (SHS) Tables
-- **`shs_strands`**: `id`, `code` (UNIQUE), `name`, `description`, `is_active`, `created_at`, `updated_at`.
+- **`shs_strands`**: Senior High School academic strands and landing cards. `id`, `code` (UNIQUE), `name`, `description`, `icon` (VARCHAR(50), DEFAULT 'bi-mortarboard'), `careers` (TEXT), `custom_tuition` (VARCHAR(100)), `is_active`, `created_at`, `updated_at`.
 - **`shs_curricula`**: `id`, `strand_id` (FK $\rightarrow$ `shs_strands.id`), `curriculum_name`, `version`, `effective_academic_year`, `description`, `status` (`active`,`inactive`,`draft`), `created_at`, `updated_at`.
 - **`shs_curriculum_subjects`**: `id`, `curriculum_id` (FK $\rightarrow$ `shs_curricula.id`), `subject_id` (FK $\rightarrow$ `subjects.id`), `grade_level` (`Grade 11`,`Grade 12`), `semester` (`First`,`Second`), `created_at`, `updated_at`.
 - **`shs_sections`**: `id`, `section_code` (UNIQUE), `strand_id` (FK $\rightarrow$ `shs_strands.id`), `curriculum_id` (FK $\rightarrow$ `shs_curricula.id`), `grade_level`, `academic_year`, `capacity`, `schedule_type`, `adviser`, `status`, `created_at`, `updated_at`.
-- **`shs_section_subjects`**: `id`, `shs_section_id` (FK $\rightarrow$ `shs_sections.id`), `subject_id` (FK $\rightarrow$ `subjects.id`), `capacity`, `day`, `start_time`, `end_time`, `room`, `instructor`, `created_at`, `updated_at`.
+- **`shs_section_subjects`**: `id`, `shs_section_id` (FK $\rightarrow$ `shs_sections.id`), `subject_id` (FK $\rightarrow$ `subjects.id`), `faculty_user_id` (FK $\rightarrow$ `users.id`), `capacity`, `day`, `start_time`, `end_time`, `room`, `instructor`, `delivery_mode` (DEFAULT 'Face to Face'), `created_at`, `updated_at`.
 - **`shs_enrollments`**: `id`, `application_id` (FK $\rightarrow$ `applications.id`), `subject_id` (FK $\rightarrow$ `subjects.id`), `shs_section_id` (FK $\rightarrow$ `shs_sections.id`), `created_at`, `updated_at`.
 - **`student_academic_records_view`**: Database View synthesizing student enrollment details, total units, section codes, and academic levels for reporting.
+
+### Faculty & Timetable Management Tables
+- **`faculty_profiles`**: Academic rank, employment type, and workload caps.
+  * `id` (INT(10) UNSIGNED, PK, AUTO_INC)
+  * `user_id` (INT(10) UNSIGNED, UNIQUE, NOT NULL, FK $\rightarrow$ `users.id`)
+  * `employee_id` (VARCHAR(50), UNIQUE, NOT NULL): Official Faculty ID.
+  * `program_id` (INT(10) UNSIGNED, NULL, FK $\rightarrow$ `college_programs.id`, ON DELETE SET NULL)
+  * `academic_rank` (VARCHAR(100), NOT NULL, DEFAULT 'Instructor I')
+  * `employment_type` (ENUM('full_time','part_time','adjunct'), NOT NULL, DEFAULT 'full_time')
+  * `max_teaching_units` (DECIMAL(4,2), NOT NULL, DEFAULT 18.00)
+  * `specializations` (TEXT, NULL)
+  * `status` (ENUM('active','on_leave','inactive'), NOT NULL, DEFAULT 'active')
+  * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+- **`faculty_availability`**: Weekly availability schedule windows for conflict-free timetable matrix generation.
+  * `id` (INT(10) UNSIGNED, PK, AUTO_INC)
+  * `faculty_user_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `users.id`, ON DELETE CASCADE)
+  * `day_of_week` (ENUM('Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'), NOT NULL)
+  * `start_time` (TIME, NOT NULL, DEFAULT '07:00:00')
+  * `end_time` (TIME, NOT NULL, DEFAULT '19:00:00')
+  * `is_available` (TINYINT(1), NOT NULL, DEFAULT 1)
+  * `created_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+  * UNIQUE KEY: (`faculty_user_id`, `day_of_week`, `start_time`, `end_time`)
+- **`faculty_specializations`**: Subject qualifications mapping faculty competence to curriculum subjects.
+  * `id` (INT(10) UNSIGNED, PK, AUTO_INC)
+  * `faculty_user_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `users.id`, ON DELETE CASCADE)
+  * `subject_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `subjects.id`, ON DELETE CASCADE)
+  * `competency_level` (ENUM('Primary','Secondary','Qualified'), NOT NULL, DEFAULT 'Primary')
+  * `years_experience` (INT(10) UNSIGNED, DEFAULT 1)
+  * `created_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+  * UNIQUE KEY: (`faculty_user_id`, `subject_id`)
 
 ---
 
@@ -257,11 +298,12 @@ Finalized financial billing ledger per application term.
 Frozen itemized line items snapshot for student assessments (protects historical records from fee schedule changes).
 * `id` (INT(10) UNSIGNED, PK, AUTO_INC)
 * `assessment_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `student_assessments.id`, ON DELETE CASCADE)
-* `item_name` (VARCHAR(150), NOT NULL): E.g., `Tuition (18 Units @ ₱250.00)`, `Computer Lab Fee`, `Registration Fee`.
-* `item_type` (ENUM('tuition','miscellaneous','laboratory','registration','other'), NOT NULL, DEFAULT 'other')
-* `unit_rate` (DECIMAL(10,2), NOT NULL, DEFAULT 0.00)
-* `units` (INT(11), NOT NULL, DEFAULT 1)
-* `total_amount` (DECIMAL(10,2), NOT NULL, DEFAULT 0.00)
+* `item_type` (ENUM('tuition','miscellaneous','laboratory','registration','other','discount'), NOT NULL)
+* `item_code` (VARCHAR(50), NULL): E.g., `CS101`, `MISC-REG`, `LAB-FEE`, `SCHOLARSHIP`.
+* `item_name` (VARCHAR(150), NOT NULL): E.g., `Tuition (18.00 Units @ ₱500.00)`, `Computer Lab Fee`, `Registration Fee`.
+* `units` (DECIMAL(4,2), NOT NULL, DEFAULT 0.00)
+* `rate_per_unit` (DECIMAL(10,2), NOT NULL, DEFAULT 0.00)
+* `amount` (DECIMAL(10,2), NOT NULL): Net line-item charge or negative discount value.
 * `created_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
 ### `payment_records`
@@ -273,7 +315,7 @@ Transaction records for over-the-counter payments and online bank proofs.
 * `amount` (DECIMAL(10,2), NOT NULL)
 * `payment_date` (DATE, NOT NULL)
 * `payment_method` (VARCHAR(50), NOT NULL): `Cash`, `GCash`, `Bank Transfer`.
-* `receipt_number` (VARCHAR(50), NULL): Guaranteed unique official receipt ID (`OR-YYYY-XXXXXX`).
+* `receipt_number` (VARCHAR(50), NULL): Guaranteed unique official receipt ID (`REC-YYYYMMDD-XXXX`).
 * `reference_number` (VARCHAR(100), NULL): Bank reference number.
 * `proof_image` (VARCHAR(255), NULL): Uploaded receipt proof image.
 * `status` (ENUM('pending','verified','rejected'), NOT NULL, DEFAULT 'pending')
@@ -281,9 +323,10 @@ Transaction records for over-the-counter payments and online bank proofs.
 * `created_at` / `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
 
 ### `receipt_sequences`
-Atomic counter sequence for concurrency-safe official receipt number generation (`OR-YYYY-XXXXXX`).
-* `receipt_year` (INT(11), PK): Calendar year (e.g., `2026`).
-* `current_sequence` (INT(11), NOT NULL, DEFAULT 0): Incrementing sequence counter protected by `FOR UPDATE` row-level locks.
+Atomic counter sequence for concurrency-safe official receipt number generation (`REC-YYYYMMDD-XXXX`).
+* `id` (INT(10) UNSIGNED, PK, AUTO_INC)
+* `sequence_year` (INT(10) UNSIGNED, UNIQUE, NOT NULL): Calendar year (e.g., `2026`).
+* `current_value` (INT(10) UNSIGNED, NOT NULL, DEFAULT 0): Incrementing sequence counter incremented atomically via `generateAtomicReceiptNumber()` in `app/Helpers/functions.php`.
 * `updated_at` (TIMESTAMP, NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP)
 
 ### `scholarships`

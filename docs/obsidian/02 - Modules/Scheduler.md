@@ -11,9 +11,10 @@ The Scheduler module translates curriculum subjects into timetabled, scheduled c
 ## 1. Core Responsibilities
 1. **Section Creation:** Creates structured class blocks in `college_sections` and `shs_sections` (e.g. `BSIT 1-A`, `STEM 11-1`).
 2. **Subject Scheduling & Matrix:** Attaches curriculum subjects to sections via `college_section_subjects` and `shs_section_subjects` with designated days (`Monday`..`Saturday`), start/end times, rooms, instructors, and delivery modes.
-3. **Delivery Mode Governance:** Supports `Face-to-Face` and `Online` instruction designations stored directly in `delivery_mode` on section subject rows.
-4. **Faculty & Room Conflict Detection:** Prevents double-booking by verifying room and instructor availability across all active section timetables.
-5. **Capacity Controls:** Sets maximum enrollment limits per section to prevent classroom overcrowding.
+3. **Delivery Mode Governance:** Supports `Face to Face`, `Online Synchronous`, `Blended`, and `Asynchronous` instruction designations stored directly in `delivery_mode` on section subject rows.
+4. **Faculty & Room Conflict Detection:** Prevents double-booking by verifying room and instructor availability across all active section timetables and weekly availability windows.
+5. **Faculty Teaching Profiles & Workload:** Governs instructor assignments, maximum teaching unit caps (`max_teaching_units`), and subject competency tiers via `faculty_profiles` and `faculty_specializations`.
+6. **Capacity Controls:** Sets maximum enrollment limits per section to prevent classroom overcrowding.
 
 ---
 
@@ -37,9 +38,26 @@ The Schedule Builder (`schedule_builder.php`) provides an interactive calendar g
 - **SPA Scope Isolation:** JavaScript variables and functions are encapsulated inside an Immediately Invoked Function Expression (IIFE) and globally exported to `window` to prevent variable collision syntax errors during SPA AJAX transitions. Full navigation links (`data-spa="false"`) are used for heavy canvas operations.
 
 ---
+
+## 4. Faculty Workload & Timetable Governance
+
+The scheduling engine interacts with three core faculty tables:
+1. **`faculty_profiles`**: Tracks instructor employment status (`full_time`, `part_time`, `adjunct`), academic rank, and unit thresholds (`max_teaching_units`, typically 18.00–24.00 units).
+2. **`faculty_availability`**: Enforces allowable day/time blocks per instructor (`is_available = 1`). Schedules placed outside an instructor's availability window trigger conflict warnings.
+3. **`faculty_specializations`**: Maps instructor qualification levels (`Primary`, `Secondary`, `Qualified`) to specific subjects from the catalog, preventing unaccredited course assignments.
+
+### Conflict Detection Matrix
+The controller executes three validations before persisting a timetable block:
+$$\text{Overlap Condition} = (\text{Slot Start} < \text{Existing End}) \land (\text{Slot End} > \text{Existing Start}) \land (\text{Day} = \text{Existing Day})$$
+- **Room Conflict:** Flags any overlapping section subjects assigned to the same `room`.
+- **Faculty Conflict:** Flags overlapping timetable slots assigned to the same `faculty_user_id`.
+- **Capacity Fit:** Alerts if section enrollment exceeds physical classroom capacity.
+
+---
 **Related:**
 - [[Registrar]]
 - [[Curriculum Architecture]]
 - [[Subject Catalog Immutability Architecture]]
-- [[LMS]]
+- [[Data Dictionary]]
 - [[ADR-003 Hybrid SPA Navigation Design]]
+

@@ -159,7 +159,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             throw new Exception('Invalid email format.');
         }
 
-        if (!in_array($role, ['applicant', 'superadmin', 'admissions', 'scholarship', 'cashier'])) {
+        if (!in_array($role, ['applicant', 'superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'faculty', 'scheduler'])) {
             throw new Exception('Invalid role specified.');
         }
 
@@ -172,9 +172,14 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
+        $employeeId = ($role === 'faculty') 
+            ? (!empty($_POST['employee_id']) ? trim($_POST['employee_id']) : 'EMP-' . date('Y') . '-' . rand(1000, 9999))
+            : null;
+        $lmsStatus = ($role === 'faculty') ? 'active' : 'inactive';
+
         $insertStmt = $pdo->prepare('
-            INSERT INTO users (first_name, last_name, email, password, role, department, permissions) 
-            VALUES (:first, :last, :email, :pass, :role, :dept, :perms)
+            INSERT INTO users (first_name, last_name, email, password, role, employee_id, department, permissions, lms_status) 
+            VALUES (:first, :last, :email, :pass, :role, :emp_id, :dept, :perms, :lms_status)
         ');
         $insertStmt->execute([
             'first' => $firstName,
@@ -182,11 +187,28 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             'email' => $email,
             'pass' => $hashedPassword,
             'role' => $role,
+            'emp_id' => $employeeId,
             'dept' => $department,
-            'perms' => $permissions
+            'perms' => $permissions,
+            'lms_status' => $lmsStatus
         ]);
 
-        $newUserId = $pdo->lastInsertId();
+        $newUserId = (int)$pdo->lastInsertId();
+
+        if ($role === 'faculty') {
+            $profStmt = $pdo->prepare("
+                INSERT INTO faculty_profiles (user_id, employee_id, academic_rank, employment_type, max_teaching_units, status)
+                VALUES (?, ?, ?, ?, ?, 'active')
+                ON DUPLICATE KEY UPDATE employee_id = VALUES(employee_id)
+            ");
+            $profStmt->execute([
+                $newUserId,
+                $employeeId,
+                trim($_POST['academic_rank'] ?? 'Instructor I'),
+                trim($_POST['employment_type'] ?? 'full_time'),
+                !empty($_POST['max_teaching_units']) ? (float)$_POST['max_teaching_units'] : 18.00
+            ]);
+        }
 
         // Audit Log
         logActivity(
@@ -196,7 +218,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             "Created a new $role account for $email (ID: $newUserId).",
             "User #$newUserId",
             null,
-            ['first_name' => $firstName, 'last_name' => $lastName, 'email' => $email, 'role' => $role, 'department' => $department, 'permissions' => $permissions]
+            ['first_name' => $firstName, 'last_name' => $lastName, 'email' => $email, 'role' => $role, 'employee_id' => $employeeId, 'department' => $department, 'permissions' => $permissions]
         );
 
         $_SESSION['success_msg'] = 'User account created successfully.';

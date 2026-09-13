@@ -7,6 +7,8 @@ use App\Core\Response;
 use App\Core\Database;
 use PDO;
 use PDOException;
+use Exception;
+use Throwable;
 
 class CollegeController extends BaseController
 {
@@ -160,7 +162,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
 try {
     if ($action === 'create_program') {
-        $code = strtolower(trim($_POST['code'] ?? ''));
+        $code = strtoupper(trim($_POST['code'] ?? ''));
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $icon = trim($_POST['icon'] ?? '');
@@ -181,19 +183,20 @@ try {
         $insertStmt = $pdo->prepare('INSERT INTO college_programs (code, name, description, icon, careers, custom_tuition, is_active) VALUES (:code, :name, :description, :icon, :careers, :custom_tuition, 1)');
         $insertStmt->execute([
             'code' => $code, 
-            'name' => $name,
+            'name' => $name, 
             'description' => $description !== '' ? $description : null,
-            'icon' => $icon !== '' ? $icon : null,
+            'icon' => $icon !== '' ? $icon : 'bi-laptop',
             'careers' => $careers !== '' ? $careers : null,
             'custom_tuition' => $customTuition !== '' ? $customTuition : null
         ]);
 
-        logActivity((int)$_SESSION['user_id'], 'bi-mortarboard', 'College Program Added', "Added college program: " . strtoupper($code));
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        logActivity($userId, 'bi-mortarboard', 'College Program Added', "Added college program: " . $code);
         $_SESSION['success_msg'] = 'Program created successfully.';
     } 
     elseif ($action === 'update_program' || $action === 'update_landing_card') {
         $id = (int)($_POST['id'] ?? 0);
-        $code = strtolower(trim($_POST['code'] ?? ''));
+        $code = strtoupper(trim($_POST['code'] ?? ''));
         $name = trim($_POST['name'] ?? '');
         $description = trim($_POST['description'] ?? '');
         $icon = trim($_POST['icon'] ?? '');
@@ -204,9 +207,30 @@ try {
             throw new Exception('Missing required information to update program.');
         }
 
+        // Verify program exists
+        $checkStmt = $pdo->prepare('SELECT id, code, name, description, icon, careers, custom_tuition FROM college_programs WHERE id = :id');
+        $checkStmt->execute(['id' => $id]);
+        $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+        if (!$existing) {
+            throw new Exception('Program not found.');
+        }
+
+        if ($action === 'update_program') {
+            if (!isset($_POST['icon']) || $icon === '') {
+                $icon = !empty($existing['icon']) ? $existing['icon'] : 'bi-laptop';
+            }
+            if (!isset($_POST['custom_tuition'])) {
+                $customTuition = $existing['custom_tuition'] ?? '';
+            }
+        } else {
+            if ($icon === '') {
+                $icon = !empty($existing['icon']) ? $existing['icon'] : 'bi-laptop';
+            }
+        }
+
         if ($code !== '' && $name !== '') {
             // Check duplicate code
-            $stmt = $pdo->prepare('SELECT id FROM college_programs WHERE code = :code AND id != :id');
+            $stmt = $pdo->prepare('SELECT id FROM college_programs WHERE UPPER(code) = UPPER(:code) AND id != :id');
             $stmt->execute(['code' => $code, 'id' => $id]);
             if ($stmt->fetch()) {
                 throw new Exception("The code '{$code}' is already used by another program.");
@@ -217,7 +241,7 @@ try {
                 'code' => $code, 
                 'name' => $name, 
                 'description' => $description !== '' ? $description : null,
-                'icon' => $icon !== '' ? $icon : null,
+                'icon' => $icon,
                 'careers' => $careers !== '' ? $careers : null,
                 'custom_tuition' => $customTuition !== '' ? $customTuition : null,
                 'id' => $id
@@ -226,14 +250,15 @@ try {
             $updateStmt = $pdo->prepare('UPDATE college_programs SET description = :description, icon = :icon, careers = :careers, custom_tuition = :custom_tuition WHERE id = :id');
             $updateStmt->execute([
                 'description' => $description !== '' ? $description : null,
-                'icon' => $icon !== '' ? $icon : null,
+                'icon' => $icon,
                 'careers' => $careers !== '' ? $careers : null,
                 'custom_tuition' => $customTuition !== '' ? $customTuition : null,
                 'id' => $id
             ]);
         }
 
-        logActivity((int)$_SESSION['user_id'], 'bi-pencil', 'College Program Updated', "Updated details/card for program ID: " . $id);
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        logActivity($userId, 'bi-pencil', 'College Program Updated', "Updated details/card for program ID: " . $id);
         $_SESSION['success_msg'] = 'Program details & landing card updated successfully.';
     }
     elseif ($action === 'toggle_program') {
@@ -249,7 +274,7 @@ try {
     else {
         throw new Exception('Invalid action requested.');
     }
-} catch (Exception $e) {
+} catch (Throwable $e) {
     $_SESSION['error_msg'] = $e->getMessage();
 }
 

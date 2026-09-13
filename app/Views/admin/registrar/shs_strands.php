@@ -192,7 +192,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <form action="shs_strand_process.php" method="POST">
+      <form action="/sia/admin/registrar/shs_strand_process.php" method="POST">
         <div class="modal-body p-4">
           <input type="hidden" name="action" value="update_landing_card">
           <?= getCsrfInput() ?>
@@ -204,39 +204,41 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
               <div class="mb-3">
                 <label class="form-label small fw-bold text-dark">Card Tagline / Overview</label>
                 <textarea name="description" id="cardDescriptionInput" class="form-control bg-light" rows="3" placeholder="Brief blurb describing this strand on the landing page..."></textarea>
-                <div class="form-text">Shown directly beneath the strand title.</div>
+                <div class="form-text">Shown directly beneath the strand title on the landing page.</div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label small fw-bold text-dark">Strand Icon</label>
                 <div class="input-group mb-2">
-                  <span class="input-group-text bg-light text-primary" id="iconAddonPreview"><i class="bi bi-mortarboard" id="iconPreviewEl"></i></span>
-                  <input type="text" name="icon" id="cardIconInput" class="form-control bg-light" placeholder="e.g. bi-calculator, bi-briefcase, bi-tools">
+                  <span class="input-group-text bg-white text-primary border-end-0" id="iconAddonPreview"><i class="bi bi-mortarboard fs-5" id="iconPreviewEl"></i></span>
+                  <input type="text" name="icon" id="cardIconInput" class="form-control bg-light border-start-0" placeholder="e.g. bi-calculator, bi-briefcase, bi-tools">
                 </div>
-                <div class="d-flex flex-wrap gap-1 mt-2" id="iconPickerList">
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-calculator"><i class="bi bi-calculator"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-briefcase"><i class="bi bi-briefcase"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-chat-square-quote"><i class="bi bi-chat-square-quote"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-tools"><i class="bi bi-tools"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-laptop"><i class="bi bi-laptop"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-journal-bookmark"><i class="bi bi-journal-bookmark"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-book-half"><i class="bi bi-book-half"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-palette"><i class="bi bi-palette"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-trophy"><i class="bi bi-trophy"></i></button>
-                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-mortarboard"><i class="bi bi-mortarboard"></i></button>
+                <div class="d-flex flex-wrap gap-1 mt-2" id="cardIconPickerList">
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-calculator" title="Calculator"><i class="bi bi-calculator"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-briefcase" title="Briefcase"><i class="bi bi-briefcase"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-chat-square-quote" title="Quote"><i class="bi bi-chat-square-quote"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-tools" title="Tools"><i class="bi bi-tools"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-laptop" title="Laptop"><i class="bi bi-laptop"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-journal-bookmark" title="Journal"><i class="bi bi-journal-bookmark"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-book-half" title="Book"><i class="bi bi-book-half"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-palette" title="Palette"><i class="bi bi-palette"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-trophy" title="Trophy"><i class="bi bi-trophy"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-mortarboard" title="Mortarboard"><i class="bi bi-mortarboard"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-cpu" title="CPU"><i class="bi bi-cpu"></i></button>
+                  <button type="button" class="btn btn-sm btn-outline-secondary icon-chip" data-icon="bi-heart-pulse" title="Health"><i class="bi bi-heart-pulse"></i></button>
                 </div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label small fw-bold text-dark">Career Opportunities</label>
                 <input type="text" name="careers" id="cardCareersInput" class="form-control bg-light" placeholder="e.g. Engineer, Programmer, Architect">
-                <div class="form-text">Comma-separated key career paths or academic tracks.</div>
+                <div class="form-text">Comma-separated career paths or tracks.</div>
               </div>
 
               <div class="mb-3">
                 <label class="form-label small fw-bold text-dark">Tuition Display Text (Optional Override)</label>
                 <input type="text" name="custom_tuition" id="cardTuitionInput" class="form-control bg-light" placeholder="e.g. ₱15,000 - ₱20,000 / sem (or leave blank for auto)">
-                <div class="form-text">Leave blank to use dynamic calculation from fee templates.</div>
+                <div class="form-text">Leave blank to use dynamic fee calculation from fee templates.</div>
               </div>
             </div>
 
@@ -271,34 +273,77 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
 <!-- Add Strand Modal -->
 <div class="modal fade" id="addStrandModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold text-dark">Add New Strand</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <form action="shs_strand_process.php" method="POST">
-        <div class="modal-body">
-          <input type="hidden" name="action" value="create_strand">
-          <?= getCsrfInput() ?>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Strand Code (e.g. STEM, HUMSS)</label>
-            <input type="text" name="code" class="form-control bg-light" required pattern="[A-Za-z0-9\-]+" title="Alphanumeric and dashes only.">
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Full Strand Name</label>
-            <input type="text" name="name" class="form-control bg-light" required placeholder="e.g. Science, Technology, Engineering, & Math">
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Landing Card Overview / Tagline</label>
-            <textarea name="description" class="form-control bg-light" rows="2" placeholder="Brief overview for the landing page card..."></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Career Paths (Optional)</label>
-            <input type="text" name="careers" class="form-control bg-light" placeholder="e.g. Engineer, Scientist, Architect">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-primary text-white border-bottom-0 pb-3">
+        <div class="d-flex align-items-center gap-2">
+          <i class="bi bi-plus-circle-fill fs-5"></i>
+          <div>
+            <h5 class="modal-title fw-bold mb-0 text-white">Add New Academic Strand</h5>
+            <small class="opacity-75 text-white">Define a new Senior High School strand and set its landing page presentation.</small>
           </div>
         </div>
-        <div class="modal-footer border-top-0 pt-0">
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="/sia/admin/registrar/shs_strand_process.php" method="POST">
+        <div class="modal-body p-4">
+          <input type="hidden" name="action" value="create_strand">
+          <?= getCsrfInput() ?>
+          
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-dark">Strand Code <span class="text-danger">*</span></label>
+              <input type="text" name="code" class="form-control bg-light text-uppercase fw-bold" required pattern="[A-Za-z0-9\-]+" placeholder="e.g. GAS" oninput="this.value = this.value.toUpperCase();">
+              <div class="form-text">Alphanumeric (e.g. STEM, GAS, ABM).</div>
+            </div>
+            <div class="col-md-8">
+              <label class="form-label small fw-bold text-dark">Full Strand Name <span class="text-danger">*</span></label>
+              <input type="text" name="name" class="form-control bg-light" required placeholder="e.g. General Academic Strand">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-dark">Landing Card Overview / Tagline</label>
+            <textarea name="description" class="form-control bg-light" rows="2" placeholder="Brief overview for the landing page card..."></textarea>
+            <div class="form-text">Shown directly beneath the strand title on the landing page.</div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-bold text-dark">Strand Icon</label>
+            <div class="input-group mb-2">
+              <span class="input-group-text bg-white text-primary border-end-0" id="addIconAddonPreview"><i class="bi bi-mortarboard fs-5" id="addIconPreviewEl"></i></span>
+              <input type="text" name="icon" id="addStrandIconInput" class="form-control bg-light border-start-0" placeholder="e.g. bi-journal-bookmark" value="bi-mortarboard">
+            </div>
+            <div class="d-flex flex-wrap gap-1 mt-2" id="addIconPickerList">
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-calculator" title="Calculator"><i class="bi bi-calculator"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-briefcase" title="Briefcase"><i class="bi bi-briefcase"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-chat-square-quote" title="Quote"><i class="bi bi-chat-square-quote"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-tools" title="Tools"><i class="bi bi-tools"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-laptop" title="Laptop"><i class="bi bi-laptop"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-journal-bookmark" title="Journal"><i class="bi bi-journal-bookmark"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-book-half" title="Book"><i class="bi bi-book-half"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-palette" title="Palette"><i class="bi bi-palette"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-trophy" title="Trophy"><i class="bi bi-trophy"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-mortarboard" title="Mortarboard"><i class="bi bi-mortarboard"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-cpu" title="CPU"><i class="bi bi-cpu"></i></button>
+              <button type="button" class="btn btn-sm btn-outline-secondary add-icon-chip" data-icon="bi-heart-pulse" title="Health"><i class="bi bi-heart-pulse"></i></button>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Career Paths (Optional)</label>
+              <input type="text" name="careers" class="form-control bg-light" placeholder="e.g. Educator, Journalist, Public Administrator">
+              <div class="form-text">Comma-separated target career paths.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Custom Tuition Override (Optional)</label>
+              <input type="text" name="custom_tuition" class="form-control bg-light" placeholder="e.g. ₱15,000 / sem">
+              <div class="form-text">Leave blank to use fee template defaults.</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer border-top bg-light pt-3">
           <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Save Strand</button>
         </div>
@@ -309,36 +354,44 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
 <!-- Edit Strand Modal -->
 <div class="modal fade" id="editStrandModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg rounded-4">
-      <div class="modal-header border-bottom-0 pb-0">
-        <h5 class="modal-title fw-bold text-dark">Edit Strand Information</h5>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+      <div class="modal-header bg-light border-bottom pb-3">
+        <h5 class="modal-title fw-bold text-dark mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Edit Strand Information</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="shs_strand_process.php" method="POST">
-        <div class="modal-body">
+      <form action="/sia/admin/registrar/shs_strand_process.php" method="POST">
+        <div class="modal-body p-4">
           <input type="hidden" name="action" value="update_strand">
           <?= getCsrfInput() ?>
           <input type="hidden" name="id" id="editStrandId">
           
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Strand Code</label>
-            <input type="text" name="code" id="editStrandCode" class="form-control bg-light" required pattern="[A-Za-z0-9\-]+">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <label class="form-label small fw-bold text-dark">Strand Code</label>
+              <input type="text" name="code" id="editStrandCode" class="form-control bg-light text-uppercase fw-bold" required pattern="[A-Za-z0-9\-]+" oninput="this.value = this.value.toUpperCase();">
+            </div>
+            <div class="col-md-8">
+              <label class="form-label small fw-bold text-dark">Full Strand Name</label>
+              <input type="text" name="name" id="editStrandName" class="form-control bg-light" required>
+            </div>
           </div>
           <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Full Strand Name</label>
-            <input type="text" name="name" id="editStrandName" class="form-control bg-light" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Landing Card Overview / Tagline</label>
+            <label class="form-label small fw-bold text-dark">Landing Card Overview / Tagline</label>
             <textarea name="description" id="editStrandDesc" class="form-control bg-light" rows="2"></textarea>
           </div>
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Career Paths</label>
-            <input type="text" name="careers" id="editStrandCareers" class="form-control bg-light">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Career Paths</label>
+              <input type="text" name="careers" id="editStrandCareers" class="form-control bg-light">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-bold text-dark">Custom Tuition Override</label>
+              <input type="text" name="custom_tuition" id="editStrandTuition" class="form-control bg-light">
+            </div>
           </div>
         </div>
-        <div class="modal-footer border-top-0 pt-0">
+        <div class="modal-footer border-top bg-light pt-3">
           <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">Save Changes</button>
         </div>
@@ -347,93 +400,187 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
   </div>
 </div>
 
-<script src="/sia/public/vendor/jquery/jquery.min.js"></script>
 <script>
-  $(document).ready(function() {
-    // Edit Strand Basic Modal
-    $('.edit-strand-btn').on('click', function() {
-      $('#editStrandId').val($(this).data('id'));
-      $('#editStrandCode').val($(this).data('code'));
-      $('#editStrandName').val($(this).data('name'));
-      $('#editStrandDesc').val($(this).data('description'));
-      $('#editStrandCareers').val($(this).data('careers'));
-    });
-
-    // Edit Landing Card Modal & Real-time Live Preview
+  document.addEventListener('DOMContentLoaded', function() {
+    // --- Edit Landing Card Modal Setup & Live Preview ---
+    const editCardModal = document.getElementById('editLandingCardModal');
     let currentCode = '';
     let currentName = '';
 
     function updatePreview() {
       const code = currentCode || 'CODE';
-      const desc = $('#cardDescriptionInput').val().trim() || currentName || 'Strand description blurb will appear here...';
-      const icon = $('#cardIconInput').val().trim() || 'bi-mortarboard';
-      const careers = $('#cardCareersInput').val().trim() || 'Higher Education, Career Readiness';
-      const tuition = $('#cardTuitionInput').val().trim() || '₱15,000 - ₱20,000 / sem';
+      const descInput = document.getElementById('cardDescriptionInput');
+      const iconInput = document.getElementById('cardIconInput');
+      const careersInput = document.getElementById('cardCareersInput');
+      const tuitionInput = document.getElementById('cardTuitionInput');
 
-      $('#previewCardCode').text(code);
-      $('#previewCardDesc').text(desc);
-      $('#previewCardCareers').text(careers);
-      $('#previewCardTuition').text(tuition);
+      const desc = (descInput ? descInput.value.trim() : '') || currentName || 'Strand description blurb will appear here...';
+      const icon = (iconInput ? iconInput.value.trim() : '') || 'bi-mortarboard';
+      const careers = (careersInput ? careersInput.value.trim() : '') || 'Higher Education, Career Readiness';
+      const tuition = (tuitionInput ? tuitionInput.value.trim() : '') || '₱15,000 - ₱20,000 / sem';
 
-      $('#iconPreviewEl').attr('class', 'bi ' + icon);
-      $('#previewCardIcon').attr('class', 'bi ' + icon);
+      const previewCode = document.getElementById('previewCardCode');
+      const previewDesc = document.getElementById('previewCardDesc');
+      const previewCareers = document.getElementById('previewCardCareers');
+      const previewTuition = document.getElementById('previewCardTuition');
+      const iconPreviewEl = document.getElementById('iconPreviewEl');
+      const previewCardIcon = document.getElementById('previewCardIcon');
+
+      if (previewCode) previewCode.textContent = code;
+      if (previewDesc) previewDesc.textContent = desc;
+      if (previewCareers) previewCareers.textContent = careers;
+      if (previewTuition) previewTuition.textContent = tuition;
+
+      if (iconPreviewEl) iconPreviewEl.className = 'bi ' + icon + ' fs-5';
+      if (previewCardIcon) previewCardIcon.className = 'bi ' + icon;
+
+      // Update active chip highlight
+      document.querySelectorAll('#cardIconPickerList .icon-chip').forEach(chip => {
+        if (chip.getAttribute('data-icon') === icon) {
+          chip.classList.remove('btn-outline-secondary');
+          chip.classList.add('btn-primary', 'text-white');
+        } else {
+          chip.classList.remove('btn-primary', 'text-white');
+          chip.classList.add('btn-outline-secondary');
+        }
+      });
     }
 
-    $('.edit-card-btn').on('click', function() {
-      const id = $(this).data('id');
-      currentCode = $(this).data('code');
-      currentName = $(this).data('name');
-      const desc = $(this).data('description') || '';
-      const icon = $(this).data('icon') || '';
-      const careers = $(this).data('careers') || '';
-      const tuition = $(this).data('custom-tuition') || '';
+    if (editCardModal) {
+      editCardModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        if (!button) return;
 
-      $('#cardStrandId').val(id);
-      $('#cardModalStrandSubtitle').text(currentCode + ' - ' + currentName);
-      $('#cardDescriptionInput').val(desc);
-      $('#cardIconInput').val(icon);
-      $('#cardCareersInput').val(careers);
-      $('#cardTuitionInput').val(tuition);
+        const id = button.getAttribute('data-id') || '';
+        currentCode = (button.getAttribute('data-code') || '').toUpperCase();
+        currentName = button.getAttribute('data-name') || '';
+        const desc = button.getAttribute('data-description') || '';
+        const icon = button.getAttribute('data-icon') || 'bi-mortarboard';
+        const careers = button.getAttribute('data-careers') || '';
+        const tuition = button.getAttribute('data-custom-tuition') || '';
 
-      updatePreview();
+        const cardIdEl = document.getElementById('cardStrandId');
+        const subtitleEl = document.getElementById('cardModalStrandSubtitle');
+        const descInput = document.getElementById('cardDescriptionInput');
+        const iconInput = document.getElementById('cardIconInput');
+        const careersInput = document.getElementById('cardCareersInput');
+        const tuitionInput = document.getElementById('cardTuitionInput');
+
+        if (cardIdEl) cardIdEl.value = id;
+        if (subtitleEl) subtitleEl.textContent = currentCode + ' - ' + currentName;
+        if (descInput) descInput.value = desc;
+        if (iconInput) iconInput.value = icon;
+        if (careersInput) careersInput.value = careers;
+        if (tuitionInput) tuitionInput.value = tuition;
+
+        updatePreview();
+      });
+    }
+
+    ['cardDescriptionInput', 'cardIconInput', 'cardCareersInput', 'cardTuitionInput'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener('input', updatePreview);
+      }
     });
 
-    $('#cardDescriptionInput, #cardIconInput, #cardCareersInput, #cardTuitionInput').on('input', updatePreview);
-
-    // Icon chip selection
-    $('.icon-chip').on('click', function() {
-      const icon = $(this).data('icon');
-      $('#cardIconInput').val(icon);
-      updatePreview();
+    // Icon chip selection for Edit Card Modal
+    document.addEventListener('click', function(e) {
+      const chip = e.target.closest('#cardIconPickerList .icon-chip');
+      if (chip) {
+        const icon = chip.getAttribute('data-icon');
+        const iconInput = document.getElementById('cardIconInput');
+        if (iconInput) {
+          iconInput.value = icon;
+          updatePreview();
+        }
+      }
     });
 
-    // Table Search filter
-    const searchInput = document.getElementById('tableSearch');
-    if(searchInput) {
-        searchInput.addEventListener('keyup', function() {
-            const filter = this.value.toLowerCase();
-            const rows = document.querySelectorAll('.custom-table tbody tr');
-            let visibleCount = 0;
-            let hasDataRows = false;
-            
-            rows.forEach(row => {
-                if(row.id === 'noResultsRow' || row.querySelector('td[colspan]')) return;
-                hasDataRows = true;
-                
-                const text = row.textContent.toLowerCase();
-                if (text.includes(filter)) {
-                    row.style.display = '';
-                    visibleCount++;
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-            
-            const noResultsRow = document.getElementById('noResultsRow');
-            if (noResultsRow) {
-                noResultsRow.style.display = (visibleCount === 0 && hasDataRows) ? '' : 'none';
-            }
+    // --- Add Strand Modal Icon Picker ---
+    document.addEventListener('click', function(e) {
+      const chip = e.target.closest('#addIconPickerList .add-icon-chip');
+      if (chip) {
+        const icon = chip.getAttribute('data-icon');
+        const iconInput = document.getElementById('addStrandIconInput');
+        const previewEl = document.getElementById('addIconPreviewEl');
+        if (iconInput) {
+          iconInput.value = icon;
+        }
+        if (previewEl) {
+          previewEl.className = 'bi ' + icon + ' fs-5';
+        }
+        document.querySelectorAll('#addIconPickerList .add-icon-chip').forEach(c => {
+          if (c.getAttribute('data-icon') === icon) {
+            c.classList.remove('btn-outline-secondary');
+            c.classList.add('btn-primary', 'text-white');
+          } else {
+            c.classList.remove('btn-primary', 'text-white');
+            c.classList.add('btn-outline-secondary');
+          }
         });
+      }
+    });
+
+    const addIconInput = document.getElementById('addStrandIconInput');
+    if (addIconInput) {
+      addIconInput.addEventListener('input', function() {
+        const icon = this.value.trim() || 'bi-mortarboard';
+        const previewEl = document.getElementById('addIconPreviewEl');
+        if (previewEl) previewEl.className = 'bi ' + icon + ' fs-5';
+      });
+    }
+
+    // --- Edit Strand Basic Modal ---
+    const editStrandModal = document.getElementById('editStrandModal');
+    if (editStrandModal) {
+      editStrandModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        if (!button) return;
+
+        const idEl = document.getElementById('editStrandId');
+        const codeEl = document.getElementById('editStrandCode');
+        const nameEl = document.getElementById('editStrandName');
+        const descEl = document.getElementById('editStrandDesc');
+        const careersEl = document.getElementById('editStrandCareers');
+        const tuitionEl = document.getElementById('editStrandTuition');
+
+        if (idEl) idEl.value = button.getAttribute('data-id') || '';
+        if (codeEl) codeEl.value = button.getAttribute('data-code') || '';
+        if (nameEl) nameEl.value = button.getAttribute('data-name') || '';
+        if (descEl) descEl.value = button.getAttribute('data-description') || '';
+        if (careersEl) careersEl.value = button.getAttribute('data-careers') || '';
+        if (tuitionEl) tuitionEl.value = button.getAttribute('data-custom-tuition') || '';
+      });
+    }
+
+    // --- Table Search Filter ---
+    const searchInput = document.getElementById('tableSearch');
+    if (searchInput) {
+      searchInput.addEventListener('keyup', function() {
+        const filter = this.value.toLowerCase();
+        const rows = document.querySelectorAll('.custom-table tbody tr');
+        let visibleCount = 0;
+        let hasDataRows = false;
+        
+        rows.forEach(row => {
+          if (row.id === 'noResultsRow' || row.querySelector('td[colspan]')) return;
+          hasDataRows = true;
+          
+          const text = row.textContent.toLowerCase();
+          if (text.includes(filter)) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+        
+        const noResultsRow = document.getElementById('noResultsRow');
+        if (noResultsRow) {
+          noResultsRow.style.display = (visibleCount === 0 && hasDataRows) ? '' : 'none';
+        }
+      });
     }
   });
 </script>

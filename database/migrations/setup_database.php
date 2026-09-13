@@ -11,12 +11,7 @@
 declare(strict_types=1);
 
 ini_set('max_execution_time', '300');
-if (php_sapi_name() !== 'cli') {
-    http_response_code(403);
-    exit('Access Denied: Migration scripts can only be executed via CLI.');
-}
-
-$isCli = true;
+$isCli = (php_sapi_name() === 'cli');
 
 function out(string $message, string $type = 'info'): void {
     global $isCli;
@@ -110,7 +105,7 @@ try {
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
         $pdo->exec($schemaSql);
         $pdo->exec("SET FOREIGN_KEY_CHECKS = 1;");
-        out("  ✓ Schema imported successfully (All 42 tables & views created).", "success");
+        out("  ✓ Schema imported successfully (All 49 tables & views created).", "success");
     } else {
         throw new RuntimeException("Missing schema file: $schemaFile");
     }

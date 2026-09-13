@@ -25,11 +25,17 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
                 s.id as subject_id,
                 s.subject_code as code, 
                 s.subject_name as name, 
-                s.units
+                s.units,
+                css.day,
+                css.start_time,
+                css.end_time,
+                css.room,
+                css.delivery_mode
             FROM college_enrollments ce
             JOIN applications a ON ce.application_id = a.id
             JOIN subjects s ON ce.subject_id = s.id
             JOIN college_sections cs ON ce.college_section_id = cs.id
+            LEFT JOIN college_section_subjects css ON css.college_section_id = ce.college_section_id AND css.subject_id = ce.subject_id
             WHERE a.user_id = :uid 
               AND a.status IN ('enrolled', 'approved')
         ");
@@ -46,7 +52,12 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
                     s.id as subject_id,
                     s.subject_code as code, 
                     s.subject_name as name, 
-                    s.units
+                    s.units,
+                    css.day,
+                    css.start_time,
+                    css.end_time,
+                    css.room,
+                    css.delivery_mode
                 FROM applications a
                 JOIN college_sections cs ON a.section_id = cs.id
                 JOIN college_section_subjects css ON css.college_section_id = cs.id
@@ -61,19 +72,18 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
             return [];
         }
 
-        // Fetch default faculty
-        $facStmt = $this->pdo->query("SELECT id FROM users WHERE role = 'faculty' ORDER BY id ASC LIMIT 1");
-        $defaultFacultyId = (int)$facStmt->fetchColumn() ?: 18;
-
         $courses = [];
         $seenCourseIds = [];
         foreach ($enrollments as $enr) {
             $secId = (int)$enr['college_section_id'];
             $subId = (int)$enr['subject_id'];
 
-            // Find or provision LMS Course
+            // Find or provision LMS Course with module, assignment, and quiz counts
             $lcStmt = $this->pdo->prepare("
-                SELECT lc.id, lc.faculty_user_id, u.first_name, u.last_name
+                SELECT lc.id, lc.faculty_user_id, u.first_name, u.last_name,
+                       (SELECT COUNT(*) FROM lms_modules m WHERE m.lms_course_id = lc.id AND m.status = 'published') as module_count,
+                       (SELECT COUNT(*) FROM lms_assignments a WHERE a.lms_course_id = lc.id AND a.status = 'published') as assignment_count,
+                       (SELECT COUNT(*) FROM lms_quizzes q WHERE q.lms_course_id = lc.id AND q.status = 'published') as quiz_count
                 FROM lms_courses lc
                 LEFT JOIN users u ON lc.faculty_user_id = u.id
                 WHERE lc.academic_level = 'College' 
@@ -85,25 +95,58 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
             $lmsCourse = $lcStmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$lmsCourse) {
-                $ins = $this->pdo->prepare("
-                    INSERT INTO lms_courses (academic_level, academic_section_id, subject_id, faculty_user_id, status)
-                    VALUES ('College', :sec_id, :sub_id, :fac_id, 'active')
+                // Resolve assigned faculty strictly from section subject timetable
+                $secSubStmt = $this->pdo->prepare("
+                    SELECT css.faculty_user_id, css.instructor 
+                    FROM college_section_subjects css
+                    WHERE css.college_section_id = :sec_id AND css.subject_id = :sub_id
+                    LIMIT 1
                 ");
-                $ins->execute([
-                    'sec_id' => $secId,
-                    'sub_id' => $subId,
-                    'fac_id' => $defaultFacultyId
-                ]);
-                $lmsCourseId = (int)$this->pdo->lastInsertId();
-                $uStmt = $this->pdo->prepare("SELECT first_name, last_name FROM users WHERE id = ?");
-                $uStmt->execute([$defaultFacultyId]);
-                $facUser = $uStmt->fetch(PDO::FETCH_ASSOC);
-                $firstName = $facUser['first_name'] ?? 'Faculty';
-                $lastName = $facUser['last_name'] ?? 'Instructor';
+                $secSubStmt->execute(['sec_id' => $secId, 'sub_id' => $subId]);
+                $secSub = $secSubStmt->fetch(PDO::FETCH_ASSOC);
+                $assignedFacultyId = !empty($secSub['faculty_user_id']) ? (int)$secSub['faculty_user_id'] : null;
+
+                if (!$assignedFacultyId && !empty($secSub['instructor']) && strtoupper($secSub['instructor']) !== 'TBA') {
+                    $fnStmt = $this->pdo->prepare("SELECT id FROM users WHERE role = 'faculty' AND (CONCAT(first_name, ' ', last_name) = ? OR last_name = ?) LIMIT 1");
+                    $fnStmt->execute([$secSub['instructor'], $secSub['instructor']]);
+                    $assignedFacultyId = (int)$fnStmt->fetchColumn() ?: null;
+                }
+
+                if ($assignedFacultyId) {
+                    $ins = $this->pdo->prepare("
+                        INSERT INTO lms_courses (academic_level, academic_section_id, subject_id, faculty_user_id, status)
+                        VALUES ('College', :sec_id, :sub_id, :fac_id, 'active')
+                        ON DUPLICATE KEY UPDATE faculty_user_id = VALUES(faculty_user_id)
+                    ");
+                    $ins->execute([
+                        'sec_id' => $secId,
+                        'sub_id' => $subId,
+                        'fac_id' => $assignedFacultyId
+                    ]);
+                    $lmsCourseId = (int)$this->pdo->lastInsertId();
+                    if ($lmsCourseId === 0) {
+                        $lcStmt->execute(['sec_id' => $secId, 'sub_id' => $subId]);
+                        $existing = $lcStmt->fetch(PDO::FETCH_ASSOC);
+                        $lmsCourseId = (int)($existing['id'] ?? 0);
+                    }
+                    $uStmt = $this->pdo->prepare("SELECT first_name, last_name FROM users WHERE id = ?");
+                    $uStmt->execute([$assignedFacultyId]);
+                    $facUser = $uStmt->fetch(PDO::FETCH_ASSOC);
+                    $firstName = $facUser['first_name'] ?? 'Faculty';
+                    $lastName = $facUser['last_name'] ?? 'Instructor';
+                    $moduleCount = 0;
+                    $assignmentCount = 0;
+                    $quizCount = 0;
+                } else {
+                    continue;
+                }
             } else {
                 $lmsCourseId = (int)$lmsCourse['id'];
                 $firstName = $lmsCourse['first_name'] ?? 'Faculty';
                 $lastName = $lmsCourse['last_name'] ?? 'Instructor';
+                $moduleCount = (int)($lmsCourse['module_count'] ?? 0);
+                $assignmentCount = (int)($lmsCourse['assignment_count'] ?? 0);
+                $quizCount = (int)($lmsCourse['quiz_count'] ?? 0);
             }
 
             if (isset($seenCourseIds[$lmsCourseId])) {
@@ -118,7 +161,15 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
                 'units' => $enr['units'],
                 'section_name' => $enr['section_name'],
                 'first_name' => $firstName,
-                'last_name' => $lastName
+                'last_name' => $lastName,
+                'day' => $enr['day'] ?? null,
+                'start_time' => $enr['start_time'] ?? null,
+                'end_time' => $enr['end_time'] ?? null,
+                'room' => $enr['room'] ?? null,
+                'delivery_mode' => $enr['delivery_mode'] ?? 'Face-to-Face',
+                'module_count' => $moduleCount,
+                'assignment_count' => $assignmentCount,
+                'quiz_count' => $quizCount
             ];
         }
 

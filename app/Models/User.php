@@ -13,12 +13,17 @@ class User extends BaseModel
     {
         $pdo = Database::getConnection();
         $stmt = $pdo->prepare(
-            'SELECT id, first_name, last_name, email, password, role, is_active, department, permissions, email_verified, force_password_reset
+            'SELECT id, first_name, last_name, email, ttu_email, student_number, employee_id, password, role, is_active, department, permissions, email_verified, force_password_reset
              FROM users
-             WHERE email = :email
+             WHERE email = :email1 OR ttu_email = :email2 OR employee_id = :email3 OR student_number = :email4
              LIMIT 1'
         );
-        $stmt->execute(['email' => $email]);
+        $stmt->execute([
+            'email1' => $email,
+            'email2' => $email,
+            'email3' => $email,
+            'email4' => $email
+        ]);
         return $stmt->fetch();
     }
 

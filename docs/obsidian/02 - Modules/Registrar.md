@@ -10,8 +10,9 @@ The Registrar module is the administrative core for managing the academic catalo
 
 ## 1. Core Responsibilities
 1. **Academic Programs & Strands:**
-   - **College Programs:** Manages degrees (BS Information Technology, BS Computer Science, etc.) in `college_programs`.
-   - **SHS Strands:** Manages Senior High strands (STEM, ABM, HUMSS, TVL) in `shs_strands`.
+   - **College Programs:** Manages degrees (BS Information Technology, BS Computer Science, etc.) in `college_programs`. Includes public landing page card customization (`icon`, `careers`, `custom_tuition`).
+   - **SHS Strands:** Manages Senior High strands (STEM, ABM, HUMSS, TVL) in `shs_strands`. Includes public landing page card customization (`icon`, `careers`, `custom_tuition`).
+   - Refer to [[Landing Page & Program Card Customization]] for full visual card builder specifications.
 2. **Curriculum Lifecycle & Versioning:**
    - Enforces the 3-state lifecycle (`draft` $\rightarrow$ `active` $\rightarrow$ `archived`) across College and SHS curricula (`college_curricula`, `shs_curricula`).
    - Supports subject mapping and reordering (`display_order`) in `draft` mode.

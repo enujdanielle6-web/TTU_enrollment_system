@@ -758,39 +758,40 @@ body.lms-layout {
     border-radius: 0.75rem;
     font-size: 0.875rem;
     font-weight: 600;
-    color: var(--lms-text-muted);
+    color: #4b5563;
+    background: transparent;
     text-decoration: none;
-    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     white-space: nowrap;
     position: relative;
     user-select: none;
 }
 
-.course-nav-link:hover {
+.course-nav-link:not(.active):hover {
     background: #f1f5f9;
-    color: var(--lms-text-main);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    color: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-.course-nav-link:active {
+.course-nav-link:not(.active):active {
     transform: translateY(0);
 }
 
 .course-nav-link.active {
-    background: var(--lms-primary);
-    color: #ffffff;
-    box-shadow: 0 4px 14px rgba(13, 110, 253, 0.35);
+    background: #0d6efd !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(13, 110, 253, 0.3);
     transform: translateY(-1px);
 }
 
 .course-nav-link.active i {
-    color: #ffffff;
+    color: #ffffff !important;
 }
 
 .course-nav-link.active .badge {
     background: #ffffff !important;
-    color: var(--lms-primary) !important;
+    color: #0d6efd !important;
 }
 
 .course-nav-badge {
@@ -897,18 +898,30 @@ body.lms-layout {
     border-radius: 50rem;
 }
 
+.hover-primary {
+    transition: color 0.15s ease;
+}
+
+.hover-primary:hover {
+    color: var(--lms-primary) !important;
+}
+
+.smaller {
+    font-size: 0.775rem;
+}
+
 .assessment-item-card {
     background: #ffffff;
-    border: 1px solid #f1f5f9;
+    border: 1px solid #e2e8f0;
     border-radius: 1rem;
     padding: 1.25rem 1.5rem;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.85rem;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .assessment-item-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
+    border-color: #94a3b8;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
     transform: translateY(-1px);
 }
 
@@ -1138,4 +1151,417 @@ body.lms-layout {
         padding-bottom: 0.75rem;
     }
 }
+
+/* ==========================================================================
+   TTU LMS: Hero Stat Banner
+   ========================================================================== */
+.lms-hero-banner {
+    position: relative;
+    background: linear-gradient(135deg, #0d6efd 0%, #1e40af 100%);
+    border-radius: 1.25rem;
+    color: #ffffff;
+    padding: 2.25rem;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(13, 110, 253, 0.15);
+}
+
+.lms-hero-banner::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    right: -40px;
+    width: 220px;
+    height: 220px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 50%;
+    filter: blur(25px);
+    pointer-events: none;
+}
+
+.lms-hero-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    left: 20%;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(96, 165, 250, 0.2) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+}
+
+.lms-hero-stat-pill {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 1rem;
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    color: #ffffff;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.lms-hero-stat-pill:hover {
+    transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.22);
+}
+
+.lms-hero-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   TTU LMS: Enhanced Course Cards
+   ========================================================================== */
+.lms-course-card {
+    background: #ffffff;
+    border-radius: 1.15rem;
+    border: 1px solid #eef2f6;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s ease, border-color 0.22s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.lms-course-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+    border-color: #cbd5e1;
+}
+
+.lms-course-header-banner {
+    padding: 1.15rem 1.35rem;
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.lms-course-header-banner::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12) 0%, rgba(0, 0, 0, 0.08) 100%);
+    pointer-events: none;
+}
+
+.lms-course-code-badge {
+    background: rgba(255, 255, 255, 0.22);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    padding: 0.35rem 0.75rem;
+    border-radius: 2rem;
+    z-index: 1;
+}
+
+.lms-course-units-chip {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(6px);
+    border-radius: 2rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.3rem 0.65rem;
+    z-index: 1;
+}
+
+.lms-course-body {
+    padding: 1.35rem;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.lms-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.5rem;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.lms-chip.chip-schedule {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+.lms-chip.chip-room {
+    background: #f0fdf4;
+    color: #15803d;
+    border-color: #bbf7d0;
+}
+
+.lms-chip.chip-section {
+    background: #fdf4ff;
+    color: #a21caf;
+    border-color: #f5d0fe;
+}
+
+.lms-activity-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.45rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    transition: all 0.15s ease;
+}
+
+.lms-activity-badge:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+}
+
+.lms-instructor-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.lms-btn-classroom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.55rem 1rem;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.75rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.18s ease;
+}
+
+.lms-btn-classroom:hover {
+    background: var(--lms-primary);
+    color: #ffffff;
+    border-color: var(--lms-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.25);
+}
+
+.lms-quick-jump-link {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #64748b;
+    text-decoration: none;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.4rem;
+    transition: all 0.15s ease;
+}
+
+.lms-quick-jump-link:hover {
+    background: #f1f5f9;
+    color: var(--lms-primary);
+}
+
+/* ==========================================================================
+   TTU LMS: Academic Calendar Styling
+   ========================================================================== */
+.lms-calendar-card {
+    background: #ffffff;
+    border-radius: 1.15rem;
+    border: 1px solid #eef2f6;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.02);
+}
+
+.lms-cal-header-bar {
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 1.25rem 1.5rem;
+}
+
+.lms-calendar-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.lms-calendar-table thead th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.85rem 0.5rem;
+    text-align: center;
+    border-bottom: 1px solid #eef2f6;
+}
+
+.lms-cal-day {
+    height: 125px;
+    vertical-align: top;
+    padding: 0.6rem;
+    border-right: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    background: #ffffff;
+    transition: background-color 0.15s ease;
+    position: relative;
+}
+
+.lms-calendar-table tr td:last-child {
+    border-right: none;
+}
+
+.lms-cal-day:hover {
+    background-color: #fafbfc;
+}
+
+.lms-cal-day-muted {
+    background-color: #f8fafc !important;
+    opacity: 0.55;
+}
+
+.lms-cal-day-num {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #475569;
+    width: 26px;
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin-bottom: 0.4rem;
+}
+
+.lms-cal-today {
+    background-color: rgba(13, 110, 253, 0.04) !important;
+}
+
+.lms-cal-today .lms-cal-day-num {
+    background: var(--lms-primary);
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(13, 110, 253, 0.35);
+}
+
+.lms-cal-event-pill {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.lms-cal-event-pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+/* Event Color Variants */
+.lms-cal-event-primary {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+.lms-cal-event-primary:hover {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.lms-cal-event-warning {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+.lms-cal-event-warning:hover {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.lms-cal-event-success {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+.lms-cal-event-success:hover {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* Legend Chips */
+.lms-legend-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.3rem 0.65rem;
+    border-radius: 2rem;
+}
+
+/* Agenda List Card */
+.lms-agenda-item {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.18s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.lms-agenda-item:hover {
+    background-color: #f8fafc;
+    color: inherit;
+}
+
+.lms-agenda-item:last-child {
+    border-bottom: none;
+}
+
 

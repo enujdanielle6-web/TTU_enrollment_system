@@ -371,7 +371,7 @@ function getStrandLabel(?string $strand): string
  * @return void
  */
 function logActivity(
-    int $userId, 
+    ?int $userId, 
     string $icon, 
     string $title, 
     string $description,
@@ -407,7 +407,7 @@ function logActivity(
             (:user_id, :ip_address, :affected_record, :icon, :title, :description, :old_value, :new_value, :reason)
         ');
         $stmt->execute([
-            'user_id' => $userId,
+            'user_id' => ($userId !== null && $userId > 0) ? $userId : null,
             'ip_address' => $ipAddress,
             'affected_record' => $affectedRecord,
             'icon' => $icon,

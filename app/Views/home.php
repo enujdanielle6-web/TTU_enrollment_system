@@ -524,15 +524,20 @@ require_once __DIR__ . '/components/navbar.php';
                   $desc = !empty($strand['description']) ? $strand['description'] : ($strand['name'] ?? '');
                 ?>
                 <div class="col-lg-4 col-md-6">
-                  <div class="card program-card h-100 fade-in-up">
-                    <div class="card-body fade-in-up">
+                  <div class="card program-card h-100 fade-in-up d-flex flex-column">
+                    <div class="card-body fade-in-up d-flex flex-column">
                       <div class="program-icon">
                         <i class="bi <?= esc($icon) ?>"></i>
                       </div>
                       <h3><?= esc($strandCode) ?></h3>
                       <p><?= esc($desc) ?></p>
-                      <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: <?= esc($tuition) ?></p>
-                      <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: <?= esc($careers) ?></p>
+                      <div class="mt-auto pt-2 border-top border-light">
+                        <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1 text-success"></i> Tuition: <span class="text-dark fw-medium"><?= esc($tuition) ?></span></p>
+                        <p class="text-muted small mb-3"><i class="bi bi-briefcase-fill me-1 text-primary"></i> Careers: <?= esc($careers) ?></p>
+                        <a href="/sia/applicant/enroll.php?level=shs&strand=<?= urlencode($strandCode) ?>" class="btn btn-sm btn-outline-primary rounded-pill w-100 fw-semibold">
+                          <i class="bi bi-arrow-right-circle me-1"></i> Apply for <?= esc($strandCode) ?>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -558,15 +563,20 @@ require_once __DIR__ . '/components/navbar.php';
                   $desc = !empty($program['description']) ? $program['description'] : ($program['name'] ?? '');
                 ?>
                 <div class="col-lg-4 col-md-6">
-                  <div class="card program-card h-100 fade-in-up">
-                    <div class="card-body fade-in-up">
+                  <div class="card program-card h-100 fade-in-up d-flex flex-column">
+                    <div class="card-body fade-in-up d-flex flex-column">
                       <div class="program-icon">
                         <i class="bi <?= esc($icon) ?>"></i>
                       </div>
                       <h3><?= esc($programCode) ?></h3>
                       <p><?= esc($desc) ?></p>
-                      <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1"></i> Tuition: <?= esc($tuition) ?></p>
-                      <p class="text-muted small"><i class="bi bi-briefcase-fill me-1"></i> Careers: <?= esc($careers) ?></p>
+                      <div class="mt-auto pt-2 border-top border-light">
+                        <p class="text-muted small mb-1"><i class="bi bi-cash-coin me-1 text-success"></i> Tuition: <span class="text-dark fw-medium"><?= esc($tuition) ?></span></p>
+                        <p class="text-muted small mb-3"><i class="bi bi-briefcase-fill me-1 text-primary"></i> Careers: <?= esc($careers) ?></p>
+                        <a href="/sia/applicant/enroll.php?level=college&program=<?= urlencode($programCode) ?>" class="btn btn-sm btn-outline-primary rounded-pill w-100 fw-semibold">
+                          <i class="bi bi-arrow-right-circle me-1"></i> Apply for <?= esc($programCode) ?>
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>

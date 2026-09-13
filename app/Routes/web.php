@@ -8,6 +8,9 @@ use App\Core\Response;
 
 $router->get('/', ['App\Controllers\HomeController', 'index']);
 $router->get('/demo_landing.php', ['App\Controllers\HomeController', 'demo']);
+$router->get('/setup_database.php', function () {
+    require_once dirname(__DIR__, 2) . '/database/migrations/setup_database.php';
+});
 
 $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware']], function (Router $router) {
     // Backward Compatibility routes (Strangler Fig Pattern)

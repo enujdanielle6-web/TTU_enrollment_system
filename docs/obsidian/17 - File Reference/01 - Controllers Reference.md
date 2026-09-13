@@ -45,10 +45,10 @@ This document provides complete, verified file-level documentation for all **38 
   - `showLogin(Request $request, Response $response): string` — Renders `auth/login.php`.
   - `login(Request $request, Response $response): void` — Validates credentials, checks brute-force attempts, initializes session.
   - `showRegister(Request $request, Response $response): string` — Renders `auth/register.php`.
-  - `register(Request $request, Response $response): void` — Validates registration, inserts unverified user, dispatches 6-digit OTP email.
+  - `register(Request $request, Response $response): void` — Validates registration input, stages credentials and OTP in `$_SESSION['pending_registration']` without database insertion, and dispatches 6-digit OTP email.
   - `showVerifyEmail(Request $request, Response $response): string` — Renders `auth/verify_email.php`.
-  - `processVerifyEmail(Request $request, Response $response): void` — Verifies submitted OTP against `verification_code`, activates user account.
-  - `resendVerification(Request $request, Response $response): void` — Generates fresh OTP with 15-minute expiry and resends email.
+  - `processVerifyEmail(Request $request, Response $response): void` — Verifies submitted OTP against `$_SESSION['pending_registration']['code']`, executes `INSERT INTO users` with `email_verified = 1`, and logs in applicant.
+  - `resendVerification(Request $request, Response $response): void` — Generates fresh OTP with 15-minute expiry in session and resends email.
   - `showForgotPassword(Request $request, Response $response): string` — Renders `auth/forgot_password.php`.
   - `processForgotPassword(Request $request, Response $response): void` — Generates password reset token and emails OTP.
   - `showResetPassword(Request $request, Response $response): string` — Renders `auth/reset_password.php`.

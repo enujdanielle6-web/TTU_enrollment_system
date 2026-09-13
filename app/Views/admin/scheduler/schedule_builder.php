@@ -18,6 +18,7 @@ foreach ($subjects as $s) {
         'end_time' => $s['end_time'],
         'room' => $s['room'],
         'instructor' => $s['instructor'],
+        'faculty_user_id' => $s['faculty_user_id'] ?? null,
         'delivery_mode' => $s['delivery_mode'],
         'semester' => $sem
     ];
@@ -296,8 +297,16 @@ if (empty($semesters)) $semesters = ['1'];
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-medium">Instructor</label>
-                        <input type="text" class="form-control" id="edit_instructor" placeholder="e.g. Dr. Smith">
+                        <label class="form-label text-muted small fw-medium">Instructor (Assigned Faculty)</label>
+                        <select class="form-select" id="edit_faculty_user_id">
+                            <option value="">-- Unassigned / TBA --</option>
+                            <?php foreach ($facultyList ?? [] as $fac): ?>
+                                <option value="<?= esc($fac['id']) ?>" data-name="<?= htmlspecialchars($fac['full_name'], ENT_QUOTES, 'UTF-8') ?>">
+                                    <?= esc($fac['full_name']) ?> (<?= esc($fac['employee_id']) ?> - <?= esc($fac['academic_rank'] ?? 'Instructor I') ?>)
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="hidden" id="edit_instructor">
                     </div>
 
                     <div class="mb-3">
@@ -532,7 +541,18 @@ function openEdit(id) {
     document.getElementById('edit_start').value = sub.start_time && sub.start_time !== '00:00:00' ? sub.start_time.substring(0,5) : '';
     document.getElementById('edit_end').value = sub.end_time && sub.end_time !== '00:00:00' ? sub.end_time.substring(0,5) : '';
     document.getElementById('edit_room').value = sub.room || '';
+    document.getElementById('edit_faculty_user_id').value = sub.faculty_user_id || '';
     document.getElementById('edit_instructor').value = sub.instructor || '';
+    if (!sub.faculty_user_id && sub.instructor && sub.instructor !== 'TBA') {
+        const sel = document.getElementById('edit_faculty_user_id');
+        for (let opt of sel.options) {
+            if (opt.getAttribute('data-name') === sub.instructor) {
+                sel.value = opt.value;
+                sub.faculty_user_id = parseInt(opt.value);
+                break;
+            }
+        }
+    }
     document.getElementById('edit_mode').value = sub.delivery_mode || 'Face-to-Face';
     
     const count = subjects.filter(s => s.subject_code === sub.subject_code).length;
@@ -651,7 +671,10 @@ function saveEdit() {
     }
     
     sub.room = document.getElementById('edit_room').value;
-    sub.instructor = document.getElementById('edit_instructor').value;
+    const facSel = document.getElementById('edit_faculty_user_id');
+    const selectedOpt = facSel.selectedOptions ? facSel.selectedOptions[0] : null;
+    sub.faculty_user_id = facSel.value ? parseInt(facSel.value) : null;
+    sub.instructor = (facSel.value && selectedOpt) ? (selectedOpt.getAttribute('data-name') || 'TBA') : 'TBA';
     sub.delivery_mode = document.getElementById('edit_mode').value;
     
     detectLocalConflicts();
