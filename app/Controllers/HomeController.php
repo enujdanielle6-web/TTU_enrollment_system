@@ -57,6 +57,35 @@ class HomeController extends BaseController
                 ORDER BY p.id ASC
             ");
             $collegePrograms = $collegeStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Fetch active Scholarships
+            $scholarshipStmt = $pdo->query("
+                SELECT 
+                    id,
+                    name,
+                    code,
+                    category,
+                    provider,
+                    year_level,
+                    min_gwa,
+                    income_requirement,
+                    slots,
+                    tuition_coverage_type,
+                    tuition_coverage_value,
+                    misc_coverage_type,
+                    misc_coverage_value,
+                    stipend_amount,
+                    book_allowance,
+                    description,
+                    requirements,
+                    application_start,
+                    application_end,
+                    status
+                FROM scholarships
+                WHERE status = 'Active'
+                ORDER BY id ASC
+            ");
+            $activeScholarships = $scholarshipStmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (\Throwable $e) {
             error_log('HomeController index error: ' . $e->getMessage());
         }
@@ -64,6 +93,7 @@ class HomeController extends BaseController
         return $this->render('home', [
             'collegePrograms' => $collegePrograms,
             'shsStrands' => $shsStrands,
+            'activeScholarships' => $activeScholarships ?? [],
         ]);
     }
 

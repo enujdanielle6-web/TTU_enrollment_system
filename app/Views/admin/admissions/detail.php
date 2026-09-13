@@ -12,25 +12,51 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="mb-4 d-flex align-items-center justify-content-between">
-      <div>
-        <?php 
-          if (isset($_SERVER['HTTP_REFERER']) && 
-              str_contains($_SERVER['HTTP_REFERER'], '/admin/') && 
-              !str_contains($_SERVER['HTTP_REFERER'], 'application_detail.php') && 
-              !str_contains($_SERVER['HTTP_REFERER'], 'application_process.php')) {
-              $_SESSION['app_detail_back_url'] = $_SERVER['HTTP_REFERER'];
-          }
-          $backUrl = isset($_SESSION['app_detail_back_url']) 
-              ? htmlspecialchars($_SESSION['app_detail_back_url'], ENT_QUOTES, 'UTF-8') 
-              : 'review.php';
-        ?>
-        <a href="<?= esc($backUrl) ?>" class="text-decoration-none text-muted small fw-medium"><i class="bi bi-arrow-left"></i> Back to List</a>
-        <h1 class="h3 fw-bold text-dark mt-2 mb-1">
-          Review Application 
-          <span class="badge <?= esc($badgeClass) ?> ms-2 fs-6 align-middle"><?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?></span>
-        </h1>
-        <p class="text-muted mb-0">Ref: <span class="fw-medium text-dark"><?= htmlspecialchars($app['reference_number'], ENT_QUOTES, 'UTF-8') ?></span></p>
+    <!-- Dossier Top Header -->
+    <div class="dossier-hero-strip mb-4 fade-in-up">
+      <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-2">
+            <?php 
+              if (isset($_SERVER['HTTP_REFERER']) && 
+                  str_contains($_SERVER['HTTP_REFERER'], '/admin/') && 
+                  !str_contains($_SERVER['HTTP_REFERER'], 'application_detail.php') && 
+                  !str_contains($_SERVER['HTTP_REFERER'], 'application_process.php')) {
+                  $_SESSION['app_detail_back_url'] = $_SERVER['HTTP_REFERER'];
+              }
+              $backUrl = isset($_SESSION['app_detail_back_url']) 
+                  ? htmlspecialchars($_SESSION['app_detail_back_url'], ENT_QUOTES, 'UTF-8') 
+                  : 'review.php';
+            ?>
+            <a href="<?= esc($backUrl) ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1" style="font-size: 0.78rem;">
+              <i class="bi bi-arrow-left"></i>
+              <span>Back to List</span>
+            </a>
+            <span class="badge bg-light text-secondary border rounded-pill px-3 py-1 font-monospace" style="font-size: 0.75rem;">
+              <i class="bi bi-hash text-muted"></i><?= htmlspecialchars($app['reference_number'], ENT_QUOTES, 'UTF-8') ?>
+            </span>
+          </div>
+          <div class="d-flex align-items-center gap-3 flex-wrap">
+            <h1 class="h3 fw-bold text-dark mb-0">Review Application</h1>
+            <span class="badge <?= esc($badgeClass) ?> rounded-pill px-3 py-1 fs-6 fw-semibold align-middle shadow-sm">
+              <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8') ?>
+            </span>
+          </div>
+          <div class="text-muted small mt-1">
+            Applicant: <strong class="text-dark"><?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8') ?></strong>
+            <?php if (!empty($app['created_at'])): ?>
+              <span class="mx-1 text-black-50">•</span> Submitted on <?= date('M j, Y g:i A', strtotime($app['created_at'])) ?>
+            <?php endif; ?>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2 fw-semibold" style="font-size: 0.8rem;">
+            <i class="bi bi-mortarboard me-1"></i><?= htmlspecialchars($app['academic_level'] ?? 'College', ENT_QUOTES, 'UTF-8') ?>
+          </span>
+          <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-2 fw-semibold" style="font-size: 0.8rem;">
+            <i class="bi bi-bookmark me-1"></i><?= htmlspecialchars($app['strand'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+          </span>
+        </div>
       </div>
     </div>
 
@@ -52,45 +78,67 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         <div class="col-lg-8">
         
         <!-- Personal Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-person-vcard-fill"></i>
-            <h2>Personal Information</h2>
+        <div class="dossier-card mb-4 fade-in-up">
+          <div class="dossier-card-header">
+            <div class="d-flex align-items-center gap-3">
+              <div class="dossier-header-icon bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-person-vcard-fill"></i>
+              </div>
+              <div>
+                <h2 class="h6 fw-bold text-dark mb-0">Personal Information</h2>
+                <small class="text-muted" style="font-size: 0.72rem;">Primary identity and demographic data</small>
+              </div>
+            </div>
           </div>
-          <div class="island-body">
+          <div class="dossier-card-body">
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Full Name</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-person"></i> Full Name</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Email Address</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['email'], ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-envelope"></i> Email Address</span>
+                  <div class="info-tile-value text-break"><?= htmlspecialchars($app['email'], ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Student Number</label>
-                <div class="fw-medium text-dark"><?= $app['student_number'] ? htmlspecialchars($app['student_number'], ENT_QUOTES, 'UTF-8') : '<span class="text-muted">Not Assigned</span>' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-person-badge"></i> Student Number</span>
+                  <div class="info-tile-value">
+                    <?= $app['student_number'] ? htmlspecialchars($app['student_number'], ENT_QUOTES, 'UTF-8') : '<span class="badge bg-light text-muted border rounded-pill px-2 py-1 fw-normal">Not Assigned</span>' ?>
+                  </div>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Date of Birth</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['birth_date'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-calendar3"></i> Date of Birth</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($app['birth_date'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Gender</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars(ucfirst($app['gender'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-gender-ambiguous"></i> Gender</span>
+                  <div class="info-tile-value"><?= htmlspecialchars(ucfirst($app['gender'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Contact No.</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['contact_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-telephone"></i> Contact No.</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($app['contact_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
-              <div class="col-12">
-                <label class="text-muted small fw-semibold text-uppercase">Address</label>
-                <div class="fw-medium text-dark">
-                  <?php 
-                    $fullAddress = trim(($app['address_house_number'] ?? '') . ' ' . ($app['address'] ?? ''));
-                    echo htmlspecialchars($fullAddress !== '' ? $fullAddress : 'N/A', ENT_QUOTES, 'UTF-8');
-                  ?>
+              <div class="col-md-8">
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-geo-alt"></i> Complete Address</span>
+                  <div class="info-tile-value">
+                    <?php 
+                      $fullAddress = trim(($app['address_house_number'] ?? '') . ' ' . ($app['address'] ?? ''));
+                      echo htmlspecialchars($fullAddress !== '' ? $fullAddress : 'N/A', ENT_QUOTES, 'UTF-8');
+                    ?>
+                  </div>
                 </div>
               </div>
             </div>
@@ -98,52 +146,83 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         </div>
 
         <!-- Academic Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-mortarboard-fill"></i>
-            <h2>Enrollment Details</h2>
+        <div class="dossier-card mb-4 fade-in-up">
+          <div class="dossier-card-header">
+            <div class="d-flex align-items-center gap-3">
+              <div class="dossier-header-icon bg-info bg-opacity-10 text-info">
+                <i class="bi bi-mortarboard-fill"></i>
+              </div>
+              <div>
+                <h2 class="h6 fw-bold text-dark mb-0">Enrollment Details</h2>
+                <small class="text-muted" style="font-size: 0.72rem;">Academic classification, term, and curriculum track</small>
+              </div>
+            </div>
           </div>
-          <div class="island-body">
+          <div class="dossier-card-body">
             <div class="row g-3">
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Academic Level</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['academic_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-mortarboard"></i> Academic Level</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($app['academic_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Student Type</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars(ucfirst(str_replace('_', ' ', $app['student_type'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-person-gear"></i> Student Type</span>
+                  <div class="info-tile-value"><?= htmlspecialchars(ucfirst(str_replace('_', ' ', $app['student_type'] ?? 'N/A')), ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Grade/Year Level</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['grade_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-award"></i> Grade/Year Level</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($app['grade_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">School Year</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['school_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-calendar-event"></i> School Year</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($app['school_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Semester</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['semester'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-clock-history"></i> Semester</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($app['semester'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <?php if (($app['academic_level'] ?? '') === 'College' && ($app['grade_level'] ?? '') === '1st Year'): ?>
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">NSTP Choice</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($app['nstp'] ?? 'Not Selected', ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-shield-check"></i> NSTP Choice</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($app['nstp'] ?? 'Not Selected', ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <?php endif; ?>
               <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Selected Program</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars(getStrandLabel($app['strand'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-book"></i> Selected Program</span>
+                  <div class="info-tile-value"><?= htmlspecialchars(getStrandLabel($app['strand'] ?? ''), ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Application Curriculum</label>
-                <div class="fw-medium text-dark"><?= !empty($app['assigned_curriculum_version']) ? htmlspecialchars($app['assigned_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic">Pending Assignment</span>' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-file-earmark-code"></i> Application Curriculum</span>
+                  <div class="info-tile-value">
+                    <?= !empty($app['assigned_curriculum_version']) 
+                        ? htmlspecialchars($app['assigned_curriculum_version'], ENT_QUOTES, 'UTF-8') 
+                        : '<span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle rounded-pill px-2 py-1 small fw-normal">Pending Assignment</span>' ?>
+                  </div>
+                </div>
               </div>
               <div class="col-12 mt-2">
-                <div class="p-2 bg-success bg-opacity-10 rounded border border-success border-opacity-25">
-                  <label class="text-success small fw-semibold text-uppercase"><i class="bi bi-file-earmark-lock2-fill"></i> Official Student Curriculum</label>
-                  <div class="fw-bold text-success-emphasis"><?= !empty($app['user_curriculum_version']) ? htmlspecialchars($app['user_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-warning fst-italic">Pending First Enrollment</span>' ?></div>
+                <div class="p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25 d-flex align-items-center justify-content-between flex-wrap gap-2">
+                  <div>
+                    <span class="text-success text-uppercase fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.5px;"><i class="bi bi-file-earmark-lock2-fill me-1"></i> Official Student Curriculum</span>
+                    <div class="fw-bold text-success-emphasis fs-6 mt-1">
+                      <?= !empty($app['user_curriculum_version']) ? htmlspecialchars($app['user_curriculum_version'], ENT_QUOTES, 'UTF-8') : '<span class="text-secondary small fst-italic">Pending First Enrollment</span>' ?>
+                    </div>
+                  </div>
+                  <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 rounded-pill px-3 py-1 small">Binding Record</span>
                 </div>
               </div>
             </div>
@@ -157,15 +236,18 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         ?>
         <?php if (!empty($displaySubs) || $isIrregular): ?>
         <!-- Subjects Section -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-          <div class="position-absolute top-0 start-0 w-100 <?= $isRequested ? 'bg-warning' : 'bg-primary' ?>" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi <?= $isRequested ? 'bi-clipboard-check text-warning fs-4' : 'bi-journal-text text-primary fs-4' ?>"></i>
+        <div class="dossier-card mb-4 fade-in-up">
+          <div class="dossier-card-header flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="dossier-header-icon <?= $isRequested ? 'bg-warning bg-opacity-15 text-warning' : 'bg-primary bg-opacity-10 text-primary' ?>">
+                <i class="bi <?= $isRequested ? 'bi-clipboard-check-fill' : 'bi-journal-text' ?>"></i>
+              </div>
               <div>
-                <h2 class="mb-0 fs-5"><?= $isRequested ? 'Requested Subjects (Irregular Student)' : 'Enrolled Subjects' ?></h2>
+                <h2 class="h6 fw-bold text-dark mb-0"><?= $isRequested ? 'Requested Subjects (Irregular Student)' : 'Enrolled Subjects' ?></h2>
                 <?php if ($isRequested): ?>
-                <span class="badge bg-warning bg-opacity-10 text-warning-emphasis border border-warning-subtle small">Awaiting Evaluation</span>
+                  <span class="badge bg-warning bg-opacity-15 text-dark border border-warning border-opacity-50 rounded-pill px-2 py-0 small mt-1">Awaiting Evaluation</span>
+                <?php else: ?>
+                  <small class="text-muted" style="font-size: 0.72rem;">Academic load and timetabled classes</small>
                 <?php endif; ?>
               </div>
             </div>
@@ -175,7 +257,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             </button>
             <?php endif; ?>
           </div>
-          <div class="island-body p-0 mt-2">
+          <div class="p-0">
             <div class="table-responsive">
               <table class="table table-hover align-middle mb-0 custom-table">
                 <thead class="table-light text-muted small text-uppercase">
@@ -202,7 +284,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     ?>
                     <tr>
                       <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($sub['subject_code'], ENT_QUOTES, 'UTF-8') ?></td>
-                      <td><?= htmlspecialchars($sub['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
+                      <td class="fw-medium text-dark"><?= htmlspecialchars($sub['subject_name'], ENT_QUOTES, 'UTF-8') ?></td>
                       <td class="text-primary small" style="font-size: 0.8rem;">
                           <?php if (!empty($sub['section_code'])): ?>
                               <span class="badge bg-secondary mb-1"><?= htmlspecialchars($sub['section_code'], ENT_QUOTES, 'UTF-8') ?></span><br>
@@ -210,11 +292,11 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                           <?= !empty($sub['schedule_text']) ? esc($sub['schedule_text']) : '<span class="text-muted fst-italic">Standard Schedule</span>' ?>
                       </td>
                       <td>
-                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle">
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle rounded-pill px-2 py-1">
                           <?= htmlspecialchars($sub['subject_type'] ?? 'Curriculum', ENT_QUOTES, 'UTF-8') ?>
                         </span>
                       </td>
-                      <td class="text-end pe-4"><?= htmlspecialchars((string)$sub['units'], ENT_QUOTES, 'UTF-8') ?></td>
+                      <td class="text-end pe-4 fw-semibold text-primary"><?= htmlspecialchars((string)$sub['units'], ENT_QUOTES, 'UTF-8') ?></td>
                     </tr>
                     <?php endforeach; ?>
                   <?php endif; ?>
@@ -222,8 +304,8 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <?php if (!empty($displaySubs)): ?>
                 <tfoot class="table-light">
                   <tr>
-                    <td colspan="3" class="text-end fw-bold text-dark">Total Units:</td>
-                    <td class="text-end pe-4 fw-bold text-dark fs-5" colspan="2"><?= esc($totalUnits) ?></td>
+                    <td colspan="3" class="text-end fw-bold text-dark ps-4">Total Academic Units:</td>
+                    <td class="text-end pe-4 fw-bold text-dark fs-6" colspan="2"><?= esc($totalUnits) ?> Units</td>
                   </tr>
                 </tfoot>
                 <?php endif; ?>
@@ -234,137 +316,187 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         <?php endif; ?>
 
         <!-- Educational History -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-building"></i>
-            <h2>Educational History</h2>
+        <div class="dossier-card mb-4 fade-in-up">
+          <div class="dossier-card-header">
+            <div class="d-flex align-items-center gap-3">
+              <div class="dossier-header-icon bg-secondary bg-opacity-10 text-secondary">
+                <i class="bi bi-building"></i>
+              </div>
+              <div>
+                <h2 class="h6 fw-bold text-dark mb-0">Educational History</h2>
+                <small class="text-muted" style="font-size: 0.72rem;">Previous schooling and learner credentials</small>
+              </div>
+            </div>
           </div>
-          <div class="island-body">
+          <div class="dossier-card-body">
             <div class="row g-3">
               <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Learner Reference Number (LRN)</label>
-                <div class="fw-medium text-dark"><?= !empty($app['lrn']) ? htmlspecialchars($app['lrn'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-upc-scan"></i> Learner Reference Number (LRN)</span>
+                  <div class="info-tile-value font-monospace"><?= !empty($app['lrn']) ? htmlspecialchars($app['lrn'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Previous School Name</label>
-                <div class="fw-medium text-dark"><?= !empty($app['previous_school']) ? htmlspecialchars($app['previous_school'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-building"></i> Previous School Name</span>
+                  <div class="info-tile-value"><?= !empty($app['previous_school']) ? htmlspecialchars($app['previous_school'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Previous School Type</label>
-                <div class="fw-medium text-dark"><?= !empty($app['previous_school_type']) ? htmlspecialchars($app['previous_school_type'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-tag"></i> Previous School Type</span>
+                  <div class="info-tile-value"><?= !empty($app['previous_school_type']) ? htmlspecialchars($app['previous_school_type'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                </div>
               </div>
               <div class="col-md-6">
-                <label class="text-muted small fw-semibold text-uppercase">Last School Year Attended</label>
-                <div class="fw-medium text-dark"><?= !empty($app['previous_school_year']) ? htmlspecialchars($app['previous_school_year'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-calendar-range"></i> Last School Year Attended</span>
+                  <div class="info-tile-value"><?= !empty($app['previous_school_year']) ? htmlspecialchars($app['previous_school_year'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Family & Guardian Background -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-people-fill"></i>
-            <h2>Family & Guardian Information</h2>
+        <div class="dossier-card mb-4 fade-in-up">
+          <div class="dossier-card-header">
+            <div class="d-flex align-items-center gap-3">
+              <div class="dossier-header-icon bg-info bg-opacity-10 text-info">
+                <i class="bi bi-people-fill"></i>
+              </div>
+              <div>
+                <h2 class="h6 fw-bold text-dark mb-0">Family & Guardian Information</h2>
+                <small class="text-muted" style="font-size: 0.72rem;">Authorized parent or primary guardian contacts</small>
+              </div>
+            </div>
           </div>
-          <div class="island-body">
+          <div class="dossier-card-body">
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Primary Guardian / Parent</label>
-                <div class="fw-medium text-dark"><?= !empty($app['guardian_name']) ? htmlspecialchars($app['guardian_name'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-person"></i> Primary Guardian / Parent</span>
+                  <div class="info-tile-value"><?= !empty($app['guardian_name']) ? htmlspecialchars($app['guardian_name'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Relationship to Applicant</label>
-                <div class="fw-medium text-dark"><?= !empty($app['guardian_relationship']) ? htmlspecialchars($app['guardian_relationship'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-heart"></i> Relationship to Applicant</span>
+                  <div class="info-tile-value"><?= !empty($app['guardian_relationship']) ? htmlspecialchars($app['guardian_relationship'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Guardian Contact Number</label>
-                <div class="fw-medium text-dark"><?= !empty($app['guardian_contact']) ? htmlspecialchars($app['guardian_contact'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-telephone"></i> Guardian Contact Number</span>
+                  <div class="info-tile-value"><?= !empty($app['guardian_contact']) ? htmlspecialchars($app['guardian_contact'], ENT_QUOTES, 'UTF-8') : 'N/A' ?></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Emergency & Medical Information -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light">
-            <i class="bi bi-heart-pulse-fill"></i>
-            <h2>Emergency & Medical Info</h2>
+        <div class="dossier-card mb-4 fade-in-up">
+          <div class="dossier-card-header">
+            <div class="d-flex align-items-center gap-3">
+              <div class="dossier-header-icon bg-danger bg-opacity-10 text-danger">
+                <i class="bi bi-heart-pulse-fill"></i>
+              </div>
+              <div>
+                <h2 class="h6 fw-bold text-dark mb-0">Emergency & Medical Info</h2>
+                <small class="text-muted" style="font-size: 0.72rem;">Health profile and designated emergency point of contact</small>
+              </div>
+            </div>
           </div>
-          <div class="island-body">
+          <div class="dossier-card-body">
             <div class="row g-3">
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Emergency Contact</label>
-                <div class="fw-medium text-dark"><?= !empty($app['emergency_name']) ? htmlspecialchars($app['emergency_name'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_name']) ? htmlspecialchars($health['emergency_name'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-person-exclamation"></i> Emergency Contact</span>
+                  <div class="info-tile-value"><?= !empty($app['emergency_name']) ? htmlspecialchars($app['emergency_name'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_name']) ? htmlspecialchars($health['emergency_name'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Relationship</label>
-                <div class="fw-medium text-dark"><?= !empty($app['emergency_relationship']) ? htmlspecialchars($app['emergency_relationship'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_relationship']) ? htmlspecialchars($health['emergency_relationship'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-link-45deg"></i> Relationship</span>
+                  <div class="info-tile-value"><?= !empty($app['emergency_relationship']) ? htmlspecialchars($app['emergency_relationship'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_relationship']) ? htmlspecialchars($health['emergency_relationship'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
+                </div>
               </div>
               <div class="col-md-4">
-                <label class="text-muted small fw-semibold text-uppercase">Contact Number</label>
-                <div class="fw-medium text-dark"><?= !empty($app['emergency_contact']) ? htmlspecialchars($app['emergency_contact'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_contact']) ? htmlspecialchars($health['emergency_contact'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-telephone-forward"></i> Contact Number</span>
+                  <div class="info-tile-value"><?= !empty($app['emergency_contact']) ? htmlspecialchars($app['emergency_contact'], ENT_QUOTES, 'UTF-8') : (!empty($health['emergency_contact']) ? htmlspecialchars($health['emergency_contact'], ENT_QUOTES, 'UTF-8') : 'N/A') ?></div>
+                </div>
               </div>
               
-              <div class="col-12"><hr class="my-1 border-light"></div>
-
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Height & Weight</label>
-                <div class="fw-medium text-dark">
-                  <?= !empty($health['height']) ? htmlspecialchars($health['height']) . ' cm' : '—' ?> / 
-                  <?= !empty($health['weight']) ? htmlspecialchars($health['weight']) . ' kg' : '—' ?>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-rulers"></i> Height &amp; Weight</span>
+                  <div class="info-tile-value">
+                    <?= !empty($health['height']) ? htmlspecialchars($health['height']) . ' cm' : '—' ?> / 
+                    <?= !empty($health['weight']) ? htmlspecialchars($health['weight']) . ' kg' : '—' ?>
+                  </div>
                 </div>
               </div>
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Blood Type</label>
-                <div class="fw-medium text-dark"><?= !empty($health['blood_type']) ? htmlspecialchars($health['blood_type'], ENT_QUOTES, 'UTF-8') : '—' ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-droplet-half text-danger"></i> Blood Type</span>
+                  <div class="info-tile-value"><?= !empty($health['blood_type']) ? htmlspecialchars($health['blood_type'], ENT_QUOTES, 'UTF-8') : '—' ?></div>
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Allergies</label>
-                <div class="fw-medium text-dark"><?= !empty($health['allergies_details']) ? htmlspecialchars($health['allergies_details'], ENT_QUOTES, 'UTF-8') : (!empty($health['has_allergies']) ? 'Yes' : 'None') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-bandaid"></i> Allergies</span>
+                  <div class="info-tile-value"><?= !empty($health['allergies_details']) ? htmlspecialchars($health['allergies_details'], ENT_QUOTES, 'UTF-8') : (!empty($health['has_allergies']) ? 'Yes' : 'None') ?></div>
+                </div>
               </div>
               <div class="col-md-3">
-                <label class="text-muted small fw-semibold text-uppercase">Medical Clearance</label>
-                <div>
-                  <?php 
-                    $hStatus = $health['status'] ?? 'pending';
-                    $hBadge = match($hStatus) {
-                      'verified' => 'bg-success',
-                      'rejected' => 'bg-danger',
-                      'correction_required' => 'bg-warning text-dark',
-                      default => 'bg-secondary bg-opacity-10 text-secondary'
-                    };
-                  ?>
-                  <span class="badge <?= esc($hBadge) ?> rounded-pill text-uppercase" style="font-size: 0.7rem;"><?= ucfirst(htmlspecialchars($hStatus, ENT_QUOTES, 'UTF-8')) ?></span>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-shield-check"></i> Medical Clearance</span>
+                  <div class="info-tile-value mt-1">
+                    <?php 
+                      $hStatus = $health['status'] ?? 'pending';
+                      $hBadge = match($hStatus) {
+                        'verified' => 'bg-success text-white',
+                        'rejected' => 'bg-danger text-white',
+                        'correction_required' => 'bg-warning text-dark',
+                        default => 'bg-secondary bg-opacity-10 text-secondary'
+                      };
+                    ?>
+                    <span class="badge <?= esc($hBadge) ?> rounded-pill px-3 py-1 text-uppercase" style="font-size: 0.7rem;"><?= ucfirst(htmlspecialchars($hStatus, ENT_QUOTES, 'UTF-8')) ?></span>
+                  </div>
                 </div>
               </div>
               <?php if (!empty($health['medical_conditions'])): ?>
               <div class="col-12">
-                <label class="text-muted small fw-semibold text-uppercase">Declared Medical Conditions</label>
-                <div class="fw-medium text-dark"><?= htmlspecialchars($health['medical_conditions'], ENT_QUOTES, 'UTF-8') ?></div>
+                <div class="info-tile">
+                  <span class="info-tile-label"><i class="bi bi-journal-medical"></i> Declared Medical Conditions</span>
+                  <div class="info-tile-value"><?= htmlspecialchars($health['medical_conditions'], ENT_QUOTES, 'UTF-8') ?></div>
+                </div>
               </div>
               <?php endif; ?>
             </div>
           </div>
         </div>
 
-                        <!-- Documents -->
-        <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div class="d-flex align-items-center gap-2">
-              <i class="bi bi-folder-fill text-primary"></i>
-              <h2 class="mb-0">Uploaded Documents</h2>
+        <!-- Documents -->
+        <div class="dossier-card mb-4 fade-in-up">
+          <div class="dossier-card-header flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-3">
+              <div class="dossier-header-icon bg-primary bg-opacity-10 text-primary">
+                <i class="bi bi-folder-fill"></i>
+              </div>
+              <div>
+                <h2 class="h6 fw-bold text-dark mb-0">Uploaded Documents</h2>
+                <small class="text-muted" style="font-size: 0.72rem;">Submitted credentials and verification status</small>
+              </div>
             </div>
             <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#adminUploadDocModal">
               <i class="bi bi-cloud-arrow-up"></i>
               <span>Upload Document</span>
             </button>
           </div>
-          <div class="island-body">
+          <div class="dossier-card-body">
             <?php if ($app['document_submission_method'] === 'on_campus'): ?>
                <div class="alert alert-secondary bg-light border-0 d-flex align-items-center justify-content-between flex-wrap gap-2 py-3 px-3 mb-3 rounded-3">
                  <div class="d-flex align-items-center gap-3">
@@ -409,7 +541,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                          <div>
                            <div class="d-flex align-items-center gap-2 flex-wrap">
                              <span class="fw-bold text-dark"><?= $docNameEsc ?></span>
-                             <span class="badge <?= esc($statusBadge) ?> rounded-pill text-uppercase" style="font-size: 0.65rem;"><?= ucfirst(htmlspecialchars($doc['status'] ?? 'pending', ENT_QUOTES, 'UTF-8')) ?></span>
+                             <span class="badge <?= esc($statusBadge) ?> rounded-pill text-uppercase px-2" style="font-size: 0.65rem;"><?= ucfirst(htmlspecialchars($doc['status'] ?? 'pending', ENT_QUOTES, 'UTF-8')) ?></span>
                            </div>
                            <div class="small text-muted mt-1">
                              <i class="bi bi-clock me-1"></i> Uploaded: <?= !empty($doc['created_at']) ? date('M j, Y g:i A', strtotime($doc['created_at'])) : 'N/A' ?>
@@ -435,16 +567,16 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                      
                      <div class="row g-2 mt-2 align-items-center bg-light p-2 rounded-3 border">
                        <div class="col-md-4">
-                         <label class="small text-muted fw-bold mb-1">Verify Status</label>
-                         <select name="doc_status[<?= esc($doc['id']) ?>]" class="form-select form-select-sm">
+                         <label class="small text-muted fw-bold mb-1" style="font-size: 0.72rem;">Verify Status</label>
+                         <select name="doc_status[<?= esc($doc['id']) ?>]" class="form-select form-select-sm rounded-3">
                            <option value="pending" <?= esc(($doc['status'] ?? '') === 'pending' ? 'selected' : '') ?>>Pending / Awaiting</option>
                            <option value="verified" <?= esc(($doc['status'] ?? '') === 'verified' ? 'selected' : '') ?>>Verified / Approved</option>
                            <option value="rejected" <?= esc(($doc['status'] ?? '') === 'rejected' ? 'selected' : '') ?>>Rejected / Needs Reupload</option>
                          </select>
                        </div>
                        <div class="col-md-8">
-                         <label class="small text-muted fw-bold mb-1">Feedback Comment</label>
-                         <input type="text" name="doc_feedback[<?= esc($doc['id']) ?>]" class="form-control form-control-sm" placeholder="e.g. Please upload clear copy of LRN card..." value="<?= htmlspecialchars($doc['feedback'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                         <label class="small text-muted fw-bold mb-1" style="font-size: 0.72rem;">Feedback Comment</label>
+                         <input type="text" name="doc_feedback[<?= esc($doc['id']) ?>]" class="form-control form-control-sm rounded-3" placeholder="e.g. Please upload clear copy of LRN card..." value="<?= htmlspecialchars($doc['feedback'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                        </div>
                      </div>
                    </li>
@@ -459,17 +591,22 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
       <!-- Right Column: Administrative Action -->
       <div class="col-lg-4">
         
-        <div class="island border-primary border-top border-4 sticky-top" style="top: 80px;">
-          <div class="island-header bg-primary-light">
-            <i class="bi bi-shield-lock-fill text-primary"></i>
-            <h2 class="text-primary">Admin Action Panel</h2>
+        <div class="action-console-card sticky-top" style="top: 85px;">
+          <div class="action-console-header d-flex align-items-center gap-3">
+            <div class="rounded-3 bg-primary text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; flex-shrink: 0; background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%);">
+              <i class="bi bi-shield-lock-fill fs-5"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold text-dark mb-0">Admin Action Panel</h6>
+              <small class="text-muted" style="font-size: 0.72rem;">Evaluation & Status Workflow</small>
+            </div>
           </div>
-          <div class="island-body">
+          <div class="p-4">
             
               <?php if (hasPermission('enrollment.finalize') && empty($app['section_id'])): ?>
-              <div class="mb-3 p-3 bg-white rounded border border-primary">
-                <label for="assign_section" class="form-label fw-semibold small text-primary"><i class="bi bi-diagram-3 text-primary"></i> Assign Section</label>
-                <select name="assign_section" id="assign_section" class="form-select form-select-sm">
+              <div class="mb-3 p-3 bg-light rounded-3 border border-primary border-opacity-25">
+                <label for="assign_section" class="form-label fw-semibold small text-primary mb-1"><i class="bi bi-diagram-3-fill me-1"></i> Assign Section</label>
+                <select name="assign_section" id="assign_section" class="form-select form-select-sm rounded-3">
                   <option value="">Do not assign section yet</option>
                   <?php foreach ($availableSections as $sec): 
                           $remaining = (int)$sec['capacity'] - (int)$sec['current_enrollment'];
@@ -481,27 +618,28 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     </option>
                   <?php endforeach; ?>
                 </select>
-                <div class="form-text" style="font-size: 0.7rem;">When assigned, the system will automatically retrieve the curriculum subjects and schedule for this student.</div>
+                <div class="form-text text-muted mt-1" style="font-size: 0.7rem;">When assigned, the system will automatically retrieve the curriculum subjects and schedule for this student.</div>
                 <div id="enrollmentSummaryPreview"></div>
               </div>
               <?php endif; ?>
 
               <?php if (!empty($app['section_id'])): ?>
               <div class="mb-3">
-                 <label class="form-label fw-semibold small text-dark">Assigned Section</label>
+                 <label class="form-label fw-semibold small text-dark mb-1">Assigned Section</label>
                  <?php 
                     $currSec = array_filter($availableSections, fn($s) => $s['id'] == $app['section_id']);
                     $currSec = reset($currSec);
                  ?>
-                 <div class="form-control form-control-sm bg-light text-muted">
-                    <?= $currSec ? htmlspecialchars($currSec['section_code'], ENT_QUOTES, 'UTF-8') : 'Unknown Section ID: ' . $app['section_id'] ?>
+                 <div class="p-2 px-3 bg-light rounded-3 border fw-semibold text-dark d-flex align-items-center justify-content-between">
+                    <span><i class="bi bi-diagram-3 text-primary me-2"></i><?= $currSec ? htmlspecialchars($currSec['section_code'], ENT_QUOTES, 'UTF-8') : 'Unknown Section ID: ' . $app['section_id'] ?></span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill small">Current</span>
                  </div>
               </div>
               <?php endif; ?>
 
               <div class="mb-3">
-                <label for="status" class="form-label fw-semibold small text-dark">Update Status</label>
-                <select name="status" id="status" class="form-select form-select-sm" required <?= esc($app['status'] === 'enrolled' ? 'disabled' : '') ?>>
+                <label for="status" class="form-label fw-semibold small text-dark mb-1">Update Status</label>
+                <select name="status" id="status" class="form-select form-select-sm rounded-3 py-2 fw-medium" required <?= esc($app['status'] === 'enrolled' ? 'disabled' : '') ?>>
                   <?php if ($app['status'] === 'enrolled'): ?>
                     <option value="enrolled" selected>Officially Enrolled</option>
                   <?php else: ?>
@@ -520,35 +658,51 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
               </div>
 
               <div class="mb-3">
-                <label for="feedback" class="form-label fw-semibold small text-dark">Applicant Feedback (Visible to Student)</label>
-                <textarea name="feedback" id="feedback" rows="3" class="form-control form-control-sm" placeholder="e.g. Please upload a clearer copy of your birth certificate."><?= htmlspecialchars($app['admin_feedback'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                <div class="form-text" style="font-size: 0.7rem;">Feedback will be recorded in the applicant's activity timeline and displayed on their dashboard.</div>
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <label for="feedback" class="form-label fw-semibold small text-dark mb-0"><i class="bi bi-chat-left-text text-primary me-1"></i> Applicant Feedback</label>
+                  <span class="badge bg-light text-muted border rounded-pill" style="font-size: 0.65rem;">Visible to Student</span>
+                </div>
+                <textarea name="feedback" id="feedback" rows="3" class="form-control form-control-sm rounded-3" placeholder="e.g. Please upload a clearer copy of your birth certificate."><?= htmlspecialchars($app['admin_feedback'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                <div class="form-text text-muted" style="font-size: 0.7rem;">Feedback will be recorded in the applicant's activity timeline and displayed on their dashboard.</div>
               </div>
 
               <div class="mb-4">
-                <label for="internal_notes" class="form-label fw-semibold small text-dark">Internal Admin Notes (Admin Only)</label>
-                <textarea name="internal_notes" id="internal_notes" rows="3" class="form-control form-control-sm" placeholder="Internal notes about the application..."><?= htmlspecialchars($app['internal_notes'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
-                <div class="form-text" style="font-size: 0.7rem;">These notes are only visible to system administrators.</div>
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <label for="internal_notes" class="form-label fw-semibold small text-dark mb-0"><i class="bi bi-lock-fill text-secondary me-1"></i> Internal Admin Notes</label>
+                  <span class="badge bg-light text-muted border rounded-pill" style="font-size: 0.65rem;">Admin Only</span>
+                </div>
+                <textarea name="internal_notes" id="internal_notes" rows="3" class="form-control form-control-sm rounded-3" placeholder="Internal notes about the application..."><?= htmlspecialchars($app['internal_notes'] ?? '', ENT_QUOTES, 'UTF-8'); ?></textarea>
+                <div class="form-text text-muted" style="font-size: 0.7rem;">These notes are only visible to system administrators.</div>
               </div>
 
               <?php if (!$assessment): ?>
-              <div class="mb-4 p-3 bg-white rounded border border-warning">
-                <div class="fw-semibold small text-dark mb-1"><i class="bi bi-cash-stack text-warning"></i> Automated Assessment Generation</div>
-                <div class="form-text mt-0" style="font-size: 0.7rem;">The system will automatically generate a fee assessment for <strong><?= htmlspecialchars($app['grade_level'] ?? '', ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($app['strand'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong> as soon as this application is marked as <strong>Approved</strong>. This is required before the student can apply for scholarships.</div>
+              <div class="mb-4 p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25">
+                <div class="fw-semibold small text-dark mb-1"><i class="bi bi-cash-stack text-warning me-1"></i> Automated Assessment Notice</div>
+                <div class="text-muted" style="font-size: 0.72rem; line-height: 1.5;">The system will automatically generate a fee assessment for <strong><?= htmlspecialchars($app['grade_level'] ?? '', ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($app['strand'] ?? '', ENT_QUOTES, 'UTF-8') ?></strong> as soon as this application is marked as <strong>Approved</strong>. This is required before the student can apply for scholarships.</div>
               </div>
               <?php else: ?>
-              <div class="mb-4 p-3 bg-white rounded border border-success">
-                <div class="fw-semibold small text-dark"><i class="bi bi-check-circle-fill text-success"></i> Assessment Generated</div>
-                <div class="small text-muted mt-1">
-                  Net Amount: <strong>₱<?= number_format((float)$assessment['net_amount'], 2) ?></strong><br>
-                  Discount: ₱<?= number_format((float)$assessment['discount_amount'], 2) ?>
+              <div class="mb-4 p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25">
+                <div class="fw-semibold small text-success-emphasis d-flex align-items-center justify-content-between">
+                  <span><i class="bi bi-check-circle-fill text-success me-1"></i> Assessment Generated</span>
+                  <span class="badge bg-success bg-opacity-20 text-success rounded-pill px-2 py-1 small">Active</span>
                 </div>
+                <div class="small text-muted mt-2 pt-2 border-top border-success border-opacity-25 d-flex justify-content-between">
+                  <span>Net Amount:</span>
+                  <strong class="text-dark">₱<?= number_format((float)$assessment['net_amount'], 2) ?></strong>
+                </div>
+                <?php if ((float)$assessment['discount_amount'] > 0): ?>
+                <div class="small text-muted d-flex justify-content-between mt-1">
+                  <span>Discount:</span>
+                  <span class="text-success fw-medium">-₱<?= number_format((float)$assessment['discount_amount'], 2) ?></span>
+                </div>
+                <?php endif; ?>
               </div>
               <?php endif; ?>
 
               <div class="d-grid">
-                <button type="submit" class="btn btn-primary fw-medium rounded-pill shadow-sm">
-                  <i class="bi bi-save2 me-1"></i> Save Changes
+                <button type="submit" class="btn btn-primary fw-bold rounded-pill py-2 shadow-sm d-flex align-items-center justify-content-center gap-2" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
+                  <i class="bi bi-check-circle-fill"></i>
+                  <span>Save Decision &amp; Changes</span>
                 </button>
               </div>
 
@@ -772,7 +926,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       previewEl.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary spinner-border-sm" role="status"></div><span class="ms-2 small text-muted">Retrieving curriculum...</span></div>';
 
-      fetch(`../ajax/get_enrollment_summary.php?section_id=${sectionId}&app_id=<?= esc($appId) ?>`)
+      fetch(`../ajax/get_enrollment_summary.php?section_id=${sectionId}&app_id=<?= esc($app['id']) ?>`)
         .then(response => response.text())
         .then(html => {
           previewEl.innerHTML = html;

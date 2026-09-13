@@ -1,50 +1,46 @@
 @import url("./design-system.css");
 
 .main-navbar {
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.85) !important;
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  transition: all 0.3s ease;
   z-index: 1030;
 }
 
 .main-navbar .navbar-brand {
   align-items: center;
-  color: var(--color-text);
+  color: #0f172a;
   display: inline-flex;
   font-weight: 700;
   gap: var(--space-2);
+  transition: transform 0.2s ease;
 }
 
-.school-logo {
-  align-items: center;
-  background-color: var(--color-primary);
-  border-radius: var(--radius-md);
-  color: #ffffff;
-  display: inline-flex;
-  height: 42px;
-  justify-content: center;
-  width: 42px;
-}
-
-.school-logo i {
-  font-size: 1.35rem;
+.main-navbar .navbar-brand:hover {
+  transform: translateY(-1px);
 }
 
 .school-name {
-  font-size: 1rem;
-  letter-spacing: 0;
+  font-size: 1.1rem;
+  letter-spacing: -0.2px;
 }
 
 .main-navbar .nav-link {
-  border-radius: var(--radius-md);
-  color: var(--color-text);
+  border-radius: var(--radius-pill);
+  color: #334155;
   font-weight: 500;
-  padding: 0.625rem 0.85rem;
+  font-size: 0.925rem;
+  padding: 0.5rem 0.9rem;
   position: relative;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
 .main-navbar .nav-link:hover,
 .main-navbar .nav-link:focus {
-  background-color: var(--color-primary-light);
+  background-color: rgba(13, 110, 253, 0.08);
   color: var(--color-primary);
   transform: translateY(-1px);
 }
@@ -57,11 +53,17 @@
 
 .main-navbar .nav-register {
   min-height: 42px;
-  padding-inline: 1rem;
+  padding-inline: 1.25rem;
+  transition: all 0.25s ease;
+}
+
+.main-navbar .nav-register:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(13, 110, 253, 0.4) !important;
 }
 
 .main-navbar .navbar-toggler {
-  border-color: var(--color-border);
+  border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: var(--radius-md);
 }
 
@@ -71,7 +73,12 @@
 
 @media (max-width: 991.98px) {
   .main-navbar .navbar-collapse {
-    padding: var(--space-3) 0 var(--space-2);
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    margin-top: 0.75rem;
+    padding: 1.25rem;
+    border: 1px solid rgba(226, 232, 240, 0.8);
   }
 
   .main-navbar .nav-link,
@@ -87,42 +94,109 @@
 
 .hero-section {
   position: relative;
-  background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('../images/TTU_CAMPUS.png');
+  background-image: 
+    radial-gradient(ellipse at center top, rgba(13, 110, 253, 0.3), transparent 65%),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.78) 0%, rgba(15, 23, 42, 0.94) 100%), 
+    url('../images/TTU_CAMPUS.png');
   background-attachment: fixed;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   overflow: hidden;
-  padding: 10rem 0;
+  padding: 8.5rem 0 6.5rem 0;
   color: white;
 }
 
-.hero-eyebrow {
-  color: var(--color-primary);
+.hero-badge {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #bfdbfe;
+  font-size: 0.825rem;
+  letter-spacing: 0.75px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.hero-badge:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.badge-pulse {
+  width: 8px;
+  height: 8px;
+  background-color: #38bdf8;
+  border-radius: 50%;
   display: inline-block;
-  font-size: var(--font-size-sm);
-  font-weight: 700;
-  margin-bottom: var(--space-3);
-  text-transform: uppercase;
+  box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7);
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(56, 189, 248, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); }
 }
 
 .hero-title {
-  font-size: clamp(2.25rem, 6vw, 4.5rem);
-  font-weight: 700;
+  font-size: clamp(2.35rem, 5.5vw, 4.25rem);
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
   margin-bottom: var(--space-4);
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.hero-title-gradient {
+  background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline;
 }
 
 .hero-text {
-  color: var(--color-text-muted);
+  color: #e2e8f0;
   font-size: var(--font-size-lg);
+  line-height: 1.65;
   margin-bottom: var(--space-5);
-  max-width: 560px;
+  max-width: 620px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);
+}
+
+.hero-btn-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%);
+  border: none;
+  box-shadow: 0 8px 24px rgba(13, 110, 253, 0.4);
+  transition: all 0.25s ease;
+}
+
+.hero-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(13, 110, 253, 0.55);
+}
+
+.hero-btn-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  transition: all 0.25s ease;
+}
+
+.hero-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: #ffffff;
+  transform: translateY(-2px);
 }
 
 .hero-actions .btn {
@@ -1411,4 +1485,600 @@ body {
 .custom-table td {
   padding-top: 0.85rem;
   padding-bottom: 0.85rem;
+}
+
+/* ==========================================================================
+   ENHANCED LANDING PAGE DESIGN SYSTEM & MODERN UI COMPONENTS
+   ========================================================================== */
+
+/* Floating KPI Stats Strip */
+.hero-stats-strip {
+  position: relative;
+  margin-top: -3.25rem;
+  margin-bottom: 2.5rem;
+  z-index: 20;
+}
+
+.hero-stat-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px -4px rgba(15, 23, 42, 0.08);
+  padding: 1.25rem 1.15rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 100%;
+}
+
+.hero-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 36px -4px rgba(13, 110, 253, 0.14);
+  border-color: rgba(13, 110, 253, 0.35);
+}
+
+.hero-stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.hero-stat-card:hover .hero-stat-icon {
+  transform: scale(1.1);
+}
+
+/* LMS Portals Showcase Cards */
+.lms-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.05);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  position: relative;
+}
+
+.lms-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #0d6efd, #0dcaf0);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lms-card:hover::before {
+  opacity: 1;
+}
+
+.lms-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 24px 48px -8px rgba(13, 110, 253, 0.14);
+  border-color: rgba(13, 110, 253, 0.3);
+}
+
+.lms-icon-box {
+  width: 76px;
+  height: 76px;
+  border-radius: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.15rem;
+  margin: 0 auto 1.25rem;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.lms-card:hover .lms-icon-box {
+  transform: scale(1.08) rotate(3deg);
+}
+
+/* Enhanced Program Offerings Cards */
+.program-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 22px;
+  box-shadow: 0 6px 24px -4px rgba(15, 23, 42, 0.05);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 100%;
+  position: relative;
+}
+
+.program-card:hover {
+  border-color: rgba(13, 110, 253, 0.35);
+  box-shadow: 0 16px 36px -4px rgba(13, 110, 253, 0.12);
+  transform: translateY(-7px);
+}
+
+.program-card .program-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #e0f2fe 0%, #ede9fe 100%);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.25rem;
+  transition: transform 0.3s ease;
+}
+
+.program-card:hover .program-icon {
+  transform: scale(1.1) rotate(4deg);
+}
+
+.career-chip {
+  display: inline-block;
+  font-size: 0.725rem;
+  background: #f1f5f9;
+  color: #475569;
+  padding: 0.25rem 0.65rem;
+  border-radius: 8px;
+  margin-right: 4px;
+  margin-bottom: 4px;
+  font-weight: 500;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.tuition-badge-box {
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+}
+
+/* Admission Step Numbering Badge */
+.admission-step-badge {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  color: #1d4ed8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.75px;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  display: inline-block;
+  margin-bottom: 0.85rem;
+  border: 1px solid #bfdbfe;
+}
+
+/* Nav Pills Customizer */
+.nav-pills .nav-link.active {
+  background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%) !important;
+  box-shadow: 0 4px 14px rgba(13, 110, 253, 0.35) !important;
+  color: #ffffff !important;
+}
+
+.nav-pills .nav-link {
+  color: #475569;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.nav-pills .nav-link:hover:not(.active) {
+  background-color: #f1f5f9;
+  color: #0d6efd;
+}
+
+/* University Footer */
+.university-footer {
+  background: linear-gradient(180deg, #0f172a 0%, #090d16 100%);
+  color: #94a3b8;
+  padding-top: 4.5rem;
+  padding-bottom: 2rem;
+}
+
+.university-footer a {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
+}
+
+.university-footer a:hover {
+  color: #38bdf8;
+  transform: translateX(3px);
+}
+
+.university-footer h5 {
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+  letter-spacing: -0.2px;
+}
+
+.university-footer .footer-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* Enhanced Scholarship Cards */
+.scholarships-section {
+  background-color: #f8fafc;
+}
+
+.scholarship-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 22px;
+  box-shadow: 0 6px 24px -4px rgba(15, 23, 42, 0.05);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.scholarship-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #f59e0b, #ef4444);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.scholarship-card.school-based::before {
+  background: linear-gradient(90deg, #0d6efd, #3b82f6);
+}
+
+.scholarship-card.government::before {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.scholarship-card.private::before {
+  background: linear-gradient(90deg, #8b5cf6, #6366f1);
+}
+
+.scholarship-card:hover::before {
+  opacity: 1;
+}
+
+.scholarship-card:hover {
+  border-color: rgba(13, 110, 253, 0.35);
+  box-shadow: 0 20px 40px -6px rgba(15, 23, 42, 0.12);
+  transform: translateY(-8px);
+}
+
+.benefit-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+}
+
+.benefit-pill.coverage {
+  background: rgba(16, 185, 129, 0.1);
+  color: #065f46;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.benefit-pill.stipend {
+  background: rgba(13, 110, 253, 0.08);
+  color: #1e40af;
+  border: 1px solid rgba(13, 110, 253, 0.2);
+}
+
+.benefit-pill.book {
+  background: rgba(245, 158, 11, 0.1);
+  color: #92400e;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.eligibility-box {
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+}
+
+.scholarship-req-item {
+  position: relative;
+  padding-left: 1.25rem;
+  font-size: 0.785rem;
+  color: #64748b;
+  margin-bottom: 0.35rem;
+}
+
+.scholarship-req-item::before {
+  content: "•";
+  position: absolute;
+  left: 0.35rem;
+  color: var(--color-primary);
+  font-weight: bold;
+}
+
+/* Custom SweetAlert2 Polish */
+.swal2-container {
+  z-index: 10000 !important;
+  backdrop-filter: blur(4px);
+}
+
+.swal2-popup.swal2-modal {
+  font-family: inherit;
+  border-radius: 20px !important;
+  border: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.swal2-actions {
+  margin-top: 1.5rem !important;
+}
+
+/* ==========================================================================
+   Admin Dossier & Application Review System
+   ========================================================================== */
+.dossier-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: box-shadow 0.25s ease;
+}
+
+.dossier-card:hover {
+  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.07);
+}
+
+.dossier-card-header {
+  padding: 1.15rem 1.4rem;
+  border-bottom: 1px solid rgba(241, 245, 249, 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+}
+
+.dossier-header-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.dossier-card-body {
+  padding: 1.4rem;
+}
+
+.info-tile {
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.info-tile:hover {
+  background: #ffffff;
+  border-color: rgba(203, 213, 225, 0.9);
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+}
+
+.info-tile-label {
+  font-size: 0.685rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.info-tile-value {
+  font-size: 0.925rem;
+  font-weight: 600;
+  color: #0f172a;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.dossier-hero-strip {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 18px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+}
+
+.action-console-card {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 18px;
+  box-shadow: 0 6px 24px -4px rgba(15, 23, 42, 0.06);
+  position: sticky;
+  top: 85px;
+  overflow: hidden;
+}
+
+.action-console-header {
+  padding: 1.15rem 1.4rem;
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(37, 99, 235, 0.08) 100%);
+  border-bottom: 1px solid rgba(13, 110, 253, 0.12);
+}
+
+/* ==========================================================================
+   Admissions Dashboard Modern Styling
+   ========================================================================== */
+.stat-card-kpi {
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 18px;
+  box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04);
+  padding: 1.5rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+  display: block;
+  text-decoration: none !important;
+  height: 100%;
+}
+
+.stat-card-kpi:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px -6px rgba(15, 23, 42, 0.1);
+  border-color: rgba(203, 213, 225, 1);
+}
+
+.stat-card-kpi .stat-card-glow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.12;
+  filter: blur(28px);
+  transition: opacity 0.3s ease;
+}
+
+.stat-card-kpi:hover .stat-card-glow {
+  opacity: 0.22;
+}
+
+.stat-icon-wrapper {
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+}
+
+.stat-card-kpi:hover .stat-icon-wrapper {
+  transform: scale(1.08);
+}
+
+.stat-number-display {
+  font-size: 2.75rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+}
+
+.stat-card-footer {
+  margin-top: 1.25rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(241, 245, 249, 1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.stat-card-footer .stat-card-action {
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: transform 0.2s ease;
+}
+
+.stat-card-kpi:hover .stat-card-footer .stat-card-action i {
+  transform: translateX(3px);
+}
+
+/* Applicant initials avatar */
+.applicant-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, rgba(13, 110, 253, 0.1) 0%, rgba(59, 130, 246, 0.18) 100%);
+  color: #0d6efd;
+  border: 1px solid rgba(13, 110, 253, 0.2);
+}
+
+/* Monospace Ref Badge */
+.applicant-ref-badge {
+  font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.825rem;
+  font-weight: 600;
+  background-color: #f8fafc;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+  padding: 0.3rem 0.65rem;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  letter-spacing: -0.01em;
+}
+
+/* Table Polish */
+.dashboard-table thead th {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #64748b;
+  padding: 0.9rem 1.25rem;
+}
+
+.dashboard-table tbody td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.dashboard-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.dashboard-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* Bulk Action Toolbar Polish */
+.bulk-toolbar-active {
+  background-color: rgba(13, 110, 253, 0.04) !important;
+  border-top-color: rgba(13, 110, 253, 0.2) !important;
+  transition: background-color 0.2s ease;
+}
+
+.extra-small {
+  font-size: 0.75rem;
 }

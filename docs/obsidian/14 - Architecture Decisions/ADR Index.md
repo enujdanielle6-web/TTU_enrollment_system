@@ -16,6 +16,7 @@ Architecture Decision Records (ADRs) document significant structural, behavioral
 - **[[ADR-008 Authoritative Enrollment State Machine and Cashier Decoupling]]**: Separation of cashier financial verification (`payment_verified`) from exclusive Registrar matriculation authority, pre-requisite clinic clearance gating, and race condition elimination.
 - **[[ADR-009 Financial Immutability and Assessment Snapshots]]**: Freezing line-item assessment breakdowns in `assessment_items` to prevent retroactive rate changes, and atomic receipt sequencing (`receipt_sequences`) for collision-free cashier operations.
 - **[[ADR-010 Domain Service Layer Extraction and Atomic Sequences]]**: Extraction of stateless, non-abstracting domain services (`StudentNumberService`, `AssessmentService`, `EnrollmentService`) and race-free sequence counters while preserving the Hybrid MVC Fat Controller pattern.
+- **[[ADR-011 Multi-Section LMS Subject Instance Isolation and Irregular Student Subject Preservation]]**: Architectural separation of LMS course classrooms across section cohorts via `(subject_id, section_id)` and preservation of irregular student custom requested subjects during matriculation.
 
 ---
 **Related:**

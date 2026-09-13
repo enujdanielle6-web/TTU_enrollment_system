@@ -9,10 +9,10 @@ The Admissions module is the primary administrative intake checkpoint in the [[S
 ---
 
 ## 1. Core Responsibilities
-1. **Application Intake & Review:** Reviews submitted applications across `pending`, `under_review`, and `correction_required` states.
-2. **Document Verification:** Inspects applicant-uploaded admission requirements (PSA Birth Certificate, Form 137/138, Good Moral, 2x2 Photos) via `application_documents`.
-3. **Section & Curriculum Assignment:** Assigns active class sections from `college_sections` or `shs_sections`. For college applicants, locks in permanent `college_curriculum_id` on the student record and populates `college_enrollments` from curriculum subjects.
-4. **Irregular Applicant Subject Requests:** Displays custom requested subjects from `application_subject_requests` directly within `application_detail.php` for irregular student evaluation.
+1. **Application Intake & Review:** Reviews submitted applications across `pending`, `under_review`, and `correction_required` states with responsive quick-filter pills and real-time intake metrics (`dashboard.php`, `review.php`).
+2. **Document Verification:** Inspects applicant-uploaded admission requirements (PSA Birth Certificate, Form 137/138, Good Moral, 2x2 Photos) via `application_documents`. Powered by correlated subqueries (`doc_count`, `pending_docs`) in `AdmissionsController@review` and an in-browser zoom inspector (`detail.php`).
+3. **Section & Curriculum Assignment:** Assigns active class sections from `college_sections` or `shs_sections`. For regular college applicants, locks in permanent `college_curriculum_id` on the student record and populates `college_enrollments` from curriculum subjects.
+4. **Irregular Applicant Subject Requests:** Displays custom requested subjects from `application_subject_requests` directly within an interactive subject drawer in `application_detail.php`, preserving custom student schedules across different programs/years without section overwrite.
 5. **Clinic Clearance Requirement:** Requires verified medical clearance from the Clinic (`health_records.status = 'verified'`) before permitting transition to `status = 'approved'`.
 6. **Automatic Assessment Snapshotting:** Upon moving status to `approved`, automatically delegates assessment calculation to `App\Services\AssessmentService`, freezing fee line items in `assessment_items`.
 7. **Enrollment Queue Handoff:** Once approved and assessed, applicants proceed to Cashier payment verification (`payment_verified`). Official enrollment finalization and credential generation are owned by the [[Registrar]].

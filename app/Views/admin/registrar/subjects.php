@@ -133,11 +133,24 @@ require_once __DIR__ . '/../../components/header.php';
                         <input type="hidden" name="action" value="toggle_status">
                         <input type="hidden" name="subject_id" value="<?= esc($subject['id']) ?>">
                         <?php if ($isActive): ?>
-                          <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-3 me-1" title="Inactivate (retire from future curriculum pickers)" onclick="return confirm('Retire <?= htmlspecialchars(addslashes($subject['subject_code'])) ?> from future curriculum pickers? Historical records will remain intact.');">
+                          <button type="button" 
+                                  class="btn btn-sm btn-outline-warning rounded-pill px-3 me-1" 
+                                  title="Inactivate (retire from future curriculum pickers)"
+                                  data-subject-id="<?= esc($subject['id']) ?>"
+                                  data-subject-code="<?= htmlspecialchars($subject['subject_code'], ENT_QUOTES, 'UTF-8') ?>"
+                                  data-subject-name="<?= htmlspecialchars($subject['subject_name'], ENT_QUOTES, 'UTF-8') ?>"
+                                  data-subject-usage="<?= htmlspecialchars($subject['usage_summary'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                  onclick="confirmInactivate(this)">
                             <i class="bi bi-pause-circle me-1"></i> Inactivate
                           </button>
                         <?php else: ?>
-                          <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3 me-1" title="Reactivate for curriculum pickers">
+                          <button type="button" 
+                                  class="btn btn-sm btn-outline-success rounded-pill px-3 me-1" 
+                                  title="Reactivate for curriculum pickers"
+                                  data-subject-id="<?= esc($subject['id']) ?>"
+                                  data-subject-code="<?= htmlspecialchars($subject['subject_code'], ENT_QUOTES, 'UTF-8') ?>"
+                                  data-subject-name="<?= htmlspecialchars($subject['subject_name'], ENT_QUOTES, 'UTF-8') ?>"
+                                  onclick="confirmActivate(this)">
                             <i class="bi bi-play-circle me-1"></i> Activate
                           </button>
                         <?php endif; ?>
@@ -416,6 +429,153 @@ function setDeleteSubject(id, code) {
     document.getElementById('deleteSubjectId').value = id;
     document.getElementById('deleteSubjectCode').textContent = code;
 }
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function confirmInactivate(button) {
+    const form = button.closest('form');
+    if (!form) return;
+
+    const code = button.dataset.subjectCode || 'Subject';
+    const name = button.dataset.subjectName || '';
+    const usage = (button.dataset.subjectUsage || '').trim();
+
+    if (typeof Swal === 'undefined') {
+        form.submit();
+        return;
+    }
+
+    const hasUsage = usage !== '' && usage !== 'Unused';
+    const usageBadge = hasUsage 
+        ? `<div class="p-3 mt-2 rounded-3 bg-light border text-start small">
+             <div class="text-muted small text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.5px;">Current Academic References</div>
+             <div class="text-dark fw-bold mt-1"><i class="bi bi-diagram-3-fill text-primary me-1"></i>${escapeHtml(usage)}</div>
+           </div>`
+        : `<div class="p-2 px-3 mt-2 rounded-3 bg-light border text-start small text-muted">
+             <i class="bi bi-info-circle me-1 text-secondary"></i> Currently unused in any curriculum or section.
+           </div>`;
+
+    Swal.fire({
+        title: '<div class="fs-4 fw-bold text-dark pt-1">Inactivate Subject?</div>',
+        html: `
+            <div class="text-center mb-3">
+                <span class="badge bg-warning bg-opacity-15 text-dark border border-warning border-opacity-50 rounded-pill px-3 py-1 small fw-semibold mb-2 d-inline-block">
+                    <i class="bi bi-pause-circle-fill text-warning me-1"></i> Status Change: Inactive
+                </span>
+                <h4 class="fw-bold text-dark mb-1">${escapeHtml(code)}</h4>
+                <div class="text-muted small">${escapeHtml(name)}</div>
+            </div>
+
+            ${usageBadge}
+
+            <div class="alert alert-warning text-start small mt-3 mb-0 p-3 rounded-3 d-flex gap-2 align-items-start border-warning border-opacity-25" style="background-color: #fffbeb;">
+                <i class="bi bi-exclamation-triangle-fill text-warning fs-5 flex-shrink-0 mt-0"></i>
+                <div class="text-secondary" style="font-size: 0.82rem; line-height: 1.45;">
+                    Retiring this subject will remove it from future curriculum builders and schedule section pickers. <strong>All historical student enrollments, grades, and existing curricula will remain completely intact.</strong>
+                </div>
+            </div>
+        `,
+        icon: 'warning',
+        iconColor: '#f59e0b',
+        showCancelButton: true,
+        confirmButtonText: '<i class="bi bi-pause-circle me-1"></i> Yes, Inactivate Subject',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        focusCancel: true,
+        buttonsStyling: false,
+        customClass: {
+            popup: 'rounded-4 shadow-lg border-0 p-4',
+            title: 'p-0 m-0',
+            htmlContainer: 'p-0 mt-3 text-start',
+            actions: 'gap-2 mt-4',
+            confirmButton: 'btn btn-warning rounded-pill px-4 py-2 fw-semibold text-dark shadow-sm',
+            cancelButton: 'btn btn-light rounded-pill px-4 py-2 fw-medium border text-secondary'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Inactivating...';
+            form.submit();
+        }
+    });
+}
+
+function confirmActivate(button) {
+    const form = button.closest('form');
+    if (!form) return;
+
+    const code = button.dataset.subjectCode || 'Subject';
+    const name = button.dataset.subjectName || '';
+
+    if (typeof Swal === 'undefined') {
+        form.submit();
+        return;
+    }
+
+    Swal.fire({
+        title: '<div class="fs-4 fw-bold text-dark pt-1">Reactivate Subject?</div>',
+        html: `
+            <div class="text-center mb-3">
+                <span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-50 rounded-pill px-3 py-1 small fw-semibold mb-2 d-inline-block">
+                    <i class="bi bi-play-circle-fill text-success me-1"></i> Status Change: Active
+                </span>
+                <h4 class="fw-bold text-dark mb-1">${escapeHtml(code)}</h4>
+                <div class="text-muted small">${escapeHtml(name)}</div>
+            </div>
+            <p class="text-muted small text-center mb-0">
+                This subject will be restored to active status and will become immediately selectable in curriculum builders and section subject pickers.
+            </p>
+        `,
+        icon: 'question',
+        iconColor: '#10b981',
+        showCancelButton: true,
+        confirmButtonText: '<i class="bi bi-play-circle me-1"></i> Yes, Activate',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+        buttonsStyling: false,
+        customClass: {
+            popup: 'rounded-4 shadow-lg border-0 p-4',
+            title: 'p-0 m-0',
+            htmlContainer: 'p-0 mt-3 text-start',
+            actions: 'gap-2 mt-4',
+            confirmButton: 'btn btn-success rounded-pill px-4 py-2 fw-semibold shadow-sm',
+            cancelButton: 'btn btn-light rounded-pill px-4 py-2 fw-medium border text-secondary'
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            button.disabled = true;
+            button.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Activating...';
+            form.submit();
+        }
+    });
+}
+
+window.confirmInactivate = confirmInactivate;
+window.confirmActivate = confirmActivate;
+
+<?php if (!empty($successMsg)): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: 'success',
+            title: <?= json_encode($successMsg) ?>,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3500,
+            timerProgressBar: true
+        });
+    }
+});
+<?php endif; ?>
 </script>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>

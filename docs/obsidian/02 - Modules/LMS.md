@@ -50,8 +50,22 @@ The LMS is parasitic on the Enrollment System:
 File downloads are routed through authenticated controller actions (`/lms/download/material/{id}` and `/lms/download/submission/{id}`) to prevent Insecure Direct Object Reference (IDOR) attacks.
 
 ---
+
+## 4. Multi-Section Course Instance Isolation
+
+To support multiple cohort sections taking identical curriculum subjects (e.g. `CC101` in `BSIT 1-A` and `BSIT 1-B`):
+- **Database Model:** `lms_courses` explicitly links `subject_id` and `section_id` (foreign key to `college_sections.id` or `shs_sections.id`).
+- **Isolation Principle:** Every section has its own discrete `lms_courses` classroom entry with unique course code suffix (e.g., `CC101-BSIT1A` vs. `CC101-BSIT1B`).
+- **Enrollment Resolution:** In `CollegeEnrollmentRepository` and `ShsEnrollmentRepository`, courses are joined using both `subject_id` and `college_section_id`.
+- **Anti-Duplication & Crosstalk Protection:**
+  - Zero duplicate course cards appear on the student dashboard.
+  - Faculty assignments, announcements, grades, and attendance remain strictly scoped to the student's assigned section.
+  - Verified with 100% pass via `scripts/test_two_sections_lms.php`.
+
+---
 **Related:**
 - [[LMS_Database_Architecture]]
 - [[LMS_Phase_2_Foundation]]
 - [[LMS Profile and Messages UI]]
 - [[ADR-003 Hybrid SPA Navigation Design]]
+- [[ADR-011 Multi-Section LMS Subject Instance Isolation and Irregular Student Subject Preservation]]

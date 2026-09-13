@@ -1095,7 +1095,7 @@ function sendVerificationCodeEmail(string $recipientEmail, string $recipientName
 /**
  * Sends the official Student & LMS Credentials email to an enrolled student.
  */
-function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, string $ttuEmail, string $studentNumber, string $tempPassword, ?string &$errorMessage = null): bool
+function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, string $ttuEmail, string $studentNumber, string $tempPassword = '', ?string &$errorMessage = null): bool
 {
     $recipientEmail = trim($recipientEmail);
     if (!filter_var($recipientEmail, FILTER_VALIDATE_EMAIL)) {

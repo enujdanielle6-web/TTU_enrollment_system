@@ -39,7 +39,8 @@ In accordance with TTU's **Hybrid MVC architecture**, Domain Services encapsulat
 - **Responsibilities:**
   - Determines tuition assessment rules based on Academic Level (College vs. SHS), Grade/Year Level, Strand, and Semester.
   - Evaluates lecture course units, laboratory course units, and per-unit billing rates (`fee_templates.is_per_unit = 1`).
-  - Applies approved scholarship percentage or fixed-amount deductions from `scholarship_recipients`.
+  - **Irregular Student Unit Resolution:** Checks if applicant has custom approved subjects in `application_subject_requests`. Uses the student's exact requested lecture/lab units for tuition calculation and line-item snapshotting rather than regular curriculum defaults.
+  - Applies approved scholarship percentage or fixed-amount deductions from `scholarship_recipients` against assessed tuition.
   - Calculates downpayment thresholds (statutory minimum of ₱3,000.00 or full net assessment if less).
   - Automatically invokes `snapshotAssessmentItems()` helper to freeze itemized breakdowns into `assessment_items`, preventing retroactive rate changes if fee schedules are altered mid-year.
 - **Key Methods:**
@@ -47,9 +48,9 @@ In accordance with TTU's **Hybrid MVC architecture**, Domain Services encapsulat
   - `static recalculateAssessment(int $assessmentId, PDO $pdo): bool` — Recalculates assessment following scholarship grant awards or unit adjustments.
   - `static getAssessmentBreakdown(int $assessmentId, PDO $pdo): array` — Retrieves frozen line items from `assessment_items` for official receipt and COM rendering.
 - **Dependencies & Imports:** PDO, `App\Core\Database`, `snapshotAssessmentItems()` in `app/Helpers/functions.php`.
-- **Database Interaction:** Reads `applications`, `fee_templates`, `college_sections`, `shs_sections`, `subjects`, `scholarship_recipients`; Writes `student_assessments`, `assessment_items`.
+- **Database Interaction:** Reads `applications`, `application_subject_requests`, `fee_templates`, `college_sections`, `shs_sections`, `subjects`, `scholarship_recipients`; Writes `student_assessments`, `assessment_items`.
 - **Used By:** `AdmissionsController`, `FinanceController`, `ApplicantController`.
-- **Related Documentation:** [[ADR-009 Financial Immutability and Assessment Snapshots]], [[Payment & Assessment Workflow]], [[Finance]]
+- **Related Documentation:** [[ADR-009 Financial Immutability and Assessment Snapshots]], [[ADR-011 Multi-Section LMS Subject Instance Isolation and Irregular Student Subject Preservation]], [[Payment & Assessment Workflow]], [[Finance]]
 
 ---
 
@@ -65,17 +66,17 @@ In accordance with TTU's **Hybrid MVC architecture**, Domain Services encapsulat
   - Calls `StudentNumberService::generate()` to allocate a guaranteed-unique institutional student ID.
   - Provisions institutional `@ttu.edu.ph` email addresses formatted as `first.last@ttu.edu.ph` (handling name collision deduplication with numeric suffixes).
   - Enforces password resets on initial login (`force_password_reset = 1`).
-  - Enrolls student into official course section offerings (`college_enrollments` or `shs_enrollments`).
+  - **Irregular Student Schedule Preservation:** Inspects `application_subject_requests` for approved custom subjects; if present, populates `college_enrollments` directly from custom requests rather than overwriting with regular section subjects from `college_section_subjects`.
   - Transitions `applications.status = 'enrolled'`.
-  - Dispatches branded HTML welcome email with temporary credentials via PHPMailer Google SMTP.
+  - Dispatches branded HTML welcome email with temporary credentials via PHPMailer Google SMTP (`sendStudentCredentialsEmail()`).
   - Logs immutable audit trail in `activity_logs`.
 - **Key Methods:**
   - `static finalizeEnrollment(int $applicationId, int $registrarId, PDO $pdo): array` — Executes complete matriculation transaction; returns student number and credentials summary.
-  - `static assignSectionSubjects(int $applicationId, int $sectionId, string $level, PDO $pdo): int` — Maps section timetable offerings into official student enrollment bridge tables.
+  - `static assignSectionSubjects(int $applicationId, int $sectionId, string $level, PDO $pdo): int` — Maps section timetable offerings into official student enrollment bridge tables for regular cohorts.
 - **Dependencies & Imports:** `App\Services\StudentNumberService`, `App\Core\Database`, PHPMailer, PDO.
-- **Database Interaction:** Reads/Writes `applications`, `users`, `college_sections`, `college_section_subjects`, `college_enrollments`, `shs_sections`, `shs_section_subjects`, `shs_enrollments`, `activity_logs`.
+- **Database Interaction:** Reads/Writes `applications`, `application_subject_requests`, `users`, `college_sections`, `college_section_subjects`, `college_enrollments`, `shs_sections`, `shs_section_subjects`, `shs_enrollments`, `activity_logs`.
 - **Used By:** `RegistrarController@finalizeEnrollment`.
-- **Related Documentation:** [[ADR-008 Authoritative Enrollment State Machine and Cashier Decoupling]], [[ADR-010 Domain Service Layer Extraction and Atomic Sequences]], [[Student Lifecycle Workflow]]
+- **Related Documentation:** [[ADR-008 Authoritative Enrollment State Machine and Cashier Decoupling]], [[ADR-010 Domain Service Layer Extraction and Atomic Sequences]], [[ADR-011 Multi-Section LMS Subject Instance Isolation and Irregular Student Subject Preservation]], [[Student Lifecycle Workflow]]
 
 ---
 

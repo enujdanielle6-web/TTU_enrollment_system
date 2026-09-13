@@ -124,9 +124,35 @@ class EnrollmentService
             $pdo->prepare('UPDATE users SET role = "student", lms_status = "active" WHERE id = :id')
                 ->execute(['id' => $userId]);
 
-            // 8. Enroll in section subjects if section is assigned
-            if (!empty($app['section_id'])) {
+            // 8. Enroll in section subjects (for regular students) or custom requested subjects (for irregular students)
+            if (($app['student_type'] ?? '') !== 'Irregular' && !empty($app['section_id'])) {
                 self::assignSectionSubjects($applicationId, (int)$app['section_id'], $academicLevel, $pdo);
+            } elseif (($app['student_type'] ?? '') === 'Irregular') {
+                $reqStmt = $pdo->prepare('SELECT subject_id, section_id FROM application_subject_requests WHERE application_id = :app_id');
+                $reqStmt->execute(['app_id' => $applicationId]);
+                $reqSubs = $reqStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!empty($reqSubs)) {
+                    if ($academicLevel === 'College') {
+                        $insCe = $pdo->prepare('INSERT IGNORE INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                        foreach ($reqSubs as $rs) {
+                            $insCe->execute([
+                                'app_id' => $applicationId,
+                                'sub_id' => (int)$rs['subject_id'],
+                                'sec_id' => !empty($rs['section_id']) ? (int)$rs['section_id'] : ($app['section_id'] ?? null)
+                            ]);
+                        }
+                    } else {
+                        $insSe = $pdo->prepare('INSERT IGNORE INTO shs_enrollments (application_id, subject_id, shs_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                        foreach ($reqSubs as $rs) {
+                            $insSe->execute([
+                                'app_id' => $applicationId,
+                                'sub_id' => (int)$rs['subject_id'],
+                                'sec_id' => !empty($rs['section_id']) ? (int)$rs['section_id'] : ($app['section_id'] ?? null)
+                            ]);
+                        }
+                    }
+                }
             }
 
             // 9. Activity log for Student
@@ -159,12 +185,13 @@ class EnrollmentService
             // 11. Dispatch credentials email
             if (function_exists('sendStudentCredentialsEmail') && !empty($app['email'])) {
                 try {
+                    $credentialPassword = '[Your Registered Account Password]';
                     sendStudentCredentialsEmail(
                         $app['email'],
                         $app['first_name'],
                         $ttuEmail,
                         $studentNumber,
-                        $tempPassword
+                        $credentialPassword
                     );
                 } catch (Exception $emailEx) {
                     error_log('sendStudentCredentialsEmail notification failed: ' . $emailEx->getMessage());

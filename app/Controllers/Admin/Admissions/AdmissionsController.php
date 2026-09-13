@@ -135,6 +135,7 @@ public function review(Request $request, Response $response)
             $sql = "
                 SELECT a.id, a.reference_number, a.status, a.strand, a.grade_level, a.academic_level, a.created_at, a.document_submission_method,
                        u.first_name, u.last_name, u.email,
+                       (SELECT COUNT(*) FROM application_documents d WHERE d.application_id = a.id) as doc_count,
                        (SELECT COUNT(*) FROM application_documents d WHERE d.application_id = a.id AND d.status = 'pending') as pending_docs,
                        (SELECT h.status FROM health_records h WHERE h.application_id = a.id LIMIT 1) as medical_status
                 FROM applications a

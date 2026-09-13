@@ -93,6 +93,17 @@ class AssessmentService
                 }
 
                 if ($totalUnits === 0) {
+                    $reqUnitsStmt = $pdo->prepare('
+                        SELECT SUM(s.units)
+                        FROM application_subject_requests asr
+                        JOIN subjects s ON asr.subject_id = s.id
+                        WHERE asr.application_id = :app_id
+                    ');
+                    $reqUnitsStmt->execute(['app_id' => $applicationId]);
+                    $totalUnits = (int)$reqUnitsStmt->fetchColumn();
+                }
+
+                if ($totalUnits === 0) {
                     $unitsStmt = $pdo->prepare('
                         SELECT SUM(s.units)
                         FROM college_curriculum_subjects ccs
@@ -199,6 +210,17 @@ class AssessmentService
                 ');
                 $snapSubStmt->execute(['sec_id' => $appData['section_id']]);
                 $subjectsForSnapshot = $snapSubStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+
+            if (empty($subjectsForSnapshot)) {
+                $snapReqStmt = $pdo->prepare('
+                    SELECT s.subject_code, s.subject_name, s.units
+                    FROM application_subject_requests asr
+                    JOIN subjects s ON asr.subject_id = s.id
+                    WHERE asr.application_id = :app_id
+                ');
+                $snapReqStmt->execute(['app_id' => $applicationId]);
+                $subjectsForSnapshot = $snapReqStmt->fetchAll(PDO::FETCH_ASSOC);
             }
 
             if (empty($subjectsForSnapshot)) {

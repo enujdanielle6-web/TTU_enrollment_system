@@ -28,11 +28,22 @@ Due to the system's **Hybrid MVC** architecture and raw PDO data access in contr
 | **TC-11** | **SHS Curriculum Versioning & Immutability** | SHS strands in database. | Execute 24 lifecycle audit scenarios (`scratch/audit_shs_curriculum_system.php`). | SHS follows identical Draft $\rightarrow$ Active $\rightarrow$ Archived lifecycle with immutable active locks and version branching. | **PASSED (24/24)** |
 | **TC-12** | **Subject Catalog Immutability & Safety** | Shared universal subjects table. | Execute 15 safety checks (`scratch/verify_subject_immutability.php`). | `ON DELETE RESTRICT` blocks direct deletion of referenced subjects; locked structural fields reject edits; non-destructive `status` toggling functional. | **PASSED (15/15)** |
 | **TC-13** | **Scheduler Visual Timetable & Conflict Engine** | Sections and subjects configured. | Build section schedule via `/admin/scheduler/schedule_builder.php`. | Room and instructor collisions detected; delivery modes (`Face-to-Face`/`Online`) persisted; timetable renders without SPA script collision. | **PASSED** |
+| **TC-14** | **College Regular Full Lifecycle & LMS Bot** | College programs and sections seeded. | Execute `php scripts/test_enrollment_bot.php`. | Full lifecycle automated: Registration $\rightarrow$ Admissions review $\rightarrow$ Clinic clearance $\rightarrow$ Assessment $\rightarrow$ Cashier payment $\rightarrow$ Registrar finalization $\rightarrow$ Credentials generated $\rightarrow$ Student LMS login and course cards verified. | **PASSED** |
+| **TC-15** | **SHS Regular Grade 12 STEM Lifecycle Bot** | SHS strands, curricula, and sections seeded. | Execute `php scripts/test_shs_enrollment_bot.php`. | SHS Grade 12 STEM lifecycle automated: Registration $\rightarrow$ Admissions review $\rightarrow$ Clinic clearance $\rightarrow$ Assessment $\rightarrow$ Cashier payment $\rightarrow$ Registrar finalization $\rightarrow$ SHS LMS student dashboard verified with Grade 12 subjects. | **PASSED** |
+| **TC-16** | **Irregular Student with Scholarship Bot** | Irregular applicant with custom requested subjects and active scholarship. | Execute `php scripts/test_irregular_scholarship_bot.php`. | 9-unit custom subject request preserved without section overwrite; 100% tuition discount applied in assessment; net misc fees paid via Cashier; matriculation and LMS cards match custom subjects exactly. | **PASSED** |
+| **TC-17** | **Multi-Section LMS Course Instance Isolation** | Two sections sharing identical program and subjects (`BSIT 1-A` & `BSIT 1-B`). | Execute `php scripts/test_two_sections_lms.php`. | Section A student gets Course IDs `1, 2, 3`; Section B student gets Course IDs `11, 12, 13`; zero card duplication and complete classroom isolation verified. | **PASSED** |
 
 ---
 
 ## 3. Automated Test Suites & CLI Scripts
 
+### 3.1 Permanent End-to-End Lifecycle Bots (`/scripts`)
+- **`scripts/test_enrollment_bot.php`**: Automated test bot simulating a College regular applicant (BSIT) from registration through Admissions review, Clinic clearance, tuition assessment, Cashier payment, Registrar matriculation, institutional credential generation, and LMS student dashboard verification.
+- **`scripts/test_shs_enrollment_bot.php`**: Automated test bot executing the full enrollment lifecycle for a Senior High School Grade 12 STEM applicant, verifying SHS curriculum subjects, assessment rules, and SHS LMS course provisioning.
+- **`scripts/test_irregular_scholarship_bot.php`**: Automated test bot verifying the irregular student journey: custom subject selection (`application_subject_requests`), 100% tuition academic scholarship award, net assessment calculation, cashier payment, subject preservation during enrollment finalization, and LMS verification.
+- **`scripts/test_two_sections_lms.php`**: Automated multi-section LMS subject isolation bot verifying that two students taking identical subjects in different sections (`BSIT 1-A` and `BSIT 1-B`) receive distinct `lms_courses` instances with zero duplication or cross-section classroom leakage.
+
+### 3.2 Immutability & Conflict Audit Suites (`/scratch`)
 - **`scratch/audit_curriculum_system.php`**: Comprehensive 24-scenario College curriculum lifecycle and immutability test suite.
 - **`scratch/audit_shs_curriculum_system.php`**: Comprehensive 24-scenario SHS curriculum lifecycle and immutability test suite.
 - **`scratch/verify_subject_immutability.php`**: 15-check automated verification suite for `ON DELETE RESTRICT` constraints, usage detection metrics, field mutation locking, and financial snapshot protection.
@@ -45,3 +56,4 @@ Due to the system's **Hybrid MVC** architecture and raw PDO data access in contr
 - [[Curriculum Architecture]]
 - [[Subject Catalog Immutability Architecture]]
 - [[ADR-005 Curriculum Versioning and Subject Catalog Immutability]]
+- [[ADR-011 Multi-Section LMS Subject Instance Isolation and Irregular Student Subject Preservation]]

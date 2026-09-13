@@ -29,7 +29,14 @@ The Reports engine generates administrative summaries, demographic statistics, f
   ```
 
 ---
+
+## 3. Engineering & Session Audit Reports
+
+- **[[2026-09-13 Session Report - Automated Enrollment Bots, Scholarships & Multi-Section LMS Isolation]]**: Comprehensive documentation of full lifecycle bot automation, SHS Grade 12 STEM workflows, irregular student scholarship preservation, and LMS multi-section instance isolation.
+
+---
 **Related:**
 - [[Finance]]
 - [[Registrar]]
 - [[Module Index]]
+- [[Testing Strategy]]

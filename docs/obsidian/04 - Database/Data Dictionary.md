@@ -222,7 +222,7 @@ Official subject enrollment bridge for College students.
 ### Parallel Senior High School (SHS) Tables
 - **`shs_strands`**: Senior High School academic strands and landing cards. `id`, `code` (UNIQUE), `name`, `description`, `icon` (VARCHAR(50), DEFAULT 'bi-mortarboard'), `careers` (TEXT), `custom_tuition` (VARCHAR(100)), `is_active`, `created_at`, `updated_at`.
 - **`shs_curricula`**: `id`, `strand_id` (FK $\rightarrow$ `shs_strands.id`), `curriculum_name`, `version`, `effective_academic_year`, `description`, `status` (`active`,`inactive`,`draft`), `created_at`, `updated_at`.
-- **`shs_curriculum_subjects`**: `id`, `curriculum_id` (FK $\rightarrow$ `shs_curricula.id`), `subject_id` (FK $\rightarrow$ `subjects.id`), `grade_level` (`Grade 11`,`Grade 12`), `semester` (`First`,`Second`), `created_at`, `updated_at`.
+- **`shs_curriculum_subjects`**: `id`, `curriculum_id` (FK $\rightarrow$ `shs_curricula.id`), `subject_id` (FK $\rightarrow$ `subjects.id`), `grade_level` (`Grade 11`,`Grade 12`), `semester` (`First`,`Second`), `display_order` (INT, NOT NULL, DEFAULT 1), `created_at`, `updated_at`.
 - **`shs_sections`**: `id`, `section_code` (UNIQUE), `strand_id` (FK $\rightarrow$ `shs_strands.id`), `curriculum_id` (FK $\rightarrow$ `shs_curricula.id`), `grade_level`, `academic_year`, `capacity`, `schedule_type`, `adviser`, `status`, `created_at`, `updated_at`.
 - **`shs_section_subjects`**: `id`, `shs_section_id` (FK $\rightarrow$ `shs_sections.id`), `subject_id` (FK $\rightarrow$ `subjects.id`), `faculty_user_id` (FK $\rightarrow$ `users.id`), `capacity`, `day`, `start_time`, `end_time`, `room`, `instructor`, `delivery_mode` (DEFAULT 'Face to Face'), `created_at`, `updated_at`.
 - **`shs_enrollments`**: `id`, `application_id` (FK $\rightarrow$ `applications.id`), `subject_id` (FK $\rightarrow$ `subjects.id`), `shs_section_id` (FK $\rightarrow$ `shs_sections.id`), `created_at`, `updated_at`.
@@ -386,7 +386,7 @@ Active awardees receiving scholarship deductions per term.
 Active course instances mapped to enrolled subjects.
 * `id` (INT(10) UNSIGNED, PK, AUTO_INC)
 * `subject_id` (INT(10) UNSIGNED, NOT NULL, FK $\rightarrow$ `subjects.id`, ON DELETE CASCADE)
-* `section_id` (INT(10) UNSIGNED, NULL)
+* `section_id` (INT(10) UNSIGNED, NULL, FK $\rightarrow$ `college_sections.id` or `shs_sections.id`): Enforces distinct isolated course classroom instances per section cohort, preventing crosstalk and duplication.
 * `academic_level` (ENUM('College','Senior High School'), NOT NULL, DEFAULT 'College')
 * `instructor_id` (INT(10) UNSIGNED, NULL, FK $\rightarrow$ `users.id`, ON DELETE SET NULL)
 * `course_code` (VARCHAR(100), UNIQUE, NOT NULL): E.g., `CS101-BSCS1A`.

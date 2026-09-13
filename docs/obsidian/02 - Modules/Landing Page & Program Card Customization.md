@@ -56,13 +56,28 @@ The following columns on `college_programs` and `shs_strands` store card appeara
 In `HomeController::index()`:
 - Fetches all college programs where `is_published = 1` and `status = 'active'`.
 - Fetches all SHS strands where `is_published = 1` and `status = 'active'`.
-- Pass both collections to `app/Views/home.php`.
+- Fetches active scholarship programs where `is_active = 1` from `scholarships`.
+- Passes `$programs`, `$strands`, and `$scholarships` collections to `app/Views/home.php`.
 
 In `home.php`:
 - Renders responsive program cards complete with dynamic icons, badges, descriptions, duration (4 Years / 2 Years), and an instant **"Enroll Now"** button leading directly to `/auth/register.php`.
 
 ---
+
+## 5. Public Scholarship Showcase Integration (`#scholarships`)
+
+To promote institutional accessibility and financial aid opportunities to prospective applicants:
+1. **Dynamic Database Integration:** `HomeController@index` queries active scholarship grants from `scholarships`.
+2. **Landing Page Showcase Section:** Rendered under `#scholarships` in `home.php` with:
+   - Modern glassmorphism cards with theme color gradients (emerald, blue, amber, violet).
+   - Dynamic coverage badges highlighting **100% Tuition**, **50% Tuition**, or **Monthly Living Allowance**.
+   - Minimum GWA and eligibility criteria.
+   - Interactive requirement preview modals and direct application links pointing to `/auth/register.php`.
+3. **Navbar Anchor Navigation:** Integrated into [`navbar.php`](file:///c:/xampp/htdocs/sia/app/Views/components/navbar.php) with smooth scrolling to `#scholarships`.
+
+---
 **Related:**
 - [[Applicant Registration Workflow]]
 - [[Curriculum Architecture]]
+- [[Scholarship]]
 - [[Page Relationships Matrix]]

@@ -10,9 +10,11 @@ The Scholarship module governs financial aid programs, student grant application
 
 ## 1. Core Responsibilities
 1. **Scholarship Program Management:** Creates grant offerings in the `scholarships` table with defined discount types (`percentage` or `fixed_amount`), criteria, and active statuses.
-2. **Application Processing:** Reviews student scholarship submissions in `scholarship_applications` across `pending`, `under_review`, `approved`, and `rejected` states.
-3. **Active Scholars Registry:** Maintains the roster of awarded students in `scholarship_recipients`.
-4. **Finance Integration:** When a scholarship is approved, the discount is automatically factored into the student's tuition assessment in [`FinanceController`](file:///c:/xampp/htdocs/sia/app/Controllers/Admin/Finance/FinanceController.php).
+2. **Public Landing Page Showcase:** Active grants (`is_active = 1`) are queried dynamically by `HomeController@index` and rendered in the interactive `#scholarships` showcase on the university homepage ([`home.php`](file:///c:/xampp/htdocs/sia/app/Views/home.php)), displaying coverage badges (e.g. 100% Tuition, Monthly Stipend), requirements modals, and direct application routes.
+3. **Application Processing:** Reviews student scholarship submissions in `scholarship_applications` across `pending`, `under_review`, `approved`, and `rejected` states.
+4. **Active Scholars Registry:** Maintains the roster of awarded students in `scholarship_recipients`.
+5. **Automated Assessment Discounting:** When an applicant or student has an approved scholarship in `scholarship_recipients`, `App\Services\AssessmentService::calculate()` automatically factors the discount into the assessment calculation, deducting percentage or fixed-amount discounts from assessed tuition fees and freezing the net amount into `assessment_items`.
+6. **Automated Verification:** End-to-end lifecycle verified by `scripts/test_irregular_scholarship_bot.php` (verifying 100% tuition deduction, net fee cashiering, and matriculation).
 
 ---
 
@@ -31,3 +33,5 @@ The Scholarship module governs financial aid programs, student grant application
 - [[Finance]]
 - [[Payment & Assessment Workflow]]
 - [[Applicant Portal]]
+- [[Landing Page & Program Card Customization]]
+- [[ADR-011 Multi-Section LMS Subject Instance Isolation and Irregular Student Subject Preservation]]
