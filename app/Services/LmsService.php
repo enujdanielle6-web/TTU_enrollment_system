@@ -90,7 +90,59 @@ class LmsService
             ORDER BY s.subject_code ASC
         ");
         $stmt->execute(['fid' => $facultyUserId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!empty($courses)) {
+            return $courses;
+        }
+
+        // Check if user has administrative or oversight privileges (superadmin / admin / LMS oversight)
+        $userStmt = $this->pdo->prepare("SELECT role, permissions FROM users WHERE id = :uid AND is_active = 1");
+        $userStmt->execute(['uid' => $facultyUserId]);
+        $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user) {
+            $isSuperOrAdmin = in_array($user['role'], ['superadmin', 'admin'], true);
+            $perms = !empty($user['permissions']) ? json_decode($user['permissions'], true) : [];
+            $hasPerm = is_array($perms) && (in_array('*', $perms, true) || in_array('lms.courses.manage', $perms, true) || in_array('lms.courses.view_all', $perms, true));
+
+            if ($isSuperOrAdmin || $hasPerm) {
+                $allStmt = $this->pdo->prepare("
+                    SELECT 
+                        lc.id as lms_course_id,
+                        lc.academic_level,
+                        lc.academic_section_id,
+                        lc.subject_id,
+                        s.subject_code, 
+                        s.subject_name,
+                        s.subject_code as code, 
+                        s.subject_name as name,
+                        s.units,
+                        COALESCE(cs.section_code, ss.section_code) as section_code,
+                        COALESCE(cs.section_code, ss.section_code) as section_name,
+                        u.first_name,
+                        u.last_name,
+                        u.email,
+                        (
+                            SELECT COUNT(DISTINCT a.user_id) 
+                            FROM applications a 
+                            WHERE a.section_id = lc.academic_section_id 
+                              AND a.status IN ('enrolled', 'approved')
+                        ) as enrolled_count
+                    FROM lms_courses lc
+                    JOIN subjects s ON lc.subject_id = s.id
+                    LEFT JOIN college_sections cs ON lc.academic_level = 'College' AND lc.academic_section_id = cs.id
+                    LEFT JOIN shs_sections ss ON (lc.academic_level = 'SHS' OR lc.academic_level = 'Senior High School') AND lc.academic_section_id = ss.id
+                    LEFT JOIN users u ON lc.faculty_user_id = u.id
+                    WHERE lc.status = 'active'
+                    ORDER BY s.subject_code ASC
+                ");
+                $allStmt->execute();
+                return $allStmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        }
+
+        return [];
     }
 
     public function getCourseDetails(int $lmsCourseId): ?array
@@ -128,7 +180,28 @@ class LmsService
             WHERE id = :lcid AND faculty_user_id = :uid AND status = 'active'
         ");
         $stmt->execute(['lcid' => $lmsCourseId, 'uid' => $userId]);
-        return (bool)$stmt->fetchColumn();
+        if ((bool)$stmt->fetchColumn()) {
+            return true;
+        }
+
+        // Grant oversight access to superadmin, admin, or users with LMS management permissions
+        $userStmt = $this->pdo->prepare("SELECT role, permissions FROM users WHERE id = :uid AND is_active = 1");
+        $userStmt->execute(['uid' => $userId]);
+        $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($user) {
+            if (in_array($user['role'], ['superadmin', 'admin'], true)) {
+                return true;
+            }
+            if (!empty($user['permissions'])) {
+                $perms = json_decode($user['permissions'], true);
+                if (is_array($perms) && (in_array('*', $perms, true) || in_array('lms.courses.manage', $perms, true) || in_array('lms.courses.view_all', $perms, true))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public function getMaterialsByModule(int $moduleId): array

@@ -69,6 +69,7 @@
                 <div class="modal fade" id="uploadMaterialModal<?= esc($module['id']) ?>" tabindex="-1">
                     <div class="modal-dialog">
                         <form class="modal-content border-0 shadow" method="POST" action="/sia/lms/faculty/material_upload.php" enctype="multipart/form-data">
+                            <?= getCsrfInput() ?>
                             <div class="modal-header border-bottom-0 pb-0">
                                 <h5 class="modal-title fw-bold">Upload to <?= htmlspecialchars($module['title']) ?></h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -102,6 +103,7 @@
 <div class="modal fade" id="createModuleModal" tabindex="-1">
     <div class="modal-dialog">
         <form class="modal-content border-0 shadow" method="POST" action="/sia/lms/faculty/module_create.php">
+            <?= getCsrfInput() ?>
             <div class="modal-header border-bottom-0 pb-0">
                 <h5 class="modal-title fw-bold">Create New Module</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>

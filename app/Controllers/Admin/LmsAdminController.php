@@ -45,8 +45,8 @@ class LmsAdminController extends BaseController
         $faculty_stmt->execute();
         $faculty_users = $faculty_stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $pageTitle = 'LMS Course Generator';
-        require_once __DIR__ . '/../../Views/components/admin_navbar.php';
+        $pageTitle = 'LMS Course Generator - Administrator';
+        requirePermission(['programs.manage', 'curriculum.manage', 'sections.manage', 'users.manage']);
 
         return $this->render('admin/system/lms_course_generator', get_defined_vars());
     }

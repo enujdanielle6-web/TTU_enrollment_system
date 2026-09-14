@@ -100,13 +100,21 @@ class RoleMiddleware implements MiddlewareInterface
             if ($userRole === 'admissions') {
                 $response->redirect('/sia/admin/admissions/admissions_dashboard.php');
             } elseif ($userRole === 'admin') {
-                $response->redirect('/sia/admin/registrar/students.php');
+                $response->redirect('/sia/admin/registrar/registrar_dashboard.php');
             } elseif ($userRole === 'scholarship') {
                 $response->redirect('/sia/admin/scholarship/scholarship_dashboard.php');
             } elseif ($userRole === 'cashier') {
                 $response->redirect('/sia/admin/finance/cashier_dashboard.php');
             } elseif ($userRole === 'scheduler') {
                 $response->redirect('/sia/admin/scheduler/scheduler_dashboard.php');
+            } elseif ($userRole === 'clinic') {
+                $response->redirect('/sia/admin/clinic/clinic_dashboard.php');
+            } elseif ($userRole === 'superadmin') {
+                $response->redirect('/sia/admin/system/sysadmin_dashboard.php');
+            } elseif ($userRole === 'faculty') {
+                $response->redirect('/sia/lms/faculty/dashboard.php');
+            } elseif ($userRole === 'student') {
+                $response->redirect('/sia/lms/student/dashboard.php');
             } else {
                 // If the role is empty or unknown, destroy session and force login to prevent redirect loops
                 session_unset();

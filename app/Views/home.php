@@ -1054,6 +1054,7 @@ require_once __DIR__ . '/components/navbar.php';
               <h3 class="fw-bold fs-5 text-dark mb-3">Send Us a Direct Message</h3>
               <p class="text-muted small mb-4">Fill out the inquiry form below and an admissions counselor will get back to you within 24 hours.</p>
               <form action="#" method="post">
+                <?= getCsrfInput() ?>
                 <div class="row g-3">
                   <div class="col-md-6">
                     <label class="form-label small fw-semibold text-dark" for="contactFullName">Full Name</label>
