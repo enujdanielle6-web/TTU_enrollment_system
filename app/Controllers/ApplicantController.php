@@ -607,9 +607,9 @@ return;
                 $query .= ' AND program_id IS NULL';
             }
 
-            // We filter year level if the scholarship requires it
+            // We filter year level if the scholarship requires it (supports empty, "All", "All Levels", or matching specific year)
             if ($userYearLevel) {
-                $query .= ' AND (year_level IS NULL OR year_level = "" OR year_level = :yl)';
+                $query .= ' AND (year_level IS NULL OR year_level = "" OR LOWER(year_level) = "all" OR LOWER(year_level) = "all levels" OR year_level = :yl)';
                 $params['yl'] = $userYearLevel;
             }
 
