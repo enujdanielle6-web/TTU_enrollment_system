@@ -1,108 +1,152 @@
 <?php
+$pageTitle = 'System Audit Logs - Administrator';
 require_once __DIR__ . '/../../components/header.php';
-
 require_once __DIR__ . '/../../components/admin_navbar.php';
-
-// Pagination setup
-$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$limit = 50;
-$offset = ($page - 1) * $limit;
-
-// Search filtering
-$searchQuery = trim($_GET['search'] ?? '');
-
-$logs = [];
-$totalLogs = 0;
-
-try {
-    if ($searchQuery !== '') {
-        // Count with search
-        $countStmt = $pdo->prepare('
-            SELECT COUNT(al.id) FROM activity_logs al
-            JOIN users u ON al.user_id = u.id
-            WHERE u.email LIKE :search OR u.first_name LIKE :search OR u.last_name LIKE :search OR al.title LIKE :search
-        ');
-        $countStmt->execute(['search' => '%' . $searchQuery . '%']);
-        $totalLogs = (int) $countStmt->fetchColumn();
-
-        // Fetch logs with search
-        $stmt = $pdo->prepare('
-            SELECT al.*, u.first_name, u.last_name, u.email, u.role, u.department 
-            FROM activity_logs al
-            JOIN users u ON al.user_id = u.id
-            WHERE u.email LIKE :search OR u.first_name LIKE :search OR u.last_name LIKE :search OR al.title LIKE :search OR al.affected_record LIKE :search
-            ORDER BY al.created_at DESC 
-            LIMIT :limit OFFSET :offset
-        ');
-        $stmt->bindValue(':search', '%' . $searchQuery . '%');
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $logs = $stmt->fetchAll();
-    } else {
-        // Count all
-        $totalLogs = (int) $pdo->query('SELECT COUNT(id) FROM activity_logs')->fetchColumn();
-
-        // Fetch all paginated
-        $stmt = $pdo->prepare('
-            SELECT al.*, u.first_name, u.last_name, u.email, u.role, u.department 
-            FROM activity_logs al
-            JOIN users u ON al.user_id = u.id
-            ORDER BY al.created_at DESC 
-            LIMIT :limit OFFSET :offset
-        ');
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-        $logs = $stmt->fetchAll();
-    }
-} catch (PDOException $e) {
-    error_log('Audit logs fetch failed: ' . $e->getMessage());
-}
-
-$totalPages = ceil($totalLogs / $limit);
 ?>
 
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex justify-content-between align-items-end fade-in-up" style="animation-delay: 0.1s;">
-      <div>
-        <h1 class="h3 fw-bold text-dark mb-1">System Audit Logs</h1>
-        <p class="text-muted mb-0">Monitor applicant activities, form submissions, and administrative changes.</p>
-      </div>
-      <div>
-        <a href="../dashboard.php" class="btn btn-outline-secondary rounded-pill px-4 shadow-sm">
-          <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
-        </a>
+    <!-- Dossier Hero Header Strip (Design System Consistent) -->
+    <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+            <i class="bi bi-shield-check"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h1 class="h4 fw-bold text-dark mb-0">Security & Audit Logs</h1>
+              <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-shield-shaded me-1"></i> Audit Trail
+              </span>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-calendar-check text-primary me-1"></i> AY <?= esc($systemSettings['active_school_year'] ?? '2026–2027') ?>
+              </span>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-journal-text text-primary me-1"></i> <?= number_format($totalLogs) ?> Events
+              </span>
+            </div>
+            <p class="text-muted small mb-0">Immutable chronological ledger of authentication attempts, administrative operations, enrollment changes, and critical security overrides.</p>
+          </div>
+        </div>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+          <a href="sysadmin_dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
+            <i class="bi bi-arrow-left text-primary"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="users.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
+            <i class="bi bi-people text-primary"></i>
+            <span>User Directory</span>
+          </a>
+        </div>
       </div>
     </div>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm fade-in-up" style="border-radius: 16px; animation-delay: 0.2s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 fade-in-up" style="animation-delay: 0.3s;">
-        <div class="d-flex align-items-center">
-          <i class="bi bi-shield-lock-fill text-primary"></i>
-          <h2 class="mb-0 text-dark">Activity Record</h2>
+    <!-- Executive KPI Metric Cards (Consistent 3-Column Grid) -->
+    <div class="row g-4 mb-4">
+      
+      <!-- Card 1: Total Audit Events -->
+      <div class="col-md-4">
+        <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.1s;">
+          <div class="stat-card-glow bg-warning"></div>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+              <i class="bi bi-journal-text"></i>
+            </div>
+            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-database me-1"></i> Log Volume
+            </span>
+          </div>
+          <div class="stat-number-display mb-1"><?= number_format($stats['total_events']) ?></div>
+          <h2 class="h6 fw-bold text-dark mb-1">Total Audit Events</h2>
+          <p class="text-muted small mb-0">Immutable records in persistent storage</p>
+          <div class="stat-card-footer">
+            <span>Storage Scope</span>
+            <span class="stat-card-action text-warning">Full Ledger <i class="bi bi-check2"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Events Today -->
+      <div class="col-md-4">
+        <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.15s;">
+          <div class="stat-card-glow bg-primary"></div>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+              <i class="bi bi-calendar-check"></i>
+            </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-sun-fill me-1"></i> Daily Activity
+            </span>
+          </div>
+          <div class="stat-number-display mb-1 text-primary"><?= number_format($stats['events_today']) ?></div>
+          <h2 class="h6 fw-bold text-dark mb-1">Events Logged Today</h2>
+          <p class="text-muted small mb-0">Recorded on <?= date('M d, Y') ?></p>
+          <div class="stat-card-footer">
+            <span>Daily Intake</span>
+            <span class="stat-card-action text-primary">Active Sessions <i class="bi bi-activity"></i></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Unique Users Tracked -->
+      <div class="col-md-4">
+        <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.2s;">
+          <div class="stat-card-glow bg-info"></div>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-fingerprint me-1"></i> Actors
+            </span>
+          </div>
+          <div class="stat-number-display mb-1 text-info"><?= number_format($stats['unique_users']) ?></div>
+          <h2 class="h6 fw-bold text-dark mb-1">Active User Accounts</h2>
+          <p class="text-muted small mb-0">Unique actors in audit history</p>
+          <div class="stat-card-footer">
+            <span>Identity Trace</span>
+            <span class="stat-card-action text-info">Audited Users <i class="bi bi-arrow-right"></i></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Activity Record (Dossier Card Styling) -->
+    <div class="dossier-card fade-in-up" id="auditCard" style="animation-delay: 0.25s;">
+      <div class="dossier-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        
+        <div class="d-flex align-items-center gap-2.5">
+          <div class="dossier-header-icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-shield-lock-fill"></i>
+          </div>
+          <div>
+            <h2 class="h5 fw-bold text-dark mb-0 d-inline-block align-middle">Audit Activity Records</h2>
+            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small fw-semibold ms-2 align-middle">
+              <i class="bi bi-clock-history text-primary me-1"></i><?= number_format($totalLogs) ?> Entries
+            </span>
+          </div>
         </div>
         
         <!-- Search Form -->
-        <form action="audit_logs.php" method="GET" class="d-flex gap-2">
-          <div class="input-group input-group-sm" style="max-width: 300px;">
+        <form action="audit_logs.php" method="GET" class="d-flex gap-2 align-items-center">
+          <div class="input-group input-group-sm shadow-xs" style="min-width: 260px;">
             <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-            <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Search by name, email, or action..." value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>">
-            <button class="btn btn-primary px-3" type="submit">Filter</button>
+            <input type="text" name="search" class="form-control border-start-0 ps-0" placeholder="Search actor, action, record..." value="<?= htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8') ?>">
           </div>
           <?php if ($searchQuery !== ''): ?>
-            <a href="audit_logs.php" class="btn btn-sm btn-outline-secondary">Clear</a>
+            <a href="audit_logs.php" class="btn btn-sm btn-light border rounded-pill px-3">Clear</a>
           <?php endif; ?>
         </form>
+
       </div>
       
-      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
+      <div class="p-0">
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 custom-table">
-            <thead class="table-light">
+          <table class="table table-hover align-middle mb-0 dashboard-table custom-table">
+            <thead>
               <tr>
                 <th scope="col" class="ps-4">Timestamp & IP</th>
                 <th scope="col">User Details</th>
@@ -114,71 +158,100 @@ $totalPages = ceil($totalLogs / $limit);
             <tbody>
               <?php if (empty($logs)): ?>
                 <tr>
-                  <td colspan="4" class="text-center py-5 text-muted">
-                    <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
-                    No audit logs found matching your criteria.
+                  <td colspan="5" class="text-center py-5 text-muted">
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4">
+                      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3 shadow-xs" style="width: 64px; height: 64px;">
+                        <i class="bi bi-inbox fs-2 text-muted"></i>
+                      </div>
+                      <h3 class="h6 fw-bold text-dark mb-1">No Audit Logs Found</h3>
+                      <p class="text-muted small mb-0">No records match your search filter criteria.</p>
+                    </div>
                   </td>
                 </tr>
               <?php else: ?>
-                <?php foreach ($logs as $log): ?>
+                <?php foreach ($logs as $log): 
+                    $fName = trim($log['first_name'] ?? '');
+                    $lName = trim($log['last_name'] ?? '');
+                    $fullName = trim($fName . ' ' . $lName);
+                    if ($fullName === '') $fullName = 'System Process';
+
+                    $initials = strtoupper(mb_substr($fName, 0, 1) . mb_substr($lName, 0, 1));
+                    if ($initials === '') $initials = 'SY';
+
+                    $logBadge = match($log['role']) {
+                        'superadmin'  => 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25',
+                        'admin'       => 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25',
+                        'admissions'  => 'bg-info bg-opacity-10 text-info border border-info border-opacity-25',
+                        'scholarship' => 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25',
+                        'cashier'     => 'bg-success bg-opacity-10 text-success border border-success border-opacity-25',
+                        default       => 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25'
+                    };
+                ?>
                   <tr>
+                    <!-- Timestamp & IP -->
                     <td class="ps-4 text-nowrap">
-                      <span class="d-block fw-semibold text-dark small"><?= date('M j, Y', strtotime($log['created_at'])) ?></span>
-                      <span class="text-muted" style="font-size: 0.75rem;"><?= date('g:i:s A', strtotime($log['created_at'])) ?></span>
-                      <?php if ($log['ip_address']): ?>
-                        <span class="d-block text-secondary mt-1" style="font-size: 0.65rem;"><i class="bi bi-globe me-1"></i><?= htmlspecialchars($log['ip_address'], ENT_QUOTES, 'UTF-8') ?></span>
+                      <div class="d-flex align-items-center gap-1.5 text-dark fw-medium small">
+                        <i class="bi bi-clock-history text-muted extra-small"></i>
+                        <span><?= date('M j, Y', strtotime($log['created_at'])) ?></span>
+                      </div>
+                      <div class="extra-small text-muted"><?= date('g:i:s A', strtotime($log['created_at'])) ?></div>
+                      <?php if (!empty($log['ip_address'])): ?>
+                        <div class="extra-small text-secondary font-monospace mt-1">
+                          <i class="bi bi-globe me-1"></i><?= htmlspecialchars($log['ip_address'], ENT_QUOTES, 'UTF-8') ?>
+                        </div>
                       <?php endif; ?>
                     </td>
+
+                    <!-- Actor / User Details -->
                     <td>
-                      <div class="d-flex align-items-center gap-2">
-                        <div class="bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px; font-size: 0.85rem;">
-                          <?= strtoupper(substr($log['first_name'], 0, 1) . substr($log['last_name'], 0, 1)) ?>
+                      <div class="d-flex align-items-center gap-2.5">
+                        <div class="applicant-avatar" style="width: 36px; height: 36px; font-size: 0.8rem;">
+                          <?= esc($initials) ?>
                         </div>
                         <div>
-                          <p class="mb-0 fw-semibold text-dark small"><?= htmlspecialchars($log['first_name'] . ' ' . $log['last_name'], ENT_QUOTES, 'UTF-8') ?></p>
-                          <p class="mb-0 text-muted" style="font-size: 0.75rem;">
-                            <?= htmlspecialchars($log['email'], ENT_QUOTES, 'UTF-8') ?>
-                            <?php
-                              $logBadge = match($log['role']) {
-                                  'superadmin' => 'bg-danger',
-                                  'admissions' => 'bg-primary',
-                                  'scholarship' => 'bg-success',
-                                  'cashier' => 'bg-info text-dark',
-                                  default => 'bg-secondary'
-                              };
-                            ?>
-                            <span class="badge <?= esc($logBadge) ?> ms-1" style="font-size: 0.6rem;"><?= strtoupper($log['role']) ?></span>
+                          <span class="d-block fw-bold text-dark small"><?= htmlspecialchars($fullName, ENT_QUOTES, 'UTF-8') ?></span>
+                          <div class="d-flex align-items-center gap-1.5 flex-wrap">
+                            <span class="extra-small text-muted"><?= htmlspecialchars($log['email'], ENT_QUOTES, 'UTF-8') ?></span>
+                            <span class="badge <?= esc($logBadge) ?> rounded-pill extra-small px-2 py-0.5"><?= strtoupper($log['role']) ?></span>
                             <?php if (!empty($log['department'])): ?>
-                              <span class="badge bg-light text-dark border border-secondary-subtle ms-1" style="font-size: 0.6rem;"><i class="bi bi-building me-1"></i><?= htmlspecialchars(ucfirst($log['department']), ENT_QUOTES, 'UTF-8') ?></span>
+                              <span class="badge bg-light text-secondary border rounded-pill extra-small px-2 py-0.5"><?= htmlspecialchars(ucfirst($log['department']), ENT_QUOTES, 'UTF-8') ?></span>
                             <?php endif; ?>
-                          </p>
+                          </div>
                         </div>
                       </div>
                     </td>
+
+                    <!-- Action Title -->
                     <td>
                       <div class="d-flex align-items-center gap-2">
-                        <i class="bi <?= htmlspecialchars($log['icon'], ENT_QUOTES, 'UTF-8') ?> text-info"></i>
-                        <span class="fw-medium text-dark small"><?= htmlspecialchars($log['title'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 28px; height: 28px; font-size: 0.85rem;">
+                          <i class="bi <?= htmlspecialchars($log['icon'] ?? 'bi-activity', ENT_QUOTES, 'UTF-8') ?>"></i>
+                        </div>
+                        <div>
+                          <span class="fw-bold text-dark small d-block"><?= htmlspecialchars($log['title'], ENT_QUOTES, 'UTF-8') ?></span>
+                          <?php if (!empty($log['affected_record'])): ?>
+                            <span class="applicant-ref-badge" style="font-size: 0.72rem; padding: 0.15rem 0.45rem;">
+                              <?= htmlspecialchars($log['affected_record'], ENT_QUOTES, 'UTF-8') ?>
+                            </span>
+                          <?php endif; ?>
+                        </div>
                       </div>
                     </td>
-                    <td>
-                      <span class="text-muted small"><?= htmlspecialchars($log['description'] ?? 'No additional context provided.', ENT_QUOTES, 'UTF-8') ?></span>
-                      <?php if ($log['affected_record']): ?>
-                        <div class="mt-1">
-                          <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle" style="font-size: 0.65rem;">
-                            <i class="bi bi-link-45deg me-1"></i><?= htmlspecialchars($log['affected_record'], ENT_QUOTES, 'UTF-8') ?>
-                          </span>
-                        </div>
-                      <?php endif; ?>
-                    </td>
-                    <td class="text-end pe-4">
-                      <?php if ($log['old_value'] || $log['new_value']): ?>
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#logModal<?= esc($log['id']) ?>">
-                          View
-                        </button>
 
+                    <!-- Context / Description -->
+                    <td>
+                      <p class="mb-0 text-dark small" style="max-width: 380px;"><?= htmlspecialchars($log['description'] ?? '', ENT_QUOTES, 'UTF-8') ?></p>
+                    </td>
+
+                    <!-- Details Action -->
+                    <td class="text-end pe-4">
+                      <?php if (!empty($log['old_value']) || !empty($log['new_value'])): ?>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-xs d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#logModal<?= esc($log['id']) ?>">
+                          <i class="bi bi-file-earmark-diff"></i>
+                          <span>Diff</span>
+                        </button>
                       <?php else: ?>
-                        <span class="text-muted small italic">N/A</span>
+                        <span class="text-muted extra-small fst-italic">Standard Event</span>
                       <?php endif; ?>
                     </td>
                   </tr>
@@ -189,37 +262,38 @@ $totalPages = ceil($totalLogs / $limit);
         </div>
       </div>
       
-      <!-- Pagination Controls -->
+      <!-- Pagination Controls in Card Footer -->
       <?php if ($totalPages > 1): ?>
-        <div class="island-body border-top border-light py-3 d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.5s;">
-          <span class="text-muted small">Showing page <?= esc($page) ?> of <?= esc($totalPages) ?> (<?= esc($totalLogs) ?> total entries)</span>
-          <nav aria-label="Audit Log Pagination">
+        <div class="dossier-card-footer border-top border-light py-3 px-4 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+          <span class="text-muted small">Showing page <strong><?= esc($page) ?></strong> of <strong><?= esc($totalPages) ?></strong> (<?= number_format($totalLogs) ?> events)</span>
+          <nav aria-label="Audit Pagination">
             <ul class="pagination pagination-sm mb-0">
               <li class="page-item <?= esc(($page <= 1) ? 'disabled' : '') ?>">
-                <a class="page-link" href="?page=<?= esc($page - 1) ?>&search=<?= esc(urlencode($searchQuery)) ?>" tabindex="-1" aria-disabled="true">Previous</a>
+                <a class="page-link rounded-start-pill" href="?page=<?= esc($page - 1) ?>&search=<?= esc(urlencode($searchQuery)) ?>">
+                  <i class="bi bi-chevron-left me-1"></i> Prev
+                </a>
               </li>
               
               <?php
               $startPage = max(1, $page - 2);
               $endPage = min($totalPages, $page + 2);
-              
               if ($startPage > 1) {
                   echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
               }
-              
               for ($i = $startPage; $i <= $endPage; $i++): ?>
                 <li class="page-item <?= esc(($i === $page) ? 'active' : '') ?>">
                   <a class="page-link" href="?page=<?= esc($i) ?>&search=<?= esc(urlencode($searchQuery)) ?>"><?= esc($i) ?></a>
                 </li>
               <?php endfor; 
-              
               if ($endPage < $totalPages) {
                   echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
               }
               ?>
               
               <li class="page-item <?= esc(($page >= $totalPages) ? 'disabled' : '') ?>">
-                <a class="page-link" href="?page=<?= esc($page + 1) ?>&search=<?= esc(urlencode($searchQuery)) ?>">Next</a>
+                <a class="page-link rounded-end-pill" href="?page=<?= esc($page + 1) ?>&search=<?= esc(urlencode($searchQuery)) ?>">
+                  Next <i class="bi bi-chevron-right ms-1"></i>
+                </a>
               </li>
             </ul>
           </nav>
@@ -231,71 +305,74 @@ $totalPages = ceil($totalLogs / $limit);
   </div>
 </main>
 
-
-
+<!-- Modals for Log Change Diffs -->
 <?php foreach ($logs as $log): ?>
-  <?php if ($log['old_value'] || $log['new_value']): ?>
-                        <!-- Log Details Modal -->
-                        <div class="modal fade" id="logModal<?= esc($log['id']) ?>" tabindex="-1" aria-hidden="true">
-                          <div class="modal-dialog modal-lg modal-dialog-centered">
-                            <div class="modal-content text-start">
-                              <div class="modal-header border-bottom-0 pb-0">
-                                <h5 class="modal-title fw-bold text-dark"><i class="bi bi-file-earmark-diff text-primary me-2"></i>Change Details</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                              </div>
-                              <div class="modal-body pt-3 pb-4">
-                                <div class="row g-3">
-                                  <div class="col-md-6">
-                                    <h6 class="text-muted small fw-bold mb-2">PREVIOUS VALUE</h6>
-                                    <div class="bg-light border rounded-3 p-3 text-break" style="max-height: 300px; overflow-y: auto; font-size: 0.85rem;">
-                                      <?php 
-                                        $oldArr = json_decode((string)$log['old_value'], true);
-                                        if (is_array($oldArr) && !empty($oldArr)) {
-                                            echo '<ul class="list-unstyled mb-0">';
-                                            foreach ($oldArr as $k => $v) {
-                                                $val = is_scalar($v) ? htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8') : htmlspecialchars(json_encode($v), ENT_QUOTES, 'UTF-8');
-                                                echo '<li class="mb-1"><span class="text-muted fw-bold">' . htmlspecialchars(ucwords(str_replace('_', ' ', $k))) . ':</span> <span class="text-danger-emphasis">' . $val . '</span></li>';
-                                            }
-                                            echo '</ul>';
-                                        } else {
-                                            echo '<span class="text-muted fst-italic">No prior data.</span>';
-                                        }
-                                      ?>
-                                    </div>
-                                  </div>
-                                  <div class="col-md-6">
-                                    <h6 class="text-muted small fw-bold mb-2">NEW VALUE</h6>
-                                    <div class="bg-light border rounded-3 p-3 text-break" style="max-height: 300px; overflow-y: auto; font-size: 0.85rem;">
-                                      <?php 
-                                        $newArr = json_decode((string)$log['new_value'], true);
-                                        if (is_array($newArr) && !empty($newArr)) {
-                                            echo '<ul class="list-unstyled mb-0">';
-                                            foreach ($newArr as $k => $v) {
-                                                $val = is_scalar($v) ? htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8') : htmlspecialchars(json_encode($v), ENT_QUOTES, 'UTF-8');
-                                                echo '<li class="mb-1"><span class="text-muted fw-bold">' . htmlspecialchars(ucwords(str_replace('_', ' ', $k))) . ':</span> <span class="text-success-emphasis fw-medium">' . $val . '</span></li>';
-                                            }
-                                            echo '</ul>';
-                                        } else {
-                                            echo '<span class="text-muted fst-italic">No new data.</span>';
-                                        }
-                                      ?>
-                                    </div>
-                                  </div>
-                                </div>
-                                <?php if ($log['reason']): ?>
-                                  <div class="mt-4 p-3 bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-3">
-                                    <p class="mb-1 fw-bold small"><i class="bi bi-chat-quote-fill me-1"></i>Reason for Change:</p>
-                                    <p class="mb-0 small"><?= htmlspecialchars($log['reason'], ENT_QUOTES, 'UTF-8') ?></p>
-                                  </div>
-                                <?php endif; ?>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+  <?php if (!empty($log['old_value']) || !empty($log['new_value'])): ?>
+    <div class="modal fade" id="logModal<?= esc($log['id']) ?>" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden text-start">
+          <div class="modal-header bg-white border-bottom py-3">
+            <h5 class="modal-title fw-bold text-dark d-flex align-items-center">
+              <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle me-3" style="width: 36px; height: 36px;">
+                <i class="bi bi-file-earmark-diff fs-5"></i>
+              </div>
+              Audit Change Comparison
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-4 bg-light">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <h6 class="text-muted small fw-bold mb-2 text-uppercase" style="letter-spacing: 0.5px;">Previous State</h6>
+                <div class="bg-white border rounded-3 p-3 text-break shadow-xs" style="max-height: 300px; overflow-y: auto; font-size: 0.85rem;">
+                  <?php 
+                    $oldArr = json_decode((string)$log['old_value'], true);
+                    if (is_array($oldArr) && !empty($oldArr)) {
+                        echo '<ul class="list-unstyled mb-0">';
+                        foreach ($oldArr as $k => $v) {
+                            $val = is_scalar($v) ? htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8') : htmlspecialchars(json_encode($v), ENT_QUOTES, 'UTF-8');
+                            echo '<li class="mb-1.5"><span class="text-muted fw-bold">' . htmlspecialchars(ucwords(str_replace('_', ' ', $k))) . ':</span> <span class="text-danger-emphasis fw-medium">' . $val . '</span></li>';
+                        }
+                        echo '</ul>';
+                    } else {
+                        echo '<span class="text-muted fst-italic">No prior state recorded.</span>';
+                    }
+                  ?>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h6 class="text-muted small fw-bold mb-2 text-uppercase" style="letter-spacing: 0.5px;">Updated State</h6>
+                <div class="bg-white border rounded-3 p-3 text-break shadow-xs" style="max-height: 300px; overflow-y: auto; font-size: 0.85rem;">
+                  <?php 
+                    $newArr = json_decode((string)$log['new_value'], true);
+                    if (is_array($newArr) && !empty($newArr)) {
+                        echo '<ul class="list-unstyled mb-0">';
+                        foreach ($newArr as $k => $v) {
+                            $val = is_scalar($v) ? htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8') : htmlspecialchars(json_encode($v), ENT_QUOTES, 'UTF-8');
+                            echo '<li class="mb-1.5"><span class="text-muted fw-bold">' . htmlspecialchars(ucwords(str_replace('_', ' ', $k))) . ':</span> <span class="text-success fw-medium">' . $val . '</span></li>';
+                        }
+                        echo '</ul>';
+                    } else {
+                        echo '<span class="text-muted fst-italic">No updated state recorded.</span>';
+                    }
+                  ?>
+                </div>
+              </div>
+            </div>
+            <?php if (!empty($log['reason'])): ?>
+              <div class="mt-4 p-3 bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 rounded-3">
+                <p class="mb-1 fw-bold small text-warning"><i class="bi bi-chat-quote-fill me-1"></i>Reason Provided:</p>
+                <p class="mb-0 small"><?= htmlspecialchars($log['reason'], ENT_QUOTES, 'UTF-8') ?></p>
+              </div>
+            <?php endif; ?>
+          </div>
+          <div class="modal-footer border-top-0 pt-0 bg-light">
+            <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
   <?php endif; ?>
 <?php endforeach; ?>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>
-
-
-

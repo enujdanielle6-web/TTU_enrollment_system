@@ -14,9 +14,87 @@ class ClinicController extends BaseController
     {
         $pdo = Database::getConnection();
         
-requirePermission('medical.review');
+        requirePermission('medical.review');
 
-$pageTitle = 'Clinic Dashboard - Triple T University';
+        $pageTitle = 'Clinic Dashboard - Triple T University';
+
+        // 1. Core Health Record Statistics
+        try {
+            $statsStmt = $pdo->query('
+                SELECT 
+                    COUNT(*) as total,
+                    COALESCE(SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END), 0) as pending,
+                    COALESCE(SUM(CASE WHEN status = "verified" THEN 1 ELSE 0 END), 0) as verified,
+                    COALESCE(SUM(CASE WHEN status = "correction_required" THEN 1 ELSE 0 END), 0) as correction_required,
+                    COALESCE(SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END), 0) as rejected
+                FROM health_records
+            ');
+            $rawStats = $statsStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $e) {
+            error_log('Clinic dashboard stats query failed: ' . $e->getMessage());
+            $rawStats = [];
+        }
+        
+        $total = (int)($rawStats['total'] ?? 0);
+        $verified = (int)($rawStats['verified'] ?? 0);
+        $pending = (int)($rawStats['pending'] ?? 0);
+        $correction = (int)($rawStats['correction_required'] ?? 0);
+        $rejected = (int)($rawStats['rejected'] ?? 0);
+        $clearanceRate = $total > 0 ? (int)round(($verified / $total) * 100) : 100;
+
+        $stats = [
+            'total' => $total,
+            'pending' => $pending,
+            'pending_medical' => $pending,
+            'verified' => $verified,
+            'total_verified' => $verified,
+            'correction_required' => $correction,
+            'rejected' => $rejected,
+            'clearance_rate' => $clearanceRate
+        ];
+
+        // 2. Declared Medical Condition Triage
+        try {
+            $condStmt = $pdo->query('
+                SELECT 
+                    COALESCE(SUM(CASE WHEN has_allergies = 1 THEN 1 ELSE 0 END), 0) as allergies,
+                    COALESCE(SUM(CASE WHEN has_asthma = 1 THEN 1 ELSE 0 END), 0) as asthma,
+                    COALESCE(SUM(CASE WHEN has_hypertension = 1 THEN 1 ELSE 0 END), 0) as hypertension,
+                    COALESCE(SUM(CASE WHEN has_diabetes = 1 THEN 1 ELSE 0 END), 0) as diabetes,
+                    COALESCE(SUM(CASE WHEN has_heart_disease = 1 THEN 1 ELSE 0 END), 0) as heart_disease,
+                    COALESCE(SUM(CASE WHEN has_physical_disability = 1 THEN 1 ELSE 0 END), 0) as physical_disability,
+                    COALESCE(SUM(CASE WHEN has_maintenance_medication = 1 THEN 1 ELSE 0 END), 0) as maintenance_medication
+                FROM health_records
+            ');
+            $conditionStats = $condStmt->fetch(PDO::FETCH_ASSOC) ?: [];
+        } catch (PDOException $e) {
+            error_log('Clinic condition stats query failed: ' . $e->getMessage());
+            $conditionStats = [];
+        }
+
+        // 3. Recent Health Submissions
+        try {
+            $recentStmt = $pdo->query('
+                SELECT h.id, h.status, h.created_at, h.updated_at, h.blood_type,
+                       h.has_allergies, h.has_asthma, h.has_diabetes, h.has_hypertension,
+                       h.has_heart_disease, h.has_physical_disability, h.has_existing_condition,
+                       h.emergency_name, h.emergency_relationship, h.emergency_contact,
+                       a.reference_number, a.academic_level, a.strand,
+                       u.first_name, u.last_name, u.email
+                FROM health_records h
+                INNER JOIN applications a ON h.application_id = a.id
+                INNER JOIN users u ON h.user_id = u.id
+                ORDER BY h.created_at DESC LIMIT 15
+            ');
+            $recent_records = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Clinic recent submissions query failed: ' . $e->getMessage());
+            $recent_records = [];
+        }
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         return $this->render('admin/clinic/clinic_dashboard', get_defined_vars());
     }

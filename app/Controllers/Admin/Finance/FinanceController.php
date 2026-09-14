@@ -14,65 +14,207 @@ class FinanceController extends BaseController
     public function dashboard(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-        
-requirePermission(['assessments.generate', 'payments.record']);
+        requirePermission(['assessments.generate', 'payments.record']);
 
-$pageTitle = 'Cashier Dashboard - Administrator';
+        $pageTitle = 'Cashier Dashboard - Triple T University';
+
+        // Load System Settings
+        $systemSettings = [];
+        try {
+            $stmt = $pdo->query('SELECT setting_key, setting_value FROM system_settings');
+            $systemSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        } catch (PDOException $e) {
+            error_log('Finance system settings fetch failed: ' . $e->getMessage());
+        }
+
+        // Compute Financial KPIs
+        $stats = [
+            'outstanding_balances' => 0.0,
+            'payments_today'       => 0.0,
+            'total_revenue'        => 0.0,
+            'total_accounts'       => 0,
+            'paid_accounts'        => 0,
+            'partial_accounts'     => 0,
+            'unpaid_accounts'      => 0,
+            'pending_verifications'=> 0,
+        ];
+
+        try {
+            $stmtOut = $pdo->query('SELECT COALESCE(SUM(net_amount - total_paid), 0) FROM student_assessments WHERE payment_status IN ("unpaid", "partial")');
+            $stats['outstanding_balances'] = (float)$stmtOut->fetchColumn();
+
+            $stmtToday = $pdo->query('SELECT COALESCE(SUM(amount), 0) FROM payment_records WHERE DATE(payment_date) = CURDATE() AND status != "rejected"');
+            $stats['payments_today'] = (float)$stmtToday->fetchColumn();
+
+            $stmtRev = $pdo->query('SELECT COALESCE(SUM(amount), 0) FROM payment_records WHERE status != "rejected"');
+            $stats['total_revenue'] = (float)$stmtRev->fetchColumn();
+
+            $stmtCounts = $pdo->query('
+                SELECT 
+                    COUNT(*) as total_accounts,
+                    SUM(CASE WHEN payment_status = "paid" THEN 1 ELSE 0 END) as paid_count,
+                    SUM(CASE WHEN payment_status = "partial" THEN 1 ELSE 0 END) as partial_count,
+                    SUM(CASE WHEN payment_status = "unpaid" THEN 1 ELSE 0 END) as unpaid_count
+                FROM student_assessments
+            ')->fetch(PDO::FETCH_ASSOC);
+
+            if ($stmtCounts) {
+                $stats['total_accounts']   = (int)($stmtCounts['total_accounts'] ?? 0);
+                $stats['paid_accounts']    = (int)($stmtCounts['paid_count'] ?? 0);
+                $stats['partial_accounts'] = (int)($stmtCounts['partial_count'] ?? 0);
+                $stats['unpaid_accounts']  = (int)($stmtCounts['unpaid_count'] ?? 0);
+            }
+
+            $stmtPending = $pdo->query('SELECT COUNT(*) FROM payment_records WHERE status = "pending"');
+            $stats['pending_verifications'] = (int)$stmtPending->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('Cashier stats error: ' . $e->getMessage());
+        }
+
+        // Fetch Assessments with Applicant & Student Details
+        $assessments = [];
+        try {
+            $stmt = $pdo->query('
+                SELECT sa.id as assessment_id, sa.net_amount, sa.total_paid, sa.payment_status, sa.created_at,
+                       a.id as application_id, a.reference_number, a.academic_level, a.grade_level, a.strand,
+                       u.first_name, u.last_name, u.email, u.student_number
+                FROM student_assessments sa
+                INNER JOIN applications a ON sa.application_id = a.id
+                INNER JOIN users u ON a.user_id = u.id
+                ORDER BY 
+                    CASE sa.payment_status 
+                        WHEN "unpaid" THEN 1 
+                        WHEN "partial" THEN 2 
+                        ELSE 3 
+                    END ASC,
+                    sa.created_at DESC
+            ');
+            $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Cashier dashboard fetch failed: ' . $e->getMessage());
+        }
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         return $this->render('admin/finance/cashier_dashboard', get_defined_vars());
     }
+
     public function assessment(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-        
+        requirePermission(['assessments.generate', 'payments.record']);
 
-$assessmentId = (int) ($_GET['id'] ?? 0);
+        $assessmentId = (int) ($_GET['id'] ?? 0);
 
-if ($assessmentId <= 0) {
-    $response->redirect("/sia/admin/finance/cashier_dashboard.php");
-    return;
-}
+        if ($assessmentId <= 0) {
+            $response->redirect("/sia/admin/finance/cashier_dashboard.php");
+            return;
+        }
 
-try {
-    $breakdown = \App\Services\AssessmentService::getAssessmentBreakdown($pdo, $assessmentId);
-    if (!$breakdown) {
-        $response->redirect("/sia/admin/finance/cashier_dashboard.php");
-        return;
-    }
+        try {
+            $breakdown = \App\Services\AssessmentService::getAssessmentBreakdown($pdo, $assessmentId);
+            if (!$breakdown) {
+                $response->redirect("/sia/admin/finance/cashier_dashboard.php");
+                return;
+            }
 
-    $assessment = $breakdown['assessment'];
-    $payments = $breakdown['payments'];
-    $assessmentItems = $breakdown['assessment_items'];
-    $enrolledSubjects = $breakdown['enrolled_subjects'];
+            $assessment = $breakdown['assessment'];
+            $payments = $breakdown['payments'];
+            $assessmentItems = $breakdown['assessment_items'];
+            $enrolledSubjects = $breakdown['enrolled_subjects'];
 
-    // Calculate balances
-    $totalAmount = (float)$assessment['total_amount'];
-    $discountAmount = (float)$assessment['discount_amount'];
-    $netAmount = (float)$assessment['net_amount'];
-    $totalPaid = (float)$assessment['total_paid'];
-    $balance = max(0, $netAmount - $totalPaid);
+            // Calculate balances
+            $totalAmount = (float)$assessment['total_amount'];
+            $discountAmount = (float)$assessment['discount_amount'];
+            $netAmount = (float)$assessment['net_amount'];
+            $totalPaid = (float)$assessment['total_paid'];
+            $balance = max(0, $netAmount - $totalPaid);
 
-} catch (PDOException $e) {
-    error_log('Admin assessment fetch failed: ' . $e->getMessage());
-    $_SESSION['error_msg'] = 'A database error occurred while querying details for this assessment.';
-    $response->redirect("/sia/admin/finance/cashier_dashboard.php");
-    return;
-}
+            // Load System Settings
+            $stmt = $pdo->query('SELECT setting_key, setting_value FROM system_settings');
+            $systemSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
 
-$successMsg = $_SESSION['success_msg'] ?? null;
-$errorMsg = $_SESSION['error_msg'] ?? null;
-unset($_SESSION['success_msg'], $_SESSION['error_msg']);
+        } catch (PDOException $e) {
+            error_log('Admin assessment fetch failed: ' . $e->getMessage());
+            $_SESSION['error_msg'] = 'A database error occurred while querying details for this assessment.';
+            $response->redirect("/sia/admin/finance/cashier_dashboard.php");
+            return;
+        }
 
-$pageTitle = 'Student Account - Cashier';
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
+
+        $pageTitle = 'Student Account - Cashier';
 
         return $this->render('admin/finance/cashier_assessment', get_defined_vars());
     }
+
     public function payments(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-        
+        requirePermission(['payments.record']);
 
-$pageTitle = 'Payment History - Administrator';
+        $pageTitle = 'Payment History & Ledger - Triple T University';
+
+        // Load System Settings
+        $systemSettings = [];
+        try {
+            $stmt = $pdo->query('SELECT setting_key, setting_value FROM system_settings');
+            $systemSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        } catch (PDOException $e) {
+            error_log('Payment history system settings fetch failed: ' . $e->getMessage());
+        }
+
+        // Compute Payment Statistics
+        $stats = [
+            'total_collections' => 0.0,
+            'today_collections' => 0.0,
+            'pending_reviews'   => 0,
+            'total_transactions'=> 0,
+        ];
+
+        try {
+            $stmtTot = $pdo->query('SELECT COALESCE(SUM(amount), 0) FROM payment_records WHERE status = "verified"');
+            $stats['total_collections'] = (float)$stmtTot->fetchColumn();
+
+            $stmtToday = $pdo->query('SELECT COALESCE(SUM(amount), 0) FROM payment_records WHERE DATE(payment_date) = CURDATE() AND status = "verified"');
+            $stats['today_collections'] = (float)$stmtToday->fetchColumn();
+
+            $stmtPending = $pdo->query('SELECT COUNT(*) FROM payment_records WHERE status = "pending"');
+            $stats['pending_reviews'] = (int)$stmtPending->fetchColumn();
+
+            $stmtCount = $pdo->query('SELECT COUNT(*) FROM payment_records');
+            $stats['total_transactions'] = (int)$stmtCount->fetchColumn();
+        } catch (PDOException $e) {
+            error_log('Payment stats error: ' . $e->getMessage());
+        }
+
+        // Fetch All Payments
+        $payments = [];
+        try {
+            $stmt = $pdo->query('
+                SELECT pr.*, 
+                       u.first_name as student_first, u.last_name as student_last, u.student_number, u.email as student_email,
+                       c.first_name as cashier_first, c.last_name as cashier_last,
+                       a.reference_number as app_ref, a.academic_level, a.strand
+                FROM payment_records pr
+                INNER JOIN users u ON pr.user_id = u.id
+                LEFT JOIN users c ON pr.cashier_id = c.id
+                INNER JOIN student_assessments sa ON pr.assessment_id = sa.id
+                INNER JOIN applications a ON sa.application_id = a.id
+                ORDER BY pr.created_at DESC
+            ');
+            $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Cashier payments fetch failed: ' . $e->getMessage());
+        }
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         return $this->render('admin/finance/cashier_payments', get_defined_vars());
     }

@@ -158,24 +158,37 @@ if (empty($semesters)) $semesters = ['1'];
 <main class="py-5 bg-light min-vh-100">
     <div class="container-fluid px-lg-5">
         
-        <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
+        <!-- Dossier Hero Header Strip -->
+        <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
             <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                <div>
-                    <h1 class="h3 fw-bold text-dark mb-1">
-                        <a href="<?= esc($type === 'shs' ? 'shs_sections.php' : 'college_sections.php') ?>" data-spa="false" class="text-decoration-none text-muted me-2"><i class="bi bi-arrow-left"></i></a>
-                        Schedule Builder
-                    </h1>
-                    <p class="text-muted mb-0">
-                        Managing schedule for <span class="fw-bold text-primary"><?= htmlspecialchars($section['section_code'], ENT_QUOTES, 'UTF-8') ?></span>
-                        (<?= htmlspecialchars($section['program_code'], ENT_QUOTES, 'UTF-8') ?> - <?= htmlspecialchars($section['year_level'], ENT_QUOTES, 'UTF-8') ?>)
-                    </p>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="<?= esc($type === 'shs' ? 'shs_sections.php' : 'college_sections.php') ?>" data-spa="false" class="btn btn-light border rounded-circle d-flex align-items-center justify-content-center shadow-xs text-muted" style="width: 44px; height: 44px;" title="Back to Sections">
+                        <i class="bi bi-arrow-left fs-5"></i>
+                    </a>
+                    <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-4 shadow-sm" style="width: 52px; height: 52px; font-size: 1.5rem; flex-shrink: 0;">
+                        <i class="bi bi-calendar2-range-fill"></i>
+                    </div>
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <h1 class="h4 fw-bold text-dark mb-0">Visual Schedule Builder</h1>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                                <i class="bi bi-hash text-muted"></i><?= htmlspecialchars($section['section_code'], ENT_QUOTES, 'UTF-8') ?>
+                            </span>
+                            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                                <?= htmlspecialchars($section['program_code'], ENT_QUOTES, 'UTF-8') ?> &bull; <?= htmlspecialchars($section['year_level'], ENT_QUOTES, 'UTF-8') ?>
+                            </span>
+                        </div>
+                        <p class="text-muted small mb-0">Drag and drop subject blocks into time slots to construct class schedules.</p>
+                    </div>
                 </div>
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-outline-primary fw-medium" onclick="autoGenerate()">
-                        <i class="bi bi-magic me-1"></i> Auto-Generate
+                <div class="d-flex align-items-center gap-2">
+                    <button type="button" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs" onclick="autoGenerate()">
+                        <i class="bi bi-magic text-primary"></i>
+                        <span>Auto-Generate</span>
                     </button>
-                    <button type="button" class="btn btn-primary fw-medium" onclick="saveSchedule()">
-                        <i class="bi bi-save me-1"></i> Save Schedule
+                    <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-2" onclick="saveSchedule()">
+                        <i class="bi bi-save"></i>
+                        <span>Save Schedule</span>
                     </button>
                 </div>
             </div>
@@ -186,67 +199,91 @@ if (empty($semesters)) $semesters = ['1'];
         <div class="row">
             <!-- Sidebar: Unscheduled Subjects -->
             <div class="col-xl-3 mb-4">
-                <div class="island fade-in-up" style="animation-delay: 0.2s;">
-                    <h5 class="fw-bold mb-3">Unscheduled</h5>
-                    
-                    <?php if ($type === 'shs'): ?>
-                    <ul class="nav nav-pills mb-3" id="semTab" role="tablist">
-                        <?php foreach ($semesters as $i => $sem): ?>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link <?= esc($i===0?'active':'') ?>" data-bs-toggle="pill" data-bs-target="#sem<?= htmlspecialchars($sem) ?>" type="button" onclick="switchSemester('<?= htmlspecialchars($sem) ?>')">
-                                Semester <?= htmlspecialchars($sem) ?>
-                            </button>
-                        </li>
-                        <?php endforeach; ?>
-                    </ul>
-                    <?php endif; ?>
-
-                    <div class="tab-content">
-                        <?php foreach ($semesters as $i => $sem): ?>
-                        <div class="tab-pane fade <?= esc($i===0?'show active':'') ?>" id="sem<?= htmlspecialchars($sem) ?>" role="tabpanel">
-                            <div class="unscheduled-list" id="unscheduledList_<?= htmlspecialchars($sem) ?>" ondragover="allowDrop(event)" ondrop="dropToUnscheduled(event, '<?= htmlspecialchars($sem) ?>')">
-                                <!-- Populated by JS -->
+                <div class="dossier-card fade-in-up" style="animation-delay: 0.15s;">
+                    <div class="dossier-card-header d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="dossier-header-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="bi bi-inbox-fill"></i>
                             </div>
+                            <h2 class="h6 fw-bold text-dark mb-0">Unscheduled Subjects</h2>
                         </div>
-                        <?php endforeach; ?>
+                    </div>
+                    <div class="p-3">
+                        <?php if ($type === 'shs'): ?>
+                        <ul class="nav nav-pills mb-3" id="semTab" role="tablist">
+                            <?php foreach ($semesters as $i => $sem): ?>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link <?= esc($i===0?'active':'') ?> rounded-pill px-3 py-1.5 small fw-medium" data-bs-toggle="pill" data-bs-target="#sem<?= htmlspecialchars($sem) ?>" type="button" onclick="switchSemester('<?= htmlspecialchars($sem) ?>')">
+                                    Semester <?= htmlspecialchars($sem) ?>
+                                </button>
+                            </li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <?php endif; ?>
+
+                        <div class="tab-content">
+                            <?php foreach ($semesters as $i => $sem): ?>
+                            <div class="tab-pane fade <?= esc($i===0?'show active':'') ?>" id="sem<?= htmlspecialchars($sem) ?>" role="tabpanel">
+                                <div class="unscheduled-list" id="unscheduledList_<?= htmlspecialchars($sem) ?>" ondragover="allowDrop(event)" ondrop="dropToUnscheduled(event, '<?= htmlspecialchars($sem) ?>')">
+                                    <!-- Populated by JS -->
+                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Calendar Area -->
-            <div class="col-xl-9">
-                <div class="calendar-container">
-                    <div class="calendar-header">
-                        <div>Time</div>
-                        <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-                    </div>
-                    <div class="calendar-body">
-                        <!-- Grid Lines -->
-                        <div class="grid-lines">
-                            <?php for ($i=0; $i<11; $i++): ?>
-                                <div class="grid-line"></div>
-                            <?php endfor; ?>
-                        </div>
-                        
-                        <!-- Time Column -->
-                        <div class="time-col">
-                            <?php
-                            for ($h=7; $h<=17; $h++) {
-                                $ap = $h >= 12 ? 'PM' : 'AM';
-                                $hr = $h > 12 ? $h - 12 : $h;
-                                echo "<div class='time-slot'>{$hr}:00 {$ap}</div>";
-                            }
-                            ?>
-                        </div>
-
-                        <!-- Day Columns -->
-                        <?php 
-                        $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-                        foreach ($days as $d): ?>
-                            <div class="day-col" id="col_<?= esc($d) ?>" ondragover="allowDrop(event)" ondrop="dropToCalendar(event, '<?= esc($d) ?>')">
-                                <!-- Blocks appended by JS -->
+            <div class="col-xl-9 mb-4">
+                <div class="dossier-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="dossier-card-header d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="dossier-header-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-calendar3"></i>
                             </div>
-                        <?php endforeach; ?>
+                            <h2 class="h6 fw-bold text-dark mb-0">Weekly Timetable Grid (7:00 AM &ndash; 6:00 PM)</h2>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 small text-muted">
+                            <span class="d-inline-flex align-items-center"><span class="badge bg-primary rounded-circle p-1 me-1"></span> Scheduled</span>
+                            <span class="d-inline-flex align-items-center ms-2"><span class="badge bg-danger rounded-circle p-1 me-1"></span> Conflict</span>
+                        </div>
+                    </div>
+                    <div class="p-3 bg-light bg-opacity-25">
+                        <div class="calendar-container shadow-xs">
+                            <div class="calendar-header">
+                                <div>Time</div>
+                                <div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                            </div>
+                            <div class="calendar-body">
+                                <!-- Grid Lines -->
+                                <div class="grid-lines">
+                                    <?php for ($i=0; $i<11; $i++): ?>
+                                        <div class="grid-line"></div>
+                                    <?php endfor; ?>
+                                </div>
+                                
+                                <!-- Time Column -->
+                                <div class="time-col">
+                                    <?php
+                                    for ($h=7; $h<=17; $h++) {
+                                        $ap = $h >= 12 ? 'PM' : 'AM';
+                                        $hr = $h > 12 ? $h - 12 : $h;
+                                        echo "<div class='time-slot'>{$hr}:00 {$ap}</div>";
+                                    }
+                                    ?>
+                                </div>
+
+                                <!-- Day Columns -->
+                                <?php 
+                                $days = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+                                foreach ($days as $d): ?>
+                                    <div class="day-col" id="col_<?= esc($d) ?>" ondragover="allowDrop(event)" ondrop="dropToCalendar(event, '<?= esc($d) ?>')">
+                                        <!-- Blocks appended by JS -->
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

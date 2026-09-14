@@ -7,19 +7,105 @@ use App\Core\Response;
 use App\Core\Database;
 use PDO;
 use PDOException;
+use Exception;
 
 class SystemController extends BaseController
 {
     public function dashboard(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-        
-requirePermission(['users.manage', 'settings.manage', 'reports.view']);
+        requirePermission(['users.manage', 'settings.manage', 'reports.view']);
 
-$pageTitle = 'System Admin Dashboard - Triple T University';
+        $pageTitle = 'System Admin Dashboard - Triple T University';
+
+        // Load System Settings
+        $systemSettings = [];
+        try {
+            $stmt = $pdo->query('SELECT setting_key, setting_value FROM system_settings');
+            $systemSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        } catch (PDOException $e) {
+            error_log('SysAdmin settings error: ' . $e->getMessage());
+        }
+
+        // Aggregate System Health & Governance Stats
+        $stats = [
+            'total_users'     => 0,
+            'active_users'    => 0,
+            'total_apps'      => 0,
+            'enrolled_apps'   => 0,
+            'today_regs'      => 0,
+            'week_regs'       => 0,
+            'total_logs'      => 0,
+            'staff_count'     => 0,
+            'student_count'   => 0,
+            'applicant_count' => 0,
+            'system_health'   => 'Operational',
+        ];
+
+        $recent_regs = [];
+
+        try {
+            // Total & active users
+            $userCounts = $pdo->query('
+                SELECT 
+                    COUNT(*) as total_users,
+                    COALESCE(SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END), 0) as active_users,
+                    COALESCE(SUM(CASE WHEN role IN ("student") THEN 1 ELSE 0 END), 0) as student_count,
+                    COALESCE(SUM(CASE WHEN role IN ("applicant") THEN 1 ELSE 0 END), 0) as applicant_count,
+                    COALESCE(SUM(CASE WHEN role NOT IN ("student", "applicant") THEN 1 ELSE 0 END), 0) as staff_count,
+                    COALESCE(SUM(CASE WHEN created_at >= CURDATE() THEN 1 ELSE 0 END), 0) as today_regs,
+                    COALESCE(SUM(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END), 0) as week_regs
+                FROM users
+            ')->fetch(PDO::FETCH_ASSOC);
+
+            if ($userCounts) {
+                $stats['total_users']     = (int)$userCounts['total_users'];
+                $stats['active_users']    = (int)$userCounts['active_users'];
+                $stats['student_count']   = (int)$userCounts['student_count'];
+                $stats['applicant_count'] = (int)$userCounts['applicant_count'];
+                $stats['staff_count']     = (int)$userCounts['staff_count'];
+                $stats['today_regs']      = (int)$userCounts['today_regs'];
+                $stats['week_regs']       = (int)$userCounts['week_regs'];
+            }
+
+            // Total & enrolled apps
+            $appCounts = $pdo->query('
+                SELECT 
+                    COUNT(*) as total_apps,
+                    COALESCE(SUM(CASE WHEN status = "enrolled" THEN 1 ELSE 0 END), 0) as enrolled_apps
+                FROM applications
+            ')->fetch(PDO::FETCH_ASSOC);
+
+            if ($appCounts) {
+                $stats['total_apps']    = (int)$appCounts['total_apps'];
+                $stats['enrolled_apps'] = (int)$appCounts['enrolled_apps'];
+            }
+
+            // Audit Logs
+            $stmtLogs = $pdo->query('SELECT COUNT(*) FROM activity_logs');
+            $stats['total_logs'] = (int)$stmtLogs->fetchColumn();
+
+            // Recent Registrations (with last login)
+            $recentRegsStmt = $pdo->query('
+                SELECT u.id, u.first_name, u.last_name, u.email, u.role, u.department, u.is_active, u.created_at,
+                       (SELECT MAX(created_at) FROM activity_logs WHERE user_id = u.id AND title = "Logged In") AS last_login
+                FROM users u 
+                ORDER BY u.created_at DESC 
+                LIMIT 8
+            ');
+            $recent_regs = $recentRegsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch (PDOException $e) {
+            error_log('SysAdmin dashboard stats error: ' . $e->getMessage());
+        }
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         return $this->render('admin/system/sysadmin_dashboard', get_defined_vars());
     }
+
     public function users(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
@@ -27,40 +113,268 @@ $pageTitle = 'System Admin Dashboard - Triple T University';
 
         $pageTitle = 'User Management - Administrator';
 
+        // Load System Settings
+        $systemSettings = [];
+        try {
+            $stmt = $pdo->query('SELECT setting_key, setting_value FROM system_settings');
+            $systemSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        } catch (PDOException $e) {
+            error_log('Users settings error: ' . $e->getMessage());
+        }
+
+        // Pagination setup
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 20;
+        $offset = ($page - 1) * $limit;
+
+        // Filters
+        $searchQuery = trim($_GET['search'] ?? '');
+        $roleFilter = trim($_GET['role'] ?? 'all');
+
+        $whereClauses = [];
+        $params = [];
+
+        if ($searchQuery !== '') {
+            $whereClauses[] = '(u.email LIKE :search OR u.first_name LIKE :search OR u.last_name LIKE :search)';
+            $params[':search'] = '%' . $searchQuery . '%';
+        }
+
+        $validRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler', 'faculty', 'applicant', 'student'];
+        if ($roleFilter !== 'all' && in_array($roleFilter, $validRoles, true)) {
+            $whereClauses[] = 'u.role = :role';
+            $params[':role'] = $roleFilter;
+        }
+
+        $whereSQL = '';
+        if (!empty($whereClauses)) {
+            $whereSQL = 'WHERE ' . implode(' AND ', $whereClauses);
+        }
+
+        $users = [];
+        $totalUsers = 0;
+
+        // KPI Counts
+        $stats = [
+            'total_users'   => 0,
+            'staff_count'   => 0,
+            'student_count' => 0,
+            'active_count'  => 0,
+        ];
+
+        try {
+            // Compute KPI totals
+            $kpiStmt = $pdo->query('
+                SELECT 
+                    COUNT(*) as total,
+                    COALESCE(SUM(CASE WHEN role NOT IN ("student", "applicant") THEN 1 ELSE 0 END), 0) as staff,
+                    COALESCE(SUM(CASE WHEN role = "student" THEN 1 ELSE 0 END), 0) as student,
+                    COALESCE(SUM(CASE WHEN is_active = 1 THEN 1 ELSE 0 END), 0) as active
+                FROM users
+            ')->fetch(PDO::FETCH_ASSOC);
+
+            if ($kpiStmt) {
+                $stats['total_users']   = (int)$kpiStmt['total'];
+                $stats['staff_count']   = (int)$kpiStmt['staff'];
+                $stats['student_count'] = (int)$kpiStmt['student'];
+                $stats['active_count']  = (int)$kpiStmt['active'];
+            }
+
+            // Count filtered users
+            $countStmt = $pdo->prepare("SELECT COUNT(u.id) FROM users u $whereSQL");
+            $countStmt->execute($params);
+            $totalUsers = (int) $countStmt->fetchColumn();
+
+            // Fetch users with real last_login
+            $stmt = $pdo->prepare("
+                SELECT 
+                    u.id, u.first_name, u.last_name, u.email, u.role, u.department, u.permissions, u.is_active, u.created_at,
+                    (SELECT MAX(created_at) FROM activity_logs WHERE user_id = u.id AND title = 'Logged In') AS last_login 
+                FROM users u 
+                $whereSQL 
+                ORDER BY u.created_at DESC 
+                LIMIT :limit OFFSET :offset
+            ");
+            
+            foreach ($params as $key => $val) {
+                $stmt->bindValue($key, $val);
+            }
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('User fetch failed: ' . $e->getMessage());
+        }
+
+        $totalPages = (int)ceil($totalUsers / $limit);
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
+
         return $this->render('admin/system/users', get_defined_vars());
     }
+
     public function auditLogs(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-        
+        requirePermission('reports.view');
 
-$pageTitle = 'Audit Logs - Administrator';
+        $pageTitle = 'Audit Logs - Administrator';
+
+        // Load System Settings
+        $systemSettings = [];
+        try {
+            $stmt = $pdo->query('SELECT setting_key, setting_value FROM system_settings');
+            $systemSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        } catch (PDOException $e) {
+            error_log('Audit logs settings error: ' . $e->getMessage());
+        }
+
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 50;
+        $offset = ($page - 1) * $limit;
+        $searchQuery = trim($_GET['search'] ?? '');
+
+        $logs = [];
+        $totalLogs = 0;
+
+        $stats = [
+            'total_events'  => 0,
+            'events_today'  => 0,
+            'unique_users'  => 0,
+        ];
+
+        try {
+            $statsStmt = $pdo->query('
+                SELECT 
+                    COUNT(*) as total_events,
+                    COALESCE(SUM(CASE WHEN created_at >= CURDATE() THEN 1 ELSE 0 END), 0) as events_today,
+                    COUNT(DISTINCT user_id) as unique_users
+                FROM activity_logs
+            ')->fetch(PDO::FETCH_ASSOC);
+
+            if ($statsStmt) {
+                $stats['total_events'] = (int)$statsStmt['total_events'];
+                $stats['events_today'] = (int)$statsStmt['events_today'];
+                $stats['unique_users'] = (int)$statsStmt['unique_users'];
+            }
+
+            if ($searchQuery !== '') {
+                $countStmt = $pdo->prepare('
+                    SELECT COUNT(al.id) FROM activity_logs al
+                    JOIN users u ON al.user_id = u.id
+                    WHERE u.email LIKE :search OR u.first_name LIKE :search OR u.last_name LIKE :search OR al.title LIKE :search OR al.affected_record LIKE :search
+                ');
+                $countStmt->execute(['search' => '%' . $searchQuery . '%']);
+                $totalLogs = (int) $countStmt->fetchColumn();
+
+                $stmt = $pdo->prepare('
+                    SELECT al.*, u.first_name, u.last_name, u.email, u.role, u.department 
+                    FROM activity_logs al
+                    JOIN users u ON al.user_id = u.id
+                    WHERE u.email LIKE :search OR u.first_name LIKE :search OR u.last_name LIKE :search OR al.title LIKE :search OR al.affected_record LIKE :search
+                    ORDER BY al.created_at DESC 
+                    LIMIT :limit OFFSET :offset
+                ');
+                $stmt->bindValue(':search', '%' . $searchQuery . '%');
+                $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+                $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $stmt->execute();
+                $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                $totalLogs = (int) $pdo->query('SELECT COUNT(id) FROM activity_logs')->fetchColumn();
+
+                $stmt = $pdo->prepare('
+                    SELECT al.*, u.first_name, u.last_name, u.email, u.role, u.department 
+                    FROM activity_logs al
+                    JOIN users u ON al.user_id = u.id
+                    ORDER BY al.created_at DESC 
+                    LIMIT :limit OFFSET :offset
+                ');
+                $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+                $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+                $stmt->execute();
+                $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            }
+        } catch (PDOException $e) {
+            error_log('Audit logs fetch failed: ' . $e->getMessage());
+        }
+
+        $totalPages = (int)ceil($totalLogs / $limit);
 
         return $this->render('admin/system/audit_logs', get_defined_vars());
     }
     public function userActivity(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-        
+        requirePermission('reports.view');
 
-$userId = (int)($_GET['id'] ?? 0);
+        $userId = (int)($_GET['id'] ?? 0);
+        if ($userId <= 0) {
+            $response->redirect("/sia/admin/system/users.php");
+            return;
+        }
 
-if ($userId <= 0) {
-    $response->redirect("/sia/admin/system/users.php");
-    return;
-}
+        // Fetch user details
+        $stmtUser = $pdo->prepare('SELECT id, first_name, last_name, email, role, department, status, created_at FROM users WHERE id = :id');
+        $stmtUser->execute(['id' => $userId]);
+        $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
 
-// Fetch user details
-$stmtUser = $pdo->prepare('SELECT first_name, last_name, email, role, department FROM users WHERE id = :id');
-$stmtUser->execute(['id' => $userId]);
-$user = $stmtUser->fetch();
+        if (!$user) {
+            $response->redirect("/sia/admin/system/users.php");
+            return;
+        }
 
-if (!$user) {
-    $response->redirect("/sia/admin/system/users.php");
-    return;
-}
+        $pageTitle = 'User Activity History - Administrator';
 
-$pageTitle = 'User Activity History - Administrator';
+        // Pagination setup
+        $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        $limit = 50;
+        $offset = ($page - 1) * $limit;
+
+        $logs = [];
+        $totalLogs = 0;
+        $stats = [
+            'total_actions' => 0,
+            'today_actions' => 0,
+            'last_active'   => null,
+        ];
+
+        try {
+            // Count total logs for this user
+            $countStmt = $pdo->prepare('SELECT COUNT(id) FROM activity_logs WHERE user_id = :user_id');
+            $countStmt->execute(['user_id' => $userId]);
+            $totalLogs = (int)$countStmt->fetchColumn();
+            $stats['total_actions'] = $totalLogs;
+
+            // Today's actions
+            $todayStmt = $pdo->prepare('SELECT COUNT(id) FROM activity_logs WHERE user_id = :user_id AND DATE(created_at) = CURDATE()');
+            $todayStmt->execute(['user_id' => $userId]);
+            $stats['today_actions'] = (int)$todayStmt->fetchColumn();
+
+            // Fetch logs paginated
+            $stmt = $pdo->prepare('
+                SELECT * 
+                FROM activity_logs 
+                WHERE user_id = :user_id 
+                ORDER BY created_at DESC 
+                LIMIT :limit OFFSET :offset
+            ');
+            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            if (!empty($logs)) {
+                $stats['last_active'] = $logs[0]['created_at'];
+            }
+        } catch (PDOException $e) {
+            error_log('User activity fetch failed: ' . $e->getMessage());
+        }
+
+        $totalPages = (int)ceil($totalLogs / $limit);
 
         return $this->render('admin/system/user_activity', get_defined_vars());
     }
@@ -68,14 +382,48 @@ $pageTitle = 'User Activity History - Administrator';
     {
         $pdo = Database::getConnection();
         
-requirePermission('*');
+        requirePermission('*');
 
-$pageTitle = 'Backup & Restore - Administrator';
+        $pageTitle = 'Backup & Restore - Administrator';
 
-$successMsg = $_SESSION['success_msg'] ?? null;
-$errorMsg = $_SESSION['error_msg'] ?? null;
-unset($_SESSION['success_msg'], $_SESSION['error_msg']);
+        $dbStats = [
+            'total_tables' => 0,
+            'db_size_mb'   => '0.00',
+            'last_event'   => null,
+        ];
 
+        try {
+            // Count tables
+            $tablesStmt = $pdo->query('SHOW TABLES');
+            $dbStats['total_tables'] = $tablesStmt ? $tablesStmt->rowCount() : 0;
+            
+            // Database size in MB
+            $sizeStmt = $pdo->query("
+                SELECT ROUND(SUM(data_length + index_length) / 1024 / 1024, 2) AS size_mb 
+                FROM information_schema.TABLES 
+                WHERE table_schema = DATABASE()
+            ");
+            $sizeRow = $sizeStmt ? $sizeStmt->fetch(PDO::FETCH_ASSOC) : null;
+            if ($sizeRow && isset($sizeRow['size_mb'])) {
+                $dbStats['db_size_mb'] = $sizeRow['size_mb'];
+            }
+            
+            // Last backup/restore activity log
+            $lastLogStmt = $pdo->query("
+                SELECT title, description, created_at 
+                FROM activity_logs 
+                WHERE title LIKE '%Database%' OR title LIKE '%Backup%' OR title LIKE '%Restore%'
+                ORDER BY created_at DESC 
+                LIMIT 1
+            ");
+            $dbStats['last_event'] = $lastLogStmt ? $lastLogStmt->fetch(PDO::FETCH_ASSOC) : null;
+        } catch (PDOException $e) {
+            error_log('Backup stats error: ' . $e->getMessage());
+        }
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         return $this->render('admin/system/backup', get_defined_vars());
     }
@@ -151,7 +499,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         }
 
         $passErrors = [];
-        if (!isPasswordStrong($password, $passErrors)) {
+        if (!\isPasswordStrong($password, $passErrors)) {
             throw new Exception(implode(' ', $passErrors));
         }
 
@@ -270,7 +618,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         // Update password if provided
         if ($newPassword !== '') {
             $passErrors = [];
-            if (!isPasswordStrong($newPassword, $passErrors)) {
+            if (!\isPasswordStrong($newPassword, $passErrors)) {
                 throw new Exception(implode(' ', $passErrors));
             }
             $updateQuery .= ', password = :pass';

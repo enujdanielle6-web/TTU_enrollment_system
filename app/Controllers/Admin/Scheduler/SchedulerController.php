@@ -12,8 +12,91 @@ class SchedulerController extends BaseController
 {
     public function dashboard(Request $request, Response $response)
     {
-        $pageTitle = 'Scheduler Dashboard';
+        $pageTitle = 'Scheduler Dashboard - Triple T University';
         $pdo = Database::getConnection();
+
+        $stats = [
+            'shs_sections' => 0,
+            'college_sections' => 0,
+            'total_sections' => 0,
+            'shs_scheduled_subjects' => 0,
+            'college_scheduled_subjects' => 0,
+            'total_scheduled_subjects' => 0,
+            'total_capacity' => 0,
+            'total_enrolled_sections' => 0,
+        ];
+
+        $recentCollegeSections = [];
+        $recentShsSections = [];
+        $systemSettings = [];
+
+        try {
+            // Active Section counts
+            $stmtShs = $pdo->query('SELECT COUNT(*) FROM shs_sections WHERE status = 1');
+            $stats['shs_sections'] = (int) $stmtShs->fetchColumn();
+
+            $stmtCol = $pdo->query('SELECT COUNT(*) FROM college_sections WHERE status = 1');
+            $stats['college_sections'] = (int) $stmtCol->fetchColumn();
+
+            $stats['total_sections'] = $stats['shs_sections'] + $stats['college_sections'];
+
+            // Scheduled subject slots
+            $stats['college_scheduled_subjects'] = (int) $pdo->query('SELECT COUNT(*) FROM college_section_subjects')->fetchColumn();
+            $stats['shs_scheduled_subjects'] = (int) $pdo->query('SELECT COUNT(*) FROM shs_section_subjects')->fetchColumn();
+            $stats['total_scheduled_subjects'] = $stats['college_scheduled_subjects'] + $stats['shs_scheduled_subjects'];
+
+            // Capacities & Enrollment in sections
+            $colCap = (int) $pdo->query('SELECT COALESCE(SUM(capacity), 0) FROM college_sections WHERE status = 1')->fetchColumn();
+            $shsCap = (int) $pdo->query('SELECT COALESCE(SUM(capacity), 0) FROM shs_sections WHERE status = 1')->fetchColumn();
+            $stats['total_capacity'] = $colCap + $shsCap;
+
+            $colEnrolled = (int) $pdo->query("SELECT COUNT(*) FROM applications WHERE section_id IN (SELECT id FROM college_sections WHERE status = 1) AND status != 'rejected'")->fetchColumn();
+            $shsEnrolled = (int) $pdo->query("SELECT COUNT(*) FROM applications WHERE section_id IN (SELECT id FROM shs_sections WHERE status = 1) AND status != 'rejected'")->fetchColumn();
+            $stats['total_enrolled_sections'] = $colEnrolled + $shsEnrolled;
+
+            // Fetch Active College Sections
+            $stmtColSections = $pdo->query("
+                SELECT 
+                    s.*, 
+                    p.code as program_code,
+                    p.name as program_name,
+                    c.version as curriculum_version,
+                    (SELECT COUNT(*) FROM applications a WHERE a.section_id = s.id AND a.status != 'rejected') as current_enrollment,
+                    (SELECT COUNT(*) FROM college_section_subjects css WHERE css.college_section_id = s.id) as subject_count
+                FROM college_sections s
+                INNER JOIN college_programs p ON p.id = s.program_id
+                LEFT JOIN college_curricula c ON s.curriculum_id = c.id
+                WHERE s.status = 1
+                ORDER BY s.id DESC
+                LIMIT 6
+            ");
+            $recentCollegeSections = $stmtColSections->fetchAll(PDO::FETCH_ASSOC);
+
+            // Fetch Active SHS Sections
+            $stmtShsSections = $pdo->query("
+                SELECT 
+                    s.*, 
+                    p.code as program_code,
+                    p.name as program_name,
+                    (SELECT COUNT(*) FROM applications a WHERE a.section_id = s.id AND a.status != 'rejected') as current_enrollment,
+                    (SELECT COUNT(*) FROM shs_section_subjects sss WHERE sss.shs_section_id = s.id) as subject_count
+                FROM shs_sections s
+                INNER JOIN shs_strands p ON p.id = s.strand_id
+                WHERE s.status = 1
+                ORDER BY s.id DESC
+                LIMIT 6
+            ");
+            $recentShsSections = $stmtShsSections->fetchAll(PDO::FETCH_ASSOC);
+
+            // System settings
+            $stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM system_settings");
+            while ($row = $stmtSettings->fetch(PDO::FETCH_ASSOC)) {
+                $systemSettings[$row['setting_key']] = $row['setting_value'];
+            }
+        } catch (PDOException $e) {
+            error_log('Scheduler dashboard data fetch failed: ' . $e->getMessage());
+        }
+
         return $this->render('admin/scheduler/scheduler_dashboard', get_defined_vars());
     }
 
@@ -270,9 +353,11 @@ try {
         SELECT 
             s.*, 
             p.code as program_code,
+            c.version as curriculum_version,
             (SELECT COUNT(*) FROM applications a WHERE a.section_id = s.id AND a.status != 'rejected') as current_enrollment
         FROM shs_sections s
         INNER JOIN shs_strands p ON p.id = s.strand_id
+        LEFT JOIN shs_curricula c ON s.curriculum_id = c.id
         ORDER BY p.code ASC, s.grade_level ASC, s.section_code ASC
     ";
     $stmt = $pdo->query($query);

@@ -4,45 +4,73 @@ require_once __DIR__ . '/../../components/header.php';
 <?php require_once __DIR__ . '/../../components/admin_navbar.php'; ?>
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
-    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h1 class="h3 fw-bold text-dark mb-1">SHS Curriculum Management</h1>
-          <p class="text-muted mb-0">Manage academic curricula and tracks for Senior High School strands</p>
+    <!-- Dossier Hero Header Strip (Admissions Consistent) -->
+    <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+            <i class="bi bi-diagram-3-fill"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h1 class="h4 fw-bold text-dark mb-0">SHS Curriculum Management</h1>
+              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> University Registrar
+              </span>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-layers text-info me-1"></i><?= count($curricula ?? []) ?> Plans
+              </span>
+            </div>
+            <p class="text-muted small mb-0">Manage academic curricula and tracks for Senior High School strands.</p>
+          </div>
         </div>
-        <div>
-          <button class="btn btn-primary fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createCurriculumModal">
-            <i class="bi bi-plus-lg me-1"></i> Create Curriculum
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-primary rounded-pill px-3 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#createCurriculumModal">
+            <i class="bi bi-plus-lg"></i>
+            <span>Create Curriculum</span>
           </button>
         </div>
       </div>
     </div>
 
     <?php if ($successMsg): ?>
-      <div class="alert alert-success shadow-sm rounded-12"><i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-success d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+        <div><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
     <?php endif; ?>
     <?php if ($errorMsg): ?>
-      <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-danger d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+        <div><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 mb-4 fade-in-up" style="animation-delay: 0.2s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.3s;">
-        <div>
-          <i class="bi bi-journal-bookmark-fill"></i>
-          <h2 class="mb-0 d-inline-block">Curriculum Directory</h2>
+    <!-- Curriculum Directory Card (Dossier Card Styling) -->
+    <div class="dossier-card mb-4 fade-in-up" style="animation-delay: 0.15s;">
+      <div class="dossier-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-2.5">
+          <div class="dossier-header-icon bg-info bg-opacity-10 text-info">
+            <i class="bi bi-journal-bookmark-fill"></i>
+          </div>
+          <div>
+            <h2 class="h5 fw-bold text-dark mb-0 d-inline-block align-middle">Curriculum Directory</h2>
+            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small fw-semibold ms-2 align-middle">
+              <?= count($curricula ?? []) ?> Records
+            </span>
+          </div>
         </div>
         <div>
-          <div class="input-group shadow-sm" style="width: 250px;">
-              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-              <input type="text" id="tableSearch" class="form-control border-start-0" placeholder="Search curriculum...">
+          <div class="input-group input-group-sm" style="width: 220px;">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+            <input type="text" id="tableSearch" class="form-control form-control-sm border-start-0 ps-0" placeholder="Search curriculum...">
           </div>
         </div>
       </div>
-      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
+      <div class="p-0">
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 custom-table">
-            <thead class="table-light text-muted small text-uppercase">
+          <table class="table table-hover align-middle mb-0 dashboard-table">
+            <thead>
               <tr>
                 <th class="ps-4">Strand</th>
                 <th>Curriculum Name</th>

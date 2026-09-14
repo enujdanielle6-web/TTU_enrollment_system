@@ -1,47 +1,7 @@
 <?php
+$pageTitle = 'Scholarship Applications - Administrator';
 require_once __DIR__ . '/../../components/header.php';
-
 require_once __DIR__ . '/../../components/admin_navbar.php';
-
-// Fetch scholarship applications
-$applications = [];
-try {
-    $stmt = $pdo->query('
-        SELECT sa.*, 
-               u.first_name, u.last_name, u.email,
-               s.name as scholarship_name, s.category, s.tuition_coverage_type, s.tuition_coverage_value
-        FROM scholarship_applications sa
-        INNER JOIN users u ON sa.user_id = u.id
-        INNER JOIN scholarships s ON sa.scholarship_id = s.id
-        ORDER BY 
-            CASE sa.status 
-                WHEN "pending" THEN 1 
-                WHEN "under_review" THEN 2 
-                ELSE 3 
-            END ASC,
-            sa.created_at DESC
-    ');
-    $applications = $stmt->fetchAll();
-} catch (PDOException $e) {
-    error_log('Scholarship apps fetch failed: ' . $e->getMessage());
-}
-
-$stats = [
-    'pending' => 0,
-    'approved' => 0,
-    'rejected' => 0,
-    'total' => 0
-];
-foreach ($applications as $app) {
-    $stats['total']++;
-    if ($app['status'] === 'pending' || $app['status'] === 'under_review') {
-        $stats['pending']++;
-    } elseif ($app['status'] === 'approved') {
-        $stats['approved']++;
-    } elseif ($app['status'] === 'rejected') {
-        $stats['rejected']++;
-    }
-}
 
 $successMsg = $_SESSION['success_msg'] ?? null;
 $errorMsg = $_SESSION['error_msg'] ?? null;
@@ -51,144 +11,262 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
-      <h1 class="h3 fw-bold text-dark mb-1">Scholarship Applications</h1>
-      <p class="text-muted mb-0">Review and process student applications for financial aid.</p>
+    <!-- Dossier Hero Header Strip -->
+    <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+            <i class="bi bi-inbox-fill"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h1 class="h4 fw-bold text-dark mb-0">Scholarship Applications Review</h1>
+              <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-hourglass-split me-1"></i> Review Queue
+              </span>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-clock-history text-warning me-1"></i><?= $stats['pending'] ?? 0 ?> Awaiting Review
+              </span>
+            </div>
+            <p class="text-muted small mb-0">Evaluate student financial aid applications, review uploaded verification documents, and authorize awards.</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <a href="scholarship_dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
+            <i class="bi bi-speedometer2 text-primary"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="scholarships.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
+            <i class="bi bi-award text-primary"></i>
+            <span>Programs</span>
+          </a>
+        </div>
+      </div>
     </div>
 
     <?php if ($successMsg): ?>
-      <div class="alert alert-success shadow-sm rounded-12"><i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-success d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+        <div><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
     <?php endif; ?>
     <?php if ($errorMsg): ?>
-      <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-danger d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+        <div><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
     <?php endif; ?>
 
-    <!-- Scholarship Statistics Row -->
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4 mb-4">
-      <div class="col">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
-          <div class="position-absolute top-0 start-0 w-100 bg-warning" style="height: 4px;"></div>
-          <div class="mb-3 d-flex justify-content-center">
-            <div class="d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning rounded-circle" style="width: 56px; height: 56px;">
-              <i class="bi bi-hourglass-split fs-4"></i>
-            </div>
-          </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['pending']) ?></h2>
-          <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Pending Apps</p>
-        </div>
-      </div>
+    <!-- Scholarship Statistics Row (Consistent 4-Column Grid) -->
+    <div class="row g-4 mb-4">
       
-      <div class="col">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.3s;">
-          <div class="position-absolute top-0 start-0 w-100 bg-success" style="height: 4px;"></div>
-          <div class="mb-3 d-flex justify-content-center">
-            <div class="d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success rounded-circle" style="width: 56px; height: 56px;">
-              <i class="bi bi-award fs-4"></i>
+      <!-- Card 1: Pending Review -->
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.1s;">
+          <div class="stat-card-glow bg-warning"></div>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
+              <i class="bi bi-hourglass-split"></i>
             </div>
+            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-clock me-1"></i> Awaiting Action
+            </span>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['approved']) ?></h2>
-          <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Approved</p>
-        </div>
-      </div>
-      
-      <div class="col">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.4s;">
-          <div class="position-absolute top-0 start-0 w-100 bg-danger" style="height: 4px;"></div>
-          <div class="mb-3 d-flex justify-content-center">
-            <div class="d-flex align-items-center justify-content-center bg-danger bg-opacity-10 text-danger rounded-circle" style="width: 56px; height: 56px;">
-              <i class="bi bi-x-circle fs-4"></i>
-            </div>
+          <div class="stat-number-display mb-1"><?= esc($stats['pending'] ?? 0) ?></div>
+          <h2 class="h6 fw-bold text-dark mb-1">Pending Review</h2>
+          <p class="text-muted small mb-0">Needs administrative evaluation</p>
+          <div class="stat-card-footer">
+            <span>Action Required</span>
+            <span class="stat-card-action text-warning">Process Now</span>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['rejected']) ?></h2>
-          <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Rejected</p>
         </div>
       </div>
 
-      <div class="col">
-        <div class="island p-4 h-100 text-center position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.5s;">
-          <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-          <div class="mb-3 d-flex justify-content-center">
-            <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-circle" style="width: 56px; height: 56px;">
-              <i class="bi bi-inbox fs-4"></i>
+      <!-- Card 2: Approved -->
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.15s;">
+          <div class="stat-card-glow bg-success"></div>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
+              <i class="bi bi-check-circle-fill"></i>
             </div>
+            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-award me-1"></i> Authorized
+            </span>
           </div>
-          <h2 class="display-6 fw-bold text-dark mb-1"><?= esc($stats['total']) ?></h2>
-          <p class="text-muted small fw-semibold text-uppercase tracking-wide mb-0">Total Apps</p>
+          <div class="stat-number-display mb-1"><?= esc($stats['approved'] ?? 0) ?></div>
+          <h2 class="h6 fw-bold text-dark mb-1">Approved Applications</h2>
+          <p class="text-muted small mb-0">Discount applied to assessment</p>
+          <div class="stat-card-footer">
+            <span>Authorized Grants</span>
+            <span class="stat-card-action text-success">Fee Deductions</span>
+          </div>
         </div>
       </div>
+
+      <!-- Card 3: Rejected -->
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.2s;">
+          <div class="stat-card-glow bg-danger"></div>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon-wrapper bg-danger bg-opacity-10 text-danger">
+              <i class="bi bi-x-circle-fill"></i>
+            </div>
+            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-dash-circle me-1"></i> Ineligible
+            </span>
+          </div>
+          <div class="stat-number-display mb-1"><?= esc($stats['rejected'] ?? 0) ?></div>
+          <h2 class="h6 fw-bold text-dark mb-1">Rejected Submissions</h2>
+          <p class="text-muted small mb-0">Declined or incomplete documents</p>
+          <div class="stat-card-footer">
+            <span>Disqualified</span>
+            <span class="stat-card-action text-danger">Audit Record</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: Total Applications -->
+      <div class="col-sm-6 col-xl-3">
+        <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.25s;">
+          <div class="stat-card-glow bg-primary"></div>
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
+              <i class="bi bi-inbox-fill"></i>
+            </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+              <i class="bi bi-collection me-1"></i> Cumulative
+            </span>
+          </div>
+          <div class="stat-number-display mb-1"><?= esc($stats['total'] ?? 0) ?></div>
+          <h2 class="h6 fw-bold text-dark mb-1">Total Submissions</h2>
+          <p class="text-muted small mb-0">All terms scholarship submissions</p>
+          <div class="stat-card-footer">
+            <span>Lifecycle Count</span>
+            <span class="stat-card-action text-primary">All Records</span>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.6s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.7s;">
-        <i class="bi bi-inbox-fill text-primary"></i>
-        <h2 class="mb-0 text-dark">Applications Queue</h2>
+    <!-- Applications Queue Card (Dossier Card Styling) -->
+    <div class="dossier-card mb-4 fade-in-up" style="animation-delay: 0.3s;">
+      <div class="dossier-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-2.5">
+          <div class="dossier-header-icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-inbox-fill"></i>
+          </div>
+          <div>
+            <h2 class="h5 fw-bold text-dark mb-0 d-inline-block align-middle">Applications Review Queue</h2>
+            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small fw-semibold ms-2 align-middle">
+              <?= count($applications ?? []) ?> Records
+            </span>
+          </div>
+        </div>
+        
+        <div class="d-flex align-items-center gap-2">
+          <select id="statusFilter" class="form-select form-select-sm" style="width: 160px;">
+            <option value="">All Statuses</option>
+            <option value="pending">Pending</option>
+            <option value="under_review">Under Review</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <div class="input-group input-group-sm" style="width: 220px;">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+            <input type="text" id="appSearch" class="form-control form-control-sm border-start-0 ps-0" placeholder="Search applicant...">
+          </div>
+        </div>
       </div>
       
-      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.8s;">
+      <div class="p-0">
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 custom-table">
-            <thead class="table-light">
+          <table class="table table-hover align-middle mb-0 dashboard-table">
+            <thead>
               <tr>
-                <th scope="col" class="ps-4">Applicant Name</th>
-                <th scope="col">Email Address</th>
-                <th scope="col">Scholarship Type</th>
-                <th scope="col">Status</th>
-                <th scope="col">Date Applied</th>
-                <th scope="col" class="text-end pe-4">Action</th>
+                <th class="ps-4">Applicant</th>
+                <th>Scholarship Type</th>
+                <th>Term</th>
+                <th>Status</th>
+                <th>Date Applied</th>
+                <th class="text-end pe-4">Action</th>
               </tr>
             </thead>
             <tbody>
               <?php if (empty($applications)): ?>
                 <tr>
-                  <td colspan="6" class="text-center py-5 text-muted">
-                    <i class="bi bi-award fs-1 d-block mb-3 text-secondary"></i>
-                    No scholarship applications found.
+                  <td colspan="6" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4 text-muted">
+                      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                      </div>
+                      <h3 class="h6 fw-bold text-dark mb-1">No Applications Found</h3>
+                      <p class="small text-muted mb-0">Student scholarship submissions will automatically appear here for review.</p>
+                    </div>
                   </td>
                 </tr>
               <?php else: ?>
-                <?php foreach ($applications as $app): ?>
-                  <tr>
-                    <td class="ps-4 fw-bold text-dark">
-                      <?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8') ?>
+                <?php foreach ($applications as $app): 
+                  $fLetter = !empty($app['first_name']) ? strtoupper(substr($app['first_name'], 0, 1)) : 'S';
+                  $lLetter = !empty($app['last_name']) ? strtoupper(substr($app['last_name'], 0, 1)) : 'A';
+                  $statusClass = match($app['status']) {
+                      'approved' => 'bg-success bg-opacity-10 text-success border-success',
+                      'rejected' => 'bg-danger bg-opacity-10 text-danger border-danger',
+                      'under_review' => 'bg-info bg-opacity-10 text-info border-info',
+                      default => 'bg-warning bg-opacity-10 text-warning border-warning'
+                  };
+                  $statusLabel = match($app['status']) {
+                      'under_review' => 'Under Review',
+                      default => ucfirst($app['status'])
+                  };
+                ?>
+                  <tr data-status="<?= esc($app['status']) ?>">
+                    <td class="ps-4">
+                      <div class="d-flex align-items-center gap-2.5">
+                        <div class="applicant-avatar bg-primary bg-opacity-10 text-primary fw-bold" style="width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem;">
+                          <?= esc($fLetter . $lLetter) ?>
+                        </div>
+                        <div>
+                          <div class="fw-bold text-dark"><?= htmlspecialchars($app['last_name'] . ', ' . $app['first_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                          <span class="applicant-ref-badge extra-small">
+                            <i class="bi bi-person-badge text-muted me-1"></i><?= htmlspecialchars($app['student_number'] ?? $app['email'], ENT_QUOTES, 'UTF-8') ?>
+                          </span>
+                        </div>
+                      </div>
                     </td>
                     <td>
-                      <?= htmlspecialchars($app['email'], ENT_QUOTES, 'UTF-8') ?>
-                    </td>
-                    <td>
-                      <?= htmlspecialchars($app['scholarship_name'], ENT_QUOTES, 'UTF-8') ?>
-                      <span class="d-block small text-muted">
-                        <span class="badge bg-light text-dark border"><i class="bi bi-tag-fill me-1 text-primary"></i><?= htmlspecialchars($app['category'], ENT_QUOTES, 'UTF-8') ?></span>
+                      <div class="fw-semibold text-dark"><?= htmlspecialchars($app['scholarship_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                      <div class="d-flex align-items-center gap-1.5 mt-0.5">
+                        <span class="badge bg-light text-secondary border rounded-pill extra-small">
+                          <?= htmlspecialchars($app['category'] ?? 'General') ?>
+                        </span>
                         <?php if ($app['tuition_coverage_type'] === 'percentage'): ?>
-                          <?= number_format((float)$app['tuition_coverage_value'], 0) ?>% Tuition Coverage
+                          <span class="text-success extra-small fw-medium"><?= number_format((float)$app['tuition_coverage_value'], 0) ?>% Tuition</span>
                         <?php elseif ($app['tuition_coverage_type'] === 'fixed'): ?>
-                          ₱<?= number_format((float)$app['tuition_coverage_value'], 2) ?> Tuition Coverage
+                          <span class="text-success extra-small fw-medium">₱<?= number_format((float)$app['tuition_coverage_value'], 2) ?></span>
                         <?php else: ?>
-                          Full Tuition Coverage
+                          <span class="text-success extra-small fw-medium">Full Tuition</span>
                         <?php endif; ?>
+                      </div>
+                    </td>
+                    <td>
+                      <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                        <?= htmlspecialchars($app['ay_name'] ?? 'Current Term', ENT_QUOTES, 'UTF-8') ?>
                       </span>
                     </td>
                     <td>
-                      <?php 
-                        $badgeClass = match($app['status']) {
-                            'approved' => 'bg-success',
-                            'rejected' => 'bg-danger',
-                            'under_review' => 'bg-info',
-                            default => 'bg-warning text-dark'
-                        };
-                        $statusLabel = match($app['status']) {
-                            'under_review' => 'Under Review',
-                            default => ucfirst($app['status'])
-                        };
-                      ?>
-                      <span class="badge <?= esc($badgeClass) ?> rounded-pill px-3"><?= esc($statusLabel) ?></span>
+                      <span class="badge <?= esc($statusClass) ?> border border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+                        <?= esc($statusLabel) ?>
+                      </span>
                     </td>
-                    <td>
+                    <td class="text-muted small">
                       <?= date('M d, Y', strtotime($app['created_at'])) ?>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="scholarship_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium">
-                        Review <i class="bi bi-arrow-right ms-1"></i>
+                      <a href="scholarship_detail.php?id=<?= esc($app['id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 py-1 extra-small fw-medium d-inline-flex align-items-center gap-1 shadow-xs" title="Review Application">
+                        <span>Review</span>
+                        <i class="bi bi-arrow-right"></i>
                       </a>
                     </td>
                   </tr>
@@ -199,10 +277,38 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         </div>
       </div>
     </div>
+
   </div>
 </main>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('appSearch');
+    const statusFilter = document.getElementById('statusFilter');
+    const rows = document.querySelectorAll('.dashboard-table tbody tr');
+
+    function applyFilters() {
+        const query = (searchInput ? searchInput.value : '').toLowerCase();
+        const selectedStatus = statusFilter ? statusFilter.value.toLowerCase() : '';
+
+        rows.forEach(row => {
+            const rowText = row.textContent.toLowerCase();
+            const rowStatus = (row.getAttribute('data-status') || '').toLowerCase();
+
+            const matchesQuery = !query || rowText.includes(query);
+            const matchesStatus = !selectedStatus || rowStatus === selectedStatus;
+
+            row.style.display = (matchesQuery && matchesStatus) ? '' : 'none';
+        });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', applyFilters);
+    }
+    if (statusFilter) {
+        statusFilter.addEventListener('change', applyFilters);
+    }
+});
+</script>
+
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>
-
-
-

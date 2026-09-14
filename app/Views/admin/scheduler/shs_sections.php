@@ -7,45 +7,80 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h1 class="h3 fw-bold text-dark mb-1">Section Management</h1>
-          <p class="text-muted mb-0">Manage student shs_sections and monitoring capacity</p>
+    <!-- Dossier Hero Header Strip (Admissions Consistent) -->
+    <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+            <i class="bi bi-journal-bookmark-fill"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h1 class="h4 fw-bold text-dark mb-0">Senior High School Sections</h1>
+              <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> University Scheduler
+              </span>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-layers text-info me-1"></i><?= count($shs_sections ?? []) ?> Sections
+              </span>
+            </div>
+            <p class="text-muted small mb-0">Manage senior high track sections, classroom capacity, and schedule blocks.</p>
+          </div>
         </div>
-        <div>
-          <button type="button" class="btn btn-primary rounded-pill shadow-sm px-4 fw-medium" data-bs-toggle="modal" data-bs-target="#addSectionModal">
-            <i class="bi bi-plus-circle me-1"></i> Add Section
+        <div class="d-flex align-items-center gap-2">
+          <a href="scheduler_dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
+            <i class="bi bi-speedometer2 text-primary"></i>
+            <span>Dashboard</span>
+          </a>
+          <button type="button" class="btn btn-primary rounded-pill px-3 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addSectionModal">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add Section</span>
           </button>
         </div>
       </div>
     </div>
 
     <?php if (isset($_SESSION['admin_success'])): ?>
-      <div class="alert alert-success shadow-sm rounded-12"><i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($_SESSION['admin_success'], ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-success d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+        <div><?= htmlspecialchars($_SESSION['admin_success'], ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
       <?php unset($_SESSION['admin_success']); ?>
     <?php endif; ?>
     <?php if (isset($_SESSION['admin_error'])): ?>
-      <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($_SESSION['admin_error'], ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-danger d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+        <div><?= htmlspecialchars($_SESSION['admin_error'], ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
       <?php unset($_SESSION['admin_error']); ?>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4 fade-in-up" style="animation-delay: 0.2s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom d-flex justify-content-between align-items-center p-3 fade-in-up" style="animation-delay: 0.3s;">
-        <h5 class="mb-0 fw-bold text-dark"><i class="bi bi-list-ul me-2 text-primary"></i>All SHS Sections</h5>
-        <div class="input-group shadow-sm" style="width: 250px;">
-          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-          <input type="text" id="sectionSearch" class="form-control border-start-0" placeholder="Search shs_sections...">
+    <!-- SHS Sections Catalog Card (Dossier Card Styling) -->
+    <div class="dossier-card mb-4 fade-in-up" style="animation-delay: 0.15s;">
+      <div class="dossier-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-2.5">
+          <div class="dossier-header-icon bg-info bg-opacity-10 text-info">
+            <i class="bi bi-journal-bookmark-fill"></i>
+          </div>
+          <div>
+            <h2 class="h5 fw-bold text-dark mb-0 d-inline-block align-middle">All SHS Sections</h2>
+            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small fw-semibold ms-2 align-middle">
+              <?= count($shs_sections ?? []) ?> Records
+            </span>
+          </div>
+        </div>
+        <div class="input-group input-group-sm" style="width: 240px;">
+          <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" id="sectionSearch" class="form-control form-control-sm border-start-0 ps-0" placeholder="Search sections...">
         </div>
       </div>
-      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
+      <div class="p-0">
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 custom-table">
-            <thead class="table-light text-muted small text-uppercase">
+          <table class="table table-hover align-middle mb-0 dashboard-table">
+            <thead>
               <tr>
                 <th class="ps-4">Section Code</th>
-                <th>Program</th>
+                <th>Strand & Curriculum</th>
                 <th>Grade Level</th>
                 <th>Academic Year</th>
                 <th>Schedule</th>
@@ -58,21 +93,35 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             <tbody>
               <?php if (empty($shs_sections)): ?>
                 <tr>
-                  <td colspan="8" class="text-center py-5 text-muted">
-                    <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
-                    No shs_sections found.
+                  <td colspan="9" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4 text-muted">
+                      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                      </div>
+                      <h3 class="h6 fw-bold text-dark mb-1">No SHS Sections Found</h3>
+                      <p class="small text-muted mb-0">Use the "Add Section" button to create new senior high class sections.</p>
+                    </div>
                   </td>
                 </tr>
               <?php else: ?>
                 <?php foreach ($shs_sections as $s): ?>
                   <tr>
-                    <td class="ps-4 fw-bold text-dark"><?= htmlspecialchars($s['section_code'], ENT_QUOTES, 'UTF-8') ?></td>
-                    <td><span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"><?= htmlspecialchars($s['program_code'], ENT_QUOTES, 'UTF-8') ?></span></td>
-                    <td>
-                      <div class="fw-bold"><?= htmlspecialchars($s['grade_level'], ENT_QUOTES, 'UTF-8') ?></div>
+                    <td class="ps-4">
+                      <span class="applicant-ref-badge fw-bold text-dark">
+                        <i class="bi bi-hash text-muted"></i><?= htmlspecialchars($s['section_code'], ENT_QUOTES, 'UTF-8') ?>
+                      </span>
                     </td>
                     <td>
-                      <span class="badge bg-light text-dark border"><?= htmlspecialchars($s['academic_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
+                      <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle"><?= htmlspecialchars($s['program_code'], ENT_QUOTES, 'UTF-8') ?></span>
+                      <?php if (!empty($s['curriculum_version'])): ?>
+                        <div class="small text-muted mt-1">v<?= htmlspecialchars($s['curriculum_version'], ENT_QUOTES, 'UTF-8') ?></div>
+                      <?php endif; ?>
+                    </td>
+                    <td>
+                      <div class="fw-semibold text-dark"><?= htmlspecialchars($s['grade_level'], ENT_QUOTES, 'UTF-8') ?></div>
+                    </td>
+                    <td>
+                      <span class="badge bg-light text-secondary border rounded-pill"><?= htmlspecialchars($s['academic_year'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></span>
                     </td>
                     <td><i class="bi bi-clock me-1 text-muted"></i><?= htmlspecialchars($s['schedule_type'], ENT_QUOTES, 'UTF-8') ?></td>
                     <td><?= htmlspecialchars($s['adviser'] ?: 'Unassigned', ENT_QUOTES, 'UTF-8') ?></td>
@@ -288,7 +337,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (searchInput) {
         searchInput.addEventListener('keyup', function() {
             const filter = this.value.toLowerCase();
-            const rows = document.querySelectorAll('.custom-table tbody tr');
+            const rows = document.querySelectorAll('.dashboard-table tbody tr');
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(filter) ? '' : 'none';

@@ -16,6 +16,68 @@ class ScholarshipController extends BaseController
         $pdo = Database::getConnection();
         requirePermission('scholarships.manage');
 
+        $stats = [
+            'active_scholarships' => 0,
+            'total_applications' => 0,
+            'pending_review' => 0,
+            'approved_applications' => 0,
+            'active_scholars' => 0,
+            'total_slots' => 0,
+        ];
+
+        $recentScholarships = [];
+        $recentApplications = [];
+        $systemSettings = [];
+
+        try {
+            // Stats
+            $stats['active_scholarships'] = (int) $pdo->query('SELECT COUNT(*) FROM scholarships WHERE status = "Active"')->fetchColumn();
+            $stats['total_applications'] = (int) $pdo->query('SELECT COUNT(*) FROM scholarship_applications')->fetchColumn();
+            $stats['pending_review'] = (int) $pdo->query('SELECT COUNT(*) FROM scholarship_applications WHERE status IN ("pending", "under_review")')->fetchColumn();
+            $stats['approved_applications'] = (int) $pdo->query('SELECT COUNT(*) FROM scholarship_applications WHERE status = "approved"')->fetchColumn();
+            $stats['active_scholars'] = (int) $pdo->query('SELECT COUNT(*) FROM scholarship_recipients WHERE status IN ("Active", "Renewed")')->fetchColumn();
+            $stats['total_slots'] = (int) $pdo->query('SELECT COALESCE(SUM(slots), 0) FROM scholarships WHERE status = "Active" AND slots IS NOT NULL')->fetchColumn();
+
+            // Active Scholarships with recipient counts
+            $stmtPrograms = $pdo->query('
+                SELECT s.*,
+                       (SELECT COUNT(*) FROM scholarship_recipients sr WHERE sr.scholarship_id = s.id AND sr.status IN ("Active", "Renewed")) as recipient_count,
+                       (SELECT COUNT(*) FROM scholarship_applications sa WHERE sa.scholarship_id = s.id AND sa.status IN ("pending", "under_review")) as pending_app_count
+                FROM scholarships s
+                ORDER BY (s.status = "Active") DESC, s.name ASC
+                LIMIT 6
+            ');
+            $recentScholarships = $stmtPrograms->fetchAll(PDO::FETCH_ASSOC);
+
+            // Recent Applications
+            $stmtApps = $pdo->query('
+                SELECT sa.*, 
+                       u.first_name, u.last_name, u.email, u.student_number,
+                       s.name as scholarship_name, s.code as scholarship_code, s.category,
+                       sa.academic_year_id as ay_name
+                FROM scholarship_applications sa
+                INNER JOIN users u ON sa.user_id = u.id
+                INNER JOIN scholarships s ON sa.scholarship_id = s.id
+                ORDER BY 
+                    CASE sa.status 
+                        WHEN "pending" THEN 1 
+                        WHEN "under_review" THEN 2 
+                        ELSE 3 
+                    END ASC,
+                    sa.created_at DESC
+                LIMIT 6
+            ');
+            $recentApplications = $stmtApps->fetchAll(PDO::FETCH_ASSOC);
+
+            // System settings
+            $stmtSettings = $pdo->query("SELECT setting_key, setting_value FROM system_settings");
+            while ($row = $stmtSettings->fetch(PDO::FETCH_ASSOC)) {
+                $systemSettings[$row['setting_key']] = $row['setting_value'];
+            }
+        } catch (PDOException $e) {
+            error_log('Scholarship dashboard data fetch failed: ' . $e->getMessage());
+        }
+
         $pageTitle = 'Scholarship Dashboard - Administrator';
         return $this->render('admin/scholarship/scholarship_dashboard', get_defined_vars());
     }
@@ -72,18 +134,52 @@ class ScholarshipController extends BaseController
         $pdo = Database::getConnection();
         requirePermission('scholarship_applications.review');
 
-        // Fetch applications
-        $stmt = $pdo->query('
-            SELECT sa.*, 
-                   u.first_name, u.last_name, u.email,
-                   s.name as scholarship_name, s.category,
-                   sa.academic_year_id as ay_name
-            FROM scholarship_applications sa
-            INNER JOIN users u ON sa.user_id = u.id
-            INNER JOIN scholarships s ON sa.scholarship_id = s.id
-            ORDER BY sa.created_at DESC
-        ');
-        $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stats = [
+            'pending' => 0,
+            'approved' => 0,
+            'rejected' => 0,
+            'total' => 0
+        ];
+        $applications = [];
+
+        try {
+            // Fetch applications
+            $stmt = $pdo->query('
+                SELECT sa.*, 
+                       u.first_name, u.last_name, u.email, u.student_number,
+                       s.name as scholarship_name, s.code as scholarship_code, s.category,
+                       s.tuition_coverage_type, s.tuition_coverage_value,
+                       sa.academic_year_id as ay_name
+                FROM scholarship_applications sa
+                INNER JOIN users u ON sa.user_id = u.id
+                INNER JOIN scholarships s ON sa.scholarship_id = s.id
+                ORDER BY 
+                    CASE sa.status 
+                        WHEN "pending" THEN 1 
+                        WHEN "under_review" THEN 2 
+                        ELSE 3 
+                    END ASC,
+                    sa.created_at DESC
+            ');
+            $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($applications as $app) {
+                $stats['total']++;
+                if ($app['status'] === 'pending' || $app['status'] === 'under_review') {
+                    $stats['pending']++;
+                } elseif ($app['status'] === 'approved') {
+                    $stats['approved']++;
+                } elseif ($app['status'] === 'rejected') {
+                    $stats['rejected']++;
+                }
+            }
+        } catch (PDOException $e) {
+            error_log('Scholarship applications fetch failed: ' . $e->getMessage());
+        }
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
         $pageTitle = 'Scholarship Applications - Administrator';
         return $this->render('admin/scholarship/scholarship_review', get_defined_vars());

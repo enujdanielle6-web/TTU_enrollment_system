@@ -300,106 +300,164 @@ $exportQuery = http_build_query([
         </div>
       </div>
     </div>
-    <!-- ==================== END PRINT-ONLY DOCUMENT ==================== -->
-
-    <!-- ==================== SCREEN UI ==================== -->
+    <!-- ==================== END PRINT-ONLY DOCUMENT ==========    <!-- ==================== SCREEN UI ==================== -->
     <div class="no-print">
       
-      <!-- Hero Header -->
-      <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 fade-in-up">
-        <div>
-          <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill bg-primary bg-opacity-10 text-primary fw-semibold small mb-2">
-            <i class="bi bi-mortarboard-fill"></i> Office of the University Registrar
+      <!-- Dossier Hero Header Strip (Admissions Consistent) -->
+      <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+              <i class="bi bi-people-fill"></i>
+            </div>
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <h1 class="h4 fw-bold text-dark mb-0">Official Student Masterlist</h1>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                  <i class="bi bi-shield-check me-1"></i> University Registrar
+                </span>
+                <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                  <i class="bi bi-calendar-check text-primary me-1"></i> AY 2026–2027
+                </span>
+              </div>
+              <p class="text-muted small mb-0">Live roster of all officially enrolled students across academic departments.</p>
+            </div>
           </div>
-          <h1 class="h3 fw-bold text-dark mb-1">Official Student Masterlist</h1>
-          <p class="text-muted mb-0">Live roster of all officially enrolled students across academic departments.</p>
-        </div>
-        <div class="d-flex flex-wrap gap-2">
-          <a href="students_export.php?<?= $exportQuery ?>" id="csvExportBtn" class="btn btn-outline-success fw-semibold shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center">
-            <i class="bi bi-file-earmark-excel-fill me-2 fs-5"></i> Export CSV
-          </a>
-          <button type="button" onclick="triggerMasterlistPrint()" class="btn btn-primary fw-semibold shadow-sm rounded-pill px-4 py-2 d-inline-flex align-items-center">
-            <i class="bi bi-printer-fill me-2 fs-5"></i> Print Masterlist
-          </button>
+          <div class="d-flex flex-wrap align-items-center gap-2">
+            <a href="students_export.php?<?= $exportQuery ?>" id="csvExportBtn" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
+              <i class="bi bi-file-earmark-excel-fill text-success"></i>
+              <span>Export CSV</span>
+            </a>
+            <button type="button" onclick="triggerMasterlistPrint()" class="btn btn-primary rounded-pill px-3 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-2">
+              <i class="bi bi-printer-fill"></i>
+              <span>Print Masterlist</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Quick KPI Stat Cards -->
-      <div class="row g-3 mb-4">
-        <div class="col-6 col-xl-3">
-          <div class="stat-card p-3 p-lg-4 shadow-sm">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <span class="text-muted small fw-bold text-uppercase">Total Enrolled</span>
+      <!-- Executive KPI Metric Cards (Consistent 4-Column Grid) -->
+      <div class="row g-4 mb-4">
+        
+        <!-- Total Enrolled -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.1s;">
+            <div class="stat-card-glow bg-primary"></div>
+            <div class="d-flex justify-content-between align-items-start mb-3">
               <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
                 <i class="bi bi-people-fill"></i>
               </div>
+              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+                <i class="bi bi-check2-all me-1"></i> Masterlist
+              </span>
             </div>
-            <div class="h3 fw-bold text-dark mb-0"><?= number_format($totalCount) ?></div>
-            <div class="small text-muted mt-1">Enrolled masterlist records</div>
+            <div class="stat-number-display mb-1"><?= number_format($totalCount) ?></div>
+            <h2 class="h6 fw-bold text-dark mb-1">Total Enrolled</h2>
+            <p class="text-muted small mb-0">Active student records</p>
+            <div class="stat-card-footer">
+              <span>All departments</span>
+              <span class="stat-card-action text-primary">Official Roster</span>
+            </div>
           </div>
         </div>
 
-        <div class="col-6 col-xl-3">
-          <div class="stat-card p-3 p-lg-4 shadow-sm">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <span class="text-muted small fw-bold text-uppercase">College Dept</span>
+        <!-- College Dept -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.15s;">
+            <div class="stat-card-glow bg-info"></div>
+            <div class="d-flex justify-content-between align-items-start mb-3">
               <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
-                <i class="bi bi-mortarboard"></i>
+                <i class="bi bi-mortarboard-fill"></i>
               </div>
+              <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+                <i class="bi bi-award me-1"></i> Degree Level
+              </span>
             </div>
-            <div class="h3 fw-bold text-dark mb-0"><?= number_format($collegeCount) ?></div>
-            <div class="small text-muted mt-1">Enrolled undergraduates</div>
+            <div class="stat-number-display mb-1"><?= number_format($collegeCount) ?></div>
+            <h2 class="h6 fw-bold text-dark mb-1">College Dept</h2>
+            <p class="text-muted small mb-0">Enrolled undergraduates</p>
+            <div class="stat-card-footer">
+              <span>Higher education</span>
+              <span class="stat-card-action text-info">Undergrad Roster</span>
+            </div>
           </div>
         </div>
 
-        <div class="col-6 col-xl-3">
-          <div class="stat-card p-3 p-lg-4 shadow-sm">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <span class="text-muted small fw-bold text-uppercase">Senior High</span>
-              <div class="stat-icon-wrapper bg-secondary bg-opacity-10 text-secondary">
+        <!-- Senior High -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.2s;">
+            <div class="stat-card-glow bg-warning"></div>
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
                 <i class="bi bi-journal-bookmark-fill"></i>
               </div>
+              <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+                <i class="bi bi-bookmark-star me-1"></i> Basic Ed
+              </span>
             </div>
-            <div class="h3 fw-bold text-dark mb-0"><?= number_format($shsCount) ?></div>
-            <div class="small text-muted mt-1">Enrolled Grades 11 & 12</div>
+            <div class="stat-number-display mb-1"><?= number_format($shsCount) ?></div>
+            <h2 class="h6 fw-bold text-dark mb-1">Senior High</h2>
+            <p class="text-muted small mb-0">Grades 11 & 12 tracks</p>
+            <div class="stat-card-footer">
+              <span>Secondary school</span>
+              <span class="stat-card-action text-warning">SHS Roster</span>
+            </div>
           </div>
         </div>
 
-        <div class="col-6 col-xl-3">
-          <div class="stat-card p-3 p-lg-4 shadow-sm">
-            <div class="d-flex align-items-center justify-content-between mb-2">
-              <span class="text-muted small fw-bold text-uppercase">Official Student IDs</span>
+        <!-- Official Student IDs -->
+        <div class="col-sm-6 col-xl-3">
+          <div class="stat-card-kpi fade-in-up" style="animation-delay: 0.25s;">
+            <div class="stat-card-glow bg-success"></div>
+            <div class="d-flex justify-content-between align-items-start mb-3">
               <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
                 <i class="bi bi-patch-check-fill"></i>
               </div>
+              <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
+                <i class="bi bi-person-badge me-1"></i> ID Assigned
+              </span>
             </div>
-            <div class="h3 fw-bold text-dark mb-0"><?= number_format($officialIdCount) ?></div>
-            <div class="small text-muted mt-1">Assigned institutional numbers</div>
+            <div class="stat-number-display mb-1"><?= number_format($officialIdCount) ?></div>
+            <h2 class="h6 fw-bold text-dark mb-1">Official Student IDs</h2>
+            <p class="text-muted small mb-0">Assigned institutional numbers</p>
+            <div class="stat-card-footer">
+              <span>Identity provisioned</span>
+              <span class="stat-card-action text-success">Active IDs</span>
+            </div>
           </div>
         </div>
+
       </div>
 
-      <!-- Filters & Search Toolbar -->
-      <div class="island position-relative overflow-hidden border-0 shadow-sm mb-4 rounded-4">
-        <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-        <div class="island-body p-3 p-lg-4">
+      <!-- Filters & Search Toolbar (Dossier Card Styling) -->
+      <div class="dossier-card mb-4 fade-in-up" style="animation-delay: 0.3s;">
+        <div class="dossier-card-header py-2.5 px-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-funnel-fill text-primary"></i>
+            <span class="fw-bold small text-uppercase text-secondary">Filters & Search</span>
+          </div>
+          <?php if ($curSearch !== '' || $curLevel !== 'all' || $curGrade !== 'all' || $curStrand !== 'all'): ?>
+            <a href="students.php" id="btnResetFilters" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-0.5 extra-small d-inline-flex align-items-center gap-1">
+              <i class="bi bi-x-circle"></i> Reset Filters
+            </a>
+          <?php endif; ?>
+        </div>
+        <div class="p-3">
           <form method="GET" action="students.php" id="filterForm">
             <input type="hidden" name="page" value="1">
             <input type="hidden" name="per_page" id="formPerPage" value="<?= esc($perPage) ?>">
 
-            <div class="row g-3 align-items-center">
+            <div class="row g-2.5 align-items-center">
               
               <div class="col-12 col-md-4">
-                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Search Student</label>
-                <div class="input-group">
-                  <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                  <input type="text" name="search" id="searchName" class="form-control border-start-0 ps-0" placeholder="Name, Student No, or LRN..." value="<?= esc($curSearch) ?>">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                  <input type="text" name="search" id="searchName" class="form-control form-control-sm border-start-0 ps-0" placeholder="Search Name, Student No, or LRN..." value="<?= esc($curSearch) ?>">
                 </div>
               </div>
 
               <div class="col-6 col-md-2">
-                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Level</label>
-                <select name="level" id="filterLevel" class="form-select" onchange="this.form.submit()">
+                <select name="level" id="filterLevel" class="form-select form-select-sm bg-light" onchange="this.form.submit()">
                   <option value="all" <?= $curLevel === 'all' ? 'selected' : '' ?>>All Levels</option>
                   <option value="Senior High School" <?= $curLevel === 'Senior High School' ? 'selected' : '' ?>>Senior High School</option>
                   <option value="College" <?= $curLevel === 'College' ? 'selected' : '' ?>>College</option>
@@ -407,8 +465,7 @@ $exportQuery = http_build_query([
               </div>
 
               <div class="col-6 col-md-2">
-                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Grade / Year</label>
-                <select name="grade" id="filterGrade" class="form-select" onchange="this.form.submit()">
+                <select name="grade" id="filterGrade" class="form-select form-select-sm bg-light" onchange="this.form.submit()">
                   <option value="all" <?= $curGrade === 'all' ? 'selected' : '' ?>>All Grades/Years</option>
                   <option value="Grade 11" <?= $curGrade === 'Grade 11' ? 'selected' : '' ?>>Grade 11</option>
                   <option value="Grade 12" <?= $curGrade === 'Grade 12' ? 'selected' : '' ?>>Grade 12</option>
@@ -420,8 +477,7 @@ $exportQuery = http_build_query([
               </div>
 
               <div class="col-6 col-md-3">
-                <label class="form-label small fw-bold text-muted text-uppercase mb-1">Program / Strand</label>
-                <select name="strand" id="filterStrand" class="form-select" onchange="this.form.submit()">
+                <select name="strand" id="filterStrand" class="form-select form-select-sm bg-light" onchange="this.form.submit()">
                   <option value="all" <?= $curStrand === 'all' ? 'selected' : '' ?>>All Programs</option>
                   <?php foreach ($programs as $prog): ?>
                     <option value="<?= htmlspecialchars($prog['code'], ENT_QUOTES, 'UTF-8') ?>" <?= strtolower($curStrand) === strtolower($prog['code']) ? 'selected' : '' ?>>
@@ -431,27 +487,24 @@ $exportQuery = http_build_query([
                 </select>
               </div>
 
-              <div class="col-12 col-md-1 d-flex align-items-end gap-1">
-                <button type="submit" class="btn btn-primary w-50" title="Apply Filters">
-                  <i class="bi bi-funnel-fill"></i>
+              <div class="col-6 col-md-1">
+                <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3 w-100" title="Apply Filters">
+                  Filter
                 </button>
-                <a href="students.php" id="btnResetFilters" class="btn btn-outline-secondary w-50" title="Reset All Filters">
-                  <i class="bi bi-arrow-counterclockwise"></i>
-                </a>
               </div>
 
             </div>
           </form>
 
           <!-- Active Filter Status Indicator -->
-          <div class="d-flex align-items-center justify-content-between mt-3 pt-3 border-top small text-muted">
+          <div class="d-flex align-items-center justify-content-between mt-2.5 pt-2.5 border-top small text-muted">
             <div>
               <i class="bi bi-funnel text-primary me-1"></i> Showing <strong id="visibleCount" class="text-dark"><?= $startRecord ?>–<?= $endRecord ?></strong> of <strong class="text-dark"><?= number_format($totalFiltered) ?></strong> students
               <?php if ($totalFiltered < $totalCount): ?>
                 <span class="text-muted fst-italic ms-1">(filtered from <?= number_format($totalCount) ?> total)</span>
               <?php endif; ?>
             </div>
-            <div id="filterSummaryText" class="text-truncate ps-2 fst-italic">
+            <div id="filterSummaryText" class="text-truncate ps-2 fst-italic extra-small">
               <?= htmlspecialchars(!empty($activeSummaries) ? 'Active filters: ' . $activeScopeText : 'Showing all records', ENT_QUOTES, 'UTF-8') ?>
             </div>
           </div>
@@ -459,44 +512,61 @@ $exportQuery = http_build_query([
         </div>
       </div>
 
-      <!-- Masterlist Records Table -->
-      <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4">
-        <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-        <div class="island-body p-0">
+      <!-- Masterlist Records Table (Dossier Card Styling) -->
+      <div class="dossier-card fade-in-up" style="animation-delay: 0.35s;">
+        <div class="dossier-card-header">
+          <div class="d-flex align-items-center gap-2.5">
+            <div class="dossier-header-icon bg-primary bg-opacity-10 text-primary">
+              <i class="bi bi-table"></i>
+            </div>
+            <div>
+              <h2 class="h5 fw-bold text-dark mb-0 d-inline-block align-middle">Enrolled Students Roster</h2>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small fw-semibold ms-2 align-middle">
+                <?= number_format($totalFiltered) ?> Records
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-0">
           <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0 custom-table" id="studentsTable">
-              <thead class="table-light text-muted small text-uppercase">
+            <table class="table table-hover align-middle mb-0 dashboard-table" id="studentsTable">
+              <thead>
                 <tr>
-                  <th scope="col" class="ps-4 py-3 fw-semibold" style="width: 50px;">#</th>
-                  <th scope="col" class="py-3 fw-semibold" style="width: 170px;">ID / Reference</th>
-                  <th scope="col" class="py-3 fw-semibold">Student Name</th>
-                  <th scope="col" class="py-3 fw-semibold" style="width: 140px;">Academic Level</th>
-                  <th scope="col" class="py-3 fw-semibold" style="width: 120px;">Grade / Year</th>
-                  <th scope="col" class="py-3 fw-semibold" style="width: 110px;">Program</th>
-                  <th scope="col" class="py-3 fw-semibold" style="width: 90px;">Gender</th>
-                  <th scope="col" class="py-3 fw-semibold" style="width: 130px;">Status</th>
-                  <th scope="col" class="pe-4 py-3 text-end fw-semibold" style="width: 110px;">Actions</th>
+                  <th class="ps-4" style="width: 50px;">#</th>
+                  <th style="width: 170px;">ID / Reference</th>
+                  <th>Student Name</th>
+                  <th style="width: 150px;">Academic Level</th>
+                  <th style="width: 120px;">Grade / Year</th>
+                  <th style="width: 120px;">Program</th>
+                  <th style="width: 90px;">Gender</th>
+                  <th style="width: 120px;">Status</th>
+                  <th class="pe-4 text-end" style="width: 110px;">Actions</th>
                 </tr>
               </thead>
-              <tbody class="border-top-0">
+              <tbody>
                 <?php if (empty($students)): ?>
                   <tr id="emptyRow">
-                    <td colspan="9" class="text-center py-5 text-muted">
-                      <div class="d-inline-flex p-4 rounded-circle bg-light mb-3">
-                        <i class="bi bi-people fs-1 text-secondary"></i>
+                    <td colspan="9" class="text-center py-5">
+                      <div class="d-flex flex-column align-items-center justify-content-center py-4 text-muted">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                          <i class="bi bi-people fs-1 text-muted"></i>
+                        </div>
+                        <h3 class="h6 fw-bold text-dark mb-1">No Students Found</h3>
+                        <p class="small text-muted mb-0">There are no officially enrolled students currently in the masterlist database.</p>
                       </div>
-                      <h5 class="fw-bold text-dark mb-1">No Students Found</h5>
-                      <p class="small text-muted mb-0">There are no officially enrolled students currently in the masterlist database.</p>
                     </td>
                   </tr>
                 <?php else: ?>
                   <tr id="emptyRow" style="display: none;">
-                    <td colspan="9" class="text-center py-5 text-muted">
-                      <div class="d-inline-flex p-4 rounded-circle bg-light mb-3">
-                        <i class="bi bi-search fs-1 text-secondary"></i>
+                    <td colspan="9" class="text-center py-5">
+                      <div class="d-flex flex-column align-items-center justify-content-center py-4 text-muted">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                          <i class="bi bi-search fs-1 text-muted"></i>
+                        </div>
+                        <h3 class="h6 fw-bold text-dark mb-1">No Matching Records</h3>
+                        <p class="small text-muted mb-0">No students match your search criteria. Try modifying your filter options.</p>
                       </div>
-                      <h5 class="fw-bold text-dark mb-1">No Matching Records</h5>
-                      <p class="small text-muted mb-0">No students match your search criteria. Try modifying your filter options.</p>
                     </td>
                   </tr>
                   <?php 
@@ -510,6 +580,8 @@ $exportQuery = http_build_query([
                       
                       $fInitial = strtoupper(substr($student['first_name'] ?? 'S', 0, 1));
                       $lInitial = strtoupper(substr($student['last_name'] ?? 'N', 0, 1));
+                      $initials = $fInitial . $lInitial;
+                      if ($initials === '') $initials = 'ST';
 
                       $isCollege = (($student['academic_level'] ?? '') === 'College');
                     ?>
@@ -524,9 +596,11 @@ $exportQuery = http_build_query([
 
                       <td>
                         <div class="d-inline-flex align-items-center gap-1">
-                          <span class="student-id-mono text-dark fw-bold"><?= esc($idDisplay) ?></span>
+                          <span class="applicant-ref-badge">
+                            <i class="bi bi-hash text-muted"></i><?= esc($idDisplay) ?>
+                          </span>
                           <?php if (!empty($student['student_number'])): ?>
-                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-0.5 small ms-1" style="font-size: 0.7rem;">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-0.5 small" style="font-size: 0.68rem;">
                               <i class="bi bi-patch-check-fill me-0.5"></i>Official
                             </span>
                           <?php endif; ?>
@@ -535,17 +609,13 @@ $exportQuery = http_build_query([
 
                       <td>
                         <div class="d-flex align-items-center gap-2.5">
-                          <div class="d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-bold" style="width: 36px; height: 36px; font-size: 0.8rem; flex-shrink: 0;">
-                            <?= $fInitial . $lInitial ?>
+                          <div class="applicant-avatar">
+                            <?= esc($initials) ?>
                           </div>
                           <div>
-                            <div class="fw-semibold text-dark mb-0">
-                              <?= htmlspecialchars($student['last_name'] . ', ' . $student['first_name'], ENT_QUOTES, 'UTF-8'); ?>
-                            </div>
+                            <span class="fw-bold text-dark d-block"><?= htmlspecialchars($student['last_name'] . ', ' . $student['first_name'], ENT_QUOTES, 'UTF-8'); ?></span>
                             <?php if (!empty($student['contact_number'])): ?>
-                              <div class="text-muted small" style="font-size: 0.78rem;">
-                                <i class="bi bi-telephone me-1"></i><?= htmlspecialchars($student['contact_number'], ENT_QUOTES, 'UTF-8') ?>
-                              </div>
+                              <span class="text-muted extra-small d-block"><i class="bi bi-telephone me-1"></i><?= htmlspecialchars($student['contact_number'], ENT_QUOTES, 'UTF-8') ?></span>
                             <?php endif; ?>
                           </div>
                         </div>
@@ -553,24 +623,24 @@ $exportQuery = http_build_query([
 
                       <td>
                         <?php if ($isCollege): ?>
-                          <span class="badge bg-light text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1">
+                          <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
                             College
                           </span>
                         <?php else: ?>
-                          <span class="badge bg-light text-secondary border border-secondary border-opacity-25 rounded-pill px-2.5 py-1">
+                          <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">
                             Senior High School
                           </span>
                         <?php endif; ?>
                       </td>
 
                       <td>
-                        <span class="text-muted small">
+                        <span class="fw-semibold text-dark small">
                           <?= htmlspecialchars($student['grade_level'] ?? 'N/A', ENT_QUOTES, 'UTF-8'); ?>
                         </span>
                       </td>
 
                       <td>
-                        <span class="badge bg-light text-dark border px-2 py-1 fw-semibold">
+                        <span class="badge bg-light text-dark border px-2.5 py-1.5 rounded-pill fw-semibold small">
                           <?= htmlspecialchars(strtoupper($student['strand'] ?? 'N/A'), ENT_QUOTES, 'UTF-8'); ?>
                         </span>
                       </td>
@@ -580,14 +650,14 @@ $exportQuery = http_build_query([
                       </td>
 
                       <td>
-                        <span class="badge <?= esc($badgeClass) ?> px-2.5 py-1 rounded-pill small">
-                          <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1 rounded-pill small fw-semibold d-inline-flex align-items-center gap-1">
+                          <i class="bi bi-mortarboard-fill"></i> <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8'); ?>
                         </span>
                       </td>
 
                       <td class="pe-4 text-end">
-                        <a href="../admissions/application_detail.php?id=<?= esc($student['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                          Profile <i class="bi bi-arrow-right-short"></i>
+                        <a href="../admissions/application_detail.php?id=<?= esc($student['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium d-inline-flex align-items-center gap-1">
+                          <i class="bi bi-person-lines-fill"></i> Profile
                         </a>
                       </td>
 
@@ -599,17 +669,17 @@ $exportQuery = http_build_query([
           </div>
 
           <!-- Server-Side Pagination Bar -->
-          <div class="d-flex flex-column flex-md-row align-items-center justify-content-between p-3 p-lg-4 border-top gap-3">
+          <div class="d-flex flex-column flex-md-row align-items-center justify-content-between p-3 px-4 border-top gap-3">
             <div class="d-flex align-items-center gap-3">
               <span class="small text-muted">
                 Showing <strong class="text-dark"><?= $startRecord ?></strong> to <strong class="text-dark"><?= $endRecord ?></strong> of <strong class="text-dark"><?= number_format($totalFiltered) ?></strong> students
                 <?php if ($totalFiltered < $totalCount): ?>
-                  <span class="text-muted fst-italic">(filtered from <?= number_format($totalCount) ?> total)</span>
+                  <span class="text-muted fst-italic ms-1">(filtered from <?= number_format($totalCount) ?> total)</span>
                 <?php endif; ?>
               </span>
               <div class="d-flex align-items-center gap-2 border-start ps-3">
                 <label for="perPageSelector" class="small text-muted text-nowrap mb-0">Records per page:</label>
-                <select id="perPageSelector" class="form-select form-select-sm" style="width: 85px;" onchange="window.location.href = '<?= $buildPageUrl(1) ?>&per_page=' + this.value">
+                <select id="perPageSelector" class="form-select form-select-sm bg-light" style="width: 85px;" onchange="window.location.href = '<?= $buildPageUrl(1) ?>&per_page=' + this.value">
                   <option value="25" <?= $perPage === 25 ? 'selected' : '' ?>>25</option>
                   <option value="50" <?= $perPage === 50 ? 'selected' : '' ?>>50</option>
                   <option value="100" <?= $perPage === 100 ? 'selected' : '' ?>>100</option>
@@ -621,7 +691,7 @@ $exportQuery = http_build_query([
               <nav aria-label="Student records pagination">
                 <ul class="pagination pagination-sm mb-0">
                   <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                    <a class="page-link" href="<?= $buildPageUrl(max(1, $page - 1)) ?>">Previous</a>
+                    <a class="page-link rounded-start-pill" href="<?= $buildPageUrl(max(1, $page - 1)) ?>">Previous</a>
                   </li>
 
                   <?php
@@ -652,7 +722,7 @@ $exportQuery = http_build_query([
                     <?php endif; ?>
 
                   <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                    <a class="page-link" href="<?= $buildPageUrl(min($totalPages, $page + 1)) ?>">Next</a>
+                    <a class="page-link rounded-end-pill" href="<?= $buildPageUrl(min($totalPages, $page + 1)) ?>">Next</a>
                   </li>
                 </ul>
               </nav>

@@ -9,38 +9,52 @@ require_once __DIR__ . '/../../components/header.php';
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <!-- Top Header -->
-    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <a href="college_curriculum.php" class="btn btn-sm btn-light text-primary mb-2 fw-medium rounded-pill px-3 shadow-sm">
-            <i class="bi bi-arrow-left me-1"></i> Back to Curricula
-          </a>
-          <h1 class="h3 fw-bold text-dark mb-1"><?= htmlspecialchars($curriculum['curriculum_name']) ?></h1>
-          <p class="text-muted mb-0">
-            <?= htmlspecialchars($curriculum['program_code']) ?> | Version <?= htmlspecialchars($curriculum['version']) ?> | Effective AY: <?= htmlspecialchars($curriculum['effective_academic_year'] ?? 'N/A') ?> | 
-            <?php if ($curriculum['status'] === 'active'): ?>
-                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-medium"><i class="bi bi-shield-check me-1"></i>Active - Immutable</span>
-            <?php elseif ($curriculum['status'] === 'draft'): ?>
-                <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1 fw-medium"><i class="bi bi-pencil-fill me-1"></i>Draft - Editable</span>
-            <?php else: ?>
-                <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-1 fw-medium"><i class="bi bi-archive-fill me-1"></i>Archived - Read Only</span>
-            <?php endif; ?>
-          </p>
+    <!-- Dossier Hero Header Strip (Admissions Consistent) -->
+    <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+            <i class="bi bi-diagram-3-fill"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <a href="college_curriculum.php" class="btn btn-sm btn-light border rounded-pill px-2.5 py-0.5 extra-small text-muted me-1">
+                <i class="bi bi-arrow-left me-1"></i> Back
+              </a>
+              <h1 class="h4 fw-bold text-dark mb-0"><?= htmlspecialchars($curriculum['curriculum_name']) ?></h1>
+              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <?= htmlspecialchars($curriculum['program_code']) ?>
+              </span>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                Version <?= htmlspecialchars($curriculum['version']) ?>
+              </span>
+              <?php if ($curriculum['status'] === 'active'): ?>
+                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold"><i class="bi bi-shield-check me-1"></i>Active</span>
+              <?php elseif ($curriculum['status'] === 'draft'): ?>
+                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold"><i class="bi bi-pencil-fill me-1"></i>Draft</span>
+              <?php else: ?>
+                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold"><i class="bi bi-archive-fill me-1"></i>Archived</span>
+              <?php endif; ?>
+            </div>
+            <p class="text-muted small mb-0">Effective AY: <?= htmlspecialchars($curriculum['effective_academic_year'] ?? 'N/A') ?> • Manage semester structure and subject prerequisites.</p>
+          </div>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap align-items-center gap-2">
           <?php if ($curriculum['status'] === 'draft'): ?>
-            <button class="btn btn-primary fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
-              <i class="bi bi-plus-lg me-1"></i> Add Subject
+            <button class="btn btn-primary rounded-pill px-3 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+              <i class="bi bi-plus-lg"></i>
+              <span>Add Subject</span>
             </button>
             <?php if (!empty($subjectsRaw)): ?>
-              <button type="button" class="btn btn-success fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#builderActivateModal">
-                <i class="bi bi-check-circle me-1"></i> Activate Curriculum
+              <button type="button" class="btn btn-success rounded-pill px-3 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#builderActivateModal">
+                <i class="bi bi-check-circle"></i>
+                <span>Activate</span>
               </button>
             <?php endif; ?>
           <?php elseif ($curriculum['status'] === 'active'): ?>
-            <button class="btn btn-primary fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#builderCloneModal">
-              <i class="bi bi-files me-1"></i> Create New Version
+            <button class="btn btn-primary rounded-pill px-3 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#builderCloneModal">
+              <i class="bi bi-files"></i>
+              <span>New Version</span>
             </button>
           <?php endif; ?>
         </div>

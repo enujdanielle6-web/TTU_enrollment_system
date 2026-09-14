@@ -10,72 +10,121 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 <main class="py-5 bg-light min-vh-100">
   <div class="container-fluid px-lg-5">
     
-    <div class="island island-hero mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 fade-in-up" style="animation-delay: 0.1s;">
-      <div>
-        <h1 class="h3 fw-bold text-dark mb-1">Scholarships & Grants</h1>
-        <p class="text-muted mb-0">Manage institutional, government, and private scholarship programs.</p>
-      </div>
-      <div>
-        <button type="button" class="btn btn-primary fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#scholarshipModal" onclick="openCreateModal()">
-          <i class="bi bi-plus-circle-fill me-1"></i> Create Scholarship
-        </button>
+    <!-- Dossier Hero Header Strip -->
+    <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+            <i class="bi bi-award-fill"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h1 class="h4 fw-bold text-dark mb-0">Scholarships & Grants Catalog</h1>
+              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> Aid Programs
+              </span>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-layers text-primary me-1"></i><?= count($scholarships ?? []) ?> Programs
+              </span>
+            </div>
+            <p class="text-muted small mb-0">Configure institutional, government, and private grant types, qualification criteria, and coverage.</p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <a href="scholarship_dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
+            <i class="bi bi-speedometer2 text-primary"></i>
+            <span>Dashboard</span>
+          </a>
+          <button type="button" class="btn btn-primary rounded-pill px-3 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#scholarshipModal" onclick="openCreateModal()">
+            <i class="bi bi-plus-lg"></i>
+            <span>Create Scholarship</span>
+          </button>
+        </div>
       </div>
     </div>
 
     <?php if ($successMsg): ?>
-      <div class="alert alert-success shadow-sm rounded-12"><i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-success d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+        <div><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
     <?php endif; ?>
     <?php if ($errorMsg): ?>
-      <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-danger d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+        <div><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm fade-in-up" style="border-radius: 16px; animation-delay: 0.2s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light fade-in-up" style="animation-delay: 0.3s;">
-        <i class="bi bi-award text-primary"></i>
-        <h2 class="mb-0 text-dark">Active Scholarship Programs</h2>
+    <!-- Scholarship Programs Catalog Card (Dossier Card Styling) -->
+    <div class="dossier-card mb-4 fade-in-up" style="animation-delay: 0.15s;">
+      <div class="dossier-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-2.5">
+          <div class="dossier-header-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-award-fill"></i>
+          </div>
+          <div>
+            <h2 class="h5 fw-bold text-dark mb-0 d-inline-block align-middle">Configured Programs</h2>
+            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small fw-semibold ms-2 align-middle">
+              <?= count($scholarships ?? []) ?> Records
+            </span>
+          </div>
+        </div>
+        <div class="input-group input-group-sm" style="width: 240px;">
+          <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" id="programSearch" class="form-control form-control-sm border-start-0 ps-0" placeholder="Search programs...">
+        </div>
       </div>
       
-      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
+      <div class="p-0">
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 custom-table">
-            <thead class="table-light">
+          <table class="table table-hover align-middle mb-0 dashboard-table">
+            <thead>
               <tr>
-                <th scope="col" class="ps-4">Code</th>
-                <th scope="col">Scholarship Name</th>
-                <th scope="col">Category</th>
-                <th scope="col">Tuition Coverage</th>
-                <th scope="col">Slots</th>
-                <th scope="col">Status</th>
-                <th scope="col" class="text-end pe-4">Actions</th>
+                <th class="ps-4">Code</th>
+                <th>Scholarship Name</th>
+                <th>Category</th>
+                <th>Tuition Coverage</th>
+                <th>Slots</th>
+                <th>Status</th>
+                <th class="text-end pe-4">Actions</th>
               </tr>
             </thead>
             <tbody>
               <?php if (empty($scholarships)): ?>
                 <tr>
-                  <td colspan="7" class="text-center py-5 text-muted">
-                    <i class="bi bi-award fs-1 d-block mb-3 text-secondary"></i>
-                    No scholarships defined.
+                  <td colspan="7" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4 text-muted">
+                      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                        <i class="bi bi-award fs-1 text-muted"></i>
+                      </div>
+                      <h3 class="h6 fw-bold text-dark mb-1">No Scholarships Defined</h3>
+                      <p class="small text-muted mb-0">Use the "Create Scholarship" button above to add new programs.</p>
+                    </div>
                   </td>
                 </tr>
               <?php else: ?>
                 <?php foreach ($scholarships as $scholarship): ?>
                   <tr>
-                    <td class="ps-4 fw-bold text-dark">
-                      <?= htmlspecialchars($scholarship['code'], ENT_QUOTES, 'UTF-8') ?>
+                    <td class="ps-4">
+                      <span class="applicant-ref-badge fw-bold text-dark">
+                        <i class="bi bi-hash text-muted"></i><?= htmlspecialchars($scholarship['code'], ENT_QUOTES, 'UTF-8') ?>
+                      </span>
                     </td>
-                    <td class="fw-bold text-dark">
-                      <?= htmlspecialchars($scholarship['name'], ENT_QUOTES, 'UTF-8') ?>
+                    <td>
+                      <div class="fw-bold text-dark"><?= htmlspecialchars($scholarship['name'], ENT_QUOTES, 'UTF-8') ?></div>
                       <?php if ($scholarship['provider']): ?>
-                        <div class="text-muted fw-normal small"><i class="bi bi-building me-1"></i><?= htmlspecialchars($scholarship['provider'], ENT_QUOTES, 'UTF-8') ?></div>
+                        <div class="text-muted small mt-0.5"><i class="bi bi-building me-1"></i><?= htmlspecialchars($scholarship['provider'], ENT_QUOTES, 'UTF-8') ?></div>
                       <?php endif; ?>
                     </td>
                     <td>
-                        <span class="badge bg-light text-dark border"><i class="bi bi-tag-fill me-1 text-primary"></i><?= htmlspecialchars($scholarship['category'], ENT_QUOTES, 'UTF-8') ?></span>
+                      <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                        <i class="bi bi-tag-fill me-1 text-primary"></i><?= htmlspecialchars($scholarship['category'], ENT_QUOTES, 'UTF-8') ?>
+                      </span>
                     </td>
                     <td class="fw-bold text-success">
                       <?php if ($scholarship['tuition_coverage_type'] === 'percentage'): ?>
-                        <?= number_format((float)$scholarship['tuition_coverage_value'], 0) ?>%
+                        <?= number_format((float)$scholarship['tuition_coverage_value'], 0) ?>% Tuition
                       <?php elseif ($scholarship['tuition_coverage_type'] === 'fixed'): ?>
                         ₱<?= number_format((float)$scholarship['tuition_coverage_value'], 2) ?>
                       <?php else: ?>
@@ -83,25 +132,29 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
                       <?php endif; ?>
                     </td>
                     <td>
-                      <?= !empty($scholarship['slots']) ? esc((int)$scholarship['slots']) : '<span class="text-muted">Unlimited</span>' ?>
+                      <?= !empty($scholarship['slots']) ? '<span class="badge bg-light text-dark border">' . esc((int)$scholarship['slots']) . ' slots</span>' : '<span class="text-muted small">Unlimited</span>' ?>
                     </td>
                     <td>
                       <?php 
                         $statusClass = match($scholarship['status']) {
-                            'Active' => 'bg-success',
-                            'Draft' => 'bg-warning text-dark',
-                            'Closed' => 'bg-secondary',
-                            'Suspended' => 'bg-danger',
-                            default => 'bg-light text-dark'
+                            'Active' => 'bg-success bg-opacity-10 text-success border border-success border-opacity-25',
+                            'Draft' => 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25',
+                            'Closed' => 'bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25',
+                            'Suspended' => 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25',
+                            default => 'bg-light text-dark border'
                         };
                       ?>
-                      <span class="badge <?= esc($statusClass) ?> rounded-pill px-3"><?= htmlspecialchars($scholarship['status'], ENT_QUOTES, 'UTF-8') ?></span>
+                      <span class="badge <?= esc($statusClass) ?> rounded-pill px-2.5 py-1 small fw-semibold"><?= htmlspecialchars($scholarship['status'], ENT_QUOTES, 'UTF-8') ?></span>
                     </td>
                     <td class="text-end pe-4">
-                      <button class="btn btn-sm btn-outline-secondary rounded-pill edit-scholarship-btn" 
-                              data-scholarship='<?= json_encode($scholarship, JSON_HEX_APOS | JSON_HEX_QUOT) ?>'
+                      <button type="button" 
+                              class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 extra-small fw-medium d-inline-flex align-items-center gap-1 edit-scholarship-btn" 
+                              data-bs-toggle="modal" 
+                              data-bs-target="#scholarshipModal"
+                              data-scholarship="<?= htmlspecialchars(json_encode($scholarship), ENT_QUOTES, 'UTF-8') ?>"
                               title="Edit Scholarship">
                         <i class="bi bi-pencil-fill"></i>
+                        <span>Edit</span>
                       </button>
                     </td>
                   </tr>
@@ -261,72 +314,124 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
   </div>
 </div>
 
-<?php require_once __DIR__ . '/../../components/footer.php'; ?>
 <script>
-function openCreateModal() {
-    document.getElementById('modal_action').value = 'create_scholarship';
-    document.getElementById('modal_id').value = '';
-    document.getElementById('modal_title').innerHTML = '<i class="bi bi-plus-circle-fill text-primary me-2"></i>Create New Scholarship';
-    document.getElementById('modal_submit_btn').innerHTML = 'Create Scholarship';
-    document.getElementById('modal_submit_btn').className = 'btn btn-primary px-4 rounded-pill fw-medium shadow-sm';
+window.openCreateModal = function() {
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = val !== undefined && val !== null ? val : '';
+    };
+
+    setVal('modal_action', 'create_scholarship');
+    setVal('modal_id', '');
+    
+    const titleEl = document.getElementById('modal_title');
+    if (titleEl) {
+        titleEl.innerHTML = '<i class="bi bi-plus-circle-fill text-primary me-2"></i>Create New Scholarship';
+    }
+    const submitBtn = document.getElementById('modal_submit_btn');
+    if (submitBtn) {
+        submitBtn.innerHTML = 'Create Scholarship';
+        submitBtn.className = 'btn btn-primary px-4 rounded-pill fw-medium shadow-sm';
+    }
     
     // Clear forms
     const fields = ['s_code', 's_name', 's_provider', 's_slots', 's_min_gwa', 's_income', 's_description', 's_requirements', 's_start', 's_end'];
-    fields.forEach(f => document.getElementById(f).value = '');
+    fields.forEach(f => setVal(f, ''));
     
-    document.getElementById('s_category').value = 'School-Based';
-    document.getElementById('s_status').value = 'Draft';
-    document.getElementById('s_tuition_type').value = 'fixed';
-    document.getElementById('s_tuition_value').value = '0.00';
-    document.getElementById('s_misc_type').value = 'fixed';
-    document.getElementById('s_misc_value').value = '0.00';
-    document.getElementById('s_stipend').value = '0.00';
-    document.getElementById('s_book').value = '0.00';
-    document.getElementById('s_program').value = '';
+    setVal('s_category', 'School-Based');
+    setVal('s_status', 'Draft');
+    setVal('s_tuition_type', 'fixed');
+    setVal('s_tuition_value', '0.00');
+    setVal('s_misc_type', 'fixed');
+    setVal('s_misc_value', '0.00');
+    setVal('s_stipend', '0.00');
+    setVal('s_book', '0.00');
+    setVal('s_program', '');
+};
+
+function populateEditScholarshipModal(data) {
+    if (!data) return;
+
+    const setVal = (id, val) => {
+        const el = document.getElementById(id);
+        if (el) el.value = (val !== null && val !== undefined) ? val : '';
+    };
+
+    setVal('modal_action', 'update_scholarship');
+    setVal('modal_id', data.id);
+    
+    const titleEl = document.getElementById('modal_title');
+    if (titleEl) {
+        titleEl.innerHTML = '<i class="bi bi-pencil-fill text-primary me-2"></i>Edit Scholarship';
+    }
+    const submitBtn = document.getElementById('modal_submit_btn');
+    if (submitBtn) {
+        submitBtn.innerHTML = 'Save Changes';
+        submitBtn.className = 'btn btn-primary px-4 rounded-pill fw-medium shadow-sm';
+    }
+    
+    // Populate form inputs
+    setVal('s_code', data.code);
+    setVal('s_name', data.name);
+    setVal('s_category', data.category || 'School-Based');
+    setVal('s_provider', data.provider);
+    setVal('s_status', data.status || 'Draft');
+    setVal('s_slots', data.slots);
+    
+    setVal('s_tuition_type', data.tuition_coverage_type || 'fixed');
+    setVal('s_tuition_value', data.tuition_coverage_value || '0.00');
+    setVal('s_misc_type', data.misc_coverage_type || 'fixed');
+    setVal('s_misc_value', data.misc_coverage_value || '0.00');
+    setVal('s_stipend', data.stipend_amount || '0.00');
+    setVal('s_book', data.book_allowance || '0.00');
+    
+    setVal('s_program', data.program_id);
+    setVal('s_min_gwa', data.min_gwa);
+    setVal('s_income', data.income_requirement);
+    
+    setVal('s_start', data.application_start);
+    setVal('s_end', data.application_end);
+    setVal('s_description', data.description);
+    setVal('s_requirements', data.requirements);
+
+    // Explicitly show modal if not auto-opened
+    const modalEl = document.getElementById('scholarshipModal');
+    if (modalEl && window.bootstrap && bootstrap.Modal) {
+        const modalInstance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modalInstance.show();
+    }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const editBtns = document.querySelectorAll('.edit-scholarship-btn');
-    const modal = new bootstrap.Modal(document.getElementById('scholarshipModal'));
+// Global click event delegation for edit buttons (works across SPA navigation and normal page loads)
+if (!window.__scholarshipEditHandlerAttached__) {
+    window.__scholarshipEditHandlerAttached__ = true;
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.edit-scholarship-btn');
+        if (!btn) return;
 
-    editBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const data = JSON.parse(this.getAttribute('data-scholarship'));
-            
-            document.getElementById('modal_action').value = 'update_scholarship';
-            document.getElementById('modal_id').value = data.id;
-            document.getElementById('modal_title').innerHTML = '<i class="bi bi-pencil-fill text-success me-2"></i>Edit Scholarship';
-            document.getElementById('modal_submit_btn').innerHTML = 'Save Changes';
-            document.getElementById('modal_submit_btn').className = 'btn btn-success px-4 rounded-pill fw-medium shadow-sm';
-            
-            // Populate
-            document.getElementById('s_code').value = data.code || '';
-            document.getElementById('s_name').value = data.name || '';
-            document.getElementById('s_category').value = data.category || 'School-Based';
-            document.getElementById('s_provider').value = data.provider || '';
-            document.getElementById('s_status').value = data.status || 'Draft';
-            document.getElementById('s_slots').value = data.slots || '';
-            
-            document.getElementById('s_tuition_type').value = data.tuition_coverage_type || 'fixed';
-            document.getElementById('s_tuition_value').value = data.tuition_coverage_value || '0.00';
-            document.getElementById('s_misc_type').value = data.misc_coverage_type || 'fixed';
-            document.getElementById('s_misc_value').value = data.misc_coverage_value || '0.00';
-            document.getElementById('s_stipend').value = data.stipend_amount || '0.00';
-            document.getElementById('s_book').value = data.book_allowance || '0.00';
-            
-            document.getElementById('s_program').value = data.program_id || '';
-            document.getElementById('s_min_gwa').value = data.min_gwa || '';
-            document.getElementById('s_income').value = data.income_requirement || '';
-            
-            document.getElementById('s_start').value = data.application_start || '';
-            document.getElementById('s_end').value = data.application_end || '';
-            document.getElementById('s_description').value = data.description || '';
-            document.getElementById('s_requirements').value = data.requirements || '';
-            
-            modal.show();
-        });
+        try {
+            const raw = btn.getAttribute('data-scholarship');
+            if (raw) {
+                const data = JSON.parse(raw);
+                populateEditScholarshipModal(data);
+            }
+        } catch (err) {
+            console.error('Failed to parse scholarship data:', err);
+        }
     });
-});
+
+    // Client-side search logic
+    document.addEventListener('keyup', function(e) {
+        if (e.target && e.target.id === 'programSearch') {
+            const filter = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.dashboard-table tbody tr');
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(filter) ? '' : 'none';
+            });
+        }
+    });
+}
 </script>
-</body>
-</html>
+
+<?php require_once __DIR__ . '/../../components/footer.php'; ?>

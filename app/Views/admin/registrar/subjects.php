@@ -4,56 +4,84 @@ require_once __DIR__ . '/../../components/header.php';
 <?php require_once __DIR__ . '/../../components/admin_navbar.php'; ?>
 <main class="py-5 bg-light min-vh-100" id="mainContent">
   <div class="container-fluid px-lg-5">
-    <div class="island island-hero mb-4 fade-in-up" style="animation-delay: 0.1s;">
-      <div class="d-flex justify-content-between align-items-center">
-        <div>
-          <h1 class="h3 fw-bold text-dark mb-1">Subjects Management</h1>
-          <p class="text-muted mb-0">Master catalog of academic subjects across College and Senior High School</p>
+    <!-- Dossier Hero Header Strip (Admissions Consistent) -->
+    <div class="dossier-hero-strip mb-4 fade-in-up" style="animation-delay: 0.05s;">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+            <i class="bi bi-journal-text"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h1 class="h4 fw-bold text-dark mb-0">Subjects Management</h1>
+              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> University Registrar
+              </span>
+              <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                <i class="bi bi-collection text-primary me-1"></i> Global Catalog
+              </span>
+            </div>
+            <p class="text-muted small mb-0">Master catalog of academic subjects across College and Senior High School.</p>
+          </div>
         </div>
-        <div>
-          <button type="button" class="btn btn-primary fw-medium shadow-sm rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
-            <i class="bi bi-plus-lg me-1"></i> Add Subject
+        <div class="d-flex align-items-center gap-2">
+          <button type="button" class="btn btn-primary rounded-pill px-3 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
+            <i class="bi bi-plus-lg"></i>
+            <span>Add Subject</span>
           </button>
         </div>
       </div>
     </div>
 
     <?php if ($successMsg): ?>
-      <div class="alert alert-success shadow-sm rounded-12"><i class="bi bi-check-circle-fill me-2"></i><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-success d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-check-circle-fill fs-5 me-2 text-success"></i>
+        <div><?= htmlspecialchars($successMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
     <?php endif; ?>
     <?php if ($errorMsg): ?>
-      <div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      <div class="alert alert-danger d-flex align-items-center shadow-sm rounded-4 mb-4 border-0" role="alert">
+        <i class="bi bi-exclamation-triangle-fill fs-5 me-2 text-danger"></i>
+        <div><?= htmlspecialchars($errorMsg, ENT_QUOTES, 'UTF-8'); ?></div>
+      </div>
     <?php endif; ?>
 
-    <div class="island position-relative overflow-hidden border-0 shadow-sm rounded-4 fade-in-up" style="animation-delay: 0.2s;">
-      <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 4px;"></div>
-      <div class="island-header border-bottom border-light d-flex justify-content-between align-items-center fade-in-up" style="animation-delay: 0.3s;">
-        <div>
-          <i class="bi bi-journal-text"></i>
-          <h2 class="mb-0 d-inline-block">Master Subject Catalog</h2>
+    <!-- Master Subject Catalog Card (Dossier Card Styling) -->
+    <div class="dossier-card fade-in-up" style="animation-delay: 0.15s;">
+      <div class="dossier-card-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-2.5">
+          <div class="dossier-header-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-collection-fill"></i>
+          </div>
+          <div>
+            <h2 class="h5 fw-bold text-dark mb-0 d-inline-block align-middle">Master Subject Catalog</h2>
+            <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small fw-semibold ms-2 align-middle">
+              <?= count($subjects ?? []) ?> Subjects
+            </span>
+          </div>
         </div>
-        <div class="d-flex gap-2">
-          <select id="levelFilter" class="form-select shadow-sm" style="width: auto;">
+        <div class="d-flex flex-wrap gap-2">
+          <select id="levelFilter" class="form-select form-select-sm bg-light" style="width: auto;">
             <option value="">All Levels</option>
             <option value="College">College</option>
             <option value="SHS">SHS</option>
             <option value="Both">Both</option>
           </select>
-          <select id="statusFilter" class="form-select shadow-sm" style="width: auto;">
+          <select id="statusFilter" class="form-select form-select-sm bg-light" style="width: auto;">
             <option value="">All Statuses</option>
             <option value="1">Active</option>
             <option value="0">Inactive</option>
           </select>
-          <div class="input-group shadow-sm" style="width: 250px;">
-              <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-              <input type="text" id="tableSearch" class="form-control border-start-0" placeholder="Search subjects...">
+          <div class="input-group input-group-sm" style="width: 220px;">
+            <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
+            <input type="text" id="tableSearch" class="form-control form-control-sm border-start-0 ps-0" placeholder="Search subjects...">
           </div>
         </div>
       </div>
-      <div class="island-body p-0 fade-in-up" style="animation-delay: 0.4s;">
+      <div class="p-0">
         <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0 custom-table">
-            <thead class="table-light text-muted small text-uppercase">
+          <table class="table table-hover align-middle mb-0 dashboard-table">
+            <thead>
               <tr>
                 <th class="ps-4">Code</th>
                 <th>Subject Name</th>
@@ -68,9 +96,14 @@ require_once __DIR__ . '/../../components/header.php';
             <tbody>
               <?php if (empty($subjects)): ?>
                 <tr>
-                  <td colspan="8" class="text-center py-5 text-muted">
-                    <i class="bi bi-inbox fs-1 d-block mb-3 text-secondary"></i>
-                    No subjects found.
+                  <td colspan="8" class="text-center py-5">
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4 text-muted">
+                      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                      </div>
+                      <h3 class="h6 fw-bold text-dark mb-1">No Subjects Found</h3>
+                      <p class="small text-muted mb-0">Use the "Add Subject" button above to add subjects to the master catalog.</p>
+                    </div>
                   </td>
                 </tr>
               <?php else: ?>
@@ -81,42 +114,52 @@ require_once __DIR__ . '/../../components/header.php';
                 ?>
                   <tr class="subject-row" data-level="<?= htmlspecialchars($subject['education_level'] ?? 'College', ENT_QUOTES, 'UTF-8') ?>" data-status="<?= esc($subject['status']) ?>">
                     <td class="ps-4 fw-bold text-dark">
-                      <?= htmlspecialchars($subject['subject_code'], ENT_QUOTES, 'UTF-8') ?>
-                      <?php if ($isLocked): ?>
-                        <i class="bi bi-shield-lock-fill text-muted ms-1" title="Structural attributes are locked due to existing academic usage"></i>
-                      <?php endif; ?>
+                      <span class="applicant-ref-badge">
+                        <?= htmlspecialchars($subject['subject_code'], ENT_QUOTES, 'UTF-8') ?>
+                        <?php if ($isLocked): ?>
+                          <i class="bi bi-shield-lock-fill text-muted ms-1" title="Structural attributes are locked due to existing academic usage"></i>
+                        <?php endif; ?>
+                      </span>
                     </td>
                     <td>
-                      <div class="fw-medium text-dark"><?= htmlspecialchars($subject['subject_name'], ENT_QUOTES, 'UTF-8') ?></div>
+                      <div class="fw-bold text-dark"><?= htmlspecialchars($subject['subject_name'], ENT_QUOTES, 'UTF-8') ?></div>
                       <?php if (!empty($subject['description'])): ?>
                         <small class="text-muted text-truncate d-block" style="max-width: 280px;"><?= htmlspecialchars($subject['description'], ENT_QUOTES, 'UTF-8') ?></small>
                       <?php endif; ?>
                     </td>
-                    <td><span class="fw-semibold text-primary"><?= esc((int)$subject['units']) ?></span></td>
                     <td>
-                      <span class="badge bg-light text-secondary border"><?= htmlspecialchars($subject['subject_type'] ?: 'Lecture', ENT_QUOTES, 'UTF-8') ?></span>
+                      <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 small fw-bold">
+                        <?= esc((int)$subject['units']) ?> <?= ((int)$subject['units'] === 1) ? 'unit' : 'units' ?>
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small fw-semibold"><?= htmlspecialchars($subject['subject_type'] ?: 'Lecture', ENT_QUOTES, 'UTF-8') ?></span>
                     </td>
                     <td>
                       <?php if (($subject['education_level'] ?? 'College') === 'College'): ?>
-                        <span class="badge bg-light text-primary border border-primary border-opacity-25 rounded-pill px-3">College</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">College</span>
                       <?php elseif (($subject['education_level'] ?? '') === 'SHS'): ?>
-                        <span class="badge bg-light text-secondary border border-secondary border-opacity-25 rounded-pill px-3">SHS</span>
+                        <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">SHS</span>
                       <?php else: ?>
-                        <span class="badge bg-light text-dark border border-dark border-opacity-25 rounded-pill px-3">Both</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold">Both</span>
                       <?php endif; ?>
                     </td>
                     <td>
                       <?php if ($isActive): ?>
-                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-medium"><i class="bi bi-check-circle me-1"></i>Active</span>
+                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1">
+                          <i class="bi bi-check-circle-fill"></i> Active
+                        </span>
                       <?php else: ?>
-                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-1 fw-medium"><i class="bi bi-dash-circle me-1"></i>Inactive</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1">
+                          <i class="bi bi-dash-circle"></i> Inactive
+                        </span>
                       <?php endif; ?>
                     </td>
                     <td>
                       <?php if ($totalUsage > 0): ?>
-                        <span class="badge bg-light text-dark border fw-normal"><?= htmlspecialchars($subject['usage_summary'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
+                        <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1 small fw-normal"><?= htmlspecialchars($subject['usage_summary'] ?? '', ENT_QUOTES, 'UTF-8') ?></span>
                       <?php else: ?>
-                        <span class="badge bg-light text-muted border fw-normal">Unused</span>
+                        <span class="badge bg-light text-muted border rounded-pill px-2.5 py-1 small fw-normal">Unused</span>
                       <?php endif; ?>
                     </td>
                     <td class="text-end pe-4">
@@ -171,9 +214,14 @@ require_once __DIR__ . '/../../components/header.php';
                 <?php endforeach; ?>
               <?php endif; ?>
               <tr id="noResultsRow" style="display: none;">
-                <td colspan="8" class="text-center py-5 text-muted">
-                  <i class="bi bi-search fs-1 d-block mb-3 text-secondary"></i>
-                  No subjects match your search or filter criteria.
+                <td colspan="8" class="text-center py-5">
+                  <div class="d-flex flex-column align-items-center justify-content-center py-4 text-muted">
+                    <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                      <i class="bi bi-search fs-1 text-muted"></i>
+                    </div>
+                    <h3 class="h6 fw-bold text-dark mb-1">No Matching Subjects</h3>
+                    <p class="small text-muted mb-0">No subjects match your search or filter criteria.</p>
+                  </div>
                 </td>
               </tr>
             </tbody>

@@ -1418,3 +1418,39 @@ HTML;
     exit;
 }
 
+/**
+ * Validate password complexity according to institutional Rule VAL-03:
+ * - Minimum 8 characters
+ * - At least one uppercase letter
+ * - At least one lowercase letter
+ * - At least one digit
+ * - At least one special character
+ *
+ * @param string $password
+ * @param array &$errors Populated with human-readable error messages if validation fails
+ * @return bool True if password satisfies complexity rules, false otherwise
+ */
+function isPasswordStrong(string $password, array &$errors = []): bool
+{
+    $errors = [];
+
+    if (strlen($password) < 8) {
+        $errors[] = 'Password must be at least 8 characters long.';
+    }
+    if (!preg_match('/[A-Z]/', $password)) {
+        $errors[] = 'Password must contain at least one uppercase letter.';
+    }
+    if (!preg_match('/[a-z]/', $password)) {
+        $errors[] = 'Password must contain at least one lowercase letter.';
+    }
+    if (!preg_match('/[0-9]/', $password)) {
+        $errors[] = 'Password must contain at least one number.';
+    }
+    if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+        $errors[] = 'Password must contain at least one special character.';
+    }
+
+    return empty($errors);
+}
+
+
