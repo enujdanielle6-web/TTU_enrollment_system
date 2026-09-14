@@ -185,7 +185,7 @@ class EnrollmentService
             // 11. Dispatch credentials email
             if (function_exists('sendStudentCredentialsEmail') && !empty($app['email'])) {
                 try {
-                    $credentialPassword = '[Your Registered Account Password]';
+                    $credentialPassword = 'Use your registered account password';
                     sendStudentCredentialsEmail(
                         $app['email'],
                         $app['first_name'],

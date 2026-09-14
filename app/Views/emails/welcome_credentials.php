@@ -69,17 +69,27 @@
             <p>As an enrolled student, you have been assigned an official TTU Email and Student Credentials which grant you access to both the <strong>Student Portal</strong> and the <strong>Learning Management System (LMS)</strong>.</p>
             
             <div class="credentials-box">
-                <p><strong>TTU Email:</strong> <?= htmlspecialchars($ttuEmail ?? '') ?></p>
                 <p><strong>Student Number:</strong> <?= htmlspecialchars($studentNumber ?? '') ?></p>
-                <p><strong>Temporary Password:</strong> <?= htmlspecialchars($tempPassword ?? '') ?></p>
+                <p><strong>Institutional Email:</strong> <?= htmlspecialchars($ttuEmail ?? '') ?></p>
+                <?php if (!empty($tempPassword) && !in_array($tempPassword, ['[Your Registered Account Password]', 'Use your registered account password'], true)): ?>
+                    <p><strong>Temporary Password:</strong> <?= htmlspecialchars($tempPassword) ?></p>
+                <?php else: ?>
+                    <p><strong>Password:</strong> Use your registered account password</p>
+                <?php endif; ?>
             </div>
 
-            <div class="alert">
-                <strong>Important Security Notice:</strong> For your security, you are required to reset this temporary password immediately upon your first login.
-            </div>
+            <?php if (!empty($tempPassword) && !in_array($tempPassword, ['[Your Registered Account Password]', 'Use your registered account password'], true)): ?>
+                <div class="alert">
+                    <strong>Important Security Notice:</strong> For your security, you are required to reset this temporary password immediately upon your first login.
+                </div>
+            <?php else: ?>
+                <div class="alert" style="background-color: #eff6ff; color: #1e40af; border-color: #bfdbfe;">
+                    <strong>Login Instructions:</strong> You can log in to the Student LMS Portal using either your <strong>Student Number</strong> or your <strong>Institutional Email</strong> with your account password.
+                </div>
+            <?php endif; ?>
 
             <center>
-                <a href="<?= htmlspecialchars($portalLink ?? 'http://localhost/sia/public/index.php') ?>" class="btn">Login to Student Portal</a>
+                <a href="<?= htmlspecialchars($portalLink ?? 'http://localhost/sia/auth/lms_student_login.php') ?>" class="btn">Login to Student LMS Portal</a>
             </center>
         </div>
         <div class="footer">

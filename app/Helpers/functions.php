@@ -1198,7 +1198,7 @@ function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, 
         $mail->isHTML(true);
         $mail->Subject = 'Welcome to Triple T University - Official Student & LMS Credentials';
 
-        $portalLink = 'http://localhost/sia/public/index.php';
+        $portalLink = 'http://localhost/sia/auth/lms_student_login.php';
         ob_start();
         require __DIR__ . '/../Views/emails/welcome_credentials.php';
         $mail->Body = ob_get_clean();
