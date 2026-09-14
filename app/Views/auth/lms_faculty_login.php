@@ -65,32 +65,46 @@
 
             <!-- Quick Auto-Fill Buttons -->
             <div class="mb-3 d-flex flex-wrap gap-2 justify-content-between">
-              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-fill" onclick="document.getElementById('employee_id').value='FAC-2026-001'; document.getElementById('password').value='password123';">
-                <i class="bi bi-person-workspace me-1"></i> Auto-fill Faculty
+              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-fill shadow-xs d-inline-flex align-items-center justify-content-center gap-1.5" onclick="quickFacultyLogin('FAC-2026-001', 'password123')" title="Click to instantly log in as Faculty Instructor">
+                <i class="bi bi-person-workspace"></i> <span>Auto-fill Faculty</span>
               </button>
-              <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 flex-fill" onclick="document.getElementById('employee_id').value='admin@ttu.edu.ph'; document.getElementById('password').value='admin123';">
-                <i class="bi bi-shield-lock me-1"></i> Auto-fill Test Admin
+              <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 flex-fill shadow-xs d-inline-flex align-items-center justify-content-center gap-1.5" onclick="quickFacultyLogin('admin@ttu.edu.ph', 'admin123')" title="Click to instantly log in as Superadmin">
+                <i class="bi bi-shield-lock"></i> <span>Auto-fill Test Admin</span>
               </button>
             </div>
 
             <!-- Test Credentials Card -->
             <div class="card bg-light border-0 rounded-3 p-3 mb-3 text-start">
               <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-uppercase fw-bold text-muted" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-key-fill me-1"></i> Test Login Credentials</span>
+                <span class="text-uppercase fw-bold text-muted" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-key-fill me-1"></i> Test Login Credentials <span class="text-primary fw-normal text-none ms-1">(Click card to log in)</span></span>
               </div>
               <div class="row g-2" style="font-size: 0.8rem;">
                 <div class="col-12 col-sm-6">
-                  <div class="p-2 bg-white rounded border border-light-subtle shadow-xs">
-                    <div class="fw-semibold text-primary mb-1"><i class="bi bi-mortarboard me-1"></i> Faculty Instructor</div>
-                    <div><span class="text-muted">ID:</span> <code class="user-select-all">FAC-2026-001</code></div>
-                    <div><span class="text-muted">Pass:</span> <code>password123</code></div>
+                  <div class="p-2.5 bg-white rounded-3 border border-light-subtle shadow-xs test-cred-card h-100" 
+                       onclick="quickFacultyLogin('FAC-2026-001', 'password123')"
+                       role="button"
+                       tabindex="0"
+                       title="Click to instantly log in as Faculty Instructor">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <span class="fw-semibold text-primary"><i class="bi bi-mortarboard me-1"></i> Faculty</span>
+                      <span class="badge bg-primary bg-opacity-10 text-primary px-1.5 py-0.5 rounded-pill" style="font-size: 0.65rem;"><i class="bi bi-box-arrow-in-right me-0.5"></i> Log In</span>
+                    </div>
+                    <div><span class="text-muted small">ID:</span> <code class="fw-bold text-dark user-select-all">FAC-2026-001</code></div>
+                    <div><span class="text-muted small">Pass:</span> <code class="text-secondary user-select-all">password123</code></div>
                   </div>
                 </div>
                 <div class="col-12 col-sm-6">
-                  <div class="p-2 bg-white rounded border border-light-subtle shadow-xs">
-                    <div class="fw-semibold text-dark mb-1"><i class="bi bi-shield-check me-1"></i> Superadmin</div>
-                    <div><span class="text-muted">Email:</span> <code class="user-select-all">admin@ttu.edu.ph</code></div>
-                    <div><span class="text-muted">Pass:</span> <code>admin123</code></div>
+                  <div class="p-2.5 bg-white rounded-3 border border-light-subtle shadow-xs test-cred-card h-100" 
+                       onclick="quickFacultyLogin('admin@ttu.edu.ph', 'admin123')"
+                       role="button"
+                       tabindex="0"
+                       title="Click to instantly log in as Superadmin">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <span class="fw-semibold text-dark"><i class="bi bi-shield-check me-1"></i> Superadmin</span>
+                      <span class="badge bg-dark bg-opacity-10 text-dark px-1.5 py-0.5 rounded-pill" style="font-size: 0.65rem;"><i class="bi bi-box-arrow-in-right me-0.5"></i> Log In</span>
+                    </div>
+                    <div><span class="text-muted small">Email:</span> <code class="fw-bold text-dark user-select-all">admin@ttu.edu.ph</code></div>
+                    <div><span class="text-muted small">Pass:</span> <code class="text-secondary user-select-all">admin123</code></div>
                   </div>
                 </div>
               </div>
@@ -112,7 +126,40 @@
   </div>
 </main>
 
+<style>
+  .test-cred-card {
+    cursor: pointer;
+    transition: all 0.18s ease-in-out;
+    user-select: none;
+  }
+  .test-cred-card:hover {
+    border-color: #0d6efd !important;
+    background-color: #f8faff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.12) !important;
+  }
+  .test-cred-card:active {
+    transform: translateY(0);
+    box-shadow: none !important;
+  }
+</style>
+
 <script>
+  function quickFacultyLogin(idOrEmail, password) {
+    const idField = document.getElementById('employee_id');
+    const passField = document.getElementById('password');
+    if (idField && passField) {
+      idField.value = idOrEmail;
+      passField.value = password;
+      
+      // Animate card / button briefly before submit
+      const form = idField.closest('form');
+      if (form) {
+        form.submit();
+      }
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function() {
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
@@ -129,6 +176,16 @@
         }
       });
     }
+
+    // Support keyboard trigger (Enter/Space) on test credential cards
+    document.querySelectorAll('.test-cred-card').forEach(function(card) {
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.click();
+        }
+      });
+    });
   });
 </script>
 

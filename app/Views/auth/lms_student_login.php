@@ -63,10 +63,51 @@
               </div>
             </div>
 
-            <div class="mb-3 d-flex justify-content-end">
-              <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="document.getElementById('student_id').value='2026-000001'; document.getElementById('password').value='password123';">
-                <i class="bi bi-magic me-1"></i> Auto-fill Test Student
+            <!-- Quick Auto-Fill Buttons -->
+            <div class="mb-3 d-flex flex-wrap gap-2 justify-content-between">
+              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-fill shadow-xs d-inline-flex align-items-center justify-content-center gap-1.5" onclick="quickStudentLogin('2026-000001', 'password123')" title="Click to instantly log in as College Student">
+                <i class="bi bi-mortarboard"></i> <span>Auto-fill College</span>
               </button>
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3 flex-fill shadow-xs d-inline-flex align-items-center justify-content-center gap-1.5" onclick="quickStudentLogin('2026-000020', 'Student@TTU2026!')" title="Click to instantly log in as SHS Student">
+                <i class="bi bi-backpack"></i> <span>Auto-fill SHS</span>
+              </button>
+            </div>
+
+            <!-- Test Credentials Card -->
+            <div class="card bg-light border-0 rounded-3 p-3 mb-3 text-start">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="text-uppercase fw-bold text-muted" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-key-fill me-1"></i> Test Student Credentials <span class="text-primary fw-normal text-none ms-1">(Click card to log in)</span></span>
+              </div>
+              <div class="row g-2" style="font-size: 0.8rem;">
+                <div class="col-12 col-sm-6">
+                  <div class="p-2.5 bg-white rounded-3 border border-light-subtle shadow-xs test-cred-card h-100" 
+                       onclick="quickStudentLogin('2026-000001', 'password123')"
+                       role="button"
+                       tabindex="0"
+                       title="Click to instantly log in as College Student">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <span class="fw-semibold text-primary"><i class="bi bi-mortarboard me-1"></i> College (BSIT)</span>
+                      <span class="badge bg-primary bg-opacity-10 text-primary px-1.5 py-0.5 rounded-pill" style="font-size: 0.65rem;"><i class="bi bi-box-arrow-in-right me-0.5"></i> Log In</span>
+                    </div>
+                    <div><span class="text-muted small">ID:</span> <code class="fw-bold text-dark user-select-all">2026-000001</code></div>
+                    <div><span class="text-muted small">Pass:</span> <code class="text-secondary user-select-all">password123</code></div>
+                  </div>
+                </div>
+                <div class="col-12 col-sm-6">
+                  <div class="p-2.5 bg-white rounded-3 border border-light-subtle shadow-xs test-cred-card h-100" 
+                       onclick="quickStudentLogin('2026-000020', 'Student@TTU2026!')"
+                       role="button"
+                       tabindex="0"
+                       title="Click to instantly log in as SHS Student">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                      <span class="fw-semibold text-success"><i class="bi bi-backpack me-1"></i> SHS (STEM)</span>
+                      <span class="badge bg-success bg-opacity-10 text-success px-1.5 py-0.5 rounded-pill" style="font-size: 0.65rem;"><i class="bi bi-box-arrow-in-right me-0.5"></i> Log In</span>
+                    </div>
+                    <div><span class="text-muted small">ID:</span> <code class="fw-bold text-dark user-select-all">2026-000020</code></div>
+                    <div><span class="text-muted small">Pass:</span> <code class="text-secondary user-select-all">Student@TTU2026!</code></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <button class="btn btn-primary w-100 fw-semibold" style="padding: 0.75rem 1rem; border-radius: 10px;" type="submit">
@@ -86,7 +127,38 @@
   </div>
 </main>
 
+<style>
+  .test-cred-card {
+    cursor: pointer;
+    transition: all 0.18s ease-in-out;
+    user-select: none;
+  }
+  .test-cred-card:hover {
+    border-color: #0d6efd !important;
+    background-color: #f8faff !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 110, 253, 0.12) !important;
+  }
+  .test-cred-card:active {
+    transform: translateY(0);
+    box-shadow: none !important;
+  }
+</style>
+
 <script>
+  function quickStudentLogin(studentId, password) {
+    const idField = document.getElementById('student_id');
+    const passField = document.getElementById('password');
+    if (idField && passField) {
+      idField.value = studentId;
+      passField.value = password;
+      const form = idField.closest('form');
+      if (form) {
+        form.submit();
+      }
+    }
+  }
+
   document.addEventListener("DOMContentLoaded", function() {
     const togglePassword = document.getElementById("togglePassword");
     const passwordInput = document.getElementById("password");
@@ -103,6 +175,16 @@
         }
       });
     }
+
+    // Support keyboard trigger (Enter/Space) on test credential cards
+    document.querySelectorAll('.test-cred-card').forEach(function(card) {
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.click();
+        }
+      });
+    });
   });
 </script>
 

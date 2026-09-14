@@ -64,17 +64,19 @@ require_once __DIR__ . '/../components/header.php';
           <div class="mt-4 text-center border-top pt-4">
             
             <!-- TEMPORARY TESTING SHORTCUTS -->
-            <div class="mb-4 bg-light rounded-3 p-3 border border-warning border-opacity-50">
-                <p class="small text-muted fw-bold mb-2"><i class="bi bi-bug"></i> Test Accounts (Auto-fill)</p>
+            <div class="mb-4 bg-light rounded-3 p-3 border border-warning border-opacity-50 text-start">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="small text-muted fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Test Accounts <span class="text-primary fw-normal text-none ms-1">(1-Click Fast Login)</span></span>
+                </div>
                 <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admin@ttu.edu.ph', 'admin123')">Superadmin</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('registrar@ttu.edu.ph', 'admin123')">Registrar</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('cashier@ttu.edu.ph', 'admin123')">Cashier</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('admissions@ttu.edu.ph', 'admin123')">Admissions</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scholarship@ttu.edu.ph', 'admin123')">Scholarship</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('clinic@ttu.edu.ph', 'admin123')">Clinic</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('scheduler@ttu.edu.ph', 'admin123')">Scheduler</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark" onclick="fillLogin('jane.applicant@example.com', 'password123')">Applicant</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('admin@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Superadmin"><i class="bi bi-shield-check me-1 text-primary"></i>Superadmin</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('registrar@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Registrar"><i class="bi bi-journal-check me-1 text-info"></i>Registrar</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('cashier@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Cashier"><i class="bi bi-cash-coin me-1 text-success"></i>Cashier</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('admissions@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Admissions"><i class="bi bi-person-check me-1 text-warning"></i>Admissions</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('scholarship@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Scholarship"><i class="bi bi-award me-1 text-danger"></i>Scholarship</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('clinic@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Clinic"><i class="bi bi-heart-pulse me-1 text-danger"></i>Clinic</button>
+                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('scheduler@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Scheduler"><i class="bi bi-calendar3 me-1 text-secondary"></i>Scheduler</button>
+                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('jane.applicant@example.com', 'password123')" title="Click to instantly sign in as Applicant"><i class="bi bi-person-lines-fill me-1"></i>Applicant</button>
                 </div>
             </div>
             
