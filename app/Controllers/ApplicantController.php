@@ -804,9 +804,23 @@ try {
     $appId = (int)$app['id'];
 
     // 2. Fetch Documents (Requirements)
-    $docStmt = $pdo->prepare('SELECT * FROM application_documents WHERE application_id = :app_id');
+    $docStmt = $pdo->prepare('SELECT * FROM application_documents WHERE application_id = :app_id ORDER BY id ASC');
     $docStmt->execute(['app_id' => $appId]);
     $documents = $docStmt->fetchAll();
+
+    if (empty($documents)) {
+        $checklist = getDetailedChecklist($appId);
+        $documents = [];
+        foreach ($checklist as $name => $item) {
+            $status = strtolower($item['status'] ?? 'pending');
+            if ($status === 'uploaded') $status = 'pending';
+            if ($status === 'needs reupload') $status = 'rejected';
+            $documents[] = [
+                'document_name' => $name,
+                'status' => $status
+            ];
+        }
+    }
 
     // 3. Fetch Assessment
     $assStmt = $pdo->prepare('SELECT * FROM student_assessments WHERE application_id = :app_id LIMIT 1');

@@ -162,11 +162,16 @@ require_once __DIR__ . '/../components/header.php';
             <?php else: ?>
               <ul class="list-group list-group-flush">
                 <?php foreach ($documents as $doc): ?>
+                  <?php 
+                    $docName = $doc['document_name'] ?? $doc['document_type'] ?? 'Requirement';
+                    $docDisplay = (strpos($docName, '_') !== false && strpos($docName, ' ') === false) ? ucwords(str_replace('_', ' ', $docName)) : $docName;
+                    $docStatus = strtolower($doc['status'] ?? 'pending');
+                  ?>
                   <li class="list-group-item px-0 d-flex justify-content-between align-items-center bg-transparent border-0 py-1">
-                    <span class="small fw-medium"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $doc['document_type'] ?? '')), ENT_QUOTES) ?></span>
-                    <?php if ($doc['status'] === 'verified'): ?>
+                    <span class="small fw-medium"><?= htmlspecialchars($docDisplay, ENT_QUOTES, 'UTF-8') ?></span>
+                    <?php if ($docStatus === 'verified'): ?>
                       <i class="bi bi-check-circle-fill text-success" title="Verified"></i>
-                    <?php elseif ($doc['status'] === 'rejected'): ?>
+                    <?php elseif ($docStatus === 'rejected'): ?>
                       <i class="bi bi-x-circle-fill text-danger" title="Rejected"></i>
                     <?php else: ?>
                       <i class="bi bi-hourglass-split text-warning" title="Pending"></i>
