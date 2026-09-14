@@ -193,6 +193,19 @@ function getApplicationTimelineSteps(string $status, string $docMethod = 'online
             }
         }
         unset($step);
+    } elseif ($status === 'payment_verified') {
+        $steps[1]['state'] = 'completed';
+        $steps[2]['state'] = 'completed';
+        $steps[3]['state'] = 'completed';
+        foreach ($steps as &$step) {
+            if (in_array($step['key'], ['approved', 'health_info', 'medical_clearance', 'scholarship', 'cashier'], true)) {
+                $step['state'] = 'completed';
+            }
+            if ($step['key'] === 'enrolled') {
+                $step['state'] = 'active';
+            }
+        }
+        unset($step);
     } elseif ($status === 'rejected') {
         $steps[1]['state'] = 'completed';
         $steps[2]['state'] = 'completed';

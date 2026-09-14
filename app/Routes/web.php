@@ -38,7 +38,7 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/lms/faculty/logout', ['App\Controllers\Lms\LmsAuthController', 'logoutFaculty']);
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant']], function (Router $router) {
+$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware', 'App\Middleware\RoleMiddleware:applicant,student']], function (Router $router) {
     // Applicant Portal Routes
     $router->get('/applicant/dashboard.php', ['App\Controllers\ApplicantController', 'dashboard']);
     $router->get('/applicant/assessment.php', ['App\Controllers\ApplicantController', 'assessment']);

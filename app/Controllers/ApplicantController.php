@@ -108,6 +108,8 @@ class ApplicantController extends BaseController
         
             if ($application['status'] === 'approved') {
                 $completionPercentage = 80;
+            } elseif ($application['status'] === 'payment_verified') {
+                $completionPercentage = 95;
             } elseif ($application['status'] === 'enrolled') {
                 $completionPercentage = 100;
             }
@@ -115,13 +117,24 @@ class ApplicantController extends BaseController
         }
 
         $healthStatus = null;
-        if ($application && in_array($application['status'], ['approved', 'enrolled'])) {
+        if ($application && in_array($application['status'], ['approved', 'payment_verified', 'enrolled'], true)) {
             $healthStatus = HealthRecord::getStatus($userId);
             if ($application['status'] === 'enrolled') {
                 $completionPercentage = 100;
                 foreach ($timelineSteps as &$step) {
                     if ($step['key'] !== 'correction') {
                         $step['state'] = 'completed';
+                    }
+                }
+                unset($step);
+            } elseif ($application['status'] === 'payment_verified') {
+                $completionPercentage = 95;
+                foreach ($timelineSteps as &$step) {
+                    if (in_array($step['key'], ['created', 'submitted', 'documents', 'review', 'approved', 'health_info', 'medical_clearance', 'scholarship', 'cashier'], true)) {
+                        $step['state'] = 'completed';
+                    }
+                    if ($step['key'] === 'enrolled') {
+                        $step['state'] = 'active';
                     }
                 }
                 unset($step);
@@ -155,7 +168,7 @@ class ApplicantController extends BaseController
                             if (in_array($assessment['payment_status'], ['paid', 'partial'])) {
                                 foreach ($timelineSteps as &$enrolledStep) {
                                     if ($enrolledStep['key'] === 'enrolled') {
-                                        $enrolledStep['state'] = 'completed';
+                                        $enrolledStep['state'] = 'active';
                                     }
                                 }
                                 unset($enrolledStep);
@@ -346,7 +359,7 @@ $appCheckStmt->execute(['user_id' => $userId]);
 $userAppStatus = $appCheckStmt->fetchColumn();
 
 $healthStatus = null;
-if ($userAppStatus && in_array($userAppStatus, ['approved', 'enrolled'], true)) {
+if ($userAppStatus && in_array($userAppStatus, ['approved', 'payment_verified', 'enrolled'], true)) {
     $healthStatus = HealthRecord::getStatus($userId);
 }
 
@@ -555,7 +568,7 @@ return;
         $stmt->execute(['user_id' => $userId]);
         $app = $stmt->fetch();
 
-        $isApproved = ($app && in_array($app['status'], ['approved', 'enrolled'], true));
+        $isApproved = ($app && in_array($app['status'], ['approved', 'payment_verified', 'enrolled'], true));
         $appId = $app ? $app['id'] : 0;
         $userProgramId = $app ? $app['college_program_id'] : null;
         $userYearLevel = $app ? $app['grade_level'] : null;
@@ -670,7 +683,7 @@ return;
             $stmt->execute(['user_id' => $userId]);
             $eligibility = $stmt->fetch();
 
-            if (!$eligibility || !in_array($eligibility['status'], ['approved', 'enrolled'], true)) {
+            if (!$eligibility || !in_array($eligibility['status'], ['approved', 'payment_verified', 'enrolled'], true)) {
                 throw new \Exception('You are not eligible to apply for scholarships at this time.');
             }
 
@@ -769,7 +782,7 @@ try {
         SELECT a.*, u.first_name, u.last_name, u.email, u.student_number 
         FROM applications a
         INNER JOIN users u ON u.id = a.user_id
-        WHERE a.user_id = :user_id AND a.status IN ("approved", "enrolled")
+        WHERE a.user_id = :user_id AND a.status IN ("approved", "payment_verified", "enrolled")
         ORDER BY a.created_at DESC 
         LIMIT 1
     ');

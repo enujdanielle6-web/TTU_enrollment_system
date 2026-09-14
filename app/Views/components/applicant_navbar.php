@@ -21,7 +21,7 @@ if (isset($application) && is_array($application) && isset($application['status'
 }
 $hasApplication = ($navAppStatus !== false && $navAppStatus !== null);
 $isEditable = $hasApplication && in_array($navAppStatus, ['pending', 'correction_required'], true);
-$isApprovedOrEnrolled = $hasApplication && in_array($navAppStatus, ['approved', 'enrolled'], true);
+$isApprovedOrEnrolled = $hasApplication && in_array($navAppStatus, ['approved', 'payment_verified', 'enrolled'], true);
 ?>
 
 <style>
@@ -146,6 +146,14 @@ $isApprovedOrEnrolled = $hasApplication && in_array($navAppStatus, ['approved', 
             <li class="nav-item">
                 <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-dark hover-bg-light" href="print_slip.php">
                   <i class="bi bi-printer me-2 text-primary"></i> Admission Slip
+                </a>
+            </li>
+        <?php endif; ?>
+
+        <?php if ($navAppStatus === 'enrolled'): ?>
+            <li class="nav-item">
+                <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-primary bg-primary bg-opacity-10 fw-semibold" href="/sia/auth/lms_student_login.php">
+                  <i class="bi bi-box-arrow-in-right me-2"></i> Student LMS Portal
                 </a>
             </li>
         <?php endif; ?>

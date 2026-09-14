@@ -62,7 +62,7 @@ class DocumentController extends BaseController
         unset($_SESSION['doc_success'], $_SESSION['doc_error'], $_SESSION['success_msg'], $_SESSION['error_msg']);
 
         $method = $application['document_submission_method'] ?? 'online';
-        $isLocked = in_array($application['status'], ['under_review', 'approved', 'enrolled'], true);
+        $isLocked = in_array($application['status'], ['under_review', 'approved', 'payment_verified', 'enrolled'], true);
 
         return $this->render('applicant/documents', [
             'application' => $application,
@@ -250,7 +250,7 @@ class DocumentController extends BaseController
                 
                 $appId = (int) $application['id'];
 
-                if (in_array($application['status'], ['under_review', 'approved', 'enrolled'], true)) {
+                if (in_array($application['status'], ['under_review', 'approved', 'payment_verified', 'enrolled'], true)) {
                     $respond(false, 'Your document submission method is already locked and cannot be changed.');
                 }
                 

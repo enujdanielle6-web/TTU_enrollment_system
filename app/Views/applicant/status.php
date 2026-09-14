@@ -72,11 +72,14 @@ require_once __DIR__ . '/../components/header.php';
                         <i class="bi bi-card-checklist me-1"></i> View Office Checklist
                       </a>
                     </div>
-                  <?php elseif (in_array($application['status'], ['approved', 'enrolled'], true)): ?>
+                  <?php elseif (in_array($application['status'], ['approved', 'payment_verified', 'enrolled'], true)): ?>
                     <?php if ($application['status'] === 'enrolled'): ?>
                       <div class="mt-3 p-3 bg-light border border-info rounded-3 text-start">
                         <p class="text-dark fw-bold mb-1 small"><i class="bi bi-envelope-check-fill text-primary me-1"></i> LMS & TTU Email Sent</p>
-                        <p class="text-muted small mb-0">Check your registered email inbox for your institutional login credentials.</p>
+                        <p class="text-muted small mb-2">Check your registered email inbox for your institutional login credentials.</p>
+                        <a href="/sia/auth/lms_student_login.php" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold w-100">
+                          <i class="bi bi-box-arrow-in-right me-1"></i> Open Student LMS
+                        </a>
                       </div>
                     <?php endif; ?>
                     <div class="mt-3">

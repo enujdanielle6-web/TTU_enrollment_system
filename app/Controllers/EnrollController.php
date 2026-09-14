@@ -392,9 +392,26 @@ class EnrollController extends BaseController
         $timelineSteps = $application ? getApplicationTimelineSteps($application['status'], $docMethod, $timestamps, $hasUploadedDocs) : [];
 
         $healthStatus = null;
-        if ($application && in_array($application['status'], ['approved', 'enrolled'])) {
+        if ($application && in_array($application['status'], ['approved', 'payment_verified', 'enrolled'], true)) {
             $healthStatus = \App\Models\HealthRecord::getStatus($userId);
-            if ($application['status'] === 'approved') {
+            if ($application['status'] === 'enrolled') {
+                foreach ($timelineSteps as &$step) {
+                    if ($step['key'] !== 'correction') {
+                        $step['state'] = 'completed';
+                    }
+                }
+                unset($step);
+            } elseif ($application['status'] === 'payment_verified') {
+                foreach ($timelineSteps as &$step) {
+                    if (in_array($step['key'], ['created', 'submitted', 'documents', 'review', 'approved', 'health_info', 'medical_clearance', 'scholarship', 'cashier'], true)) {
+                        $step['state'] = 'completed';
+                    }
+                    if ($step['key'] === 'enrolled') {
+                        $step['state'] = 'active';
+                    }
+                }
+                unset($step);
+            } elseif ($application['status'] === 'approved') {
                 foreach ($timelineSteps as &$step) {
                     if ($step['key'] === 'health_info') {
                         $step['state'] = $healthStatus ? 'completed' : 'active';
@@ -423,6 +440,7 @@ class EnrollController extends BaseController
                         }
                     }
                 }
+                unset($step);
             }
         }
 

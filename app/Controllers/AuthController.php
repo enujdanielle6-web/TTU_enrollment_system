@@ -145,12 +145,14 @@ class AuthController extends BaseController
             $_SESSION['lms_email'] = $user['email'];
             $response->redirect('/sia/lms/faculty/dashboard.php');
         } elseif ($user['role'] === 'student') {
+            // Student logging in through the Enrollment System portal accesses their completed applicant/enrollment dashboard
+            // LMS has its own dedicated portal at /sia/auth/lms_student_login.php
             $_SESSION['lms_logged_in'] = true;
             $_SESSION['lms_user_id'] = (int)$user['id'];
             $_SESSION['lms_role'] = 'student';
             $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['lms_email'] = $user['email'];
-            $response->redirect('/sia/lms/student/dashboard.php');
+            $response->redirect('/sia/applicant/dashboard.php');
         } else {
             $response->redirect('/sia/applicant/dashboard.php');
         }

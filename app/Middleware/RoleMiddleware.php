@@ -79,7 +79,13 @@ class RoleMiddleware implements MiddlewareInterface
                 }
             } else {
                 // specific roles
-                if (!in_array($userRole, $this->allowedRoles, true) && $userRole !== 'superadmin') {
+                $effectiveRoles = $this->allowedRoles;
+                // If applicant is in allowedRoles, student is also allowed (enrolled students can access their enrollment dashboard)
+                if (in_array('applicant', $effectiveRoles, true) && !in_array('student', $effectiveRoles, true)) {
+                    $effectiveRoles[] = 'student';
+                }
+
+                if (!in_array($userRole, $effectiveRoles, true) && $userRole !== 'superadmin') {
                     $this->redirectUnauthorized($userRole);
                 }
             }
@@ -92,7 +98,7 @@ class RoleMiddleware implements MiddlewareInterface
     {
         $response = new Response();
         
-        if ($userRole === 'applicant') {
+        if ($userRole === 'applicant' || $userRole === 'student') {
             $response->redirect('/sia/applicant/dashboard.php');
         } else {
             $_SESSION['admin_error'] = 'Access denied. You do not have permission to view this module.';
@@ -113,8 +119,6 @@ class RoleMiddleware implements MiddlewareInterface
                 $response->redirect('/sia/admin/system/sysadmin_dashboard.php');
             } elseif ($userRole === 'faculty') {
                 $response->redirect('/sia/lms/faculty/dashboard.php');
-            } elseif ($userRole === 'student') {
-                $response->redirect('/sia/lms/student/dashboard.php');
             } else {
                 // If the role is empty or unknown, destroy session and force login to prevent redirect loops
                 session_unset();

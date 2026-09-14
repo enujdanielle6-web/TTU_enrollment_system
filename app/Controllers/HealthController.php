@@ -26,7 +26,7 @@ class HealthController extends BaseController
             return;
         }
 
-        if (!in_array($application['status'], ['approved', 'enrolled'], true)) {
+        if (!in_array($application['status'], ['approved', 'payment_verified', 'enrolled'], true)) {
             $_SESSION['error_msg'] = 'You can only submit health information once your application is approved.';
             $response->redirect('/sia/applicant/status.php');
             return;

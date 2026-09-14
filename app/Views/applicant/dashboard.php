@@ -136,6 +136,21 @@ require_once __DIR__ . '/../components/header.php';
                     </div>
                   </div>
               <?php endif; ?>
+            <?php elseif ($application['status'] === 'payment_verified'): ?>
+              <div class="alert alert-primary border-0 shadow-sm rounded-12 p-3 d-flex align-items-center justify-content-between gap-3 mb-0" style="background: #e8f3ff; border-left: 4px solid #0d6efd !important;">
+                <div class="d-flex align-items-center gap-3">
+                  <div class="bg-primary text-white rounded-circle p-2 flex-shrink-0" style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;">
+                    <i class="bi bi-cash-coin fs-5"></i>
+                  </div>
+                  <div>
+                    <h4 class="h6 mb-1 fw-bold text-dark"><i class="bi bi-check-circle-fill text-success me-1"></i> Payment Verified</h4>
+                    <p class="mb-0 small text-muted">Your tuition payment has been verified. The Registrar is currently finalizing your official enrollment and student credentials.</p>
+                  </div>
+                </div>
+                <div>
+                  <a href="assessment.php" class="btn btn-outline-primary btn-sm rounded-pill px-3 bg-white shadow-sm text-nowrap">View Receipt</a>
+                </div>
+              </div>
             <?php elseif ($application['status'] === 'enrolled'): ?>
               <div class="alert alert-success border-0 shadow-sm rounded-12 p-3 d-flex align-items-center gap-3 mb-0">
                 <div class="bg-success text-white rounded-circle p-2 flex-shrink-0" style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;">
@@ -148,15 +163,22 @@ require_once __DIR__ . '/../components/header.php';
               </div>
 
               <!-- Institutional Email & LMS Credentials Notification -->
-              <div class="alert alert-info border-0 shadow-sm rounded-12 p-3 d-flex align-items-start gap-3 mt-3 mb-0" style="background: #f0f7ff; border-left: 4px solid #0d6efd !important;">
-                <div class="bg-primary text-white rounded-circle p-2 flex-shrink-0" style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;">
-                  <i class="bi bi-envelope-check-fill fs-5"></i>
+              <div class="alert alert-info border-0 shadow-sm rounded-12 p-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mt-3 mb-0" style="background: #f0f7ff; border-left: 4px solid #0d6efd !important;">
+                <div class="d-flex align-items-start gap-3">
+                  <div class="bg-primary text-white rounded-circle p-2 flex-shrink-0" style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;">
+                    <i class="bi bi-envelope-check-fill fs-5"></i>
+                  </div>
+                  <div class="flex-grow-1">
+                    <h4 class="h6 mb-1 fw-bold text-dark"><i class="bi bi-key-fill text-warning me-1"></i> Check Your Email for TTU Account & LMS Credentials</h4>
+                    <p class="mb-0 small text-muted">
+                      We have sent your official <strong>Triple T University Institutional Email</strong> and <strong>Learning Management System (LMS) login credentials</strong> to your registered email address (<strong class="text-dark"><?= htmlspecialchars($user_email ?? $application['email'] ?? 'your email', ENT_QUOTES, 'UTF-8'); ?></strong>). Please check your inbox or spam/junk folder to activate your student account.
+                    </p>
+                  </div>
                 </div>
-                <div class="flex-grow-1">
-                  <h4 class="h6 mb-1 fw-bold text-dark"><i class="bi bi-key-fill text-warning me-1"></i> Check Your Email for TTU Account & LMS Credentials</h4>
-                  <p class="mb-0 small text-muted">
-                    We have sent your official <strong>Triple T University Institutional Email</strong> and <strong>Learning Management System (LMS) login credentials</strong> to your registered email address (<strong class="text-dark"><?= htmlspecialchars($user_email ?? $application['email'] ?? 'your email', ENT_QUOTES, 'UTF-8'); ?></strong>). Please check your inbox or spam/junk folder to activate your student account.
-                  </p>
+                <div class="flex-shrink-0 align-self-end align-self-md-center">
+                  <a href="/sia/auth/lms_student_login.php" class="btn btn-primary btn-sm rounded-pill px-3.5 py-2 fw-semibold shadow-sm text-nowrap">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Student LMS Portal
+                  </a>
                 </div>
               </div>
             <?php elseif ($application['status'] === 'rejected'): ?>
@@ -201,7 +223,7 @@ require_once __DIR__ . '/../components/header.php';
             <?php endif; ?>
 
             <!-- General System Reminder Placeholder (Only shown prior to application approval) -->
-            <?php if (!$application || !in_array($application['status'], ['approved', 'enrolled'], true)): ?>
+            <?php if (!$application || !in_array($application['status'], ['approved', 'payment_verified', 'enrolled'], true)): ?>
               <div class="alert alert-primary border-0 shadow-sm rounded-12 p-3 d-flex align-items-center gap-3 mt-3 mb-0">
                 <div class="bg-primary text-white rounded-circle p-2 flex-shrink-0" style="width:40px; height:40px; display:inline-flex; align-items:center; justify-content:center;">
                   <i class="bi bi-bell-fill"></i>
