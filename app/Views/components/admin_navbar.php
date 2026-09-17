@@ -16,7 +16,7 @@ $baseAdminUrl = '/sia/admin/';
       <i class="bi bi-chevron-left toggle-icon" style="font-size: 14px;"></i>
     </button>
     <!-- Brand / Logo Area -->
-    <div class="p-4 border-bottom d-flex align-items-center justify-content-between">
+    <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-shrink-0">
       <a class="text-decoration-none d-flex align-items-center" href="<?= esc($baseAdminUrl) ?>dashboard.php" aria-label="Admin portal home">
         <img src="<?= esc($baseAdminUrl) ?>../images/TTU_LOGO.png" alt="TTU Logo" style="height: 36px; width: auto; object-fit: contain;">
         <span class="text-dark fw-bold ms-3 fs-5 nav-text">Admin Portal</span>
@@ -222,7 +222,7 @@ $baseAdminUrl = '/sia/admin/';
 </nav>
 
 <!-- User Profile Area -->
-    <div class="p-3 border-top bg-light mt-auto">
+    <div class="p-3 border-top bg-light mt-auto flex-shrink-0">
       <div class="d-flex align-items-center gap-3 mb-3">
         <div class="bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 42px; height: 42px;">
           <?= strtoupper(substr($_SESSION['user_first_name'] ?? 'A', 0, 1) . substr($_SESSION['user_last_name'] ?? 'D', 0, 1)); ?>

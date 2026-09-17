@@ -65,6 +65,7 @@ try {
         ALTER TABLE `shs_curriculum` 
         DROP COLUMN `strand_id`,
         MODIFY COLUMN `curriculum_id` int(10) unsigned NOT NULL,
+        ADD COLUMN `display_order` int(11) NOT NULL DEFAULT 0 AFTER `semester`,
         ADD UNIQUE KEY `uq_shs_curriculum_sub` (`curriculum_id`,`grade_level`,`semester`,`subject_id`),
         ADD KEY `idx_curriculum_id` (`curriculum_id`),
         ADD CONSTRAINT `shs_curriculum_subs_ibfk_1` FOREIGN KEY (`curriculum_id`) REFERENCES `shs_curricula` (`id`) ON DELETE CASCADE,

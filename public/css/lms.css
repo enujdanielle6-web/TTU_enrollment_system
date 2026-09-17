@@ -28,25 +28,54 @@ body.lms-layout {
     width: 270px;
     background: #ffffff;
     height: 100vh;
+    max-height: 100vh;
     position: fixed;
     top: 0;
     left: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    overflow: hidden;
     border-right: 1px solid #eef2f6;
     box-shadow: 2px 0 20px rgba(0, 0, 0, 0.02);
     display: flex;
     flex-direction: column;
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s ease;
     z-index: 1040;
-    scrollbar-width: thin;
-    scrollbar-color: #e5e7eb transparent;
 }
 
 /* Brand Header */
 .lms-sidebar-brand {
     padding: 1.15rem 1.15rem;
     border-bottom: 1px solid #f1f5f9;
+    flex-shrink: 0;
+}
+
+.lms-search-container {
+    flex-shrink: 0;
+}
+
+/* Scrollable Navigation Menu */
+.lms-nav-menu {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #e5e7eb transparent;
+}
+
+.lms-nav-menu::-webkit-scrollbar {
+    width: 5px;
+}
+
+.lms-nav-menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.lms-nav-menu::-webkit-scrollbar-thumb {
+    background: #e5e7eb;
+    border-radius: 4px;
+}
+
+.lms-nav-menu::-webkit-scrollbar-thumb:hover {
+    background: #d1d5db;
 }
 
 .lms-brand-icon {
@@ -190,6 +219,7 @@ body.lms-layout {
     margin-top: auto;
     padding: 1rem 0.85rem;
     border-top: 1px solid #f1f5f9;
+    flex-shrink: 0;
 }
 
 .lms-user-card {

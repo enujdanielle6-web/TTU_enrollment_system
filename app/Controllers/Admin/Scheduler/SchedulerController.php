@@ -7,6 +7,7 @@ use App\Core\Response;
 use App\Core\Database;
 use PDO;
 use PDOException;
+use Exception;
 
 class SchedulerController extends BaseController
 {
@@ -556,7 +557,21 @@ $pageTitle = 'Schedule Builder - Admin';
             'THURSDAY' => ['TH'],
             'FRIDAY' => ['F'],
             'SATURDAY' => ['S'],
-            'SUNDAY' => ['SU']
+            'SUNDAY' => ['SU'],
+            'MON' => ['M'],
+            'TUE' => ['T'],
+            'WED' => ['W'],
+            'THU' => ['TH'],
+            'FRI' => ['F'],
+            'SAT' => ['S'],
+            'SUN' => ['SU'],
+            'M' => ['M'],
+            'T' => ['T'],
+            'W' => ['W'],
+            'TH' => ['TH'],
+            'F' => ['F'],
+            'S' => ['S'],
+            'SU' => ['SU']
         ];
         if (isset($map[$cleaned])) {
             return $map[$cleaned];
@@ -567,13 +582,35 @@ $pageTitle = 'Schedule Builder - Admin';
             $days[] = 'TH';
             $cleaned = str_replace('TH', '', $cleaned);
         }
+        if (str_contains($cleaned, 'SU')) {
+            $days[] = 'SU';
+            $cleaned = str_replace('SU', '', $cleaned);
+        }
         for ($i = 0; $i < strlen($cleaned); $i++) {
             $char = $cleaned[$i];
             if (in_array($char, ['M', 'T', 'W', 'F', 'S'])) {
                 $days[] = $char;
             }
         }
-        return array_unique($days);
+        return array_values(array_unique($days));
+    }
+
+    private function formatDays(array $days): string
+    {
+        $map = [
+            'M' => 'Monday',
+            'T' => 'Tuesday',
+            'W' => 'Wednesday',
+            'TH' => 'Thursday',
+            'F' => 'Friday',
+            'S' => 'Saturday',
+            'SU' => 'Sunday'
+        ];
+        $formatted = [];
+        foreach ($days as $d) {
+            $formatted[] = $map[$d] ?? $d;
+        }
+        return implode(', ', $formatted);
     }
 
     public function process(Request $request, Response $response)
@@ -611,6 +648,311 @@ $pageTitle = 'Schedule Builder - Admin';
         }
         
         try {
+            // PHASE 1: Pre-process, normalize times, and dual-resolve instructor/faculty
+            $processedSchedules = [];
+            $facultyCache = [];
+            
+            $uStmtById = $pdo->prepare("SELECT CONCAT(first_name, ' ', last_name) FROM users WHERE id = ?");
+            $uStmtByName = $pdo->prepare("SELECT id FROM users WHERE role = 'faculty' AND (CONCAT(first_name, ' ', last_name) = ? OR TRIM(last_name) = ?) LIMIT 1");
+            $subStmtById = $pdo->prepare("SELECT subject_code FROM subjects WHERE id = ?");
+
+            foreach ($schedules as $sched) {
+                $id = (int)($sched['id'] ?? 0);
+                $subjectId = (int)($sched['subject_id'] ?? 0);
+                $subjectCode = trim($sched['subject_code'] ?? '');
+                if (empty($subjectCode) && $subjectId > 0) {
+                    $subStmtById->execute([$subjectId]);
+                    $subjectCode = $subStmtById->fetchColumn() ?: "Subject #{$subjectId}";
+                }
+                
+                $day = !empty(trim($sched['day'] ?? '')) ? trim($sched['day']) : null;
+                $start = !empty(trim($sched['start_time'] ?? '')) ? trim($sched['start_time']) : null;
+                $end = !empty(trim($sched['end_time'] ?? '')) ? trim($sched['end_time']) : null;
+                $room = !empty(trim($sched['room'] ?? '')) ? trim($sched['room']) : null;
+                $facultyUserId = !empty($sched['faculty_user_id']) ? (int)$sched['faculty_user_id'] : null;
+                $instructor = !empty(trim($sched['instructor'] ?? '')) ? trim($sched['instructor']) : null;
+                $mode = trim($sched['delivery_mode'] ?? 'Face-to-Face');
+                $semester = trim((string)($sched['semester'] ?? '1'));
+
+                // Normalize times to HH:MM:SS
+                if ($start) {
+                    $start = strlen($start) === 5 ? $start . ':00' : $start;
+                }
+                if ($end) {
+                    $end = strlen($end) === 5 ? $end . ':00' : $end;
+                }
+
+                // If any value is TBA or 00:00:00, treat as unassigned
+                if ($day === 'TBA' || $start === '00:00:00' || $end === '00:00:00') {
+                    $day = null;
+                    $start = null;
+                    $end = null;
+                }
+
+                // Dual-resolution: resolve name from faculty_user_id or vice versa
+                if ($facultyUserId && (empty($instructor) || strtoupper($instructor) === 'TBA')) {
+                    if (!isset($facultyCache['id_' . $facultyUserId])) {
+                        $uStmtById->execute([$facultyUserId]);
+                        $facultyCache['id_' . $facultyUserId] = $uStmtById->fetchColumn() ?: 'TBA';
+                    }
+                    $instructor = $facultyCache['id_' . $facultyUserId];
+                } elseif (!$facultyUserId && !empty($instructor) && strtoupper($instructor) !== 'TBA') {
+                    if (!isset($facultyCache['name_' . $instructor])) {
+                        $uStmtByName->execute([$instructor, $instructor]);
+                        $matchedId = $uStmtByName->fetchColumn();
+                        $facultyCache['name_' . $instructor] = $matchedId ? (int)$matchedId : null;
+                    }
+                    $facultyUserId = $facultyCache['name_' . $instructor];
+                }
+
+                // Schedule completeness check
+                if ($day || $start || $end) {
+                    if (!$day || !$start || !$end) {
+                        throw new Exception("Incomplete schedule for '{$subjectCode}'. Provide Day, Start Time, and End Time, or leave all blank (TBA).");
+                    }
+                    if ($start >= $end) {
+                        throw new Exception("Start time must be strictly before end time for '{$subjectCode}' ({$start} - {$end}).");
+                    }
+                }
+
+                $processedSchedules[] = [
+                    'id' => $id,
+                    'subject_id' => $subjectId,
+                    'subject_code' => $subjectCode,
+                    'day' => $day,
+                    'start_time' => $start,
+                    'end_time' => $end,
+                    'room' => $room,
+                    'faculty_user_id' => $facultyUserId,
+                    'instructor' => $instructor,
+                    'delivery_mode' => $mode,
+                    'semester' => $semester,
+                ];
+            }
+
+            // Filter active (scheduled) items for conflict checking
+            $activeSchedules = array_values(array_filter($processedSchedules, function($s) {
+                return !empty($s['day']) && !empty($s['start_time']) && !empty($s['end_time']);
+            }));
+
+            // PHASE 2: Intra-payload validation (Section timetable & internal resource collisions)
+            $count = count($activeSchedules);
+            for ($i = 0; $i < $count; $i++) {
+                $s1 = $activeSchedules[$i];
+                $days1 = $this->decomposeDays($s1['day']);
+
+                for ($j = $i + 1; $j < $count; $j++) {
+                    $s2 = $activeSchedules[$j];
+                    $days2 = $this->decomposeDays($s2['day']);
+                    $commonDays = array_intersect($days1, $days2);
+
+                    if (empty($commonDays)) {
+                        continue;
+                    }
+
+                    $timesOverlap = ($s1['start_time'] < $s2['end_time'] && $s1['end_time'] > $s2['start_time']);
+                    if (!$timesOverlap) {
+                        continue;
+                    }
+
+                    $commonDaysStr = $this->formatDays($commonDays);
+
+                    // Validation 2A: Student Timetable Overlap (Same Section Cohort)
+                    // For SHS, only conflict if in the same semester. For College, all subjects belong to the section's semester.
+                    $sameSemester = ($type !== 'shs') || ($s1['semester'] === $s2['semester']);
+                    if ($sameSemester) {
+                        throw new Exception("Timetable Conflict: '{$s1['subject_code']}' ({$s1['start_time']} - {$s1['end_time']}) and '{$s2['subject_code']}' ({$s2['start_time']} - {$s2['end_time']}) overlap on {$commonDaysStr} for this section.");
+                    }
+
+                    // Validation 2B: Intra-Payload Room Collision (Physical rooms)
+                    $room1 = trim($s1['room'] ?? '');
+                    $room2 = trim($s2['room'] ?? '');
+                    $isRoom1Valid = !empty($room1) && strtoupper($room1) !== 'TBA' && $s1['delivery_mode'] !== 'Online';
+                    $isRoom2Valid = !empty($room2) && strtoupper($room2) !== 'TBA' && $s2['delivery_mode'] !== 'Online';
+                    if ($isRoom1Valid && $isRoom2Valid && strcasecmp($room1, $room2) === 0) {
+                        throw new Exception("Room Conflict: Room '{$room1}' is assigned to both '{$s1['subject_code']}' and '{$s2['subject_code']}' on {$commonDaysStr} at overlapping times ({$s1['start_time']}-{$s1['end_time']} vs {$s2['start_time']}-{$s2['end_time']}).");
+                    }
+
+                    // Validation 2C: Intra-Payload Faculty Collision
+                    $fac1Id = $s1['faculty_user_id'];
+                    $fac2Id = $s2['faculty_user_id'];
+                    $inst1 = trim($s1['instructor'] ?? '');
+                    $inst2 = trim($s2['instructor'] ?? '');
+                    $sameFaculty = false;
+                    $facLabel = '';
+
+                    if ($fac1Id && $fac2Id && $fac1Id === $fac2Id) {
+                        $sameFaculty = true;
+                        $facLabel = $inst1 ?: "Faculty #{$fac1Id}";
+                    } elseif (!empty($inst1) && !empty($inst2) && strtoupper($inst1) !== 'TBA' && strtoupper($inst2) !== 'TBA' && strcasecmp($inst1, $inst2) === 0) {
+                        $sameFaculty = true;
+                        $facLabel = $inst1;
+                    }
+
+                    if ($sameFaculty) {
+                        throw new Exception("Instructor Conflict: {$facLabel} is assigned to both '{$s1['subject_code']}' and '{$s2['subject_code']}' on {$commonDaysStr} at overlapping times ({$s1['start_time']}-{$s1['end_time']} vs {$s2['start_time']}-{$s2['end_time']}).");
+                    }
+                }
+            }
+
+            // PHASE 3: Cross-Section and Cross-Academic-Level Database Validation
+            // Check room conflicts against active sections in both College and SHS
+            $collegeRoomSql = '
+                SELECT cs.section_code, sub.subject_code, css.day, css.start_time, css.end_time, css.room
+                FROM college_section_subjects css
+                JOIN college_sections cs ON css.college_section_id = cs.id
+                JOIN subjects sub ON css.subject_id = sub.id
+                WHERE LOWER(TRIM(css.room)) = LOWER(?)
+                  AND css.day IS NOT NULL AND css.day != "" AND css.day != "TBA"
+                  AND css.start_time IS NOT NULL AND css.start_time != "00:00:00"
+                  AND (css.delivery_mode IS NULL OR css.delivery_mode != "Online")
+                  AND cs.status = 1
+            ' . ($type === 'college' ? ' AND css.college_section_id != ?' : '');
+
+            $shsRoomSql = '
+                SELECT ss.section_code, sub.subject_code, sss.day, sss.start_time, sss.end_time, sss.room
+                FROM shs_section_subjects sss
+                JOIN shs_sections ss ON sss.shs_section_id = ss.id
+                JOIN subjects sub ON sss.subject_id = sub.id
+                WHERE LOWER(TRIM(sss.room)) = LOWER(?)
+                  AND sss.day IS NOT NULL AND sss.day != "" AND sss.day != "TBA"
+                  AND sss.start_time IS NOT NULL AND sss.start_time != "00:00:00"
+                  AND (sss.delivery_mode IS NULL OR sss.delivery_mode != "Online")
+                  AND ss.status = 1
+            ' . ($type === 'shs' ? ' AND sss.shs_section_id != ?' : '');
+
+            $stmtColRoom = $pdo->prepare($collegeRoomSql);
+            $stmtShsRoom = $pdo->prepare($shsRoomSql);
+
+            // Faculty checks across College and SHS
+            $collegeFacIdSql = '
+                SELECT cs.section_code, sub.subject_code, css.day, css.start_time, css.end_time
+                FROM college_section_subjects css
+                JOIN college_sections cs ON css.college_section_id = cs.id
+                JOIN subjects sub ON css.subject_id = sub.id
+                WHERE css.faculty_user_id = ?
+                  AND css.day IS NOT NULL AND css.day != "" AND css.day != "TBA"
+                  AND css.start_time IS NOT NULL AND css.start_time != "00:00:00"
+                  AND cs.status = 1
+            ' . ($type === 'college' ? ' AND css.college_section_id != ?' : '');
+
+            $shsFacIdSql = '
+                SELECT ss.section_code, sub.subject_code, sss.day, sss.start_time, sss.end_time
+                FROM shs_section_subjects sss
+                JOIN shs_sections ss ON sss.shs_section_id = ss.id
+                JOIN subjects sub ON sss.subject_id = sub.id
+                WHERE sss.faculty_user_id = ?
+                  AND sss.day IS NOT NULL AND sss.day != "" AND sss.day != "TBA"
+                  AND sss.start_time IS NOT NULL AND sss.start_time != "00:00:00"
+                  AND ss.status = 1
+            ' . ($type === 'shs' ? ' AND sss.shs_section_id != ?' : '');
+
+            $stmtColFacId = $pdo->prepare($collegeFacIdSql);
+            $stmtShsFacId = $pdo->prepare($shsFacIdSql);
+
+            $collegeFacNameSql = '
+                SELECT cs.section_code, sub.subject_code, css.day, css.start_time, css.end_time
+                FROM college_section_subjects css
+                JOIN college_sections cs ON css.college_section_id = cs.id
+                JOIN subjects sub ON css.subject_id = sub.id
+                WHERE LOWER(TRIM(css.instructor)) = LOWER(?)
+                  AND css.day IS NOT NULL AND css.day != "" AND css.day != "TBA"
+                  AND css.start_time IS NOT NULL AND css.start_time != "00:00:00"
+                  AND cs.status = 1
+            ' . ($type === 'college' ? ' AND css.college_section_id != ?' : '');
+
+            $shsFacNameSql = '
+                SELECT ss.section_code, sub.subject_code, sss.day, sss.start_time, sss.end_time
+                FROM shs_section_subjects sss
+                JOIN shs_sections ss ON sss.shs_section_id = ss.id
+                JOIN subjects sub ON sss.subject_id = sub.id
+                WHERE LOWER(TRIM(sss.instructor)) = LOWER(?)
+                  AND sss.day IS NOT NULL AND sss.day != "" AND sss.day != "TBA"
+                  AND sss.start_time IS NOT NULL AND sss.start_time != "00:00:00"
+                  AND ss.status = 1
+            ' . ($type === 'shs' ? ' AND sss.shs_section_id != ?' : '');
+
+            $stmtColFacName = $pdo->prepare($collegeFacNameSql);
+            $stmtShsFacName = $pdo->prepare($shsFacNameSql);
+
+            foreach ($activeSchedules as $sched) {
+                $days = $this->decomposeDays($sched['day']);
+                $start = $sched['start_time'];
+                $end = $sched['end_time'];
+                $room = trim($sched['room'] ?? '');
+                $mode = $sched['delivery_mode'];
+                $facId = $sched['faculty_user_id'];
+                $inst = trim($sched['instructor'] ?? '');
+
+                // Check external room conflicts across College & SHS
+                if (!empty($room) && strtoupper($room) !== 'TBA' && $mode !== 'Online') {
+                    $colRoomParams = [$room];
+                    if ($type === 'college') $colRoomParams[] = $sectionId;
+                    $stmtColRoom->execute($colRoomParams);
+                    $existingColRooms = $stmtColRoom->fetchAll(PDO::FETCH_ASSOC);
+
+                    $shsRoomParams = [$room];
+                    if ($type === 'shs') $shsRoomParams[] = $sectionId;
+                    $stmtShsRoom->execute($shsRoomParams);
+                    $existingShsRooms = $stmtShsRoom->fetchAll(PDO::FETCH_ASSOC);
+
+                    $allExistingRooms = array_merge($existingColRooms, $existingShsRooms);
+                    foreach ($allExistingRooms as $er) {
+                        $exDays = $this->decomposeDays($er['day']);
+                        $common = array_intersect($days, $exDays);
+                        if (!empty($common) && ($start < $er['end_time'] && $end > $er['start_time'])) {
+                            $commonStr = $this->formatDays($common);
+                            throw new Exception("Room Conflict: Room '{$room}' is already booked by {$er['section_code']} ({$er['subject_code']}) on {$commonStr} ({$er['start_time']} - {$er['end_time']}).");
+                        }
+                    }
+                }
+
+                // Check external faculty conflicts across College & SHS
+                if ($facId) {
+                    $colFacParams = [$facId];
+                    if ($type === 'college') $colFacParams[] = $sectionId;
+                    $stmtColFacId->execute($colFacParams);
+                    $existingColFac = $stmtColFacId->fetchAll(PDO::FETCH_ASSOC);
+
+                    $shsFacParams = [$facId];
+                    if ($type === 'shs') $shsFacParams[] = $sectionId;
+                    $stmtShsFacId->execute($shsFacParams);
+                    $existingShsFac = $stmtShsFacId->fetchAll(PDO::FETCH_ASSOC);
+
+                    $allExistingFac = array_merge($existingColFac, $existingShsFac);
+                    foreach ($allExistingFac as $ef) {
+                        $exDays = $this->decomposeDays($ef['day']);
+                        $common = array_intersect($days, $exDays);
+                        if (!empty($common) && ($start < $ef['end_time'] && $end > $ef['start_time'])) {
+                            $commonStr = $this->formatDays($common);
+                            $facName = $inst ?: "Faculty #{$facId}";
+                            throw new Exception("Instructor Conflict: {$facName} is already teaching {$ef['section_code']} ({$ef['subject_code']}) on {$commonStr} ({$ef['start_time']} - {$ef['end_time']}).");
+                        }
+                    }
+                } elseif (!empty($inst) && strtoupper($inst) !== 'TBA') {
+                    $colInstParams = [$inst];
+                    if ($type === 'college') $colInstParams[] = $sectionId;
+                    $stmtColFacName->execute($colInstParams);
+                    $existingColInst = $stmtColFacName->fetchAll(PDO::FETCH_ASSOC);
+
+                    $shsInstParams = [$inst];
+                    if ($type === 'shs') $shsInstParams[] = $sectionId;
+                    $stmtShsFacName->execute($shsInstParams);
+                    $existingShsInst = $stmtShsFacName->fetchAll(PDO::FETCH_ASSOC);
+
+                    $allExistingInst = array_merge($existingColInst, $existingShsInst);
+                    foreach ($allExistingInst as $ei) {
+                        $exDays = $this->decomposeDays($ei['day']);
+                        $common = array_intersect($days, $exDays);
+                        if (!empty($common) && ($start < $ei['end_time'] && $end > $ei['start_time'])) {
+                            $commonStr = $this->formatDays($common);
+                            throw new Exception("Instructor Conflict: {$inst} is already teaching {$ei['section_code']} ({$ei['subject_code']}) on {$commonStr} ({$ei['start_time']} - {$ei['end_time']}).");
+                        }
+                    }
+                }
+            }
+
+            // PHASE 4: Atomic Database Persistence & LMS Sync
             $pdo->beginTransaction();
             
             $updateStmt = $pdo->prepare('
@@ -638,100 +980,17 @@ $pageTitle = 'Schedule Builder - Admin';
                 $delStmt->execute($delParams);
             }
             
-            foreach ($schedules as $sched) {
-                $id = (int)$sched['id'];
-                $subjectId = (int)($sched['subject_id'] ?? 0);
-                $day = !empty(trim($sched['day'] ?? '')) ? trim($sched['day']) : null;
-                $start = !empty(trim($sched['start_time'] ?? '')) ? trim($sched['start_time']) : null;
-                $end = !empty(trim($sched['end_time'] ?? '')) ? trim($sched['end_time']) : null;
-                $room = !empty(trim($sched['room'] ?? '')) ? trim($sched['room']) : null;
-                $facultyUserId = !empty($sched['faculty_user_id']) ? (int)$sched['faculty_user_id'] : null;
-                $instructor = !empty(trim($sched['instructor'] ?? '')) ? trim($sched['instructor']) : null;
-                $mode = trim($sched['delivery_mode'] ?? 'Face-to-Face');
+            foreach ($processedSchedules as $sched) {
+                $id = $sched['id'];
+                $subjectId = $sched['subject_id'];
+                $day = $sched['day'];
+                $start = $sched['start_time'];
+                $end = $sched['end_time'];
+                $room = $sched['room'];
+                $facultyUserId = $sched['faculty_user_id'];
+                $instructor = $sched['instructor'];
+                $mode = $sched['delivery_mode'];
 
-                // Dual-resolution: resolve name from faculty_user_id or vice versa
-                if ($facultyUserId && empty($instructor)) {
-                    $uStmt = $pdo->prepare("SELECT CONCAT(first_name, ' ', last_name) FROM users WHERE id = ?");
-                    $uStmt->execute([$facultyUserId]);
-                    $instructor = $uStmt->fetchColumn() ?: 'TBA';
-                } elseif (!$facultyUserId && !empty($instructor) && strtoupper($instructor) !== 'TBA') {
-                    $uStmt = $pdo->prepare("SELECT id FROM users WHERE role = 'faculty' AND (CONCAT(first_name, ' ', last_name) = ? OR TRIM(last_name) = ?) LIMIT 1");
-                    $uStmt->execute([$instructor, $instructor]);
-                    $matchedId = $uStmt->fetchColumn();
-                    if ($matchedId) {
-                        $facultyUserId = (int)$matchedId;
-                    }
-                }
-                
-                if ($day || $start || $end) {
-                    if (!$day || !$start || !$end) {
-                        throw new Exception("Incomplete schedule. Provide Day, Start, End, or leave all blank.");
-                    }
-
-                    $inputDays = $this->decomposeDays($day);
-                    
-                    // Room Conflict Check (Decomposed Days)
-                    if ($room) {
-                        $rmStmt = $pdo->prepare('
-                            SELECT sec.section_code, sub.subject_code, ss.day, ss.start_time, ss.end_time
-                            FROM ' . $table . ' ss
-                            JOIN ' . $secTable . ' sec ON ss.' . $secIdCol . ' = sec.id
-                            JOIN subjects sub ON ss.subject_id = sub.id
-                            WHERE ss.room = ? AND ss.' . $secIdCol . ' != ? AND ss.day IS NOT NULL
-                        ');
-                        $rmStmt->execute([$room, $sectionId]);
-                        $existingRooms = $rmStmt->fetchAll(PDO::FETCH_ASSOC);
-
-                        foreach ($existingRooms as $er) {
-                            $exDays = $this->decomposeDays($er['day']);
-                            $common = array_intersect($inputDays, $exDays);
-                            if (!empty($common) && ($start < $er['end_time'] && $end > $er['start_time'])) {
-                                throw new Exception("Room Conflict: Room {$room} is booked by {$er['section_code']} ({$er['subject_code']}) on " . implode(',', $common) . " ({$er['start_time']} - {$er['end_time']}).");
-                            }
-                        }
-                    }
-                    
-                    // Faculty / Instructor Conflict Check (Decomposed Days)
-                    if ($facultyUserId) {
-                        $facStmt = $pdo->prepare('
-                            SELECT sec.section_code, sub.subject_code, ss.day, ss.start_time, ss.end_time
-                            FROM ' . $table . ' ss
-                            JOIN ' . $secTable . ' sec ON ss.' . $secIdCol . ' = sec.id
-                            JOIN subjects sub ON ss.subject_id = sub.id
-                            WHERE ss.faculty_user_id = ? AND ss.' . $secIdCol . ' != ? AND ss.day IS NOT NULL
-                        ');
-                        $facStmt->execute([$facultyUserId, $sectionId]);
-                        $existingFac = $facStmt->fetchAll(PDO::FETCH_ASSOC);
-
-                        foreach ($existingFac as $ef) {
-                            $exDays = $this->decomposeDays($ef['day']);
-                            $common = array_intersect($inputDays, $exDays);
-                            if (!empty($common) && ($start < $ef['end_time'] && $end > $ef['start_time'])) {
-                                $facName = $instructor ?: "Faculty #{$facultyUserId}";
-                                throw new Exception("Instructor Conflict: {$facName} is teaching {$ef['section_code']} ({$ef['subject_code']}) on " . implode(',', $common) . " ({$ef['start_time']} - {$ef['end_time']}).");
-                            }
-                        }
-                    } elseif ($instructor && strtoupper($instructor) !== 'TBA') {
-                        $instStmt = $pdo->prepare('
-                            SELECT sec.section_code, sub.subject_code, ss.day, ss.start_time, ss.end_time
-                            FROM ' . $table . ' ss
-                            JOIN ' . $secTable . ' sec ON ss.' . $secIdCol . ' = sec.id
-                            JOIN subjects sub ON ss.subject_id = sub.id
-                            WHERE ss.instructor = ? AND ss.' . $secIdCol . ' != ? AND ss.day IS NOT NULL
-                        ');
-                        $instStmt->execute([$instructor, $sectionId]);
-                        $existingInst = $instStmt->fetchAll(PDO::FETCH_ASSOC);
-
-                        foreach ($existingInst as $ei) {
-                            $exDays = $this->decomposeDays($ei['day']);
-                            $common = array_intersect($inputDays, $exDays);
-                            if (!empty($common) && ($start < $ei['end_time'] && $end > $ei['start_time'])) {
-                                throw new Exception("Instructor Conflict: {$instructor} is teaching {$ei['section_code']} ({$ei['subject_code']}) on " . implode(',', $common) . " ({$ei['start_time']} - {$ei['end_time']}).");
-                            }
-                        }
-                    }
-                }
-                
                 if ($id <= 0) {
                     if ($subjectId <= 0) {
                         throw new Exception("Invalid subject ID for new schedule session.");
@@ -750,7 +1009,9 @@ $pageTitle = 'Schedule Builder - Admin';
             $pdo->commit();
             echo json_encode(['success' => true, 'message' => 'Schedule saved and LMS courses synchronized successfully.']);
         } catch (Exception $e) {
-            $pdo->rollBack();
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }
     }

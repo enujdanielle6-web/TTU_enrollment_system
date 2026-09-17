@@ -1008,6 +1008,7 @@ CREATE TABLE `shs_curriculum_subjects` (
   `subject_id` int(10) unsigned NOT NULL,
   `grade_level` varchar(50) NOT NULL,
   `semester` varchar(50) NOT NULL,
+  `display_order` int(11) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),

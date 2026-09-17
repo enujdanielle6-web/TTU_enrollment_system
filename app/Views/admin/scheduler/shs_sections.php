@@ -191,7 +191,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           
           <div class="mb-3">
             <label class="form-label text-muted small fw-bold">Section Code <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" name="section_code" required placeholder="e.g., BSIT-1A">
+            <input type="text" class="form-control" name="section_code" required placeholder="e.g., STEM 11-A">
             <div class="invalid-feedback">Please provide a section code.</div>
           </div>
           

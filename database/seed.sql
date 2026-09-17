@@ -148,12 +148,12 @@ INSERT INTO `shs_curricula` (`id`, `strand_id`, `curriculum_name`, `version`, `e
 (2, 4, 'TVL-ICT Grade 11-12 Curriculum', '1.0', '2026-2027', 'Vocational ICT track curriculum matrix.', 'active', NOW(), NOW());
 
 DELETE FROM `shs_curriculum_subjects`;
-INSERT INTO `shs_curriculum_subjects` (`id`, `curriculum_id`, `subject_id`, `grade_level`, `semester`, `created_at`, `updated_at`) VALUES
-(1, 1, 8, 'Grade 11', 'First', NOW(), NOW()),
-(2, 1, 9, 'Grade 11', 'First', NOW(), NOW()),
-(3, 1, 10, 'Grade 11', 'First', NOW(), NOW()),
-(4, 2, 10, 'Grade 11', 'First', NOW(), NOW()),
-(5, 2, 11, 'Grade 11', 'First', NOW(), NOW());
+INSERT INTO `shs_curriculum_subjects` (`id`, `curriculum_id`, `subject_id`, `grade_level`, `semester`, `display_order`, `created_at`, `updated_at`) VALUES
+(1, 1, 8, 'Grade 11', 'First', 1, NOW(), NOW()),
+(2, 1, 9, 'Grade 11', 'First', 2, NOW(), NOW()),
+(3, 1, 10, 'Grade 11', 'First', 3, NOW(), NOW()),
+(4, 2, 10, 'Grade 11', 'First', 1, NOW(), NOW()),
+(5, 2, 11, 'Grade 11', 'First', 2, NOW(), NOW());
 
 -- ----------------------------------------------------------------------------
 -- 7. CLASS SECTIONS & SCHEDULED SUBJECT OFFERINGS

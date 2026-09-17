@@ -666,7 +666,7 @@ require_once __DIR__ . '/../components/header.php';
       }
 
       // Delegate click in case button is dynamically revealed
-      document.addEventListener('click', function(e) {
+      function handleSubmitDocsClick(e) {
         const btn = e.target.closest('#btnSubmitAllDocs');
         if (btn && confirmSubmitDocsModalEl) {
           e.preventDefault();
@@ -675,7 +675,9 @@ require_once __DIR__ . '/../components/header.php';
           const modalInstance = bootstrap.Modal.getOrCreateInstance(confirmSubmitDocsModalEl);
           modalInstance.show();
         }
-      });
+      }
+      document.removeEventListener('click', handleSubmitDocsClick);
+      document.addEventListener('click', handleSubmitDocsClick);
 
       if (submitDocsConsentCheck && confirmSubmitDocsBtn) {
         submitDocsConsentCheck.onchange = function() {
