@@ -151,14 +151,14 @@
                         <div class="col-md-6">
                             <a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-dark d-block h-100">
                                 <div class="lms-card h-100 transition-all shadow-sm-hover overflow-hidden border bg-white rounded-4" style="border-color: #eef2f6 !important;">
-                                    <div class="p-3 text-white d-flex justify-content-between align-items-center" style="background: <?= $grad ?>;">
+                                    <div class="p-3.5 text-white d-flex justify-content-between align-items-center" style="background: <?= $grad ?>;">
                                         <div class="d-flex align-items-center gap-1.5">
                                             <span class="badge bg-white text-dark fw-bold px-2.5 py-1 rounded-pill small"><?= htmlspecialchars($course['subject_code']) ?></span>
                                             <span class="badge bg-white bg-opacity-25 text-white fw-semibold px-2 py-1 rounded-pill small"><?= esc($levelBadge) ?></span>
                                         </div>
                                         <span class="small fw-semibold opacity-90"><i class="bi bi-journal-text me-1"></i><?= htmlspecialchars($course['units'] ?? 3) ?> Units</span>
                                     </div>
-                                    <div class="p-3">
+                                    <div class="p-3.5">
                                         <h4 class="h6 fw-bold text-dark text-truncate mb-1" title="<?= htmlspecialchars($course['subject_name']) ?>">
                                             <?= htmlspecialchars($course['subject_name']) ?>
                                         </h4>
@@ -207,10 +207,10 @@
             </div>
 
             <!-- Submissions to Grade Widget -->
-            <div class="lms-card mb-4 rounded-4 border shadow-sm" style="border-color: #eef2f6 !important;">
+            <div class="lms-card mb-4 rounded-4 border shadow-sm bg-white" style="border-color: #eef2f6 !important;">
                 <div class="lms-card-header d-flex justify-content-between align-items-center border-bottom pb-3 mb-3 p-3">
                     <div class="d-flex align-items-center gap-2">
-                        <div class="icon-box-sm bg-warning bg-opacity-10 text-warning text-dark" style="width: 32px; height: 32px; border-radius: 0.5rem; font-size: 0.95rem;">
+                        <div class="icon-box-sm bg-warning bg-opacity-10 text-warning" style="width: 32px; height: 32px; border-radius: 0.5rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center;">
                             <i class="bi bi-hourglass-split"></i>
                         </div>
                         <div>
@@ -261,10 +261,10 @@
             </div>
 
             <!-- Course Announcements Widget -->
-            <div class="lms-card mb-4 rounded-4 border shadow-sm" style="border-color: #eef2f6 !important;">
+            <div class="lms-card mb-4 rounded-4 border shadow-sm bg-white" style="border-color: #eef2f6 !important;">
                 <div class="lms-card-header border-bottom pb-3 mb-3 p-3 d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
-                        <div class="icon-box-sm bg-primary bg-opacity-10 text-primary" style="width: 32px; height: 32px; border-radius: 0.5rem; font-size: 0.95rem;">
+                        <div class="icon-box-sm bg-primary bg-opacity-10 text-primary" style="width: 32px; height: 32px; border-radius: 0.5rem; font-size: 0.95rem; display: flex; align-items: center; justify-content: center;">
                             <i class="bi bi-megaphone-fill"></i>
                         </div>
                         <div>

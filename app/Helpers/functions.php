@@ -646,7 +646,8 @@ const ROLE_PERMISSIONS = [
         'programs.manage', 'subjects.manage', 
         'curriculum.manage', 'shs_curriculum.manage', 'college_curriculum.manage', 
         'enrollment.finalize',
-        'applications.view_details'
+        'applications.view_details',
+        'lms.manage', 'lms.courses.manage'
     ],
     'scheduler' => [
         'sections.manage', 'shs_sections.manage', 'college_sections.manage',

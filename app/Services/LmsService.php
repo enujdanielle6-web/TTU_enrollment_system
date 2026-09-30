@@ -61,6 +61,7 @@ class LmsService
     {
         $stmt = $this->pdo->prepare("
             SELECT 
+                lc.id,
                 lc.id as lms_course_id,
                 lc.academic_level,
                 lc.academic_section_id,
@@ -76,10 +77,24 @@ class LmsService
                 u.last_name,
                 u.email,
                 (
-                    SELECT COUNT(DISTINCT a.user_id) 
-                    FROM applications a 
-                    WHERE a.section_id = lc.academic_section_id 
-                      AND a.status IN ('enrolled', 'approved')
+                    CASE 
+                        WHEN lc.academic_level = 'College' THEN
+                            (SELECT COUNT(DISTINCT a.user_id)
+                             FROM college_enrollments ce
+                             JOIN applications a ON ce.application_id = a.id
+                             WHERE ce.college_section_id = lc.academic_section_id 
+                               AND ce.subject_id = lc.subject_id 
+                               AND ce.status = 'enrolled'
+                               AND a.status = 'enrolled')
+                        ELSE
+                            (SELECT COUNT(DISTINCT a.user_id)
+                             FROM shs_enrollments se
+                             JOIN applications a ON se.application_id = a.id
+                             WHERE se.shs_section_id = lc.academic_section_id 
+                               AND se.subject_id = lc.subject_id 
+                               AND se.status = 'enrolled'
+                               AND a.status = 'enrolled')
+                    END
                 ) as enrolled_count
             FROM lms_courses lc
             JOIN subjects s ON lc.subject_id = s.id
@@ -109,6 +124,7 @@ class LmsService
             if ($isSuperOrAdmin || $hasPerm) {
                 $allStmt = $this->pdo->prepare("
                     SELECT 
+                        lc.id,
                         lc.id as lms_course_id,
                         lc.academic_level,
                         lc.academic_section_id,
@@ -124,10 +140,24 @@ class LmsService
                         u.last_name,
                         u.email,
                         (
-                            SELECT COUNT(DISTINCT a.user_id) 
-                            FROM applications a 
-                            WHERE a.section_id = lc.academic_section_id 
-                              AND a.status IN ('enrolled', 'approved')
+                            CASE 
+                                WHEN lc.academic_level = 'College' THEN
+                                    (SELECT COUNT(DISTINCT a.user_id)
+                                     FROM college_enrollments ce
+                                     JOIN applications a ON ce.application_id = a.id
+                                     WHERE ce.college_section_id = lc.academic_section_id 
+                                       AND ce.subject_id = lc.subject_id 
+                                       AND ce.status = 'enrolled'
+                                       AND a.status = 'enrolled')
+                                ELSE
+                                    (SELECT COUNT(DISTINCT a.user_id)
+                                     FROM shs_enrollments se
+                                     JOIN applications a ON se.application_id = a.id
+                                     WHERE se.shs_section_id = lc.academic_section_id 
+                                       AND se.subject_id = lc.subject_id 
+                                       AND se.status = 'enrolled'
+                                       AND a.status = 'enrolled')
+                            END
                         ) as enrolled_count
                     FROM lms_courses lc
                     JOIN subjects s ON lc.subject_id = s.id
@@ -149,10 +179,13 @@ class LmsService
     {
         $stmt = $this->pdo->prepare("
             SELECT 
+                lc.id,
                 lc.id as lms_course_id,
                 lc.academic_level,
                 lc.academic_section_id,
                 lc.subject_id,
+                lc.faculty_user_id,
+                lc.status,
                 s.subject_code, 
                 s.subject_name,
                 s.units,
@@ -163,14 +196,110 @@ class LmsService
             FROM lms_courses lc
             JOIN subjects s ON lc.subject_id = s.id
             LEFT JOIN college_sections cs ON lc.academic_level = 'College' AND lc.academic_section_id = cs.id
-            LEFT JOIN shs_sections ss ON lc.academic_level = 'SHS' AND lc.academic_section_id = ss.id
-            JOIN users u ON lc.faculty_user_id = u.id
+            LEFT JOIN shs_sections ss ON (lc.academic_level = 'SHS' OR lc.academic_level = 'Senior High School') AND lc.academic_section_id = ss.id
+            LEFT JOIN users u ON lc.faculty_user_id = u.id
             WHERE lc.id = :lcid
         ");
         $stmt->execute(['lcid' => $lmsCourseId]);
         $course = $stmt->fetch(PDO::FETCH_ASSOC);
         
         return $course ?: null;
+    }
+
+    public function getCourseRoster(int $lmsCourseId): array
+    {
+        $course = $this->getCourseDetails($lmsCourseId);
+        if (!$course) return [];
+
+        $type = $course['academic_level'];
+        $sectionId = (int)$course['academic_section_id'];
+        $subjectId = (int)$course['subject_id'];
+
+        if ($type === 'College') {
+            $stmt = $this->pdo->prepare("
+                SELECT 
+                    u.id, 
+                    u.student_number, 
+                    u.first_name, 
+                    u.last_name, 
+                    u.email,
+                    a.id as application_id,
+                    a.status as application_status,
+                    a.student_type as enrollment_type,
+                    a.student_type,
+                    ce.status as enrollment_status,
+                    ce.college_section_id,
+                    cs.section_code,
+                    ce.created_at as enrolled_at
+                FROM college_enrollments ce
+                JOIN applications a ON ce.application_id = a.id
+                JOIN users u ON a.user_id = u.id
+                LEFT JOIN college_sections cs ON ce.college_section_id = cs.id
+                WHERE ce.college_section_id = :sec 
+                  AND ce.subject_id = :sub
+                  AND ce.status = 'enrolled'
+                  AND a.status = 'enrolled'
+                ORDER BY u.last_name ASC, u.first_name ASC
+            ");
+        } else {
+            $stmt = $this->pdo->prepare("
+                SELECT 
+                    u.id, 
+                    u.student_number, 
+                    u.first_name, 
+                    u.last_name, 
+                    u.email,
+                    a.id as application_id,
+                    a.status as application_status,
+                    a.student_type as enrollment_type,
+                    a.student_type,
+                    se.status as enrollment_status,
+                    se.shs_section_id,
+                    ss.section_code,
+                    se.created_at as enrolled_at
+                FROM shs_enrollments se
+                JOIN applications a ON se.application_id = a.id
+                JOIN users u ON a.user_id = u.id
+                LEFT JOIN shs_sections ss ON se.shs_section_id = ss.id
+                WHERE se.shs_section_id = :sec 
+                  AND se.subject_id = :sub
+                  AND se.status = 'enrolled'
+                  AND a.status = 'enrolled'
+                ORDER BY u.last_name ASC, u.first_name ASC
+            ");
+        }
+        $stmt->execute(['sec' => $sectionId, 'sub' => $subjectId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Explicit write boundary to provision or update an LMS course shell.
+     * Called by SchedulerController, EnrollmentService, or Admin LmsAdminController.
+     */
+    public function provisionCourseShell(string $academicLevel, int $sectionId, int $subjectId, ?int $facultyUserId = null, string $status = 'active'): int
+    {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO lms_courses (academic_level, academic_section_id, subject_id, faculty_user_id, status)
+            VALUES (:lvl, :sec, :sub, :fac, :status)
+            ON DUPLICATE KEY UPDATE 
+                faculty_user_id = VALUES(faculty_user_id),
+                status = VALUES(status)
+        ");
+        $stmt->execute([
+            'lvl' => $academicLevel,
+            'sec' => $sectionId,
+            'sub' => $subjectId,
+            'fac' => $facultyUserId ?: null,
+            'status' => $status
+        ]);
+        
+        $id = (int)$this->pdo->lastInsertId();
+        if ($id === 0) {
+            $fetchStmt = $this->pdo->prepare("SELECT id FROM lms_courses WHERE academic_level = :lvl AND academic_section_id = :sec AND subject_id = :sub LIMIT 1");
+            $fetchStmt->execute(['lvl' => $academicLevel, 'sec' => $sectionId, 'sub' => $subjectId]);
+            $id = (int)$fetchStmt->fetchColumn();
+        }
+        return $id;
     }
 
     public function isFacultyAuthorizedForCourse(int $userId, int $lmsCourseId): bool
@@ -269,6 +398,48 @@ class LmsService
         return (int)$this->pdo->lastInsertId();
     }
 
+    public function getModule(int $moduleId): ?array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM lms_modules WHERE id = :id");
+        $stmt->execute(['id' => $moduleId]);
+        $mod = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $mod ?: null;
+    }
+
+    public function updateModule(int $moduleId, string $title, int $orderIndex = 0): bool
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE lms_modules 
+            SET title = :title, display_order = :order 
+            WHERE id = :id
+        ");
+        return $stmt->execute([
+            'title' => $title,
+            'order' => $orderIndex,
+            'id' => $moduleId
+        ]);
+    }
+
+    public function deleteModule(int $moduleId): bool
+    {
+        // 1. Fetch and clean up material files on disk
+        $stmt = $this->pdo->prepare("SELECT file_path FROM lms_materials WHERE lms_module_id = :mid");
+        $stmt->execute(['mid' => $moduleId]);
+        $materials = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $uploadDir = dirname(__DIR__, 2) . '/storage/uploads/lms/materials/';
+        foreach ($materials as $mat) {
+            $filePath = $uploadDir . basename($mat['file_path']);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+        }
+
+        // 2. Delete module (DB foreign key CASCADE will delete lms_materials rows)
+        $delStmt = $this->pdo->prepare("DELETE FROM lms_modules WHERE id = :id");
+        return $delStmt->execute(['id' => $moduleId]);
+    }
+
     public function createMaterial(array $data): int
     {
         $stmt = $this->pdo->prepare("
@@ -288,15 +459,30 @@ class LmsService
     public function getMaterial(int $materialId): ?array
     {
         $stmt = $this->pdo->prepare("
-            SELECT mat.id, mat.lms_module_id, mat.file_name, mat.file_path, mat.mime_type, mat.file_size, mod.lms_course_id
+            SELECT mat.id, mat.lms_module_id, mat.file_name, mat.file_path, mat.mime_type, mat.file_size, md.lms_course_id
             FROM lms_materials mat
-            JOIN lms_modules mod ON mat.lms_module_id = mod.id
+            JOIN lms_modules md ON mat.lms_module_id = md.id
             WHERE mat.id = :mid
         ");
         $stmt->execute(['mid' => $materialId]);
         $material = $stmt->fetch(PDO::FETCH_ASSOC);
         
         return $material ?: null;
+    }
+
+    public function deleteMaterial(int $materialId): bool
+    {
+        $mat = $this->getMaterial($materialId);
+        if (!$mat) return false;
+
+        $uploadDir = dirname(__DIR__, 2) . '/storage/uploads/lms/materials/';
+        $filePath = $uploadDir . basename($mat['file_path']);
+        if (file_exists($filePath)) {
+            @unlink($filePath);
+        }
+
+        $stmt = $this->pdo->prepare("DELETE FROM lms_materials WHERE id = :id");
+        return $stmt->execute(['id' => $materialId]);
     }
 
     public function getAssignmentsByCourse(int $lmsCourseId, bool $publishedOnly = true): array
@@ -355,6 +541,26 @@ class LmsService
         ]);
     }
 
+    public function deleteAssignment(int $assignmentId): bool
+    {
+        // 1. Clean up submission files on disk
+        $stmt = $this->pdo->prepare("SELECT file_path FROM lms_submissions WHERE assignment_id = :aid AND file_path IS NOT NULL");
+        $stmt->execute(['aid' => $assignmentId]);
+        $submissions = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $subDir = dirname(__DIR__, 2) . '/storage/uploads/lms/submissions/';
+        foreach ($submissions as $sub) {
+            $filePath = $subDir . basename($sub['file_path']);
+            if (file_exists($filePath)) {
+                @unlink($filePath);
+            }
+        }
+
+        // 2. Delete assignment (cascades in DB to lms_submissions)
+        $delStmt = $this->pdo->prepare("DELETE FROM lms_assignments WHERE id = :id");
+        return $delStmt->execute(['id' => $assignmentId]);
+    }
+
     public function getStudentSubmission(int $assignmentId, int $studentId): ?array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM lms_submissions WHERE assignment_id = :aid AND student_id = :sid ORDER BY submitted_at DESC LIMIT 1");
@@ -374,8 +580,15 @@ class LmsService
     public function submitAssignment(int $assignmentId, int $studentId, array $fileData, string $status = 'SUBMITTED'): int
     {
         $stmt = $this->pdo->prepare("
-            INSERT INTO lms_submissions (assignment_id, student_id, file_path, file_name, mime_type, file_size, status)
-            VALUES (:aid, :sid, :path, :name, :mime, :size, :status)
+            INSERT INTO lms_submissions (assignment_id, student_id, file_path, file_name, mime_type, file_size, status, submitted_at)
+            VALUES (:aid, :sid, :path, :name, :mime, :size, :status, CURRENT_TIMESTAMP)
+            ON DUPLICATE KEY UPDATE 
+                file_path = VALUES(file_path),
+                file_name = VALUES(file_name),
+                mime_type = VALUES(mime_type),
+                file_size = VALUES(file_size),
+                status = VALUES(status),
+                submitted_at = CURRENT_TIMESTAMP
         ");
         $stmt->execute([
             'aid' => $assignmentId,
@@ -386,7 +599,13 @@ class LmsService
             'size' => $fileData['file_size'] ?? 0,
             'status' => $status
         ]);
-        return (int)$this->pdo->lastInsertId();
+        
+        $subId = (int)$this->pdo->lastInsertId();
+        if ($subId === 0) {
+            $existing = $this->getStudentSubmission($assignmentId, $studentId);
+            $subId = $existing ? (int)$existing['id'] : 0;
+        }
+        return $subId;
     }
 
     public function getSubmissionsForAssignment(int $assignmentId): array

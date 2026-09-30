@@ -72,9 +72,11 @@ class ClinicController extends BaseController
             $conditionStats = [];
         }
 
-        // 3. Recent Health Submissions
+        // 3. Recent Health Submissions (Show only 5 on dashboard, or full if ?all=1)
+        $showAll = (isset($_GET['all']) && $_GET['all'] === '1');
+        $limit = $showAll ? 100 : 5;
         try {
-            $recentStmt = $pdo->query('
+            $recentStmt = $pdo->prepare('
                 SELECT h.id, h.status, h.created_at, h.updated_at, h.blood_type,
                        h.has_allergies, h.has_asthma, h.has_diabetes, h.has_hypertension,
                        h.has_heart_disease, h.has_physical_disability, h.has_existing_condition,
@@ -84,8 +86,10 @@ class ClinicController extends BaseController
                 FROM health_records h
                 INNER JOIN applications a ON h.application_id = a.id
                 INNER JOIN users u ON h.user_id = u.id
-                ORDER BY h.created_at DESC LIMIT 15
+                ORDER BY h.created_at DESC LIMIT :limit
             ');
+            $recentStmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $recentStmt->execute();
             $recent_records = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log('Clinic recent submissions query failed: ' . $e->getMessage());
@@ -107,28 +111,56 @@ requirePermission('medical.review');
 $pageTitle = 'Medical Clearance - Administrator';
 
 $statusFilter = $_GET['status'] ?? 'all';
+$page = max(1, (int)($request->input('page', 1)));
+$limit = 10;
+$offset = ($page - 1) * $limit;
 
-$query = '
-    SELECT h.id, h.status, h.updated_at,
-           u.first_name, u.last_name,
-           a.reference_number, a.academic_level, a.strand
-    FROM health_records h
-    INNER JOIN users u ON h.user_id = u.id
-    INNER JOIN applications a ON h.application_id = a.id
-';
+$whereClauses = [];
 $params = [];
 
 if ($statusFilter !== 'all') {
-    $query .= ' WHERE h.status = :status';
+    $whereClauses[] = 'h.status = :status';
     $params['status'] = $statusFilter;
 }
 
-$query .= ' ORDER BY h.updated_at DESC';
+$whereSql = !empty($whereClauses) ? ' WHERE ' . implode(' AND ', $whereClauses) : '';
+
+$totalCount = 0;
+$totalPages = 1;
 
 try {
+    $countQuery = "
+        SELECT COUNT(*) 
+        FROM health_records h
+        INNER JOIN users u ON h.user_id = u.id
+        INNER JOIN applications a ON h.application_id = a.id
+        $whereSql
+    ";
+    $countStmt = $pdo->prepare($countQuery);
+    $countStmt->execute($params);
+    $totalCount = (int)$countStmt->fetchColumn();
+    $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+    $query = "
+        SELECT h.id, h.status, h.updated_at,
+               u.first_name, u.last_name,
+               a.reference_number, a.academic_level, a.strand
+        FROM health_records h
+        INNER JOIN users u ON h.user_id = u.id
+        INNER JOIN applications a ON h.application_id = a.id
+        $whereSql
+        ORDER BY h.updated_at DESC
+        LIMIT :limit OFFSET :offset
+    ";
+
     $stmt = $pdo->prepare($query);
-    $stmt->execute($params);
-    $records = $stmt->fetchAll();
+    foreach ($params as $k => $v) {
+        $stmt->bindValue(':' . $k, $v);
+    }
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log('Medical clearance fetch failed: ' . $e->getMessage());
     $records = [];
@@ -138,9 +170,8 @@ $successMsg = $_SESSION['success_msg'] ?? null;
 $errorMsg = $_SESSION['error_msg'] ?? null;
 unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
-
-        return $this->render('admin/clinic/medical_clearance', get_defined_vars());
-    }
+return $this->render('admin/clinic/medical_clearance', get_defined_vars());
+}
     public function detail(Request $request, Response $response)
     {
         $pdo = Database::getConnection();

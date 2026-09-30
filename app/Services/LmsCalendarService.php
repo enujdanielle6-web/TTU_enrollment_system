@@ -30,10 +30,10 @@ class LmsCalendarService
         if (empty($courses)) return [];
 
         $courseIds = array_column($courses, 'lms_course_id');
-        return $this->fetchEvents($courseIds, $month, $year, false);
+        return $this->fetchEvents($courseIds, $month, $year, false, true);
     }
 
-    private function fetchEvents(array $courseIds, string $month, string $year, bool $publishedOnly): array
+    private function fetchEvents(array $courseIds, string $month, string $year, bool $publishedOnly, bool $isFaculty = false): array
     {
         $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
         
@@ -62,6 +62,10 @@ class LmsCalendarService
         $assignments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($assignments as $a) {
+            $url = $isFaculty 
+                ? "/sia/lms/faculty/course/{$a['lms_course_id']}/assignments/{$a['id']}/submissions"
+                : "/sia/lms/student/course/{$a['lms_course_id']}/assignments/{$a['id']}";
+
             $events[] = [
                 'type' => 'assignment',
                 'id' => (int)$a['id'],
@@ -78,7 +82,7 @@ class LmsCalendarService
                 'datetime' => $a['due_date'],
                 'color' => 'primary',
                 'badge_icon' => 'bi-journal-text',
-                'url' => "/sia/lms/student/course/{$a['lms_course_id']}/assignments/{$a['id']}"
+                'url' => $url
             ];
         }
 
@@ -102,6 +106,10 @@ class LmsCalendarService
         $quizzes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($quizzes as $q) {
+            $url = $isFaculty 
+                ? "/sia/lms/faculty/course/{$q['lms_course_id']}/quizzes/{$q['id']}/results"
+                : "/sia/lms/student/course/{$q['lms_course_id']}/quizzes/{$q['id']}";
+
             $events[] = [
                 'type' => 'quiz',
                 'id' => (int)$q['id'],
@@ -119,7 +127,7 @@ class LmsCalendarService
                 'datetime' => $q['available_until'],
                 'color' => 'warning',
                 'badge_icon' => 'bi-ui-checks',
-                'url' => "/sia/lms/student/course/{$q['lms_course_id']}/quizzes/{$q['id']}"
+                'url' => $url
             ];
         }
 

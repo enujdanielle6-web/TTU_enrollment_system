@@ -185,11 +185,17 @@ $correctionCount = (int)($stats['correction_required'] ?? 0);
             </span>
           </div>
         </div>
-        <div>
-          <a href="medical_clearance.php" class="btn btn-sm btn-light border rounded-pill px-3 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-none">
-            <i class="bi bi-list-ul me-1"></i>
-            <span>View Full Queue</span>
-            <i class="bi bi-chevron-right small text-muted"></i>
+        <div class="d-flex align-items-center gap-2">
+          <?php if (!empty($showAll)): ?>
+            <a href="clinic_dashboard.php" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-medium d-inline-flex align-items-center gap-1.5 shadow-none">
+              <i class="bi bi-arrows-collapse"></i>
+              <span>Show Top 5</span>
+            </a>
+          <?php endif; ?>
+          <a href="medical_clearance.php" class="btn btn-sm btn-primary rounded-pill px-3.5 py-1.5 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs">
+            <i class="bi bi-list-ul"></i>
+            <span>View All</span>
+            <i class="bi bi-arrow-right small"></i>
           </a>
         </div>
       </div>
@@ -300,6 +306,24 @@ $correctionCount = (int)($stats['correction_required'] ?? 0);
               <?php endif; ?>
             </tbody>
           </table>
+        </div>
+      </div>
+      <!-- Card Footer: View All Clearances Action -->
+      <div class="border-top py-3 px-4 d-flex justify-content-between align-items-center flex-wrap gap-2 bg-light bg-opacity-50">
+        <span class="small text-muted">
+          Showing <strong class="text-dark"><?= count($recent_records) ?></strong> of <strong class="text-dark"><?= esc($stats['total'] ?? $total ?? 0) ?></strong> total clearances
+        </span>
+        <div class="d-flex align-items-center gap-2">
+          <?php if (empty($showAll) && ($stats['total'] ?? 0) > 5): ?>
+            <a href="clinic_dashboard.php?all=1" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-medium d-inline-flex align-items-center gap-1.5">
+              <i class="bi bi-arrows-expand"></i>
+              <span>Expand on Dashboard</span>
+            </a>
+          <?php endif; ?>
+          <a href="medical_clearance.php" class="btn btn-sm btn-outline-primary rounded-pill px-3.5 py-1.5 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs">
+            <span>View All Clearances</span>
+            <i class="bi bi-arrow-right"></i>
+          </a>
         </div>
       </div>
     </div>

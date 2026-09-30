@@ -97,6 +97,7 @@
                 
                 <?php if ($canSubmit): ?>
                     <form action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submit" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
                         <div class="mb-3">
                             <label class="form-label fw-bold text-muted small text-uppercase">Upload <?= esc($submission ? 'New ' : '') ?>File</label>
                             <input type="file" name="submission_file" class="form-control" required>

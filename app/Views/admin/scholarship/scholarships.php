@@ -163,6 +163,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             </tbody>
           </table>
         </div>
+        <?php require __DIR__ . '/../../components/pagination.php'; ?>
       </div>
     </div>
   </div>

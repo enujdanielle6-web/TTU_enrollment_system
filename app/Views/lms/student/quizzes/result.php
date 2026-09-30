@@ -1,106 +1,221 @@
 <?php require_once __DIR__ . '/../../../../Views/lms/student/layout_header.php'; ?>
 
-<div class="container py-4">
+<div class="container-fluid py-4 px-md-4">
+    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none"><?= htmlspecialchars($course['subject_code']) ?></a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="text-decoration-none">Quiz</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Result</li>
+        <ol class="breadcrumb mb-0 py-2 px-3 bg-white rounded-3 border shadow-xs align-items-center" style="font-size: 0.88rem;">
+            <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/student/my_courses.php" class="text-decoration-none text-muted">My Courses</a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-primary fw-medium"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($quiz['title']) ?></a></li>
+            <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Attempt #<?= esc($attempt['attempt_number']) ?> Result</li>
         </ol>
     </nav>
 
-    <div class="row justify-content-center">
-        <div class="col-lg-9">
+    <?php
+    $totalPossible = 0.0;
+    $correctCount = 0;
+    $totalQuestions = count($questions);
+
+    foreach ($questions as $q) {
+        $totalPossible += (float)$q['points'];
+        $ans = $answers[$q['id']] ?? null;
+        if ($ans && $ans['is_correct']) {
+            $correctCount++;
+        }
+    }
+
+    $attemptScore = (float)($attempt['score'] ?? 0);
+    $percentage = $totalPossible > 0 ? round(($attemptScore / $totalPossible) * 100) : 0;
+    $passingThreshold = (float)($quiz['passing_score'] ?: 75);
+    $passed = $percentage >= $passingThreshold;
+    $incorrectCount = $totalQuestions - $correctCount;
+    ?>
+
+    <div class="row g-4 justify-content-center">
+        <div class="col-xl-9 col-lg-10">
             
-            <div class="lms-card p-5 border-0 shadow-sm rounded-4 text-center mb-4">
-                <h1 class="h3 fw-bold text-dark mb-2"><?= htmlspecialchars($quiz['title']) ?> - Attempt #<?= esc($attempt['attempt_number']) ?></h1>
-                <p class="text-muted mb-4">Submitted on <?= date('M d, Y h:i A', strtotime($attempt['submitted_at'])) ?></p>
-
-                <?php
-                $totalPossible = 0;
-                foreach ($questions as $q) $totalPossible += $q['points'];
-                $percentage = $totalPossible > 0 ? ($attempt['score'] / $totalPossible) * 100 : 0;
-                
-                $passed = true;
-                if ($quiz['passing_score'] !== null && $percentage < $quiz['passing_score']) {
-                    $passed = false;
-                }
-                ?>
-
-                <div class="d-inline-block border rounded-circle p-5 mb-3 shadow-sm <?= esc($passed ? 'border-success' : 'border-danger') ?>" style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
-                    <div>
-                        <div class="fs-1 fw-bold <?= esc($passed ? 'text-success' : 'text-danger') ?>"><?= esc($attempt['score']) ?></div>
-                        <div class="text-muted small">out of <?= esc($totalPossible) ?></div>
+            <!-- Hero Score Results Card -->
+            <div class="lms-card border-0 shadow-sm rounded-4 mb-4 overflow-hidden bg-white text-center position-relative">
+                <div class="py-5 px-4 position-relative" style="background: <?= $passed ? 'linear-gradient(180deg, rgba(25, 135, 84, 0.06) 0%, rgba(255, 255, 255, 1) 100%)' : 'linear-gradient(180deg, rgba(220, 53, 69, 0.06) 0%, rgba(255, 255, 255, 1) 100%)' ?>;">
+                    
+                    <div class="d-inline-flex align-items-center gap-2 mb-3">
+                        <span class="badge <?= $passed ? 'bg-success' : 'bg-danger' ?> bg-opacity-10 <?= $passed ? 'text-success' : 'text-danger' ?> border <?= $passed ? 'border-success' : 'border-danger' ?> border-opacity-25 px-3 py-1.5 rounded-pill fw-bold" style="font-size: 0.85rem;">
+                            <i class="bi <?= $passed ? 'bi-check-circle-fill' : 'bi-x-circle-fill' ?> me-1"></i>
+                            <?= $passed ? 'Assessment Passed' : 'Assessment Failed' ?>
+                        </span>
+                        <span class="badge bg-light text-secondary border px-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.85rem;">
+                            Attempt #<?= esc($attempt['attempt_number']) ?>
+                        </span>
                     </div>
-                </div>
 
-                <?php if ($quiz['passing_score'] !== null): ?>
-                    <h5 class="fw-bold mt-3 <?= esc($passed ? 'text-success' : 'text-danger') ?>">
-                        <?php if ($passed): ?>
-                            <i class="bi bi-check-circle-fill me-1"></i> Passed
-                        <?php else: ?>
-                            <i class="bi bi-x-circle-fill me-1"></i> Failed
-                        <?php endif; ?>
-                    </h5>
-                    <p class="text-muted small">Passing score: <?= esc($quiz['passing_score']) ?>%</p>
-                <?php endif; ?>
+                    <h1 class="h2 fw-bold text-dark mb-2"><?= htmlspecialchars($quiz['title']) ?></h1>
+                    <p class="text-muted small mb-4">
+                        <i class="bi bi-clock-history me-1"></i> Submitted on <?= !empty($attempt['submitted_at']) ? date('F d, Y &bull; h:i A', strtotime($attempt['submitted_at'])) : 'Recently' ?>
+                    </p>
+
+                    <!-- Score Badge Dial -->
+                    <div class="d-inline-flex flex-column align-items-center justify-content-center rounded-circle shadow-sm border <?= $passed ? 'border-success' : 'border-danger' ?> border-3 mb-4 bg-white" style="width: 180px; height: 180px;">
+                        <span class="fs-1 fw-bolder <?= $passed ? 'text-success' : 'text-danger' ?> lh-1">
+                            <?= number_format($attemptScore, 1) ?>
+                        </span>
+                        <span class="text-muted small mt-1">out of <?= number_format($totalPossible, 1) ?> pts</span>
+                        <span class="badge bg-light text-secondary border rounded-pill mt-2 px-2 py-0.5 small fw-semibold">
+                            <?= $percentage ?>%
+                        </span>
+                    </div>
+
+                    <!-- Mini KPI Summary Row -->
+                    <div class="row g-3 justify-content-center max-w-700 mx-auto mt-2">
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.05em;">Correct</div>
+                                <div class="fw-bold text-success fs-5"><?= $correctCount ?></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.05em;">Incorrect</div>
+                                <div class="fw-bold text-danger fs-5"><?= $incorrectCount ?></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.05em;">Passing Mark</div>
+                                <div class="fw-bold text-dark fs-5"><?= $passingThreshold ?>%</div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-sm-3">
+                            <div class="p-3 bg-light rounded-3 border">
+                                <div class="text-muted text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.05em;">Accuracy</div>
+                                <div class="fw-bold text-primary fs-5"><?= $percentage ?>%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
+                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-arrow-left"></i>
+                            <span>Quiz Overview</span>
+                        </a>
+                        <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                            <i class="bi bi-journal-bookmark-fill"></i>
+                            <span>Return to Course</span>
+                        </a>
+                    </div>
+
+                </div>
             </div>
 
-            <h4 class="fw-bold mb-4">Review Answers</h4>
+            <!-- Detailed Answer Breakdown -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-journal-check text-primary"></i>
+                    Question Breakdown & Review
+                </h4>
+                <span class="text-muted small">
+                    <?= $correctCount ?> of <?= $totalQuestions ?> answered correctly
+                </span>
+            </div>
 
             <?php foreach ($questions as $index => $q): 
                 $myAns = $answers[$q['id']] ?? null;
+                $isCorrect = $myAns && $myAns['is_correct'];
             ?>
-                <div class="lms-card p-4 border border-2 shadow-sm rounded-4 mb-4 <?= esc(($myAns && $myAns['is_correct']) ? 'border-success border-opacity-50' : 'border-danger border-opacity-50') ?>">
-                    <div class="d-flex justify-content-between align-items-start mb-4">
-                        <h5 class="fw-bold mb-0 lh-base">
-                            <span class="text-primary me-2"><?= esc($index + 1) ?>.</span>
-                            <?= nl2br(htmlspecialchars($q['question_text'])) ?>
-                        </h5>
-                        <div class="text-end">
-                            <?php if ($myAns && $myAns['is_correct']): ?>
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 fs-6 mb-1"><i class="bi bi-check"></i> <?= esc($myAns['points_awarded']) ?> / <?= esc($q['points']) ?> pts</span>
+                <div class="lms-card p-4 p-md-5 border-0 shadow-sm rounded-4 mb-4 bg-white position-relative overflow-hidden" style="border-left: 5px solid <?= $isCorrect ? '#198754' : '#dc3545' ?> !important;">
+                    
+                    <div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge <?= $isCorrect ? 'bg-success' : 'bg-danger' ?> bg-opacity-10 <?= $isCorrect ? 'text-success' : 'text-danger' ?> border <?= $isCorrect ? 'border-success' : 'border-danger' ?> border-opacity-25 px-3 py-1.5 rounded-pill fw-bold" style="font-size: 0.85rem;">
+                                Question <?= $index + 1 ?>
+                            </span>
+                            <span class="badge bg-light text-secondary border px-2.5 py-1.5 rounded-pill small">
+                                <?= esc($q['points']) ?> Pts
+                            </span>
+                        </div>
+
+                        <div>
+                            <?php if ($isCorrect): ?>
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-1.5 rounded-pill fw-bold">
+                                    <i class="bi bi-check-lg me-1"></i>+<?= esc($myAns['points_awarded']) ?> Pts (Correct)
+                                </span>
                             <?php else: ?>
-                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 fs-6 mb-1"><i class="bi bi-x"></i> 0 / <?= esc($q['points']) ?> pts</span>
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3 py-1.5 rounded-pill fw-bold">
+                                    <i class="bi bi-x-lg me-1"></i>0.0 Pts (Incorrect)
+                                </span>
                             <?php endif; ?>
                         </div>
                     </div>
-                    
-                    <div class="ps-4 ms-2">
-                        <?php foreach ($q['choices'] as $c): 
+
+                    <h5 class="fw-bold text-dark lh-base mb-4" style="font-size: 1.12rem;">
+                        <?= nl2br(htmlspecialchars($q['question_text'])) ?>
+                    </h5>
+
+                    <!-- Choice Options -->
+                    <div class="d-flex flex-column gap-2.5">
+                        <?php foreach ($q['choices'] as $cIndex => $c): 
+                            $letter = chr(65 + $cIndex);
                             $isSelected = $myAns && $myAns['lms_question_choice_id'] == $c['id'];
-                            $isCorrect = $c['is_correct'];
+                            $isChoiceCorrect = (bool)$c['is_correct'];
+
+                            $cardClass = 'bg-white border-light-subtle';
+                            $badgeClass = 'bg-light text-secondary border';
+                            if ($isChoiceCorrect) {
+                                $cardClass = 'bg-success bg-opacity-10 border-success border-opacity-50 text-success';
+                                $badgeClass = 'bg-success text-white border-success';
+                            } elseif ($isSelected && !$isChoiceCorrect) {
+                                $cardClass = 'bg-danger bg-opacity-10 border-danger border-opacity-50 text-danger';
+                                $badgeClass = 'bg-danger text-white border-danger';
+                            }
                         ?>
-                            <div class="mb-3 p-3 rounded-3 border <?= esc($isCorrect ? 'bg-success bg-opacity-10 border-success' : ($isSelected ? 'bg-danger bg-opacity-10 border-danger' : 'bg-light')) ?>">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi <?= esc($isSelected ? 'bi-record-circle' : 'bi-circle') ?> me-3 fs-5 <?= esc($isCorrect ? 'text-success' : ($isSelected ? 'text-danger' : 'text-muted')) ?>"></i>
-                                    <span class="fs-6 <?= esc($isCorrect ? 'fw-bold text-success' : ($isSelected ? 'text-danger' : '')) ?>">
-                                        <?= htmlspecialchars($c['choice_text']) ?>
-                                    </span>
-                                    
-                                    <?php if ($isCorrect): ?>
-                                        <span class="badge bg-success ms-auto">Correct Answer</span>
-                                    <?php elseif ($isSelected && !$isCorrect): ?>
-                                        <span class="badge bg-danger ms-auto">Your Answer</span>
+                            <div class="p-3 rounded-3 border d-flex align-items-center gap-3 <?= esc($cardClass) ?>" style="transition: all 0.2s ease;">
+                                <div class="choice-letter-badge rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0 <?= esc($badgeClass) ?>" style="width: 32px; height: 32px; font-size: 0.85rem;">
+                                    <?= $letter ?>
+                                </div>
+                                <div class="flex-grow-1 fw-medium <?= esc($isChoiceCorrect ? 'text-success fw-bold' : ($isSelected ? 'text-danger' : 'text-dark')) ?>">
+                                    <?= htmlspecialchars($c['choice_text']) ?>
+                                </div>
+                                <div class="ms-auto flex-shrink-0">
+                                    <?php if ($isChoiceCorrect): ?>
+                                        <span class="badge bg-success rounded-pill px-3 py-1.5 small fw-semibold">
+                                            <i class="bi bi-check2 me-1"></i>Correct Answer
+                                        </span>
+                                    <?php elseif ($isSelected && !$isChoiceCorrect): ?>
+                                        <span class="badge bg-danger rounded-pill px-3 py-1.5 small fw-semibold">
+                                            <i class="bi bi-x-circle me-1"></i>Your Answer
+                                        </span>
                                     <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
-                        
+
                         <?php if (!$myAns || !$myAns['lms_question_choice_id']): ?>
-                            <div class="alert alert-warning py-2 mt-3 mb-0 small"><i class="bi bi-exclamation-triangle me-1"></i> You did not answer this question.</div>
+                            <div class="alert alert-warning py-2.5 px-3 rounded-3 mt-2 mb-0 small d-flex align-items-center gap-2">
+                                <i class="bi bi-exclamation-triangle-fill text-warning fs-5"></i>
+                                <span>You did not select an answer for this question during the attempt.</span>
+                            </div>
                         <?php endif; ?>
                     </div>
+
                 </div>
             <?php endforeach; ?>
 
-            <div class="text-center mt-5 mb-4">
-                <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="btn btn-outline-primary btn-lg px-5 fw-bold">Back to Quiz Details</a>
+            <!-- Bottom Action Navigation -->
+            <div class="text-center py-4 mb-5">
+                <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="btn btn-outline-primary btn-lg rounded-pill px-5 fw-bold shadow-xs">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Quiz Overview
+                </a>
             </div>
 
         </div>
     </div>
 </div>
+
+<style>
+.shadow-xs {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+</style>
 
 <?php require_once __DIR__ . '/../../../../Views/lms/student/layout_footer.php'; ?>

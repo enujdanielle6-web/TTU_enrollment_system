@@ -87,13 +87,32 @@ class ScholarshipController extends BaseController
         $pdo = Database::getConnection();
         requirePermission('scholarships.manage');
 
-        // Fetch scholarships
-        $stmt = $pdo->query('SELECT * FROM scholarships ORDER BY name ASC');
-        $scholarships = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $page = max(1, (int)($request->input('page', 1)));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $totalCount = 0;
+        $totalPages = 1;
+        $scholarships = [];
+
+        try {
+            $totalCount = (int)$pdo->query('SELECT COUNT(*) FROM scholarships')->fetchColumn();
+            $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+            $stmt = $pdo->prepare('SELECT * FROM scholarships ORDER BY name ASC LIMIT :limit OFFSET :offset');
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $scholarships = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Scholarships fetch failed: ' . $e->getMessage());
+        }
 
         // Fetch programs for dropdown
-        $progStmt = $pdo->query('SELECT id, code, name FROM college_programs ORDER BY code ASC');
-        $programs = $progStmt->fetchAll(PDO::FETCH_ASSOC);
+        $programs = [];
+        try {
+            $progStmt = $pdo->query('SELECT id, code, name FROM college_programs ORDER BY code ASC');
+            $programs = $progStmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {}
 
         $successMsg = $_SESSION['success_msg'] ?? null;
         $errorMsg = $_SESSION['error_msg'] ?? null;
@@ -108,18 +127,35 @@ class ScholarshipController extends BaseController
         $pdo = Database::getConnection();
         requirePermission('scholarships.manage');
 
-        // Fetch recipients
-        $stmt = $pdo->query('
-            SELECT sr.*, 
-                   u.first_name, u.last_name, u.student_number,
-                   s.name as scholarship_name, s.code as scholarship_code, s.category,
-                   sr.academic_year_id as ay_name
-            FROM scholarship_recipients sr
-            INNER JOIN users u ON sr.user_id = u.id
-            INNER JOIN scholarships s ON sr.scholarship_id = s.id
-            ORDER BY sr.created_at DESC
-        ');
-        $recipients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $page = max(1, (int)($request->input('page', 1)));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $totalCount = 0;
+        $totalPages = 1;
+        $recipients = [];
+
+        try {
+            $totalCount = (int)$pdo->query('SELECT COUNT(*) FROM scholarship_recipients sr INNER JOIN users u ON sr.user_id = u.id INNER JOIN scholarships s ON sr.scholarship_id = s.id')->fetchColumn();
+            $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+            $stmt = $pdo->prepare('
+                SELECT sr.*, 
+                       u.first_name, u.last_name, u.student_number,
+                       s.name as scholarship_name, s.code as scholarship_code, s.category,
+                       sr.academic_year_id as ay_name
+                FROM scholarship_recipients sr
+                INNER JOIN users u ON sr.user_id = u.id
+                INNER JOIN scholarships s ON sr.scholarship_id = s.id
+                ORDER BY sr.created_at DESC
+                LIMIT :limit OFFSET :offset
+            ');
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
+            $recipients = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('Scholarship recipients fetch failed: ' . $e->getMessage());
+        }
 
         $successMsg = $_SESSION['success_msg'] ?? null;
         $errorMsg = $_SESSION['error_msg'] ?? null;
@@ -142,9 +178,33 @@ class ScholarshipController extends BaseController
         ];
         $applications = [];
 
+        $page = max(1, (int)($request->input('page', 1)));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $totalCount = 0;
+        $totalPages = 1;
+
         try {
-            // Fetch applications
-            $stmt = $pdo->query('
+            $statStmt = $pdo->query('
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status IN ("pending", "under_review") THEN 1 ELSE 0 END) as pending,
+                    SUM(CASE WHEN status = "approved" THEN 1 ELSE 0 END) as approved,
+                    SUM(CASE WHEN status = "rejected" THEN 1 ELSE 0 END) as rejected
+                FROM scholarship_applications
+            ')->fetch(PDO::FETCH_ASSOC);
+
+            if ($statStmt) {
+                $stats['total'] = (int)($statStmt['total'] ?? 0);
+                $stats['pending'] = (int)($statStmt['pending'] ?? 0);
+                $stats['approved'] = (int)($statStmt['approved'] ?? 0);
+                $stats['rejected'] = (int)($statStmt['rejected'] ?? 0);
+            }
+
+            $totalCount = $stats['total'];
+            $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+            $stmt = $pdo->prepare('
                 SELECT sa.*, 
                        u.first_name, u.last_name, u.email, u.student_number,
                        s.name as scholarship_name, s.code as scholarship_code, s.category,
@@ -160,19 +220,12 @@ class ScholarshipController extends BaseController
                         ELSE 3 
                     END ASC,
                     sa.created_at DESC
+                LIMIT :limit OFFSET :offset
             ');
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
             $applications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($applications as $app) {
-                $stats['total']++;
-                if ($app['status'] === 'pending' || $app['status'] === 'under_review') {
-                    $stats['pending']++;
-                } elseif ($app['status'] === 'approved') {
-                    $stats['approved']++;
-                } elseif ($app['status'] === 'rejected') {
-                    $stats['rejected']++;
-                }
-            }
         } catch (PDOException $e) {
             error_log('Scholarship applications fetch failed: ' . $e->getMessage());
         }

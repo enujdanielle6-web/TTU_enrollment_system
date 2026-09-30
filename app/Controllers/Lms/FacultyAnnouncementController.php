@@ -105,4 +105,20 @@ class FacultyAnnouncementController extends BaseController
         
         $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/announcements");
     }
+
+    public function delete(Request $request, Response $response, string $courseId, string $id)
+    {
+        $lmsCourseId = (int)$courseId;
+        $announcementId = (int)$id;
+        $this->authorizeFaculty($response, $lmsCourseId);
+
+        $announcement = $this->announcementService->getAnnouncement($announcementId);
+        if (!$announcement || $announcement['lms_course_id'] != $lmsCourseId) {
+            $this->notFound($response);
+            return;
+        }
+
+        $this->announcementService->deleteAnnouncement($announcementId);
+        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/announcements");
+    }
 }

@@ -227,6 +227,7 @@ require_once __DIR__ . '/../../components/header.php';
             </tbody>
           </table>
         </div>
+        <?php require __DIR__ . '/../../components/pagination.php'; ?>
       </div>
     </div>
   </div>

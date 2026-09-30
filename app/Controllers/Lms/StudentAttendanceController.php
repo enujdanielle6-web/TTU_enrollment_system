@@ -47,7 +47,10 @@ class StudentAttendanceController extends BaseController
         ];
 
         foreach ($history as $h) {
-            $stats[$h['status']]++;
+            $st = strtolower($h['status'] ?? 'present');
+            if (isset($stats[$st])) {
+                $stats[$st]++;
+            }
         }
 
         // Percentage calculation (excused doesn't penalize, late is usually .5 or full present depending on rules. We'll count Present + Excused as full, late as .5 for display purposes, or just present/total).

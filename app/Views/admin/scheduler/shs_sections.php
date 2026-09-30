@@ -170,6 +170,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             </tbody>
           </table>
         </div>
+        <?php require __DIR__ . '/../../components/pagination.php'; ?>
       </div>
     </div>
 

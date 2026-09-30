@@ -2,10 +2,22 @@
 require_once __DIR__ . '/../../components/header.php';
 require_once __DIR__ . '/../../components/admin_navbar.php';
 
-// Fetch strands
+// Fetch strands with pagination
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = 10;
+$offset = ($page - 1) * $limit;
+$totalCount = 0;
+$totalPages = 1;
 $strands = [];
+
 try {
-    $stmt = $pdo->query('SELECT * FROM shs_strands ORDER BY created_at ASC');
+    $totalCount = (int)$pdo->query('SELECT COUNT(*) FROM shs_strands')->fetchColumn();
+    $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+    $stmt = $pdo->prepare('SELECT * FROM shs_strands ORDER BY created_at ASC LIMIT :limit OFFSET :offset');
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $strands = $stmt->fetchAll();
 } catch (PDOException $e) {
     error_log('Academic strands fetch failed: ' . $e->getMessage());
@@ -203,6 +215,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             </tbody>
           </table>
         </div>
+        <?php require __DIR__ . '/../../components/pagination.php'; ?>
       </div>
     </div>
   </div>

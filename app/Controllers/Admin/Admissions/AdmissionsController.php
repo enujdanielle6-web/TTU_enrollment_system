@@ -524,8 +524,12 @@ try {
     }
 
     if ($assignSectionId > 0) {
-        $stmt = $pdo->prepare('UPDATE applications SET section_id = :section_id WHERE id = :id');
-        $stmt->execute(['section_id' => $assignSectionId, 'id' => $appId]);
+        if ($oldApp['status'] === 'enrolled' && $assignSectionId !== (int)($oldApp['section_id'] ?? 0)) {
+            \App\Services\EnrollmentService::transferSection($appId, $assignSectionId, (int)($_SESSION['user_id'] ?? 0), $pdo);
+        } else {
+            $stmt = $pdo->prepare('UPDATE applications SET section_id = :section_id WHERE id = :id');
+            $stmt->execute(['section_id' => $assignSectionId, 'id' => $appId]);
+        }
     }
 
     if (($oldApp['student_type'] ?? '') === 'Irregular') {

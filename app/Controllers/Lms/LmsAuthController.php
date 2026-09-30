@@ -90,15 +90,23 @@ if ($role === 'student') {
             return;
         }
 
-        // Check if student has an approved or enrolled application or active LMS status
+        // Enforce strict enrollment gating: only officially finalized enrollees receive LMS access
         $enrStmt = $pdo->prepare("
             SELECT COUNT(*) FROM applications a
-            WHERE a.user_id = :uid AND a.status IN ('enrolled', 'approved')
+            WHERE a.user_id = :uid AND a.status = 'enrolled'
         ");
         $enrStmt->execute(['uid' => (int)$user['id']]);
         $enrolledCount = (int)$enrStmt->fetchColumn();
 
-        if ($enrolledCount > 0 || $user['lms_status'] === 'active' || $user['role'] === 'student') {
+        // Check if user is an approved-but-not-enrolled applicant to provide clear guidance
+        $apprStmt = $pdo->prepare("
+            SELECT COUNT(*) FROM applications a
+            WHERE a.user_id = :uid AND a.status = 'approved'
+        ");
+        $apprStmt->execute(['uid' => (int)$user['id']]);
+        $approvedCount = (int)$apprStmt->fetchColumn();
+
+        if ($enrolledCount > 0 && ($user['lms_status'] === 'active' || $user['role'] === 'student')) {
             // Success
             session_regenerate_id(true);
             $_SESSION['logged_in'] = true;
@@ -107,7 +115,7 @@ if ($role === 'student') {
             $_SESSION['user_last_name'] = $user['last_name'];
             $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['user_email'] = $user['email'];
-            $_SESSION['user_role'] = $user['role'] === 'student' ? 'student' : $user['role'];
+            $_SESSION['user_role'] = 'student';
             $_SESSION['user_department'] = $user['department'] ?? 'None';
             $_SESSION['student_number'] = $user['student_number'];
             $_SESSION['lms_status'] = $user['lms_status'] ?? 'active';
@@ -120,8 +128,11 @@ if ($role === 'student') {
             $_SESSION['lms_email'] = $user['email'];
             $response->redirect("/sia/lms/student/dashboard.php");
             return;
+        } elseif ($approvedCount > 0) {
+            echo "<script>alert('Your application is approved, but official enrollment is not finalized. Please complete your cashier payment and registrar finalization to activate your LMS access.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+            return;
         } else {
-            echo "<script>alert('You are not officially enrolled yet. Please complete enrollment with the Admissions office.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+            echo "<script>alert('You are not officially enrolled yet. Only finalized enrollees can access the LMS. Please complete admissions registration.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
             return;
         }
     } else {

@@ -72,9 +72,20 @@ class FinanceController extends BaseController
         }
 
         // Fetch Assessments with Applicant & Student Details
+        $page = max(1, (int)($request->query('page') ?? ($_GET['page'] ?? 1)));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $total_items = 0;
         $assessments = [];
         try {
-            $stmt = $pdo->query('
+            $total_items = (int)$pdo->query('
+                SELECT COUNT(*)
+                FROM student_assessments sa
+                INNER JOIN applications a ON sa.application_id = a.id
+                INNER JOIN users u ON a.user_id = u.id
+            ')->fetchColumn();
+
+            $stmt = $pdo->prepare('
                 SELECT sa.id as assessment_id, sa.net_amount, sa.total_paid, sa.payment_status, sa.created_at,
                        a.id as application_id, a.reference_number, a.academic_level, a.grade_level, a.strand,
                        u.first_name, u.last_name, u.email, u.student_number
@@ -88,11 +99,16 @@ class FinanceController extends BaseController
                         ELSE 3 
                     END ASC,
                     sa.created_at DESC
+                LIMIT :limit OFFSET :offset
             ');
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
             $assessments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log('Cashier dashboard fetch failed: ' . $e->getMessage());
         }
+        $total_pages = max(1, ceil($total_items / $limit));
 
         $successMsg = $_SESSION['success_msg'] ?? null;
         $errorMsg = $_SESSION['error_msg'] ?? null;
@@ -193,9 +209,22 @@ class FinanceController extends BaseController
         }
 
         // Fetch All Payments
+        $page = max(1, (int)($request->query('page') ?? ($_GET['page'] ?? 1)));
+        $limit = 15;
+        $offset = ($page - 1) * $limit;
+        $total_items = 0;
         $payments = [];
         try {
-            $stmt = $pdo->query('
+            $total_items = (int)$pdo->query('
+                SELECT COUNT(*)
+                FROM payment_records pr
+                INNER JOIN users u ON pr.user_id = u.id
+                LEFT JOIN users c ON pr.cashier_id = c.id
+                INNER JOIN student_assessments sa ON pr.assessment_id = sa.id
+                INNER JOIN applications a ON sa.application_id = a.id
+            ')->fetchColumn();
+
+            $stmt = $pdo->prepare('
                 SELECT pr.*, 
                        u.first_name as student_first, u.last_name as student_last, u.student_number, u.email as student_email,
                        c.first_name as cashier_first, c.last_name as cashier_last,
@@ -206,11 +235,16 @@ class FinanceController extends BaseController
                 INNER JOIN student_assessments sa ON pr.assessment_id = sa.id
                 INNER JOIN applications a ON sa.application_id = a.id
                 ORDER BY pr.created_at DESC
+                LIMIT :limit OFFSET :offset
             ');
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
             $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log('Cashier payments fetch failed: ' . $e->getMessage());
         }
+        $total_pages = max(1, ceil($total_items / $limit));
 
         $successMsg = $_SESSION['success_msg'] ?? null;
         $errorMsg = $_SESSION['error_msg'] ?? null;

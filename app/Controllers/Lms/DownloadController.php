@@ -17,10 +17,10 @@ class DownloadController extends BaseController
             return;
         }
 
-        $userId = $_SESSION['user_id'] ?? 0;
-        $role = $_SESSION['role'] ?? '';
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $role = $_SESSION['user_role'] ?? $_SESSION['lms_role'] ?? '';
 
-        if (!$userId) {
+        if (!$userId || empty($role)) {
             $this->forbidden($response);
             return;
         }
@@ -36,12 +36,12 @@ class DownloadController extends BaseController
         // Authorization check based on role
         $authorized = false;
         
-        if ($role === 'student' || $role === 'applicant') {
-            $authorized = $lmsService->isStudentAuthorizedForCourse($userId, $material['lms_course_id']);
+        if ($role === 'student') {
+            $authorized = $lmsService->isStudentAuthorizedForCourse($userId, (int)$material['lms_course_id']);
         } elseif ($role === 'faculty') {
-            $authorized = $lmsService->isFacultyAuthorizedForCourse($userId, $material['lms_course_id']);
-        } elseif ($role === 'admin' || $role === 'registrar') {
-            // Admins have global access
+            $authorized = $lmsService->isFacultyAuthorizedForCourse($userId, (int)$material['lms_course_id']);
+        } elseif (in_array($role, ['admin', 'superadmin', 'registrar'], true)) {
+            // Institutional administrative oversight access
             $authorized = true;
         }
 
@@ -50,31 +50,34 @@ class DownloadController extends BaseController
             return;
         }
 
-        // Validate file path
-        // The file_path in DB is relative to the app/uploads/lms/ directory, or absolute.
-        // Let's assume file_path stores just the filename or relative path inside app/uploads/lms/
-        $baseDir = realpath(__DIR__ . '/../../../app/uploads/lms');
-        
-        if (!$baseDir) {
-            // Directory doesn't exist or is inaccessible
-            error_log("LMS Upload directory not found.");
-            $this->notFound($response);
-            return;
+        // Canonical & fallback material storage directories
+        $candidatePaths = [
+            dirname(__DIR__, 3) . '/storage/uploads/lms/materials/' . basename($material['file_path']),
+            dirname(__DIR__, 3) . '/storage/uploads/lms/' . ltrim($material['file_path'], '/\\'),
+            dirname(__DIR__, 3) . '/app/uploads/lms/' . basename($material['file_path']),
+            dirname(__DIR__, 3) . '/app/uploads/lms/' . ltrim($material['file_path'], '/\\'),
+            'C:/xampp/storage/lms_materials/' . basename($material['file_path'])
+        ];
+
+        $resolvedPath = null;
+        foreach ($candidatePaths as $candidate) {
+            if (file_exists($candidate)) {
+                $real = realpath($candidate);
+                if ($real && file_exists($real)) {
+                    $resolvedPath = $real;
+                    break;
+                }
+            }
         }
 
-        // Construct absolute path
-        // To be safe against path traversal stored in DB, we check if file exists and starts with baseDir
-        $requestedPath = $baseDir . DIRECTORY_SEPARATOR . basename($material['file_path']);
-        $realPath = realpath($requestedPath);
-
-        if (!$realPath || strpos($realPath, $baseDir) !== 0 || !file_exists($realPath)) {
-            error_log("Attempted to access invalid material file: " . $requestedPath);
+        if (!$resolvedPath) {
+            error_log("LMS Material file not found on disk for material ID: {$materialId}");
             $this->notFound($response);
             return;
         }
 
         // File is safe to stream
-        $this->streamFile($realPath, $material['file_name'], $material['mime_type']);
+        $this->streamFile($resolvedPath, $material['file_name'], $material['mime_type']);
     }
 
     public function downloadSubmission(Request $request, Response $response, string $id)
@@ -85,10 +88,10 @@ class DownloadController extends BaseController
             return;
         }
 
-        $userId = $_SESSION['user_id'] ?? 0;
-        $role = $_SESSION['role'] ?? '';
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $role = $_SESSION['user_role'] ?? $_SESSION['lms_role'] ?? '';
 
-        if (!$userId) {
+        if (!$userId || empty($role)) {
             $this->forbidden($response);
             return;
         }
@@ -101,7 +104,7 @@ class DownloadController extends BaseController
             return;
         }
 
-        $assignment = $lmsService->getAssignment($submission['assignment_id']);
+        $assignment = $lmsService->getAssignment((int)$submission['assignment_id']);
         if (!$assignment) {
             $this->notFound($response);
             return;
@@ -110,15 +113,15 @@ class DownloadController extends BaseController
         // Authorization check
         $authorized = false;
         
-        if ($role === 'student' || $role === 'applicant') {
+        if ($role === 'student') {
             // Student can only download their own submissions
-            if ($submission['student_id'] == $userId) {
+            if ((int)$submission['student_id'] === $userId) {
                 $authorized = true;
             }
         } elseif ($role === 'faculty') {
             // Faculty can download submissions for their own courses
-            $authorized = $lmsService->isFacultyAuthorizedForCourse($userId, $assignment['lms_course_id']);
-        } elseif ($role === 'admin' || $role === 'registrar') {
+            $authorized = $lmsService->isFacultyAuthorizedForCourse($userId, (int)$assignment['lms_course_id']);
+        } elseif (in_array($role, ['admin', 'superadmin', 'registrar'], true)) {
             $authorized = true;
         }
 
@@ -127,24 +130,31 @@ class DownloadController extends BaseController
             return;
         }
 
-        $baseDir = realpath(__DIR__ . '/../../../app/uploads/lms/submissions');
-        
-        if (!$baseDir) {
-            error_log("LMS Submissions directory not found.");
+        // Canonical & fallback submission storage directories
+        $candidatePaths = [
+            dirname(__DIR__, 3) . '/storage/uploads/lms/submissions/' . basename($submission['file_path']),
+            dirname(__DIR__, 3) . '/app/uploads/lms/submissions/' . basename($submission['file_path']),
+            dirname(__DIR__, 3) . '/app/uploads/lms/submissions/' . ltrim($submission['file_path'], '/\\')
+        ];
+
+        $resolvedPath = null;
+        foreach ($candidatePaths as $candidate) {
+            if (file_exists($candidate)) {
+                $real = realpath($candidate);
+                if ($real && file_exists($real)) {
+                    $resolvedPath = $real;
+                    break;
+                }
+            }
+        }
+
+        if (!$resolvedPath) {
+            error_log("LMS Submission file not found on disk for submission ID: {$submissionId}");
             $this->notFound($response);
             return;
         }
 
-        $requestedPath = $baseDir . DIRECTORY_SEPARATOR . basename($submission['file_path']);
-        $realPath = realpath($requestedPath);
-
-        if (!$realPath || strpos($realPath, $baseDir) !== 0 || !file_exists($realPath)) {
-            error_log("Attempted to access invalid submission file: " . $requestedPath);
-            $this->notFound($response);
-            return;
-        }
-
-        $this->streamFile($realPath, $submission['file_name'], $submission['mime_type']);
+        $this->streamFile($resolvedPath, $submission['file_name'], $submission['mime_type']);
     }
 
     private function streamFile(string $filePath, string $originalName, ?string $mimeType)

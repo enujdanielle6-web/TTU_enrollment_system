@@ -86,47 +86,67 @@ class StudentAssignmentController extends BaseController
             exit;
         }
 
+        // Server-side check if already graded
+        $existingSubmission = $this->lmsService->getStudentSubmission($assignmentId, $userId);
+        if ($existingSubmission && $existingSubmission['status'] === 'GRADED') {
+            $response->setStatusCode(403);
+            echo "403 Forbidden - Assignment has already been graded and cannot be resubmitted.";
+            exit;
+        }
+
         // Handle File Upload
         if (!isset($_FILES['submission_file']) || $_FILES['submission_file']['error'] !== UPLOAD_ERR_OK) {
+            $response->setStatusCode(400);
             echo "Upload error. Please try again.";
             exit;
         }
 
         $file = $_FILES['submission_file'];
+
+        // File size cap: 25MB
+        if ($file['size'] > 25 * 1024 * 1024) {
+            $response->setStatusCode(400);
+            echo "File exceeds maximum permitted size of 25MB.";
+            exit;
+        }
         
         // Prevent executable uploads
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-        if (in_array($ext, ['php', 'exe', 'sh', 'bat', 'js', 'html', 'phtml'])) {
-            echo "Invalid file type.";
+        $blacklist = ['php', 'phtml', 'phar', 'exe', 'bat', 'cmd', 'sh', 'py', 'js', 'vbs', 'html', 'htm'];
+        if (in_array($ext, $blacklist, true)) {
+            $response->setStatusCode(400);
+            echo "Invalid file type. Executable files are strictly prohibited.";
             exit;
         }
 
-        $targetDir = realpath(__DIR__ . '/../../../app/uploads/lms/submissions');
-        if (!$targetDir) {
-            echo "System error: Upload directory not found.";
-            exit;
+        $canonicalDir = dirname(__DIR__, 3) . '/storage/uploads/lms/submissions/';
+        if (!is_dir($canonicalDir)) {
+            @mkdir($canonicalDir, 0775, true);
         }
 
-        $uniqueName = 'sub_' . $assignmentId . '_' . $userId . '_' . time() . '.' . $ext;
-        $targetPath = $targetDir . DIRECTORY_SEPARATOR . $uniqueName;
+        $uniqueName = 'sub_' . $assignmentId . '_' . $userId . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
+        $targetPath = $canonicalDir . $uniqueName;
 
         if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-            
-            $existingSubmission = $this->lmsService->getStudentSubmission($assignmentId, $userId);
             $status = $existingSubmission ? 'RESUBMITTED' : 'SUBMITTED';
+
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo ? finfo_file($finfo, $targetPath) : ($file['type'] ?? 'application/octet-stream');
+            if ($finfo) finfo_close($finfo);
 
             $fileData = [
                 'file_name' => basename($file['name']),
-                'file_path' => $uniqueName, // we store relative to submissions dir
-                'mime_type' => $file['type'],
-                'file_size' => $file['size']
+                'file_path' => $uniqueName, // stored relative to canonical submissions dir
+                'mime_type' => $mimeType,
+                'file_size' => (int)$file['size']
             ];
 
             $this->lmsService->submitAssignment($assignmentId, $userId, $fileData, $status);
             
             $this->redirect("/sia/lms/student/course/{$lmsCourseId}/assignments/{$assignmentId}");
         } else {
-            echo "Failed to move uploaded file.";
+            $response->setStatusCode(500);
+            echo "Failed to save uploaded submission file.";
             exit;
         }
     }

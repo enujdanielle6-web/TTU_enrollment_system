@@ -1,82 +1,170 @@
 <?php require_once __DIR__ . '/../layout_header.php'; ?>
 
 <div class="container-fluid py-4">
-    <nav aria-label="breadcrumb" class="mb-4">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
-            <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Quizzes</li>
-        </ol>
-    </nav>
+    <!-- Course Header & Horizontal Navigation -->
+    <?php 
+    $active_tab = 'quizzes';
+    require __DIR__ . '/../components/course_header.php'; 
+    ?>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h1 class="h3 fw-bold text-dark mb-1">Quizzes: <?= htmlspecialchars($course['subject_code']) ?></h1>
-            <p class="text-muted mb-0"><?= htmlspecialchars($course['subject_name']) ?> &bull; Section <?= htmlspecialchars($course['section_code']) ?></p>
+    <div id="course-tab-content" class="course-tab-content">
+        <?php
+        $publishedQuizzes = 0;
+        $draftQuizzes = 0;
+        foreach ($quizzes as $q) {
+            if (($q['status'] ?? '') === 'published') {
+                $publishedQuizzes++;
+            } else {
+                $draftQuizzes++;
+            }
+        }
+        $totalQuizzes = count($quizzes);
+        ?>
+
+        <!-- KPI Summary Cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-info">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-bold text-uppercase">Total Quizzes</span>
+                            <h3 class="mb-0 fw-bold mt-1 text-dark"><?= $totalQuizzes ?></h3>
+                        </div>
+                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                            <i class="bi bi-pencil-square fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-success">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-bold text-uppercase">Active / Published</span>
+                            <h3 class="mb-0 fw-bold mt-1 text-success"><?= $publishedQuizzes ?></h3>
+                        </div>
+                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                            <i class="bi bi-check2-circle fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-warning">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="text-muted small fw-bold text-uppercase">Drafts / In-Progress</span>
+                            <h3 class="mb-0 fw-bold mt-1 text-warning"><?= $draftQuizzes ?></h3>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                            <i class="bi bi-clock-history fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
-            <i class="bi bi-plus-circle me-1"></i> Create Quiz
-        </a>
-    </div>
 
-    <div class="card border-0 shadow-sm rounded-4">
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="ps-4 py-3">Quiz Title</th>
-                            <th class="py-3">Status</th>
-                            <th class="py-3">Time Limit</th>
-                            <th class="py-3">Dates</th>
-                            <th class="text-end pe-4 py-3">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($quizzes)): ?>
-                            <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
-                                    <i class="bi bi-journal-text fs-1 d-block mb-3 opacity-50"></i>
-                                    No quizzes created yet.
-                                </td>
-                            </tr>
-                        <?php else: ?>
-                            <?php foreach ($quizzes as $quiz): ?>
-                                <tr>
-                                    <td class="ps-4 fw-medium text-dark">
-                                        <?= htmlspecialchars($quiz['title']) ?>
-                                    </td>
-                                    <td>
-                                        <?php if ($quiz['status'] === 'published'): ?>
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Published</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">Draft</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?= !empty($quiz['time_limit']) ? esc($quiz['time_limit'] . ' mins') : '<span class="text-muted">Unlimited</span>' ?>
-                                    </td>
-                                    <td class="small">
-                                        <?php if ($quiz['start_date']): ?>
-                                            <div><strong>Starts:</strong> <?= date('M d, Y h:i A', strtotime($quiz['start_date'])) ?></div>
-                                        <?php endif; ?>
-                                        <?php if ($quiz['end_date']): ?>
-                                            <div><strong>Ends:</strong> <?= date('M d, Y h:i A', strtotime($quiz['end_date'])) ?></div>
-                                        <?php endif; ?>
-                                        <?php if (!$quiz['start_date'] && !$quiz['end_date']): ?>
-                                            <span class="text-muted">Always open</span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/edit" class="btn btn-sm btn-outline-secondary" title="Edit Settings"><i class="bi bi-gear"></i></a>
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions" class="btn btn-sm btn-outline-primary ms-1" title="Manage Questions"><i class="bi bi-list-check"></i> Questions</a>
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/results" class="btn btn-sm btn-info text-white ms-1" title="View Results"><i class="bi bi-bar-chart"></i> Results</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+        <!-- Section Header Bar -->
+        <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+            <div>
+                <h4 class="h5 fw-bold text-dark mb-1">
+                    <i class="bi bi-pencil-square me-2 text-info"></i>Online Quizzes &amp; Assessments
+                </h4>
+                <p class="text-muted small mb-0">Author multiple choice and true/false quizzes, configure timers and review student attempt scores.</p>
+            </div>
+            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+                <i class="bi bi-plus-lg"></i>
+                <span>Create Quiz</span>
+            </a>
+        </div>
+
+        <!-- Quizzes List Card -->
+        <div class="lms-card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+            <div class="p-0">
+                <?php if (empty($quizzes)): ?>
+                    <div class="text-center py-5 p-4">
+                        <i class="bi bi-pencil-square text-muted opacity-50 mb-3" style="font-size: 3.5rem;"></i>
+                        <h5 class="fw-bold text-dark">No Quizzes Created Yet</h5>
+                        <p class="text-muted mb-4" style="max-width: 450px; margin: 0 auto;">
+                            Prepare timed assessments and tests with automated scoring and comprehensive attempt diagnostics.
+                        </p>
+                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                            <i class="bi bi-plus-lg me-1"></i> Create First Quiz
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($quizzes as $quiz): 
+                            $isPublished = ($quiz['status'] === 'published');
+                        ?>
+                            <div class="list-group-item p-4 transition-all border-bottom hover-bg-light">
+                                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                                    <div class="d-flex align-items-start gap-3 min-w-0" style="flex: 1 1 340px;">
+                                        <div class="rounded-3 p-3 d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info flex-shrink-0" style="width: 48px; height: 48px;">
+                                            <i class="bi bi-ui-checks fs-4"></i>
+                                        </div>
+                                        <div class="min-w-0">
+                                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                                <?php if ($isPublished): ?>
+                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-bold">
+                                                        <i class="bi bi-check-circle me-1"></i>Published
+                                                    </span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-bold">
+                                                        <i class="bi bi-clock me-1"></i>Draft
+                                                    </span>
+                                                <?php endif; ?>
+                                                <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-0.5 small fw-semibold">
+                                                    <i class="bi bi-stopwatch me-1"></i><?= !empty($quiz['time_limit']) ? esc($quiz['time_limit']) . ' Mins' : 'Unlimited Time' ?>
+                                                </span>
+                                                <?php if (!empty($quiz['max_attempts'])): ?>
+                                                    <span class="badge bg-light text-muted border rounded-pill px-2 py-0.5 small">
+                                                        <?= esc($quiz['max_attempts']) ?> Max <?= (int)$quiz['max_attempts'] === 1 ? 'Attempt' : 'Attempts' ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <h5 class="fw-bold text-dark mb-1 text-truncate" title="<?= htmlspecialchars($quiz['title']) ?>">
+                                                <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions" class="text-decoration-none text-dark hover-primary">
+                                                    <?= htmlspecialchars($quiz['title']) ?>
+                                                </a>
+                                            </h5>
+                                            <div class="text-muted small d-flex flex-wrap gap-3">
+                                                <span>
+                                                    <i class="bi bi-calendar-range me-1 text-primary"></i>
+                                                    <?php if ($quiz['start_date'] || $quiz['end_date']): ?>
+                                                        <?= $quiz['start_date'] ? date('M d, Y', strtotime($quiz['start_date'])) : 'Open' ?> 
+                                                        &rarr; 
+                                                        <?= $quiz['end_date'] ? date('M d, Y, g:i A', strtotime($quiz['end_date'])) : 'No End Date' ?>
+                                                    <?php else: ?>
+                                                        Always Available
+                                                    <?php endif; ?>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions" class="btn btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold btn-sm shadow-xs">
+                                            <i class="bi bi-list-check me-1"></i> Questions
+                                        </a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/results" class="btn btn-outline-info rounded-pill px-3 py-1.5 fw-semibold btn-sm">
+                                            <i class="bi bi-bar-chart me-1"></i> Results
+                                        </a>
+                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/edit" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold btn-sm" title="Edit Quiz Settings">
+                                            <i class="bi bi-gear me-1"></i> Settings
+                                        </a>
+                                        <form method="POST" action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this quiz, its questions, and all student attempts?');">
+                                            <?= getCsrfInput() ?>
+                                            <button type="submit" class="btn btn-outline-danger rounded-pill px-2.5 py-1.5 btn-sm" title="Delete Quiz">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>

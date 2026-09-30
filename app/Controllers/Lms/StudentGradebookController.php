@@ -36,7 +36,7 @@ class StudentGradebookController extends BaseController
         $this->authorizeStudent($response, $lmsCourseId);
 
         $course = $this->lmsService->getCourseDetails($lmsCourseId);
-        $gradebookData = $this->gradebookService->getStudentGradebook($lmsCourseId, $userId);
+        $gradebookData = $this->gradebookService->getStudentPersonalGradebook($lmsCourseId, (int)$userId);
 
         return $this->render('lms/student/gradebook/index', [
             'course' => $course,

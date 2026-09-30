@@ -83,6 +83,8 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/admin/registrar/college_enrollment_queue.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'collegeQueue']);
     $router->get('/admin/registrar/shs_enrollment_queue.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'shsQueue']);
     $router->post('/admin/registrar/finalize_enrollment.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'finalizeEnrollment']);
+    $router->post('/admin/registrar/transfer_section.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'transferSection']);
+    $router->post('/admin/registrar/drop_subject.php', ['App\Controllers\Admin\Registrar\RegistrarController', 'dropSubject']);
 
     $router->get('/admin/registrar/subjects.php', ['App\Controllers\Admin\Registrar\SubjectController', 'index']);
     $router->post('/admin/registrar/subject_process.php', ['App\Controllers\Admin\Registrar\SubjectController', 'process']);
@@ -136,9 +138,38 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->get('/admin/system/settings.php', ['App\Controllers\Admin\System\SystemController', 'settings']);
     $router->post('/admin/system/settings_process.php', ['App\Controllers\Admin\System\SystemController', 'processSettings']);
     
-    // Admin LMS Management
+    // Admin LMS Management & Governance
+    $router->get('/admin/lms/dashboard', ['App\Controllers\Admin\LmsAdminController', 'dashboard']);
+    $router->get('/admin/lms/courses', ['App\Controllers\Admin\LmsAdminController', 'courses']);
+    $router->get('/admin/lms/courses/{id}', ['App\Controllers\Admin\LmsAdminController', 'courseDetail']);
+    $router->post('/admin/lms/courses/{id}/reassign', ['App\Controllers\Admin\LmsAdminController', 'reassignFaculty']);
+    $router->post('/admin/lms/courses/{id}/status', ['App\Controllers\Admin\LmsAdminController', 'updateCourseStatus']);
+    
     $router->get('/admin/lms/generator', ['App\Controllers\Admin\LmsAdminController', 'courseGenerator']);
     $router->post('/admin/lms/generate', ['App\Controllers\Admin\LmsAdminController', 'generateLmsCourse']);
+    
+    $router->get('/admin/lms/users', ['App\Controllers\Admin\LmsAdminController', 'users']);
+    $router->post('/admin/lms/users/{id}/status', ['App\Controllers\Admin\LmsAdminController', 'updateUserStatus']);
+    
+    $router->get('/admin/lms/sync', ['App\Controllers\Admin\LmsAdminController', 'sync']);
+    $router->post('/admin/lms/sync/reconcile', ['App\Controllers\Admin\LmsAdminController', 'reconcile']);
+    $router->post('/admin/lms/conflicts/resolve', ['App\Controllers\Admin\LmsAdminController', 'resolveConflict']);
+    
+    $router->get('/admin/lms/archive', ['App\Controllers\Admin\LmsAdminController', 'archive']);
+    $router->post('/admin/lms/archive/term', ['App\Controllers\Admin\LmsAdminController', 'processArchiveTerm']);
+    
+    $router->get('/admin/lms/audit_logs', ['App\Controllers\Admin\LmsAdminController', 'auditLogs']);
+    
+    // LMS Course Content & Syllabus Template Cloner
+    $router->get('/admin/lms/cloner', ['App\Controllers\Admin\LmsAdminController', 'templateCloner']);
+    $router->post('/admin/lms/cloner/process', ['App\Controllers\Admin\LmsAdminController', 'processCloneContent']);
+    
+    // LMS Platform Announcements (Governance & Maintenance Broadcasts)
+    $router->get('/admin/lms/announcements', ['App\Controllers\Admin\LmsAdminController', 'announcements']);
+    $router->post('/admin/lms/announcements/store', ['App\Controllers\Admin\LmsAdminController', 'storeAnnouncement']);
+    $router->post('/admin/lms/announcements/{id}/update', ['App\Controllers\Admin\LmsAdminController', 'updateAnnouncement']);
+    $router->post('/admin/lms/announcements/{id}/status', ['App\Controllers\Admin\LmsAdminController', 'toggleAnnouncementStatus']);
+    $router->post('/admin/lms/announcements/{id}/delete', ['App\Controllers\Admin\LmsAdminController', 'deleteAnnouncement']);
     
     $router->get('/admin/system/reports.php', ['App\Controllers\Admin\System\ReportController', 'index']);
     $router->post('/admin/system/reports_export.php', ['App\Controllers\Admin\System\ReportController', 'export']);
@@ -178,8 +209,15 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
 
 });
 
-$router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'App\Middleware\CsrfMiddleware', 'App\Middleware\AuthMiddleware']], function (Router $router) {
-    // LMS Student Portal
+// LMS Student Portal - Requires Student Role
+$router->group([
+    'middleware' => [
+        'App\Middleware\SessionSecurityMiddleware',
+        'App\Middleware\CsrfMiddleware',
+        'App\Middleware\AuthMiddleware',
+        'App\Middleware\RoleMiddleware:student'
+    ]
+], function (Router $router) {
     $router->get('/lms/student/dashboard.php', ['App\Controllers\Lms\StudentController', 'dashboard']);
     $router->get('/lms/student/course.php', ['App\Controllers\Lms\StudentController', 'course']);
     $router->get('/lms/student/my_courses.php', ['App\Controllers\Lms\StudentController', 'myCourses']);
@@ -202,12 +240,25 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     
     $router->get('/lms/student/profile.php', ['App\Controllers\Lms\StudentController', 'profile']);
     $router->get('/lms/student/messages.php', ['App\Controllers\Lms\StudentController', 'messages']);
+});
 
-    // LMS Faculty Portal
+// LMS Faculty Portal - Requires Faculty Role
+$router->group([
+    'middleware' => [
+        'App\Middleware\SessionSecurityMiddleware',
+        'App\Middleware\CsrfMiddleware',
+        'App\Middleware\AuthMiddleware',
+        'App\Middleware\RoleMiddleware:faculty'
+    ]
+], function (Router $router) {
     $router->get('/lms/faculty/dashboard.php', ['App\Controllers\Lms\FacultyController', 'dashboard']);
     $router->get('/lms/faculty/course.php', ['App\Controllers\Lms\FacultyController', 'course']);
+    $router->get('/lms/faculty/course/{course_id}/roster', ['App\Controllers\Lms\FacultyController', 'roster']);
     $router->post('/lms/faculty/module_create.php', ['App\Controllers\Lms\FacultyController', 'createModule']);
+    $router->post('/lms/faculty/module_update.php', ['App\Controllers\Lms\FacultyController', 'updateModule']);
+    $router->post('/lms/faculty/module_delete.php', ['App\Controllers\Lms\FacultyController', 'deleteModule']);
     $router->post('/lms/faculty/material_upload.php', ['App\Controllers\Lms\FacultyController', 'uploadMaterial']);
+    $router->post('/lms/faculty/material_delete.php', ['App\Controllers\Lms\FacultyController', 'deleteMaterial']);
     
     $router->get('/lms/faculty/profile.php', ['App\Controllers\Lms\FacultyController', 'profile']);
     $router->get('/lms/faculty/messages.php', ['App\Controllers\Lms\FacultyController', 'messages']);
@@ -218,16 +269,20 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->post('/lms/faculty/course/{course_id}/assignments/store', ['App\Controllers\Lms\FacultyAssignmentController', 'store']);
     $router->get('/lms/faculty/course/{course_id}/assignments/{id}/edit', ['App\Controllers\Lms\FacultyAssignmentController', 'edit']);
     $router->post('/lms/faculty/course/{course_id}/assignments/{id}/update', ['App\Controllers\Lms\FacultyAssignmentController', 'update']);
+    $router->post('/lms/faculty/course/{course_id}/assignments/{id}/delete', ['App\Controllers\Lms\FacultyAssignmentController', 'delete']);
     $router->get('/lms/faculty/course/{course_id}/assignments/{id}/submissions', ['App\Controllers\Lms\FacultyAssignmentController', 'submissions']);
     $router->post('/lms/faculty/course/{course_id}/assignments/{id}/grade', ['App\Controllers\Lms\FacultyAssignmentController', 'grade']);
+    $router->post('/lms/faculty/course/{course_id}/assignments/submissions/{id}/grade', ['App\Controllers\Lms\FacultyAssignmentController', 'grade']);
 
     $router->get('/lms/faculty/course/{course_id}/quizzes', ['App\Controllers\Lms\FacultyQuizController', 'index']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/create', ['App\Controllers\Lms\FacultyQuizController', 'create']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/store', ['App\Controllers\Lms\FacultyQuizController', 'store']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/edit', ['App\Controllers\Lms\FacultyQuizController', 'edit']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/update', ['App\Controllers\Lms\FacultyQuizController', 'update']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/delete', ['App\Controllers\Lms\FacultyQuizController', 'delete']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/questions', ['App\Controllers\Lms\FacultyQuizController', 'questions']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/store', ['App\Controllers\Lms\FacultyQuizController', 'storeQuestion']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/{qid}/delete', ['App\Controllers\Lms\FacultyQuizController', 'deleteQuestion']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/results', ['App\Controllers\Lms\FacultyQuizController', 'results']);
 
     $router->get('/lms/faculty/course/{course_id}/gradebook', ['App\Controllers\Lms\FacultyGradebookController', 'index']);
@@ -243,11 +298,19 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     $router->post('/lms/faculty/course/{course_id}/announcements/store', ['App\Controllers\Lms\FacultyAnnouncementController', 'store']);
     $router->get('/lms/faculty/course/{course_id}/announcements/{id}/edit', ['App\Controllers\Lms\FacultyAnnouncementController', 'edit']);
     $router->post('/lms/faculty/course/{course_id}/announcements/{id}/update', ['App\Controllers\Lms\FacultyAnnouncementController', 'update']);
+    $router->post('/lms/faculty/course/{course_id}/announcements/{id}/delete', ['App\Controllers\Lms\FacultyAnnouncementController', 'delete']);
+});
 
-    // LMS Secure File Delivery
+// LMS Secure File Delivery
+$router->group([
+    'middleware' => [
+        'App\Middleware\SessionSecurityMiddleware',
+        'App\Middleware\CsrfMiddleware',
+        'App\Middleware\AuthMiddleware'
+    ]
+], function (Router $router) {
     $router->get('/lms/download/material/{id}', ['App\Controllers\Lms\DownloadController', 'downloadMaterial']);
     $router->get('/lms/download/submission/{id}', ['App\Controllers\Lms\DownloadController', 'downloadSubmission']);
-
 });
 
 // Grouped routes with Middleware and Prefix

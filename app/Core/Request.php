@@ -92,6 +92,23 @@ class Request
         return array_merge($_GET, $_POST, $this->data);
     }
 
+    public function getBody(?string $key = null, $default = null)
+    {
+        $body = array_merge($_POST, $this->data);
+        $result = !empty($body) ? $body : $this->all();
+
+        if ($key === null) {
+            return $result;
+        }
+
+        return $result[$key] ?? $default;
+    }
+
+    public function get(string $key, $default = null)
+    {
+        return $this->input($key, $default);
+    }
+
     public function input(string $key, $default = null)
     {
         $all = $this->all();

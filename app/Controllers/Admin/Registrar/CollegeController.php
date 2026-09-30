@@ -34,10 +34,19 @@ try {
     $programs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {}
 
-// Fetch curricula
+// Fetch curricula with pagination
+$page = max(1, (int)($request->input('page', 1)));
+$limit = 10;
+$offset = ($page - 1) * $limit;
+$totalCount = 0;
+$totalPages = 1;
 $curricula = [];
+
 try {
-    $stmt = $pdo->query("
+    $totalCount = (int)$pdo->query('SELECT COUNT(*) FROM college_curricula cc INNER JOIN college_programs p ON cc.program_id = p.id')->fetchColumn();
+    $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+    $stmt = $pdo->prepare("
         SELECT cc.id, cc.program_id, cc.curriculum_name, cc.version, cc.effective_academic_year, cc.status, cc.description, cc.created_at,
                p.code as program_code,
                (SELECT COUNT(id) FROM college_curriculum_subjects WHERE curriculum_id = cc.id) as subject_count,
@@ -48,7 +57,11 @@ try {
         FROM college_curricula cc
         INNER JOIN college_programs p ON cc.program_id = p.id
         ORDER BY p.code ASC, cc.curriculum_name ASC
+        LIMIT :limit OFFSET :offset
     ");
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $curricula = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log('Failed to fetch college curricula: ' . $e->getMessage());

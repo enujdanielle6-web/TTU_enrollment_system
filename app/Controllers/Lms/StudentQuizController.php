@@ -82,12 +82,31 @@ class StudentQuizController extends BaseController
             if (!$inProgressAttempt) $canAttempt = false;
         }
 
+        $questions = $this->quizService->getQuestions($quizId, false);
+        $totalQuestions = count($questions);
+        $totalPoints = 0.0;
+        foreach ($questions as $q) {
+            $totalPoints += (float)($q['points'] ?? 1);
+        }
+
+        $bestScore = null;
+        foreach ($attempts as $att) {
+            if ($att['score'] !== null) {
+                if ($bestScore === null || (float)$att['score'] > $bestScore) {
+                    $bestScore = (float)$att['score'];
+                }
+            }
+        }
+
         return $this->render('lms/student/quizzes/show', [
             'course' => $course,
             'quiz' => $quiz,
             'attempts' => $attempts,
             'in_progress' => $inProgressAttempt,
-            'can_attempt' => $canAttempt
+            'can_attempt' => $canAttempt,
+            'total_questions' => $totalQuestions,
+            'total_points' => $totalPoints,
+            'best_score' => $bestScore
         ]);
     }
 
@@ -95,9 +114,15 @@ class StudentQuizController extends BaseController
     {
         $lmsCourseId = (int)$courseId;
         $quizId = (int)$id;
-        $userId = $_SESSION['user_id'];
+        $userId = (int)($_SESSION['user_id'] ?? 0);
         
         $this->authorizeStudent($response, $lmsCourseId);
+
+        $quiz = $this->quizService->getQuiz($quizId);
+        if (!$quiz || (int)$quiz['lms_course_id'] !== $lmsCourseId || $quiz['status'] !== 'published') {
+            $this->notFound($response);
+            return;
+        }
 
         $attemptId = $this->quizService->startAttempt($quizId, $userId);
 
@@ -114,14 +139,19 @@ class StudentQuizController extends BaseController
         $lmsCourseId = (int)$courseId;
         $qId = (int)$quizId;
         $aId = (int)$attemptId;
-        $userId = $_SESSION['user_id'];
+        $userId = (int)($_SESSION['user_id'] ?? 0);
         
         $this->authorizeStudent($response, $lmsCourseId);
 
         $quiz = $this->quizService->getQuiz($qId);
+        if (!$quiz || (int)$quiz['lms_course_id'] !== $lmsCourseId || $quiz['status'] !== 'published') {
+            $this->notFound($response);
+            return;
+        }
+
         $attempt = $this->quizService->getAttempt($aId);
 
-        if (!$attempt || $attempt['student_id'] != $userId || $attempt['lms_quiz_id'] != $qId) {
+        if (!$attempt || (int)$attempt['student_id'] !== $userId || (int)$attempt['lms_quiz_id'] !== $qId) {
             $this->notFound($response);
             return;
         }
@@ -147,12 +177,18 @@ class StudentQuizController extends BaseController
         $lmsCourseId = (int)$courseId;
         $qId = (int)$quizId;
         $aId = (int)$attemptId;
-        $userId = $_SESSION['user_id'];
+        $userId = (int)($_SESSION['user_id'] ?? 0);
         
         $this->authorizeStudent($response, $lmsCourseId);
 
+        $quiz = $this->quizService->getQuiz($qId);
+        if (!$quiz || (int)$quiz['lms_course_id'] !== $lmsCourseId || $quiz['status'] !== 'published') {
+            $this->notFound($response);
+            return;
+        }
+
         $attempt = $this->quizService->getAttempt($aId);
-        if (!$attempt || $attempt['student_id'] != $userId) {
+        if (!$attempt || (int)$attempt['student_id'] !== $userId || (int)$attempt['lms_quiz_id'] !== $qId || $attempt['status'] !== 'in_progress') {
             $this->notFound($response);
             return;
         }
@@ -170,14 +206,19 @@ class StudentQuizController extends BaseController
         $lmsCourseId = (int)$courseId;
         $qId = (int)$quizId;
         $aId = (int)$attemptId;
-        $userId = $_SESSION['user_id'];
+        $userId = (int)($_SESSION['user_id'] ?? 0);
         
         $this->authorizeStudent($response, $lmsCourseId);
 
         $quiz = $this->quizService->getQuiz($qId);
+        if (!$quiz || (int)$quiz['lms_course_id'] !== $lmsCourseId) {
+            $this->notFound($response);
+            return;
+        }
+
         $attempt = $this->quizService->getAttempt($aId);
 
-        if (!$attempt || $attempt['student_id'] != $userId || $attempt['lms_quiz_id'] != $qId || $attempt['status'] === 'in_progress') {
+        if (!$attempt || (int)$attempt['student_id'] !== $userId || (int)$attempt['lms_quiz_id'] !== $qId || $attempt['status'] === 'in_progress') {
             $this->notFound($response);
             return;
         }

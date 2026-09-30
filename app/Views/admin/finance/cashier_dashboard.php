@@ -180,7 +180,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           <!-- Status Filter Tabs -->
           <div class="btn-group p-1 bg-light border rounded-pill" role="group" aria-label="Status Filter">
             <button type="button" class="btn btn-sm rounded-pill px-3 fw-semibold filter-tab-btn active" data-status="all">
-              All <span class="badge bg-secondary rounded-pill ms-1"><?= count($assessments) ?></span>
+              All <span class="badge bg-secondary rounded-pill ms-1"><?= (int)($total_items ?? count($assessments)) ?></span>
             </button>
             <button type="button" class="btn btn-sm rounded-pill px-3 fw-semibold filter-tab-btn" data-status="unpaid">
               Unpaid <span class="badge bg-warning text-dark rounded-pill ms-1"><?= $stats['unpaid_accounts'] ?></span>
@@ -379,6 +379,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             </tbody>
           </table>
         </div>
+        <?php require __DIR__ . '/../../components/pagination.php'; ?>
       </div>
 
     </div>

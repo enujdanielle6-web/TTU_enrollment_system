@@ -658,6 +658,58 @@ try {
             : '/sia/admin/registrar/college_enrollment_queue.php';
         $response->redirect($redirectUrl);
     }
+
+    public function transferSection(Request $request, Response $response)
+    {
+        $pdo = Database::getConnection();
+        requirePermission('enrollment.finalize');
+
+        $appId = (int)($_POST['application_id'] ?? 0);
+        $newSectionId = (int)($_POST['section_id'] ?? 0);
+
+        if ($appId <= 0 || $newSectionId <= 0) {
+            $_SESSION['admin_error'] = 'Invalid application or target section ID.';
+            $response->redirect('/sia/admin/registrar/students.php');
+            return;
+        }
+
+        $result = \App\Services\EnrollmentService::transferSection($appId, $newSectionId, (int)($_SESSION['user_id'] ?? 0), $pdo);
+
+        if ($result['success']) {
+            $_SESSION['admin_success'] = $result['message'];
+        } else {
+            $_SESSION['admin_error'] = $result['error'];
+        }
+
+        $response->redirect('/sia/admin/registrar/students.php');
+    }
+
+    public function dropSubject(Request $request, Response $response)
+    {
+        $pdo = Database::getConnection();
+        requirePermission('enrollment.finalize');
+
+        $appId = (int)($_POST['application_id'] ?? 0);
+        $subjectId = (int)($_POST['subject_id'] ?? 0);
+        $academicLevel = trim($_POST['academic_level'] ?? 'College');
+        $status = in_array($_POST['status'] ?? '', ['dropped', 'withdrawn']) ? $_POST['status'] : 'dropped';
+
+        if ($appId <= 0 || $subjectId <= 0) {
+            $_SESSION['admin_error'] = 'Invalid application or subject ID.';
+            $response->redirect('/sia/admin/registrar/students.php');
+            return;
+        }
+
+        $result = \App\Services\EnrollmentService::dropSubject($appId, $subjectId, $academicLevel, $status, (int)($_SESSION['user_id'] ?? 0), $pdo);
+
+        if ($result['success']) {
+            $_SESSION['admin_success'] = $result['message'];
+        } else {
+            $_SESSION['admin_error'] = $result['error'];
+        }
+
+        $response->redirect('/sia/admin/registrar/students.php');
+    }
 }
 
 

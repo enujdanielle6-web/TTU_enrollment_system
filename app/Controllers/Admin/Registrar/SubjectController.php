@@ -98,19 +98,42 @@ class SubjectController extends BaseController
         $pdo = Database::getConnection();
         $pageTitle = 'Subjects - Admin Portal';
 
+        $search = trim((string)$request->input('search', ''));
+        $page = max(1, (int)$request->input('page', 1));
+        $limit = 15;
+        $offset = ($page - 1) * $limit;
+
+        $whereClauses = [];
+        $params = [];
+
+        if ($search !== '') {
+            $whereClauses[] = '(s.subject_code LIKE :search OR s.name LIKE :search OR s.description LIKE :search)';
+            $params['search'] = '%' . $search . '%';
+        }
+
+        $whereSql = !empty($whereClauses) ? ' WHERE ' . implode(' AND ', $whereClauses) : '';
+
+        $totalCount = 0;
+        $totalPages = 1;
         $subjects = [];
+
         try {
-            $stmt = $pdo->query('
+            $countStmt = $pdo->prepare("SELECT COUNT(*) FROM subjects s $whereSql");
+            $countStmt->execute($params);
+            $totalCount = (int)$countStmt->fetchColumn();
+            $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+            $query = "
                 SELECT 
                     s.*,
-                    (SELECT COUNT(*) FROM college_curriculum_subjects ccs JOIN college_curricula cc ON ccs.curriculum_id = cc.id WHERE ccs.subject_id = s.id AND cc.status = \'draft\') +
-                    (SELECT COUNT(*) FROM shs_curriculum_subjects scs JOIN shs_curricula sc ON scs.curriculum_id = sc.id WHERE scs.subject_id = s.id AND sc.status = \'draft\') as draft_count,
+                    (SELECT COUNT(*) FROM college_curriculum_subjects ccs JOIN college_curricula cc ON ccs.curriculum_id = cc.id WHERE ccs.subject_id = s.id AND cc.status = 'draft') +
+                    (SELECT COUNT(*) FROM shs_curriculum_subjects scs JOIN shs_curricula sc ON scs.curriculum_id = sc.id WHERE scs.subject_id = s.id AND sc.status = 'draft') as draft_count,
                     
-                    (SELECT COUNT(*) FROM college_curriculum_subjects ccs JOIN college_curricula cc ON ccs.curriculum_id = cc.id WHERE ccs.subject_id = s.id AND cc.status = \'active\') +
-                    (SELECT COUNT(*) FROM shs_curriculum_subjects scs JOIN shs_curricula sc ON scs.curriculum_id = sc.id WHERE scs.subject_id = s.id AND sc.status = \'active\') as active_count,
+                    (SELECT COUNT(*) FROM college_curriculum_subjects ccs JOIN college_curricula cc ON ccs.curriculum_id = cc.id WHERE ccs.subject_id = s.id AND cc.status = 'active') +
+                    (SELECT COUNT(*) FROM shs_curriculum_subjects scs JOIN shs_curricula sc ON scs.curriculum_id = sc.id WHERE scs.subject_id = s.id AND sc.status = 'active') as active_count,
 
-                    (SELECT COUNT(*) FROM college_curriculum_subjects ccs JOIN college_curricula cc ON ccs.curriculum_id = cc.id WHERE ccs.subject_id = s.id AND cc.status = \'archived\') +
-                    (SELECT COUNT(*) FROM shs_curriculum_subjects scs JOIN shs_curricula sc ON scs.curriculum_id = sc.id WHERE scs.subject_id = s.id AND sc.status = \'archived\') as archived_count,
+                    (SELECT COUNT(*) FROM college_curriculum_subjects ccs JOIN college_curricula cc ON ccs.curriculum_id = cc.id WHERE ccs.subject_id = s.id AND cc.status = 'archived') +
+                    (SELECT COUNT(*) FROM shs_curriculum_subjects scs JOIN shs_curricula sc ON scs.curriculum_id = sc.id WHERE scs.subject_id = s.id AND sc.status = 'archived') as archived_count,
 
                     (SELECT COUNT(*) FROM college_section_subjects WHERE subject_id = s.id) +
                     (SELECT COUNT(*) FROM shs_section_subjects WHERE subject_id = s.id) as section_count,
@@ -120,8 +143,18 @@ class SubjectController extends BaseController
 
                     (SELECT COUNT(*) FROM lms_courses WHERE subject_id = s.id) as lms_count
                 FROM subjects s 
+                $whereSql
                 ORDER BY s.subject_code ASC
-            ');
+                LIMIT :limit OFFSET :offset
+            ";
+
+            $stmt = $pdo->prepare($query);
+            foreach ($params as $k => $v) {
+                $stmt->bindValue(':' . $k, $v);
+            }
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
             $subjectsRaw = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             foreach ($subjectsRaw as $sub) {

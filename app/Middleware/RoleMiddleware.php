@@ -16,7 +16,8 @@ class RoleMiddleware implements MiddlewareInterface
             'programs.manage', 'subjects.manage', 
             'curriculum.manage', 'shs_curriculum.manage', 'college_curriculum.manage', 
             'enrollment.finalize',
-            'applications.view_details'
+            'applications.view_details',
+            'lms.manage', 'lms.courses.manage'
         ],
         'scheduler' => [
             'sections.manage', 'shs_sections.manage', 'college_sections.manage',
@@ -98,7 +99,9 @@ class RoleMiddleware implements MiddlewareInterface
     {
         $response = new Response();
         
-        if ($userRole === 'applicant' || $userRole === 'student') {
+        if ($userRole === 'student') {
+            $response->redirect('/sia/lms/student/dashboard.php');
+        } elseif ($userRole === 'applicant') {
             $response->redirect('/sia/applicant/dashboard.php');
         } else {
             $_SESSION['admin_error'] = 'Access denied. You do not have permission to view this module.';

@@ -2,6 +2,7 @@
 $pageTitle = 'LMS Course Generator - Administrator';
 require_once __DIR__ . '/../../components/header.php';
 require_once __DIR__ . '/../../components/admin_navbar.php';
+require_once __DIR__ . '/../lms/components/lms_header.php';
 ?>
 
 <main class="py-5 bg-light min-vh-100">

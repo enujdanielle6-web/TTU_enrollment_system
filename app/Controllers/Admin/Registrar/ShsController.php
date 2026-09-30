@@ -23,9 +23,18 @@ $pageTitle = 'SHS Strands - Administrator';
         $pdo = Database::getConnection();
         $pageTitle = 'SHS Curriculum Management - Admin Portal';
 
+        $page = max(1, (int)($request->input('page', 1)));
+        $limit = 10;
+        $offset = ($page - 1) * $limit;
+        $totalCount = 0;
+        $totalPages = 1;
         $curriculaData = [];
+
         try {
-            $stmt = $pdo->query('
+            $totalCount = (int)$pdo->query('SELECT COUNT(*) FROM shs_curricula c INNER JOIN shs_strands p ON c.strand_id = p.id')->fetchColumn();
+            $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+            $stmt = $pdo->prepare('
                 SELECT 
                     c.id as curriculum_id,
                     c.strand_id,
@@ -43,7 +52,11 @@ $pageTitle = 'SHS Strands - Administrator';
                 FROM shs_curricula c
                 INNER JOIN shs_strands p ON c.strand_id = p.id
                 ORDER BY p.code ASC, c.version DESC
+                LIMIT :limit OFFSET :offset
             ');
+            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+            $stmt->execute();
             $curriculaData = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
             error_log('Failed to fetch shs_curricula: ' . $e->getMessage());

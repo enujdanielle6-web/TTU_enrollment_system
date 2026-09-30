@@ -212,6 +212,7 @@ $statusFilter = $statusFilter ?? ($_GET['status'] ?? 'all');
             </tbody>
           </table>
         </div>
+        <?php require __DIR__ . '/../../components/pagination.php'; ?>
       </div>
     </div>
 

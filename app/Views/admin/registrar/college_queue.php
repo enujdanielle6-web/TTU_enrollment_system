@@ -27,7 +27,15 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             <p class="text-muted small mb-0">Review approved applications with verified payments and finalize their official enrollment.</p>
           </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <div class="btn-group p-1 bg-white border rounded-pill shadow-xs" role="group" aria-label="Enrollment Queue Switcher">
+            <a href="college_enrollment_queue.php" class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold btn-primary">
+              <i class="bi bi-mortarboard-fill me-1"></i> College Queue
+            </a>
+            <a href="shs_enrollment_queue.php" class="btn btn-sm rounded-pill px-3 py-1.5 fw-semibold btn-light text-muted border-0">
+              <i class="bi bi-journal-bookmark-fill me-1"></i> SHS Queue
+            </a>
+          </div>
           <a href="registrar_dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
             <i class="bi bi-speedometer2 text-primary"></i>
             <span>Dashboard</span>

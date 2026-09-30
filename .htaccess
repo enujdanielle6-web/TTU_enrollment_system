@@ -9,7 +9,7 @@
     RewriteRule ^ - [L]
 
     # Prevent direct access to sensitive directories
-    RewriteRule ^(app|config|database)/ - [F,L]
+    RewriteRule ^(app|config|database|storage)/ - [F,L]
 
     # If it's not an existing file, route it to public/index.php
     # We remove the !-d condition so the root directory '/' is also routed to the front controller

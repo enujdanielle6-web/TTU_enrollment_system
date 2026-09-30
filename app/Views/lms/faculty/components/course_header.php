@@ -154,4 +154,10 @@ $annCount = (int)$announcement_count;
         <i class="bi bi-person-check"></i>
         <span>Attendance</span>
     </a>
+
+    <a href="/sia/lms/faculty/course/<?= esc($courseId) ?>/roster" 
+       class="course-nav-link <?= esc($activeTab === 'roster' ? 'active' : '') ?>">
+        <i class="bi bi-people"></i>
+        <span>Roster</span>
+    </a>
 </div>

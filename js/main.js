@@ -61,9 +61,12 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 5000);
     });
 
-    // 3. Sidebar Minimize Toggle & Tooltips
+    // 3. Sidebar Minimize Toggle, Mobile Drawer & Tooltips
     const sidebar = document.getElementById('adminSidebar');
     const minimizeBtn = document.getElementById('sidebarMinimize');
+    const mobileToggleBtn = document.getElementById('sidebarToggle');
+    const sidebarCloseBtn = document.getElementById('sidebarClose');
+    const sidebarBackdrop = document.getElementById('sidebarBackdrop');
     
     // Initialize tooltips for sidebar
     const tooltipTriggerList = [].slice.call(document.querySelectorAll('#adminSidebar [data-sidebar-tooltip="true"]'));
@@ -108,6 +111,55 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // Mobile sidebar toggle
+    if (mobileToggleBtn && sidebar) {
+        mobileToggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.toggle('show');
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.toggle('d-none', !sidebar.classList.contains('show'));
+            }
+        });
+    }
+
+    // Mobile sidebar close button
+    if (sidebarCloseBtn && sidebar) {
+        sidebarCloseBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.remove('show');
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.add('d-none');
+            }
+        });
+    }
+
+    // Mobile sidebar backdrop click to close
+    if (sidebarBackdrop && sidebar) {
+        sidebarBackdrop.addEventListener('click', function() {
+            sidebar.classList.remove('show');
+            sidebarBackdrop.classList.add('d-none');
+        });
+    }
+
+    // Auto close drawer when navigating on mobile
+    const sidebarNavLinks = document.querySelectorAll('#adminSidebar .nav-link:not(.sidebar-toggle)');
+    sidebarNavLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth < 992 && sidebar) {
+                sidebar.classList.remove('show');
+                if (sidebarBackdrop) sidebarBackdrop.classList.add('d-none');
+            }
+        });
+    });
+
+    // Handle viewport resize: clean up mobile drawer state on desktop
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 992 && sidebar) {
+            sidebar.classList.remove('show');
+            if (sidebarBackdrop) sidebarBackdrop.classList.add('d-none');
+        }
+    });
 });
 
 // 4. Custom SweetAlert2 for Enrollment Finalization

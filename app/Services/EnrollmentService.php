@@ -133,23 +133,40 @@ class EnrollmentService
                 $reqSubs = $reqStmt->fetchAll(PDO::FETCH_ASSOC);
 
                 if (!empty($reqSubs)) {
+                    $lmsService = new \App\Services\LmsService();
                     if ($academicLevel === 'College') {
-                        $insCe = $pdo->prepare('INSERT IGNORE INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                        $insCe = $pdo->prepare('INSERT INTO college_enrollments (application_id, subject_id, college_section_id, status) VALUES (:app_id, :sub_id, :sec_id, "enrolled") ON DUPLICATE KEY UPDATE college_section_id = VALUES(college_section_id), status = "enrolled", dropped_at = NULL');
+                        $facStmt = $pdo->prepare('SELECT faculty_user_id FROM college_section_subjects WHERE college_section_id = :sec_id AND subject_id = :sub_id LIMIT 1');
                         foreach ($reqSubs as $rs) {
+                            $secId = !empty($rs['section_id']) ? (int)$rs['section_id'] : ($app['section_id'] ?? null);
+                            $subId = (int)$rs['subject_id'];
                             $insCe->execute([
                                 'app_id' => $applicationId,
-                                'sub_id' => (int)$rs['subject_id'],
-                                'sec_id' => !empty($rs['section_id']) ? (int)$rs['section_id'] : ($app['section_id'] ?? null)
+                                'sub_id' => $subId,
+                                'sec_id' => $secId
                             ]);
+                            if ($secId) {
+                                $facStmt->execute(['sec_id' => $secId, 'sub_id' => $subId]);
+                                $facId = $facStmt->fetchColumn() ?: null;
+                                $lmsService->provisionCourseShell('College', $secId, $subId, $facId ? (int)$facId : null);
+                            }
                         }
                     } else {
-                        $insSe = $pdo->prepare('INSERT IGNORE INTO shs_enrollments (application_id, subject_id, shs_section_id) VALUES (:app_id, :sub_id, :sec_id)');
+                        $insSe = $pdo->prepare('INSERT INTO shs_enrollments (application_id, subject_id, shs_section_id, status) VALUES (:app_id, :sub_id, :sec_id, "enrolled") ON DUPLICATE KEY UPDATE shs_section_id = VALUES(shs_section_id), status = "enrolled", dropped_at = NULL');
+                        $facStmt = $pdo->prepare('SELECT faculty_user_id FROM shs_section_subjects WHERE shs_section_id = :sec_id AND subject_id = :sub_id LIMIT 1');
                         foreach ($reqSubs as $rs) {
+                            $secId = !empty($rs['section_id']) ? (int)$rs['section_id'] : ($app['section_id'] ?? null);
+                            $subId = (int)$rs['subject_id'];
                             $insSe->execute([
                                 'app_id' => $applicationId,
-                                'sub_id' => (int)$rs['subject_id'],
-                                'sec_id' => !empty($rs['section_id']) ? (int)$rs['section_id'] : ($app['section_id'] ?? null)
+                                'sub_id' => $subId,
+                                'sec_id' => $secId
                             ]);
+                            if ($secId) {
+                                $facStmt->execute(['sec_id' => $secId, 'sub_id' => $subId]);
+                                $facId = $facStmt->fetchColumn() ?: null;
+                                $lmsService->provisionCourseShell('SHS', $secId, $subId, $facId ? (int)$facId : null);
+                            }
                         }
                     }
                 }
@@ -224,52 +241,359 @@ class EnrollmentService
 
     /**
      * Enrolls the applicant into all subjects belonging to the assigned section.
-     * Uses INSERT IGNORE to prevent duplicate enrollment records.
+     * Uses atomic UPSERT and explicitly provisions LMS course shells deterministically.
      */
     public static function assignSectionSubjects(int $applicationId, int $sectionId, string $academicLevel, PDO $pdo): int
     {
         $enrolledCount = 0;
+        $lmsService = new \App\Services\LmsService();
 
         if ($academicLevel === 'College') {
-            $secSubs = $pdo->prepare('SELECT subject_id FROM college_section_subjects WHERE college_section_id = :sec_id');
+            $secSubs = $pdo->prepare('SELECT subject_id, faculty_user_id FROM college_section_subjects WHERE college_section_id = :sec_id');
             $secSubs->execute(['sec_id' => $sectionId]);
-            $subIds = array_map('intval', $secSubs->fetchAll(PDO::FETCH_COLUMN));
+            $subjects = $secSubs->fetchAll(PDO::FETCH_ASSOC);
 
-            if (!empty($subIds)) {
-                $existingStmt = $pdo->prepare('SELECT subject_id FROM college_enrollments WHERE application_id = :app_id');
-                $existingStmt->execute(['app_id' => $applicationId]);
-                $existingSubIds = array_map('intval', $existingStmt->fetchAll(PDO::FETCH_COLUMN));
+            if (!empty($subjects)) {
+                $insCe = $pdo->prepare('
+                    INSERT INTO college_enrollments (application_id, subject_id, college_section_id, status)
+                    VALUES (:app_id, :sub_id, :sec_id, "enrolled")
+                    ON DUPLICATE KEY UPDATE college_section_id = VALUES(college_section_id), status = "enrolled", dropped_at = NULL
+                ');
 
-                $toInsert = array_diff($subIds, $existingSubIds);
-                if (!empty($toInsert)) {
-                    $insCe = $pdo->prepare('INSERT IGNORE INTO college_enrollments (application_id, subject_id, college_section_id) VALUES (:app_id, :sub_id, :sec_id)');
-                    foreach ($toInsert as $sId) {
-                        $insCe->execute(['app_id' => $applicationId, 'sub_id' => $sId, 'sec_id' => $sectionId]);
-                        $enrolledCount++;
-                    }
+                foreach ($subjects as $s) {
+                    $sId = (int)$s['subject_id'];
+                    $fId = !empty($s['faculty_user_id']) ? (int)$s['faculty_user_id'] : null;
+
+                    $insCe->execute([
+                        'app_id' => $applicationId,
+                        'sub_id' => $sId,
+                        'sec_id' => $sectionId
+                    ]);
+
+                    // Deterministic LMS course shell provisioning
+                    $lmsService->provisionCourseShell('College', $sectionId, $sId, $fId);
+                    $enrolledCount++;
                 }
             }
         } else {
-            $secSubs = $pdo->prepare('SELECT subject_id FROM shs_section_subjects WHERE shs_section_id = :sec_id');
+            $secSubs = $pdo->prepare('SELECT subject_id, faculty_user_id FROM shs_section_subjects WHERE shs_section_id = :sec_id');
             $secSubs->execute(['sec_id' => $sectionId]);
-            $subIds = array_map('intval', $secSubs->fetchAll(PDO::FETCH_COLUMN));
+            $subjects = $secSubs->fetchAll(PDO::FETCH_ASSOC);
 
-            if (!empty($subIds)) {
-                $existingStmt = $pdo->prepare('SELECT subject_id FROM shs_enrollments WHERE application_id = :app_id');
-                $existingStmt->execute(['app_id' => $applicationId]);
-                $existingSubIds = array_map('intval', $existingStmt->fetchAll(PDO::FETCH_COLUMN));
+            if (!empty($subjects)) {
+                $insSe = $pdo->prepare('
+                    INSERT INTO shs_enrollments (application_id, subject_id, shs_section_id, status)
+                    VALUES (:app_id, :sub_id, :sec_id, "enrolled")
+                    ON DUPLICATE KEY UPDATE shs_section_id = VALUES(shs_section_id), status = "enrolled", dropped_at = NULL
+                ');
 
-                $toInsert = array_diff($subIds, $existingSubIds);
-                if (!empty($toInsert)) {
-                    $insSe = $pdo->prepare('INSERT IGNORE INTO shs_enrollments (application_id, subject_id, shs_section_id) VALUES (:app_id, :sub_id, :sec_id)');
-                    foreach ($toInsert as $sId) {
-                        $insSe->execute(['app_id' => $applicationId, 'sub_id' => $sId, 'sec_id' => $sectionId]);
-                        $enrolledCount++;
-                    }
+                foreach ($subjects as $s) {
+                    $sId = (int)$s['subject_id'];
+                    $fId = !empty($s['faculty_user_id']) ? (int)$s['faculty_user_id'] : null;
+
+                    $insSe->execute([
+                        'app_id' => $applicationId,
+                        'sub_id' => $sId,
+                        'sec_id' => $sectionId
+                    ]);
+
+                    $lmsService->provisionCourseShell('SHS', $sectionId, $sId, $fId);
+                    $enrolledCount++;
                 }
             }
         }
 
         return $enrolledCount;
+    }
+
+    /**
+     * Executes an atomic section transfer for an enrolled student.
+     * Keeps applications and enrollment tables (college_enrollments / shs_enrollments) synchronized.
+     * Shifts active LMS course access to the new section while preserving historical activity records.
+     */
+    public static function transferSection(int $applicationId, int $newSectionId, ?int $performedByUserId = null, ?PDO $pdo = null): array
+    {
+        $pdo = $pdo ?? \App\Core\Database::getConnection();
+
+        $appStmt = $pdo->prepare('
+            SELECT a.id, a.user_id, a.academic_level, a.status, a.section_id, a.student_type,
+                   u.first_name, u.last_name, u.student_number
+            FROM applications a
+            JOIN users u ON a.user_id = u.id
+            WHERE a.id = :id
+            LIMIT 1
+        ');
+        $appStmt->execute(['id' => $applicationId]);
+        $app = $appStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$app) {
+            return ['success' => false, 'error' => 'Application record not found.'];
+        }
+
+        if ($app['status'] !== 'enrolled') {
+            return ['success' => false, 'error' => 'Section transfer can only be performed for officially enrolled students.'];
+        }
+
+        $oldSectionId = (int)($app['section_id'] ?? 0);
+        if ($oldSectionId === $newSectionId) {
+            return ['success' => true, 'message' => 'Student is already assigned to this section.'];
+        }
+
+        $level = $app['academic_level'] ?? 'College';
+        $isCollege = ($level === 'College');
+
+        // Verify target section exists and is active
+        $secTable = $isCollege ? 'college_sections' : 'shs_sections';
+        $secCheck = $pdo->prepare("SELECT id, section_code FROM {$secTable} WHERE id = :id AND status = 1");
+        $secCheck->execute(['id' => $newSectionId]);
+        $newSec = $secCheck->fetch(PDO::FETCH_ASSOC);
+
+        if (!$newSec) {
+            return ['success' => false, 'error' => 'Target section does not exist or is inactive.'];
+        }
+
+        $startedTransaction = false;
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
+            $startedTransaction = true;
+        }
+
+        try {
+            // 1. Update applications.section_id
+            $updApp = $pdo->prepare('UPDATE applications SET section_id = :sec_id WHERE id = :id');
+            $updApp->execute(['sec_id' => $newSectionId, 'id' => $applicationId]);
+
+            $lmsService = new \App\Services\LmsService();
+
+            if ($isCollege) {
+                // Fetch section subjects of new section
+                $secSubsStmt = $pdo->prepare('
+                    SELECT subject_id, faculty_user_id 
+                    FROM college_section_subjects 
+                    WHERE college_section_id = :sec_id
+                ');
+                $secSubsStmt->execute(['sec_id' => $newSectionId]);
+                $newSecSubjects = $secSubsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                // Re-bind existing active enrollments to the new section
+                $updCe = $pdo->prepare('
+                    UPDATE college_enrollments 
+                    SET college_section_id = :new_sec 
+                    WHERE application_id = :app_id AND status = "enrolled"
+                ');
+                $updCe->execute(['new_sec' => $newSectionId, 'app_id' => $applicationId]);
+
+                // Ensure all subjects in new section are enrolled and provisioned
+                $insCe = $pdo->prepare('
+                    INSERT INTO college_enrollments (application_id, subject_id, college_section_id, status)
+                    VALUES (:app_id, :sub_id, :sec_id, "enrolled")
+                    ON DUPLICATE KEY UPDATE college_section_id = VALUES(college_section_id), status = "enrolled", dropped_at = NULL
+                ');
+
+                foreach ($newSecSubjects as $nss) {
+                    $sId = (int)$nss['subject_id'];
+                    $fId = !empty($nss['faculty_user_id']) ? (int)$nss['faculty_user_id'] : null;
+
+                    $insCe->execute([
+                        'app_id' => $applicationId,
+                        'sub_id' => $sId,
+                        'sec_id' => $newSectionId
+                    ]);
+
+                    $lmsService->provisionCourseShell('College', $newSectionId, $sId, $fId);
+                }
+            } else {
+                // SHS transfer
+                $secSubsStmt = $pdo->prepare('
+                    SELECT subject_id, faculty_user_id 
+                    FROM shs_section_subjects 
+                    WHERE shs_section_id = :sec_id
+                ');
+                $secSubsStmt->execute(['sec_id' => $newSectionId]);
+                $newSecSubjects = $secSubsStmt->fetchAll(PDO::FETCH_ASSOC);
+
+                $updSe = $pdo->prepare('
+                    UPDATE shs_enrollments 
+                    SET shs_section_id = :new_sec 
+                    WHERE application_id = :app_id AND status = "enrolled"
+                ');
+                $updSe->execute(['new_sec' => $newSectionId, 'app_id' => $applicationId]);
+
+                $insSe = $pdo->prepare('
+                    INSERT INTO shs_enrollments (application_id, subject_id, shs_section_id, status)
+                    VALUES (:app_id, :sub_id, :sec_id, "enrolled")
+                    ON DUPLICATE KEY UPDATE shs_section_id = VALUES(shs_section_id), status = "enrolled", dropped_at = NULL
+                ');
+
+                foreach ($newSecSubjects as $nss) {
+                    $sId = (int)$nss['subject_id'];
+                    $fId = !empty($nss['faculty_user_id']) ? (int)$nss['faculty_user_id'] : null;
+
+                    $insSe->execute([
+                        'app_id' => $applicationId,
+                        'sub_id' => $sId,
+                        'sec_id' => $newSectionId
+                    ]);
+
+                    $lmsService->provisionCourseShell('SHS', $newSectionId, $sId, $fId);
+                }
+            }
+
+            // Log activity for student
+            $desc = "Section transfer: Reassigned from section #{$oldSectionId} to {$newSec['section_code']} (#{$newSectionId}). LMS courses updated.";
+            $logStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:uid, :icon, :title, :desc)');
+            $logStmt->execute([
+                'uid' => (int)$app['user_id'],
+                'icon' => 'bi-arrow-left-right text-primary',
+                'title' => 'Section Transferred',
+                'desc' => $desc
+            ]);
+
+            if ($performedByUserId && function_exists('logActivity')) {
+                logActivity(
+                    $performedByUserId,
+                    'bi-arrow-left-right',
+                    'Section Transfer',
+                    $desc,
+                    "Application #{$applicationId}",
+                    ['section_id' => $oldSectionId],
+                    ['section_id' => $newSectionId]
+                );
+            }
+
+            if ($startedTransaction && $pdo->inTransaction()) {
+                $pdo->commit();
+            }
+
+            return [
+                'success' => true,
+                'message' => "Successfully transferred to section {$newSec['section_code']} and synchronized LMS course access.",
+                'new_section_code' => $newSec['section_code'],
+                'new_section_id' => $newSectionId
+            ];
+        } catch (\Exception $e) {
+            if ($startedTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log('EnrollmentService::transferSection error: ' . $e->getMessage());
+            return ['success' => false, 'error' => 'Section transfer failed: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Marks an enrolled subject as dropped or withdrawn.
+     * Revokes active LMS course access while preserving historical assignments, submissions, and quiz attempts.
+     */
+    public static function dropSubject(int $applicationId, int $subjectId, string $academicLevel, string $status = 'dropped', ?int $performedByUserId = null, ?PDO $pdo = null): array
+    {
+        $pdo = $pdo ?? \App\Core\Database::getConnection();
+
+        if (!in_array($status, ['dropped', 'withdrawn'], true)) {
+            return ['success' => false, 'error' => 'Invalid status. Must be "dropped" or "withdrawn".'];
+        }
+
+        $table = ($academicLevel === 'College') ? 'college_enrollments' : 'shs_enrollments';
+
+        $checkStmt = $pdo->prepare("SELECT id, status FROM {$table} WHERE application_id = :app_id AND subject_id = :sub_id LIMIT 1");
+        $checkStmt->execute(['app_id' => $applicationId, 'sub_id' => $subjectId]);
+        $enrollment = $checkStmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$enrollment) {
+            return ['success' => false, 'error' => 'Enrollment record for this subject not found.'];
+        }
+
+        if ($enrollment['status'] === $status) {
+            return ['success' => true, 'message' => "Subject is already marked as {$status}."];
+        }
+
+        $startedTransaction = false;
+        if (!$pdo->inTransaction()) {
+            $pdo->beginTransaction();
+            $startedTransaction = true;
+        }
+
+        try {
+            $upd = $pdo->prepare("
+                UPDATE {$table} 
+                SET status = :status, dropped_at = NOW() 
+                WHERE application_id = :app_id AND subject_id = :sub_id
+            ");
+            $upd->execute([
+                'status' => $status,
+                'app_id' => $applicationId,
+                'sub_id' => $subjectId
+            ]);
+
+            // Fetch subject metadata
+            $subStmt = $pdo->prepare('SELECT subject_code, subject_name FROM subjects WHERE id = ?');
+            $subStmt->execute([$subjectId]);
+            $sub = $subStmt->fetch(PDO::FETCH_ASSOC);
+            $subCode = $sub['subject_code'] ?? "Subject #{$subjectId}";
+
+            // Fetch student user_id
+            $uStmt = $pdo->prepare('SELECT user_id FROM applications WHERE id = ?');
+            $uStmt->execute([$applicationId]);
+            $userId = (int)$uStmt->fetchColumn();
+
+            if ($userId > 0) {
+                $statusUpper = ucfirst($status);
+                $logStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, icon, title, description) VALUES (:uid, :icon, :title, :desc)');
+                $logStmt->execute([
+                    'uid' => $userId,
+                    'icon' => 'bi-dash-circle text-warning',
+                    'title' => "Subject {$statusUpper}",
+                    'desc' => "Official enrollment in {$subCode} has been marked as {$status}. Active LMS access revoked."
+                ]);
+            }
+
+            if ($performedByUserId && function_exists('logActivity')) {
+                logActivity(
+                    $performedByUserId,
+                    'bi-dash-circle',
+                    "Subject {$status}",
+                    "Marked {$subCode} as {$status} for Application #{$applicationId}.",
+                    "Application #{$applicationId}",
+                    ['status' => $enrollment['status']],
+                    ['status' => $status]
+                );
+            }
+
+            if ($startedTransaction && $pdo->inTransaction()) {
+                $pdo->commit();
+            }
+
+            return [
+                'success' => true,
+                'message' => "Subject {$subCode} successfully marked as {$status}. Active LMS access revoked while preserving historical work."
+            ];
+        } catch (\Exception $e) {
+            if ($startedTransaction && $pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            error_log("EnrollmentService::dropSubject error: " . $e->getMessage());
+            return ['success' => false, 'error' => "Failed to update subject status: " . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Marks an enrolled subject as withdrawn.
+     */
+    public static function withdrawSubject(int $applicationId, int $subjectId, string $academicLevel, ?int $performedByUserId = null, ?PDO $pdo = null): array
+    {
+        return self::dropSubject($applicationId, $subjectId, $academicLevel, 'withdrawn', $performedByUserId, $pdo);
+    }
+
+    /**
+     * Restores a dropped or withdrawn subject back to active enrollment.
+     */
+    public static function restoreSubject(int $applicationId, int $subjectId, string $academicLevel, ?int $performedByUserId = null, ?PDO $pdo = null): array
+    {
+        $pdo = $pdo ?? \App\Core\Database::getConnection();
+        $table = ($academicLevel === 'College') ? 'college_enrollments' : 'shs_enrollments';
+
+        $upd = $pdo->prepare("UPDATE {$table} SET status = 'enrolled', dropped_at = NULL WHERE application_id = :app_id AND subject_id = :sub_id");
+        $upd->execute(['app_id' => $applicationId, 'sub_id' => $subjectId]);
+
+        return ['success' => true, 'message' => 'Subject enrollment restored to active status.'];
     }
 }

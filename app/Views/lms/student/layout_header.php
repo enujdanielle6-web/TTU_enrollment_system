@@ -13,6 +13,13 @@ if ($studentUserId > 0) {
     }
 }
 $updateCount = count($professorUpdates);
+
+$platformAnnouncements = [];
+try {
+    $platformAnnouncements = (new \App\Services\LmsAnnouncementService())->getPlatformAnnouncements('students');
+} catch (\Throwable $e) {
+    $platformAnnouncements = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -215,4 +222,38 @@ $updateCount = count($professorUpdates);
 
 <!-- Main Content Area -->
 <div class="lms-main" id="spa-main">
+
+<?php if (!empty($platformAnnouncements)): ?>
+    <div class="px-3 pt-3">
+        <?php foreach ($platformAnnouncements as $pAnn): 
+            $pSev = $pAnn['severity'] ?? 'info';
+            $pAlertClass = 'alert-primary';
+            $pIcon = 'bi-info-circle-fill';
+            if ($pSev === 'warning') {
+                $pAlertClass = 'alert-warning';
+                $pIcon = 'bi-exclamation-triangle-fill';
+            } elseif ($pSev === 'danger') {
+                $pAlertClass = 'alert-danger';
+                $pIcon = 'bi-exclamation-octagon-fill';
+            } elseif ($pSev === 'success') {
+                $pAlertClass = 'alert-success';
+                $pIcon = 'bi-check-circle-fill';
+            }
+        ?>
+            <div class="alert <?= $pAlertClass ?> alert-dismissible fade show border-0 shadow-sm rounded-4 mb-3 d-flex align-items-start gap-3 p-3" role="alert">
+                <div class="fs-4 flex-shrink-0 lh-1 mt-0.5">
+                    <i class="bi <?= $pIcon ?>"></i>
+                </div>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                        <strong class="fw-bold text-dark"><?= htmlspecialchars($pAnn['title']) ?></strong>
+                        <span class="badge bg-white text-dark shadow-xs border rounded-pill px-2 py-0.5 small" style="font-size: 0.65rem;">LMS Notice</span>
+                    </div>
+                    <div class="small text-dark mb-0 opacity-90"><?= nl2br(htmlspecialchars($pAnn['content'])) ?></div>
+                </div>
+                <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endforeach; ?>
+    </div>
+<?php endif; ?>
 

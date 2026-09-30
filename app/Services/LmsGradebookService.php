@@ -23,35 +23,7 @@ class LmsGradebookService
      */
     private function getEnrolledStudents(int $lmsCourseId): array
     {
-        $course = $this->lmsService->getCourseDetails($lmsCourseId);
-        if (!$course) return [];
-
-        $type = $course['academic_level'];
-        $sectionId = $course['academic_section_id'];
-        $subjectId = $course['subject_id'];
-
-        if ($type === 'College') {
-            $stmt = $this->pdo->prepare("
-                SELECT u.id, u.student_number, u.first_name, u.last_name 
-                FROM college_enrollments ce
-                JOIN applications a ON ce.application_id = a.id
-                JOIN users u ON a.user_id = u.id
-                WHERE ce.college_section_id = :sec AND ce.subject_id = :sub
-                ORDER BY u.last_name ASC, u.first_name ASC
-            ");
-        } else {
-            $stmt = $this->pdo->prepare("
-                SELECT u.id, u.student_number, u.first_name, u.last_name 
-                FROM shs_enrollments se
-                JOIN applications a ON se.application_id = a.id
-                JOIN users u ON a.user_id = u.id
-                WHERE se.shs_section_id = :sec AND se.subject_id = :sub
-                ORDER BY u.last_name ASC, u.first_name ASC
-            ");
-        }
-        
-        $stmt->execute(['sec' => $sectionId, 'sub' => $subjectId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->lmsService->getCourseRoster($lmsCourseId);
     }
 
     /**
@@ -80,21 +52,60 @@ class LmsGradebookService
 
         $totalPossible = $maxAssignmentPoints + $maxQuizPoints;
 
-        // 3. Build Grid
+        // 3. Pre-fetch all submissions and attempts for this course in bulk (eliminates N+1 queries)
+        $submissionsByStudentAndAssignment = [];
+        if (!empty($assignments)) {
+            $assignmentIds = array_column($assignments, 'id');
+            $placeholders = implode(',', array_fill(0, count($assignmentIds), '?'));
+            $subStmt = $this->pdo->prepare("
+                SELECT * FROM lms_submissions 
+                WHERE assignment_id IN ($placeholders)
+                ORDER BY submitted_at DESC
+            ");
+            $subStmt->execute($assignmentIds);
+            while ($sub = $subStmt->fetch(PDO::FETCH_ASSOC)) {
+                $sId = (int)$sub['student_id'];
+                $aId = (int)$sub['assignment_id'];
+                if (!isset($submissionsByStudentAndAssignment[$sId][$aId])) {
+                    $submissionsByStudentAndAssignment[$sId][$aId] = $sub;
+                }
+            }
+        }
+
+        $attemptsByStudentAndQuiz = [];
+        if (!empty($quizzes)) {
+            $quizIds = array_column($quizzes, 'id');
+            $qPlaceholders = implode(',', array_fill(0, count($quizIds), '?'));
+            $attStmt = $this->pdo->prepare("
+                SELECT * FROM lms_quiz_attempts 
+                WHERE lms_quiz_id IN ($qPlaceholders)
+                ORDER BY attempt_number ASC
+            ");
+            $attStmt->execute($quizIds);
+            while ($att = $attStmt->fetch(PDO::FETCH_ASSOC)) {
+                $sId = (int)$att['student_id'];
+                $qId = (int)$att['lms_quiz_id'];
+                $attemptsByStudentAndQuiz[$sId][$qId][] = $att;
+            }
+        }
+
+        // 4. Build Grid in memory (O(1) lookups)
         $grid = [];
         foreach ($students as $student) {
-            $studentId = $student['id'];
+            $studentId = (int)$student['id'];
             $studentTotal = 0;
             
             $studentData = [
                 'student' => $student,
                 'assignments' => [],
-                'quizzes' => []
+                'assignment_submissions' => [],
+                'quizzes' => [],
+                'quiz_attempts' => []
             ];
 
             // Assignments
             foreach ($assignments as $a) {
-                $sub = $this->lmsService->getStudentSubmission($a['id'], $studentId);
+                $sub = $submissionsByStudentAndAssignment[$studentId][$a['id']] ?? null;
                 $grade = ($sub && $sub['status'] === 'GRADED') ? (float)$sub['grade'] : null;
                 $studentData['assignments'][$a['id']] = $grade;
                 $studentData['assignment_submissions'][$a['id']] = $sub;
@@ -103,7 +114,7 @@ class LmsGradebookService
 
             // Quizzes (Max score among graded attempts)
             foreach ($quizzes as $q) {
-                $attempts = $this->quizService->getStudentAttempts($q['id'], $studentId);
+                $attempts = $attemptsByStudentAndQuiz[$studentId][$q['id']] ?? [];
                 $bestScore = null;
                 foreach ($attempts as $att) {
                     if ($att['status'] === 'graded') {
@@ -135,26 +146,88 @@ class LmsGradebookService
     }
 
     /**
-     * Builds personal gradebook for one student.
+     * Builds personal gradebook for one student in O(1) student complexity.
+     * Fetches only assessments and this student's records without calculating
+     * or loading the entire class roster.
      */
-    public function getStudentGradebook(int $lmsCourseId, int $studentId): array
+    public function getStudentPersonalGradebook(int $lmsCourseId, int $studentId): array
     {
-        $gradebook = $this->getCourseGradebook($lmsCourseId);
+        // 1. Get Assessments for this course
+        $assignments = $this->lmsService->getAssignmentsByCourse($lmsCourseId, true);
+        $quizzes = $this->quizService->getQuizzesByCourse($lmsCourseId, true);
+
+        // 2. Calculate Maximum Assessment Points
+        $maxAssignmentPoints = array_sum(array_column($assignments, 'max_score'));
         
-        $myGridRow = null;
-        foreach ($gradebook['grid'] as $row) {
-            if ($row['student']['id'] == $studentId) {
-                $myGridRow = $row;
-                break;
+        $maxQuizPoints = 0;
+        $quizTotalPointsMap = [];
+        foreach ($quizzes as $quiz) {
+            $questions = $this->quizService->getQuestions($quiz['id']);
+            $points = array_sum(array_column($questions, 'points'));
+            $maxQuizPoints += $points;
+            $quizTotalPointsMap[$quiz['id']] = $points;
+        }
+
+        $totalPossible = $maxAssignmentPoints + $maxQuizPoints;
+
+        // 3. Assemble Only This Student's Grades
+        $studentTotal = 0;
+        $studentData = [
+            'student' => ['id' => $studentId],
+            'assignments' => [],
+            'assignment_submissions' => [],
+            'quizzes' => [],
+            'quiz_attempts' => []
+        ];
+
+        // Assignments
+        foreach ($assignments as $a) {
+            $sub = $this->lmsService->getStudentSubmission($a['id'], $studentId);
+            $grade = ($sub && $sub['status'] === 'GRADED') ? (float)$sub['grade'] : null;
+            $studentData['assignments'][$a['id']] = $grade;
+            $studentData['assignment_submissions'][$a['id']] = $sub;
+            if ($grade !== null) {
+                $studentTotal += $grade;
             }
         }
 
+        // Quizzes (Max score among graded attempts)
+        foreach ($quizzes as $q) {
+            $attempts = $this->quizService->getStudentAttempts($q['id'], $studentId);
+            $bestScore = null;
+            foreach ($attempts as $att) {
+                if ($att['status'] === 'graded') {
+                    if ($bestScore === null || $att['score'] > $bestScore) {
+                        $bestScore = (float)$att['score'];
+                    }
+                }
+            }
+            $studentData['quizzes'][$q['id']] = $bestScore;
+            $studentData['quiz_attempts'][$q['id']] = $attempts;
+            if ($bestScore !== null) {
+                $studentTotal += $bestScore;
+            }
+        }
+
+        $studentData['total'] = $studentTotal;
+        $studentData['percentage'] = $totalPossible > 0 ? ($studentTotal / $totalPossible) * 100 : 0;
+
         return [
-            'assignments' => $gradebook['assignments'],
-            'quizzes' => $gradebook['quizzes'],
-            'quiz_max_points' => $gradebook['quiz_max_points'],
-            'total_possible' => $gradebook['total_possible'],
-            'my_grades' => $myGridRow
+            'assignments' => $assignments,
+            'quizzes' => $quizzes,
+            'quiz_max_points' => $quizTotalPointsMap,
+            'max_assignment_points' => $maxAssignmentPoints,
+            'max_quiz_points' => $maxQuizPoints,
+            'total_possible' => $totalPossible,
+            'my_grades' => $studentData
         ];
+    }
+
+    /**
+     * Builds personal gradebook for one student (backward compatible wrapper).
+     */
+    public function getStudentGradebook(int $lmsCourseId, int $studentId): array
+    {
+        return $this->getStudentPersonalGradebook($lmsCourseId, $studentId);
     }
 }

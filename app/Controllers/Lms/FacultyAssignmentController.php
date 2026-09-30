@@ -134,17 +134,49 @@ class FacultyAssignmentController extends BaseController
     public function grade(Request $request, Response $response, string $courseId, string $id)
     {
         $lmsCourseId = (int)$courseId;
-        $assignmentId = (int)$id;
         $this->authorizeFaculty($response, $lmsCourseId);
 
         $data = $request->getBody();
-        $submissionId = (int)$data['submission_id'];
+        $submissionId = (int)($data['submission_id'] ?? $id);
+
+        $submission = $this->lmsService->getSubmission($submissionId);
+        if (!$submission) {
+            $response->setStatusCode(404);
+            echo "Submission not found.";
+            exit;
+        }
+
+        $assignmentId = (int)$submission['assignment_id'];
+        $assignment = $this->lmsService->getAssignment($assignmentId);
+        if (!$assignment || (int)$assignment['lms_course_id'] !== $lmsCourseId) {
+            $response->setStatusCode(403);
+            echo "403 Forbidden - Assignment does not belong to this course.";
+            exit;
+        }
+
         $grade = (float)$data['grade'];
         $feedback = $data['feedback'] ?? null;
-        $graderId = $_SESSION['user_id'];
+        $graderId = $_SESSION['user_id'] ?? 0;
 
         $this->lmsService->gradeSubmission($submissionId, $graderId, $grade, $feedback);
 
         $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/assignments/{$assignmentId}/submissions");
+    }
+
+    public function delete(Request $request, Response $response, string $courseId, string $id)
+    {
+        $lmsCourseId = (int)$courseId;
+        $assignmentId = (int)$id;
+        $this->authorizeFaculty($response, $lmsCourseId);
+
+        $assignment = $this->lmsService->getAssignment($assignmentId);
+        if (!$assignment || (int)$assignment['lms_course_id'] !== $lmsCourseId) {
+            $response->setStatusCode(404);
+            echo "Assignment not found.";
+            exit;
+        }
+
+        $this->lmsService->deleteAssignment($assignmentId);
+        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/assignments");
     }
 }

@@ -84,33 +84,7 @@ class FacultyAttendanceController extends BaseController
 
         $course = $this->lmsService->getCourseDetails($lmsCourseId);
         
-        // Fetch enrolled students
-        $pdo = Database::getConnection();
-        $type = $course['academic_level'];
-        $sectionId = $course['academic_section_id'];
-        $subjectId = $course['subject_id'];
-
-        if ($type === 'College') {
-            $stmt = $pdo->prepare("
-                SELECT u.id, u.student_number, u.first_name, u.last_name 
-                FROM college_enrollments ce
-                JOIN applications a ON ce.application_id = a.id
-                JOIN users u ON a.user_id = u.id
-                WHERE ce.college_section_id = :sec AND ce.subject_id = :sub
-                ORDER BY u.last_name ASC, u.first_name ASC
-            ");
-        } else {
-            $stmt = $pdo->prepare("
-                SELECT u.id, u.student_number, u.first_name, u.last_name 
-                FROM shs_enrollments se
-                JOIN applications a ON se.application_id = a.id
-                JOIN users u ON a.user_id = u.id
-                WHERE se.shs_section_id = :sec AND se.subject_id = :sub
-                ORDER BY u.last_name ASC, u.first_name ASC
-            ");
-        }
-        $stmt->execute(['sec' => $sectionId, 'sub' => $subjectId]);
-        $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $students = $this->lmsService->getCourseRoster($lmsCourseId);
 
         $records = $this->attendanceService->getSessionRecords($sessionId);
 

@@ -152,7 +152,8 @@
                                             <?= htmlspecialchars($course['name']) ?>
                                         </h4>
                                         <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top text-muted small">
-                                            <span class="text-truncate" style="max-width: 150px;"><i class="bi bi-person-badge me-1"></i> <?= htmlspecialchars(trim(($course['first_name'] ?? '') . ' ' . ($course['last_name'] ?? ''))) ?></span>
+                                            <?php $instName = trim(($course['first_name'] ?? '') . ' ' . ($course['last_name'] ?? '')); ?>
+                                            <span class="text-truncate" style="max-width: 150px;"><i class="bi bi-person-badge me-1"></i> <?= htmlspecialchars(!empty($instName) ? $instName : 'Instructor TBA') ?></span>
                                             <span class="badge bg-light text-dark border"><?= htmlspecialchars($course['section_name'] ?? 'Section') ?></span>
                                         </div>
                                     </div>

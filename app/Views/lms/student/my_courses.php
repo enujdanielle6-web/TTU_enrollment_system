@@ -18,13 +18,13 @@ $programStrand = !empty($student_meta['strand']) ? htmlspecialchars($student_met
         <div class="row align-items-center g-4 position-relative" style="z-index: 2;">
             <div class="col-lg-7">
                 <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                    <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1 fw-bold small">
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold small" style="background: rgba(255, 255, 255, 0.18); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.28); backdrop-filter: blur(4px);">
                         <i class="bi bi-mortarboard-fill me-1.5"></i><?= $programStrand ?>
                     </span>
-                    <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1 fw-bold small">
+                    <span class="badge rounded-pill px-3 py-1.5 fw-bold small" style="background: rgba(255, 255, 255, 0.18); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.28); backdrop-filter: blur(4px);">
                         <i class="bi bi-people-fill me-1.5"></i>Section <?= $sectionCode ?>
                     </span>
-                    <span class="badge bg-white bg-opacity-10 text-white rounded-pill px-3 py-1 small">
+                    <span class="badge rounded-pill px-3 py-1.5 small" style="background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); backdrop-filter: blur(4px);">
                         <i class="bi bi-calendar3 me-1.5"></i><?= $activeTerm ?>
                     </span>
                 </div>
@@ -245,23 +245,29 @@ $programStrand = !empty($student_meta['strand']) ? htmlspecialchars($student_met
 
                             <!-- Classroom Action Buttons -->
                             <div class="mt-3 pt-2">
-                                <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="lms-btn-classroom">
-                                    <span>Enter Classroom</span>
-                                    <i class="bi bi-arrow-right"></i>
-                                </a>
-                                <div class="d-flex justify-content-around mt-2 pt-1">
-                                    <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments" class="lms-quick-jump-link">
-                                        <i class="bi bi-file-earmark-text me-1"></i>Assignments
+                                <?php if (!empty($course['lms_course_id'])): ?>
+                                    <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="lms-btn-classroom">
+                                        <span>Enter Classroom</span>
+                                        <i class="bi bi-arrow-right"></i>
                                     </a>
-                                    <span class="text-muted opacity-25">&bull;</span>
-                                    <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="lms-quick-jump-link">
-                                        <i class="bi bi-pencil-square me-1"></i>Quizzes
-                                    </a>
-                                    <span class="text-muted opacity-25">&bull;</span>
-                                    <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/attendance" class="lms-quick-jump-link">
-                                        <i class="bi bi-calendar-check me-1"></i>Attendance
-                                    </a>
-                                </div>
+                                    <div class="d-flex justify-content-around mt-2 pt-1">
+                                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments" class="lms-quick-jump-link">
+                                            <i class="bi bi-file-earmark-text me-1"></i>Assignments
+                                        </a>
+                                        <span class="text-muted opacity-25">&bull;</span>
+                                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="lms-quick-jump-link">
+                                            <i class="bi bi-pencil-square me-1"></i>Quizzes
+                                        </a>
+                                        <span class="text-muted opacity-25">&bull;</span>
+                                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/attendance" class="lms-quick-jump-link">
+                                            <i class="bi bi-calendar-check me-1"></i>Attendance
+                                        </a>
+                                    </div>
+                                <?php else: ?>
+                                    <div class="d-flex flex-column align-items-center justify-content-center p-2 rounded-3 bg-light border text-center">
+                                        <span class="small fw-semibold text-muted"><i class="bi bi-clock me-1"></i>Classroom Pending Provisioning</span>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -335,9 +341,13 @@ $programStrand = !empty($student_meta['strand']) ? htmlspecialchars($student_met
                                     <div class="text-muted" style="font-size: 0.7rem;"><?= htmlspecialchars($course['section_name'] ?? 'Section') ?></div>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
-                                        Open Room &rarr;
-                                    </a>
+                                    <?php if (!empty($course['lms_course_id'])): ?>
+                                        <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                            Open Room &rarr;
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-muted border rounded-pill px-3 py-1.5">Pending</span>
+                                    <?php endif; ?>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

@@ -3,14 +3,23 @@ require_once __DIR__ . '/../../components/header.php';
 
 require_once __DIR__ . '/../../components/admin_navbar.php';
 
-// Fetch fee templates
+// Fetch fee templates with pagination
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = 10;
+$offset = ($page - 1) * $limit;
+$total_items = 0;
 $templates = [];
 try {
-    $stmt = $pdo->query('SELECT * FROM fee_templates ORDER BY grade_level ASC, strand ASC');
+    $total_items = (int)$pdo->query('SELECT COUNT(*) FROM fee_templates')->fetchColumn();
+    $stmt = $pdo->prepare('SELECT * FROM fee_templates ORDER BY grade_level ASC, strand ASC LIMIT :limit OFFSET :offset');
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $templates = $stmt->fetchAll();
 } catch (PDOException $e) {
     error_log('Fee templates fetch failed: ' . $e->getMessage());
 }
+$total_pages = max(1, ceil($total_items / $limit));
 
 $successMsg = $_SESSION['success_msg'] ?? null;
 $errorMsg = $_SESSION['error_msg'] ?? null;
@@ -138,6 +147,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             </tbody>
           </table>
         </div>
+        <?php require __DIR__ . '/../../components/pagination.php'; ?>
       </div>
     </div>
   </div>

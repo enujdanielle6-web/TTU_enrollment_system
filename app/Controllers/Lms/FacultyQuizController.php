@@ -198,4 +198,43 @@ class FacultyQuizController extends BaseController
             'attempts' => $attempts
         ]);
     }
+
+    public function delete(Request $request, Response $response, string $courseId, string $id)
+    {
+        $lmsCourseId = (int)$courseId;
+        $quizId = (int)$id;
+        $this->authorizeFaculty($response, $lmsCourseId);
+
+        $quiz = $this->quizService->getQuiz($quizId);
+        if (!$quiz || $quiz['lms_course_id'] != $lmsCourseId) {
+            $this->notFound($response);
+            return;
+        }
+
+        $this->quizService->deleteQuiz($quizId);
+        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes");
+    }
+
+    public function deleteQuestion(Request $request, Response $response, string $courseId, string $id, string $questionId)
+    {
+        $lmsCourseId = (int)$courseId;
+        $quizId = (int)$id;
+        $qId = (int)$questionId;
+        $this->authorizeFaculty($response, $lmsCourseId);
+
+        $quiz = $this->quizService->getQuiz($quizId);
+        if (!$quiz || $quiz['lms_course_id'] != $lmsCourseId) {
+            $this->notFound($response);
+            return;
+        }
+
+        $question = $this->quizService->getQuestion($qId);
+        if (!$question || (int)$question['lms_quiz_id'] !== $quizId) {
+            $this->notFound($response);
+            return;
+        }
+
+        $this->quizService->deleteQuestion($qId);
+        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
+    }
 }

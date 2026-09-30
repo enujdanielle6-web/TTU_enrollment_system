@@ -2,10 +2,22 @@
 require_once __DIR__ . '/../../components/header.php';
 require_once __DIR__ . '/../../components/admin_navbar.php';
 
-// Fetch programs
+// Fetch programs with pagination
+$page = max(1, (int)($_GET['page'] ?? 1));
+$limit = 10;
+$offset = ($page - 1) * $limit;
+$totalCount = 0;
+$totalPages = 1;
 $programs = [];
+
 try {
-    $stmt = $pdo->query('SELECT * FROM college_programs ORDER BY created_at ASC');
+    $totalCount = (int)$pdo->query('SELECT COUNT(*) FROM college_programs')->fetchColumn();
+    $totalPages = max(1, (int)ceil($totalCount / $limit));
+
+    $stmt = $pdo->prepare('SELECT * FROM college_programs ORDER BY created_at ASC LIMIT :limit OFFSET :offset');
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $programs = $stmt->fetchAll();
 } catch (PDOException $e) {
     error_log('College programs fetch failed: ' . $e->getMessage());
@@ -203,6 +215,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
             </tbody>
           </table>
         </div>
+        <?php require __DIR__ . '/../../components/pagination.php'; ?>
       </div>
     </div>
   </div>

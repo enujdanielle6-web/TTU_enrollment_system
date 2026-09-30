@@ -159,17 +159,17 @@ class LmsQuizService
         if ($quiz['end_date'] && $now > $quiz['end_date']) return null;
 
         $attempts = $this->getStudentAttempts($quizId, $studentId);
-        $attemptCount = count($attempts);
 
-        if ($quiz['max_attempts'] !== null && $attemptCount >= $quiz['max_attempts']) {
-            return null; // Max attempts reached
-        }
-
-        // Check if there is an in-progress attempt
+        // Check if there is an in-progress attempt to resume
         foreach ($attempts as $att) {
             if ($att['status'] === 'in_progress') {
                 return (int)$att['id']; // Resume existing
             }
+        }
+
+        $attemptCount = count($attempts);
+        if ($quiz['max_attempts'] !== null && $attemptCount >= $quiz['max_attempts']) {
+            return null; // Max attempts reached
         }
 
         $nextAttempt = $attemptCount + 1;
@@ -273,5 +273,25 @@ class LmsQuizService
         ");
         $stmt->execute(['qid' => $quizId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getQuestion(int $questionId): ?array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM lms_questions WHERE id = :id");
+        $stmt->execute(['id' => $questionId]);
+        $q = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $q ?: null;
+    }
+
+    public function deleteQuiz(int $quizId): bool
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM lms_quizzes WHERE id = :id");
+        return $stmt->execute(['id' => $quizId]);
+    }
+
+    public function deleteQuestion(int $questionId): bool
+    {
+        $stmt = $this->pdo->prepare("DELETE FROM lms_questions WHERE id = :id");
+        return $stmt->execute(['id' => $questionId]);
     }
 }

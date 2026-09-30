@@ -210,7 +210,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['sec
     return;
 }
 
+$page = max(1, (int)($request->input('page', 1)));
+$limit = 10;
+$offset = ($page - 1) * $limit;
+$totalCount = 0;
+$totalPages = 1;
+
 try {
+    $totalCount = (int)$pdo->query('SELECT COUNT(*) FROM college_sections s INNER JOIN college_programs p ON p.id = s.program_id')->fetchColumn();
+    $totalPages = max(1, (int)ceil($totalCount / $limit));
+
     $query = "
         SELECT 
             s.*, 
@@ -221,8 +230,12 @@ try {
         INNER JOIN college_programs p ON p.id = s.program_id
         LEFT JOIN college_curricula c ON s.curriculum_id = c.id
         ORDER BY p.code ASC, s.year_level ASC, s.section_code ASC
+        LIMIT :limit OFFSET :offset
     ";
-    $stmt = $pdo->query($query);
+    $stmt = $pdo->prepare($query);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $college_sections = $stmt->fetchAll();
     
     // Fetch programs for Add Section modal
@@ -348,7 +361,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['sec
     return;
 }
 
+$page = max(1, (int)($request->input('page', 1)));
+$limit = 10;
+$offset = ($page - 1) * $limit;
+$totalCount = 0;
+$totalPages = 1;
+
 try {
+    $totalCount = (int)$pdo->query('SELECT COUNT(*) FROM shs_sections s INNER JOIN shs_strands p ON p.id = s.strand_id')->fetchColumn();
+    $totalPages = max(1, (int)ceil($totalCount / $limit));
+
     $query = "
         SELECT 
             s.*, 
@@ -359,8 +381,12 @@ try {
         INNER JOIN shs_strands p ON p.id = s.strand_id
         LEFT JOIN shs_curricula c ON s.curriculum_id = c.id
         ORDER BY p.code ASC, s.grade_level ASC, s.section_code ASC
+        LIMIT :limit OFFSET :offset
     ";
-    $stmt = $pdo->query($query);
+    $stmt = $pdo->prepare($query);
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $stmt->execute();
     $shs_sections = $stmt->fetchAll();
     
     // Fetch programs for Add Section modal
@@ -742,8 +768,8 @@ $pageTitle = 'Schedule Builder - Admin';
                 }
 
                 // Automated LMS Course Synchronization
-                if ($facultyUserId && $subjectId > 0) {
-                    $lmsUpsertStmt->execute([$academicLevel, $sectionId, $subjectId, $facultyUserId]);
+                if ($subjectId > 0) {
+                    $lmsUpsertStmt->execute([$academicLevel, $sectionId, $subjectId, $facultyUserId ?: null]);
                 }
             }
             

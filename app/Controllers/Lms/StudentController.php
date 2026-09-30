@@ -114,7 +114,7 @@ class StudentController extends BaseController
             FROM applications a
             LEFT JOIN college_sections cs ON a.section_id = cs.id AND (a.academic_level = 'College' OR a.academic_level IS NULL)
             LEFT JOIN shs_sections ss ON a.section_id = ss.id AND (a.academic_level = 'SHS' OR a.academic_level = 'Senior High School')
-            WHERE a.user_id = :uid AND a.status IN ('enrolled', 'approved')
+            WHERE a.user_id = :uid AND a.status = 'enrolled'
             ORDER BY a.id DESC LIMIT 1
         ");
         $stmtApp->execute(['uid' => $userId]);

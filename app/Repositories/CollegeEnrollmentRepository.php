@@ -37,7 +37,8 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
             JOIN college_sections cs ON ce.college_section_id = cs.id
             LEFT JOIN college_section_subjects css ON css.college_section_id = ce.college_section_id AND css.subject_id = ce.subject_id
             WHERE a.user_id = :uid 
-              AND a.status IN ('enrolled', 'approved')
+              AND a.status = 'enrolled'
+              AND ce.status = 'enrolled'
         ");
         $stmt->execute(['uid' => $userId]);
         $enrollments = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -62,7 +63,7 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
                 JOIN college_sections cs ON a.section_id = cs.id
                 JOIN college_section_subjects css ON css.college_section_id = cs.id
                 JOIN subjects s ON css.subject_id = s.id
-                WHERE a.user_id = :uid AND a.status IN ('enrolled', 'approved')
+                WHERE a.user_id = :uid AND a.status = 'enrolled'
             ");
             $stmtSec->execute(['uid' => $userId]);
             $enrollments = $stmtSec->fetchAll(PDO::FETCH_ASSOC);
@@ -78,7 +79,7 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
             $secId = (int)$enr['college_section_id'];
             $subId = (int)$enr['subject_id'];
 
-            // Find or provision LMS Course with module, assignment, and quiz counts
+            // Query LMS Course with module, assignment, and quiz counts (Pure Read Operation)
             $lcStmt = $this->pdo->prepare("
                 SELECT lc.id, lc.faculty_user_id, u.first_name, u.last_name,
                        (SELECT COUNT(*) FROM lms_modules m WHERE m.lms_course_id = lc.id AND m.status = 'published') as module_count,
@@ -94,77 +95,57 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
             $lcStmt->execute(['sec_id' => $secId, 'sub_id' => $subId]);
             $lmsCourse = $lcStmt->fetch(PDO::FETCH_ASSOC);
 
-            if (!$lmsCourse) {
-                // Resolve assigned faculty strictly from section subject timetable
+            if ($lmsCourse) {
+                $lmsCourseId = (int)$lmsCourse['id'];
+                $firstName = !empty($lmsCourse['first_name']) ? $lmsCourse['first_name'] : 'Instructor';
+                $lastName = !empty($lmsCourse['last_name']) ? $lmsCourse['last_name'] : 'TBA';
+                $moduleCount = (int)($lmsCourse['module_count'] ?? 0);
+                $assignmentCount = (int)($lmsCourse['assignment_count'] ?? 0);
+                $quizCount = (int)($lmsCourse['quiz_count'] ?? 0);
+            } else {
+                // Course shell not yet provisioned; read timetable instructor metadata for display without mutating DB
                 $secSubStmt = $this->pdo->prepare("
-                    SELECT css.faculty_user_id, css.instructor 
+                    SELECT css.instructor 
                     FROM college_section_subjects css
                     WHERE css.college_section_id = :sec_id AND css.subject_id = :sub_id
                     LIMIT 1
                 ");
                 $secSubStmt->execute(['sec_id' => $secId, 'sub_id' => $subId]);
-                $secSub = $secSubStmt->fetch(PDO::FETCH_ASSOC);
-                $assignedFacultyId = !empty($secSub['faculty_user_id']) ? (int)$secSub['faculty_user_id'] : null;
+                $instName = $secSubStmt->fetchColumn();
 
-                if (!$assignedFacultyId && !empty($secSub['instructor']) && strtoupper($secSub['instructor']) !== 'TBA') {
-                    $fnStmt = $this->pdo->prepare("SELECT id FROM users WHERE role = 'faculty' AND (CONCAT(first_name, ' ', last_name) = ? OR last_name = ?) LIMIT 1");
-                    $fnStmt->execute([$secSub['instructor'], $secSub['instructor']]);
-                    $assignedFacultyId = (int)$fnStmt->fetchColumn() ?: null;
-                }
-
-                if ($assignedFacultyId) {
-                    $ins = $this->pdo->prepare("
-                        INSERT INTO lms_courses (academic_level, academic_section_id, subject_id, faculty_user_id, status)
-                        VALUES ('College', :sec_id, :sub_id, :fac_id, 'active')
-                        ON DUPLICATE KEY UPDATE faculty_user_id = VALUES(faculty_user_id)
-                    ");
-                    $ins->execute([
-                        'sec_id' => $secId,
-                        'sub_id' => $subId,
-                        'fac_id' => $assignedFacultyId
-                    ]);
-                    $lmsCourseId = (int)$this->pdo->lastInsertId();
-                    if ($lmsCourseId === 0) {
-                        $lcStmt->execute(['sec_id' => $secId, 'sub_id' => $subId]);
-                        $existing = $lcStmt->fetch(PDO::FETCH_ASSOC);
-                        $lmsCourseId = (int)($existing['id'] ?? 0);
-                    }
-                    $uStmt = $this->pdo->prepare("SELECT first_name, last_name FROM users WHERE id = ?");
-                    $uStmt->execute([$assignedFacultyId]);
-                    $facUser = $uStmt->fetch(PDO::FETCH_ASSOC);
-                    $firstName = $facUser['first_name'] ?? 'Faculty';
-                    $lastName = $facUser['last_name'] ?? 'Instructor';
-                    $moduleCount = 0;
-                    $assignmentCount = 0;
-                    $quizCount = 0;
-                } else {
-                    continue;
-                }
-            } else {
-                $lmsCourseId = (int)$lmsCourse['id'];
-                $firstName = $lmsCourse['first_name'] ?? 'Faculty';
-                $lastName = $lmsCourse['last_name'] ?? 'Instructor';
-                $moduleCount = (int)($lmsCourse['module_count'] ?? 0);
-                $assignmentCount = (int)($lmsCourse['assignment_count'] ?? 0);
-                $quizCount = (int)($lmsCourse['quiz_count'] ?? 0);
+                $lmsCourseId = null;
+                $firstName = (!empty($instName) && strtoupper($instName) !== 'TBA') ? $instName : 'Instructor';
+                $lastName = (!empty($instName) && strtoupper($instName) !== 'TBA') ? '' : 'TBA';
+                $moduleCount = 0;
+                $assignmentCount = 0;
+                $quizCount = 0;
             }
 
-            if (isset($seenCourseIds[$lmsCourseId])) {
+            $courseKey = $lmsCourseId ? (string)$lmsCourseId : "unmapped_{$secId}_{$subId}";
+            if (isset($seenCourseIds[$courseKey])) {
                 continue;
             }
-            $seenCourseIds[$lmsCourseId] = true;
+            $seenCourseIds[$courseKey] = true;
 
             $courses[] = [
+                'id' => $lmsCourseId,
                 'lms_course_id' => $lmsCourseId,
+                'subject_id' => $subId,
                 'code' => $enr['code'],
                 'name' => $enr['name'],
+                'subject_code' => $enr['code'],
+                'subject_name' => $enr['name'],
+                'subject_title' => $enr['name'],
                 'units' => $enr['units'],
                 'section_name' => $enr['section_name'],
                 'first_name' => $firstName,
                 'last_name' => $lastName,
+                'faculty_name' => trim($firstName . ' ' . $lastName),
                 'day' => $enr['day'] ?? null,
                 'start_time' => $enr['start_time'] ?? null,
                 'end_time' => $enr['end_time'] ?? null,
+                'schedule_days' => $enr['day'] ?? null,
+                'schedule_time' => ($enr['start_time'] && $enr['end_time']) ? date('h:i A', strtotime($enr['start_time'])) . ' - ' . date('h:i A', strtotime($enr['end_time'])) : null,
                 'room' => $enr['room'] ?? null,
                 'delivery_mode' => $enr['delivery_mode'] ?? 'Face-to-Face',
                 'module_count' => $moduleCount,
@@ -178,9 +159,13 @@ class CollegeEnrollmentRepository implements EnrollmentRepositoryInterface
 
     public function isStudentAuthorizedForCourse(int $userId, int $lmsCourseId): bool
     {
+        if ($lmsCourseId <= 0) {
+            return false;
+        }
+
         $courses = $this->getActiveStudentCourses($userId);
         foreach ($courses as $c) {
-            if ((int)$c['lms_course_id'] === $lmsCourseId) {
+            if (!empty($c['lms_course_id']) && (int)$c['lms_course_id'] === $lmsCourseId) {
                 return true;
             }
         }
