@@ -47,7 +47,7 @@ The **Triple T University (TTU) Enrollment & Learning Management System** is a m
 
 ### 1. Requirements
 - XAMPP with PHP 8.2+ (Apache + MySQL/MariaDB)
-- Extensions: `pdo_mysql`, `openssl`, `mbstring`, `curl`
+- Extensions: `pdo_mysql`, `openssl`, `mbstring`, `curl`, `zip` (XAMPP ships `zip` commented out: remove the `;` from `;extension=zip` in `C:\xampp\php\php.ini` and restart Apache; the quiz generator needs it to read .docx/.pptx files)
 - Composer 2.x
 
 ### 2. Installation Steps

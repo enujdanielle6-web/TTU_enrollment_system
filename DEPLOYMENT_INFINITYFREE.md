@@ -16,6 +16,7 @@ InfinityFree's free plan. Follow the sections in order. Nothing here needs SSH o
 | Sending email (verification codes, password reset, credentials) | ✅ Expected to work | Must use an external SMTP server on **port 587** (Gmail App Password). PHP `mail()` is not used. *Verify live.* |
 | PayMongo online checkout | ⚠️ Partly | Outgoing API calls work. Payment is confirmed when the student is **redirected back** to the site after paying. |
 | PayMongo **webhooks** (`/api/webhooks/paymongo`) | ❌ Blocked | InfinityFree's browser-security check blocks all non-browser requests. If a student closes the tab before returning, the payment stays *pending* until that student opens the **Assessment** page again (it re-checks PayMongo) or a cashier uses the PayMongo *reconcile* action on the cashier payments page. Fix: premium/other hosting. |
+| Quiz generator reading .pdf / .docx / .pptx materials | ✅ Expected to work | PDFs are read by `smalot/pdfparser`, which ships inside `vendor/` (no Composer on the server). .docx/.pptx need PHP's `zip` extension, which InfinityFree normally has enabled. Scanned/image-only PDFs have no text and are skipped. *Verify live* (see §8). |
 | Uploads larger than **10 MB** | ❌ Blocked | Hard file-size limit. Applicant/payment uploads are capped at 5 MB already; LMS assignment uploads allow 25 MB in the app but files over 10 MB will fail. |
 | SQL views (`faculty_workloads_view`, `student_academic_records_view`) | ❌ Not allowed | Not used by the app; they are left out of the import files. |
 | Cron jobs / background workers | ❌ Disabled | Not needed — session expiry and clean-ups run during normal page requests. |
@@ -26,13 +27,14 @@ InfinityFree's free plan. Follow the sections in order. Nothing here needs SSH o
 
 ## 1. Prepare the files on your PC (once per deployment)
 
-There is **no Composer or npm build step**: `vendor/` (PHPMailer) and all CSS/JS libraries are already in the project.
+There is **no Composer or npm build step**: `vendor/` (PHPMailer, and `smalot/pdfparser` for reading PDFs in the quiz generator) and all CSS/JS libraries are committed to the project.
+If you add or update a Composer package, run `composer install` locally and commit the changed `vendor/` folder together with `composer.json`/`composer.lock`, because the server cannot run Composer.
 
 1. Open a terminal in the project folder (`C:\xampp\htdocs\sia`) and run:
    ```bash
    C:\xampp\php\php.exe scripts/build_infinityfree_package.php
    ```
-   This creates the clean upload folder **`dist\infinityfree\htdocs\`** (about 345 files / 15 MB).
+   This creates the clean upload folder **`dist\infinityfree\htdocs\`** (about 415 files / 16 MB).
    It contains only what the server needs — **no** `.env`, SQL dumps, docs, test scripts, or anyone's uploaded documents.
 2. If you changed `database/schema.sql` or `database/seed.sql`, also run:
    ```bash
@@ -167,6 +169,7 @@ Use a private/incognito window. Tick each item:
 - [ ] As admin: open that applicant's documents in Admissions → the file displays.
 - [ ] Upload a payment proof image; as cashier, the proof image displays.
 - [ ] LMS: faculty and student logins at `/auth/lms_faculty_login.php` and `/auth/lms_student_login.php`, calendar and course pages open.
+- [ ] LMS quiz generator: as faculty, open a course's *Quizzes → Generate from content*. Uploaded .pdf, .docx and .pptx materials show a green badge ("PDF text layer", "Word document", "PowerPoint slides") and can be ticked. A grey "PHP zip extension is not enabled" badge means the host has `zip` off; "needs the smalot/pdfparser package" means `vendor/smalot/` or `vendor/composer/` was not fully uploaded.
 - [ ] (If PayMongo) test checkout → redirected back → payment verified.
 - [ ] After enabling HTTPS: `http://your-domain/` redirects to `https://`, and you stay logged in while navigating.
 
@@ -185,6 +188,8 @@ Use a private/incognito window. Tick each item:
 | Emails never arrive | Wrong Gmail App Password, or `SMTP_PORT` not `587`. Errors are written to `storage/logs/php-error.log`. Check the recipient's spam folder. |
 | "Table … already exists" during import | The database isn't empty. Import into a new, empty database, or drop the tables yourself only if you are sure nothing in them is needed. |
 | "CREATE VIEW command denied" during import | You imported the original `database/schema.sql`. Use `database/infinityfree/01_schema.sql` instead. |
+| Quiz generator says PDF reading needs smalot/pdfparser | Re-upload the whole `vendor/` folder (including `vendor/composer/autoload_*.php`, `vendor/smalot/` and `vendor/symfony/`). A partial upload leaves the old autoloader in place. |
+| Quiz generator says the PHP zip extension is not enabled | The host's PHP lacks `ZipArchive` and it can't be changed on InfinityFree. .docx/.pptx can't be read there; upload a PDF or put the text in the module description instead. |
 | Uploads fail for big files | 10 MB hard limit on InfinityFree. Ask users to compress/scan at lower resolution. |
 
 ---

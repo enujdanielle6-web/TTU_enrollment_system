@@ -8,7 +8,8 @@ This runbook provides complete instructions for deploying and running the TTU En
 Ensure the host machine has:
 - **XAMPP** (or standalone Apache 2.4 + MariaDB 10.4+ / MySQL 8.0)
 - **PHP 7.4+ or 8.x** (PHP 8.2 recommended) with extensions:
-  - `pdo_mysql`, `openssl`, `mbstring`, `curl`, `json`, `fileinfo`
+  - `pdo_mysql`, `openssl`, `mbstring`, `curl`, `json`, `fileinfo`, `zip`
+  - XAMPP ships `zip` disabled: in `C:\xampp\php\php.ini` change `;extension=zip` to `extension=zip`, then restart Apache. Without it the quiz generator cannot read .docx/.pptx materials.
 - **Composer** (v2.x)
 - **Git**
 
