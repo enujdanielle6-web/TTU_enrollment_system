@@ -330,14 +330,23 @@ $router->group([
 
     $router->get('/lms/faculty/course/{course_id}/quizzes', ['App\Controllers\Lms\FacultyQuizController', 'index']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/create', ['App\Controllers\Lms\FacultyQuizController', 'create']);
+    $router->get('/lms/faculty/course/{course_id}/quizzes/csv-template', ['App\Controllers\Lms\FacultyQuizController', 'csvTemplate']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/store', ['App\Controllers\Lms\FacultyQuizController', 'store']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/edit', ['App\Controllers\Lms\FacultyQuizController', 'edit']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/update', ['App\Controllers\Lms\FacultyQuizController', 'update']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/delete', ['App\Controllers\Lms\FacultyQuizController', 'delete']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/questions', ['App\Controllers\Lms\FacultyQuizController', 'questions']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/store', ['App\Controllers\Lms\FacultyQuizController', 'storeQuestion']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/import', ['App\Controllers\Lms\FacultyQuizController', 'importCsv']);
+    $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/questions/generate', ['App\Controllers\Lms\FacultyQuizController', 'generateForm']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/generate', ['App\Controllers\Lms\FacultyQuizController', 'generate']);
+    $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/questions/review', ['App\Controllers\Lms\FacultyQuizController', 'reviewDraft']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/review/save', ['App\Controllers\Lms\FacultyQuizController', 'saveDraft']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/review/discard', ['App\Controllers\Lms\FacultyQuizController', 'discardDraft']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/{qid}/delete', ['App\Controllers\Lms\FacultyQuizController', 'deleteQuestion']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/results', ['App\Controllers\Lms\FacultyQuizController', 'results']);
+    $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/attempts/{attempt_id}/review', ['App\Controllers\Lms\FacultyQuizController', 'reviewAttempt']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/attempts/{attempt_id}/review', ['App\Controllers\Lms\FacultyQuizController', 'saveAttemptReview']);
 
     $router->get('/lms/faculty/course/{course_id}/gradebook', ['App\Controllers\Lms\FacultyGradebookController', 'index']);
 

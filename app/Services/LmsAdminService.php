@@ -1215,8 +1215,8 @@ class LmsAdminService
             ");
 
             $insQuesStmt = $this->pdo->prepare("
-                INSERT INTO lms_questions (lms_quiz_id, question_text, question_type, points, display_order)
-                VALUES (:qid, :qtext, :qtype, :pts, :dorder)
+                INSERT INTO lms_questions (lms_quiz_id, question_text, question_type, points, case_sensitive, requires_manual_review, source_reference, display_order)
+                VALUES (:qid, :qtext, :qtype, :pts, :cs, :review, :source, :dorder)
             ");
 
             $selChoiceStmt = $this->pdo->prepare("
@@ -1252,6 +1252,9 @@ class LmsAdminService
                         'qtext' => $sQues['question_text'],
                         'qtype' => $sQues['question_type'],
                         'pts' => $sQues['points'] ?? 1.0,
+                        'cs' => (int)($sQues['case_sensitive'] ?? 0),
+                        'review' => (int)($sQues['requires_manual_review'] ?? 0),
+                        'source' => $sQues['source_reference'] ?? null,
                         'dorder' => $sQues['display_order'] ?? 0
                     ]);
                     $newQuesId = (int)$this->pdo->lastInsertId();

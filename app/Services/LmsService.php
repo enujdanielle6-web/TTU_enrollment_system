@@ -398,6 +398,32 @@ class LmsService
         return (int)$this->pdo->lastInsertId();
     }
 
+    /**
+     * Resolves a material row to its file on disk for quiz generation, checking the
+     * canonical storage directory first and then the legacy locations (same order as
+     * DownloadController). Returns null when missing.
+     */
+    public function resolveMaterialPath(array $material): ?string
+    {
+        $root = dirname(__DIR__, 2);
+        $candidatePaths = [
+            $root . '/storage/uploads/lms/materials/' . basename($material['file_path']),
+            $root . '/storage/uploads/lms/' . ltrim($material['file_path'], '/\\'),
+            $root . '/app/uploads/lms/' . basename($material['file_path']),
+            $root . '/app/uploads/lms/' . ltrim($material['file_path'], '/\\')
+        ];
+
+        foreach ($candidatePaths as $candidate) {
+            if (file_exists($candidate)) {
+                $real = realpath($candidate);
+                if ($real && file_exists($real)) {
+                    return $real;
+                }
+            }
+        }
+        return null;
+    }
+
     public function getModule(int $moduleId): ?array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM lms_modules WHERE id = :id");
