@@ -12,7 +12,7 @@ class AuthMiddleware implements MiddlewareInterface
     {
         if (empty($_SESSION['logged_in'])) {
             $response = new Response();
-            $response->redirect('/sia/auth/login.php');
+            $response->redirect(BASE_PATH . '/auth/login.php');
             exit;
         }
 

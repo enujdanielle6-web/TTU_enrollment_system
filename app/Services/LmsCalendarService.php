@@ -63,8 +63,8 @@ class LmsCalendarService
 
         foreach ($assignments as $a) {
             $url = $isFaculty 
-                ? "/sia/lms/faculty/course/{$a['lms_course_id']}/assignments/{$a['id']}/submissions"
-                : "/sia/lms/student/course/{$a['lms_course_id']}/assignments/{$a['id']}";
+                ? BASE_PATH . "/lms/faculty/course/{$a['lms_course_id']}/assignments/{$a['id']}/submissions"
+                : BASE_PATH . "/lms/student/course/{$a['lms_course_id']}/assignments/{$a['id']}";
 
             $events[] = [
                 'type' => 'assignment',
@@ -107,8 +107,8 @@ class LmsCalendarService
 
         foreach ($quizzes as $q) {
             $url = $isFaculty 
-                ? "/sia/lms/faculty/course/{$q['lms_course_id']}/quizzes/{$q['id']}/results"
-                : "/sia/lms/student/course/{$q['lms_course_id']}/quizzes/{$q['id']}";
+                ? BASE_PATH . "/lms/faculty/course/{$q['lms_course_id']}/quizzes/{$q['id']}/results"
+                : BASE_PATH . "/lms/student/course/{$q['lms_course_id']}/quizzes/{$q['id']}";
 
             $events[] = [
                 'type' => 'quiz',

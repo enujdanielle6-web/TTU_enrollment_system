@@ -20,3 +20,18 @@ Desktop.ini
 .vscode/
 *.swp
 *~
+
+# Production configuration (contains database/SMTP/PayMongo secrets)
+/config/config.php
+
+# InfinityFree deployment build output (regenerate with scripts/build_infinityfree_package.php)
+/dist/
+
+# Local database backups
+/storage/backups/
+
+# User uploads (applicant documents, payment proofs) - personal data, never commit.
+# Keep the folder structure and protective .htaccess files.
+/uploads/**/*
+!/uploads/**/
+!/uploads/**/.htaccess

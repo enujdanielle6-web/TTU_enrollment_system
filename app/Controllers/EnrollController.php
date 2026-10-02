@@ -27,7 +27,7 @@ class EnrollController extends BaseController
         $user = $userStmt->fetch();
         
         if (!$user) {
-            $response->redirect('/sia/auth/login.php');
+            $response->redirect(BASE_PATH . '/auth/login.php');
             return;
         }
 
@@ -37,7 +37,7 @@ class EnrollController extends BaseController
         $existingStatus = $existingApp['status'] ?? null;
 
         if ($existingStatus && !in_array($existingStatus, ['pending', 'correction_required'], true)) {
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
             return;
         }
         
@@ -140,7 +140,7 @@ class EnrollController extends BaseController
             $existing = $appStatement->fetch();
             if ($existing) {
                 if (!in_array($existing['status'], ['pending', 'correction_required'], true)) {
-                    $response->redirect('/sia/applicant/dashboard.php');
+                    $response->redirect(BASE_PATH . '/applicant/dashboard.php');
                     return;
                 }
                 $isUpdate = true;
@@ -276,7 +276,7 @@ class EnrollController extends BaseController
         if (!empty($errors)) {
             $_SESSION['enroll_errors'] = $errors;
             $_SESSION['enroll_old'] = $oldData;
-            $response->redirect('/sia/applicant/enroll.php');
+            $response->redirect(BASE_PATH . '/applicant/enroll.php');
             return;
         }
 
@@ -338,7 +338,7 @@ class EnrollController extends BaseController
 
             $pdo->commit();
 
-            $response->redirect('/sia/applicant/status.php');
+            $response->redirect(BASE_PATH . '/applicant/status.php');
         } catch (\Exception $exception) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
@@ -346,7 +346,7 @@ class EnrollController extends BaseController
             error_log('Enrollment insertion failed: ' . $exception->getMessage());
             $_SESSION['enroll_errors'] = ['Application submission failed. Please try again.'];
             $_SESSION['enroll_old'] = $oldData;
-            $response->redirect('/sia/applicant/enroll.php');
+            $response->redirect(BASE_PATH . '/applicant/enroll.php');
         }
     }
 
@@ -378,7 +378,7 @@ class EnrollController extends BaseController
         $application = $appStmt->fetch() ?: null;
 
         if (!$application) {
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
             return;
         }
 

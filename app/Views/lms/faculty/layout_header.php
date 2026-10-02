@@ -32,12 +32,12 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) : 'Faculty LMS Dashboard - TTU' ?></title>
     <!-- CSS & Fonts -->
-    <link href="/sia/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/sia/public/vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="/sia/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link href="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/vendor/fonts/fonts.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
     <!-- Main Design System & Custom LMS CSS -->
-    <link rel="stylesheet" href="/sia/css/main.css?v=<?= time() ?>">
-    <link rel="stylesheet" href="/sia/public/css/lms.css?v=<?= esc(filemtime(__DIR__ . '/../../../../public/css/lms.css')) ?>">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/css/main.css?v=<?= time() ?>">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/css/lms.css?v=<?= esc(filemtime(__DIR__ . '/../../../../public/css/lms.css')) ?>">
 </head>
 <body class="lms-layout lms-faculty-layout">
 
@@ -45,9 +45,9 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
 <aside class="lms-sidebar" id="lmsSidebar">
     <!-- Brand Header -->
     <div class="lms-sidebar-brand d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
-        <a href="/sia/lms/faculty/dashboard.php" class="d-flex align-items-center gap-2 text-decoration-none">
+        <a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="d-flex align-items-center gap-2 text-decoration-none">
             <div class="lms-brand-icon shadow-xs">
-                <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 28px; width: auto; object-fit: contain;">
+                <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 28px; width: auto; object-fit: contain;">
             </div>
             <div class="nav-text">
                 <span class="fw-bold text-dark d-block" style="font-size: 1.05rem; line-height: 1.15; letter-spacing: -0.01em;">TTU LMS</span>
@@ -78,7 +78,7 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
         ?>
 
         <div class="lms-section-label">Teaching &amp; Classes</div>
-        <a href="/sia/lms/faculty/dashboard.php" class="lms-nav-link <?= esc($isDashboardActive ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="lms-nav-link <?= esc($isDashboardActive ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-grid-1x2-fill"></i>
             </div>
@@ -87,37 +87,37 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
 
         <?php if (isset($course) && isset($course['lms_course_id'])): ?>
             <div class="lms-section-label mt-3"><?= htmlspecialchars($course['subject_code'] ?? 'Course') ?></div>
-            <a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="lms-nav-link <?= esc(strpos($current_page, 'course.php') !== false ? 'active' : '') ?>">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="lms-nav-link <?= esc(strpos($current_page, 'course.php') !== false ? 'active' : '') ?>">
                 <div class="lms-nav-icon">
                     <i class="bi bi-folder2-open"></i>
                 </div>
                 <span class="nav-text">Modules &amp; Materials</span>
             </a>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements" class="lms-nav-link <?= esc(strpos($request_uri, '/announcements') !== false ? 'active' : '') ?>">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements" class="lms-nav-link <?= esc(strpos($request_uri, '/announcements') !== false ? 'active' : '') ?>">
                 <div class="lms-nav-icon">
                     <i class="bi bi-megaphone"></i>
                 </div>
                 <span class="nav-text">Announcements</span>
             </a>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="lms-nav-link <?= esc(strpos($request_uri, '/assignments') !== false ? 'active' : '') ?>">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="lms-nav-link <?= esc(strpos($request_uri, '/assignments') !== false ? 'active' : '') ?>">
                 <div class="lms-nav-icon">
                     <i class="bi bi-journal-text"></i>
                 </div>
                 <span class="nav-text">Assignments</span>
             </a>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="lms-nav-link <?= esc(strpos($request_uri, '/quizzes') !== false ? 'active' : '') ?>">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="lms-nav-link <?= esc(strpos($request_uri, '/quizzes') !== false ? 'active' : '') ?>">
                 <div class="lms-nav-icon">
                     <i class="bi bi-pencil-square"></i>
                 </div>
                 <span class="nav-text">Online Quizzes</span>
             </a>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/gradebook" class="lms-nav-link <?= esc(strpos($request_uri, '/gradebook') !== false ? 'active' : '') ?>">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/gradebook" class="lms-nav-link <?= esc(strpos($request_uri, '/gradebook') !== false ? 'active' : '') ?>">
                 <div class="lms-nav-icon">
                     <i class="bi bi-star-fill"></i>
                 </div>
                 <span class="nav-text">Grades</span>
             </a>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="lms-nav-link <?= esc(strpos($request_uri, '/attendance') !== false ? 'active' : '') ?>">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="lms-nav-link <?= esc(strpos($request_uri, '/attendance') !== false ? 'active' : '') ?>">
                 <div class="lms-nav-icon">
                     <i class="bi bi-person-check-fill"></i>
                 </div>
@@ -126,13 +126,13 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
         <?php endif; ?>
 
         <div class="lms-section-label mt-3">Campus Life</div>
-        <a href="/sia/lms/faculty/calendar" class="lms-nav-link <?= esc($isCalendarActive ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/faculty/calendar" class="lms-nav-link <?= esc($isCalendarActive ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-calendar-event-fill"></i>
             </div>
             <span class="nav-text">Calendar</span>
         </a>
-        <a href="/sia/lms/faculty/messages.php" class="lms-nav-link <?= esc($isMessagesActive ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/faculty/messages.php" class="lms-nav-link <?= esc($isMessagesActive ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-chat-dots-fill"></i>
             </div>
@@ -140,7 +140,7 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
         </a>
 
         <div class="lms-section-label mt-3">Preferences</div>
-        <a href="/sia/lms/faculty/profile.php" class="lms-nav-link <?= esc($isProfileActive ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/faculty/profile.php" class="lms-nav-link <?= esc($isProfileActive ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-person-fill"></i>
             </div>
@@ -149,7 +149,7 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
 
         <?php if (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) && ($_SESSION['user_department'] ?? '') !== 'Registrar Office'): ?>
             <div class="lms-section-label mt-3">Administration</div>
-            <a href="/sia/lms/admin/dashboard" class="lms-nav-link text-primary fw-semibold">
+            <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="lms-nav-link text-primary fw-semibold">
                 <div class="lms-nav-icon text-primary">
                     <i class="bi bi-shield-lock-fill"></i>
                 </div>
@@ -187,7 +187,7 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
             </div>
         </div>
         
-        <a href="/sia/auth/lms_faculty_logout.php" class="lms-logout-btn text-decoration-none">
+        <a href="<?= BASE_PATH ?>/auth/lms_faculty_logout.php" class="lms-logout-btn text-decoration-none">
             <i class="bi bi-box-arrow-right"></i>
             <span class="nav-text">Sign out</span>
         </a>
@@ -259,7 +259,7 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
     </div>
 
     <div class="p-2 bg-light border-top text-center">
-        <a href="/sia/lms/faculty/calendar" class="small fw-semibold text-primary text-decoration-none">
+        <a href="<?= BASE_PATH ?>/lms/faculty/calendar" class="small fw-semibold text-primary text-decoration-none">
             View Academic Calendar &rarr;
         </a>
     </div>
@@ -292,7 +292,7 @@ if (strpos($request_uri, '/calendar') !== false) {
       <nav aria-label="Breadcrumb">
         <ul class="lms-breadcrumb d-flex align-items-center mb-0">
           <li>
-            <a href="/sia/lms/faculty/dashboard.php">
+            <a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php">
               <i class="bi bi-mortarboard text-primary"></i>
               <span>Faculty Portal</span>
             </a>
@@ -312,14 +312,14 @@ if (strpos($request_uri, '/calendar') !== false) {
       </div>
 
       <!-- Quick Calendar Link -->
-      <a href="/sia/lms/faculty/calendar" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Academic Schedule & Calendar">
+      <a href="<?= BASE_PATH ?>/lms/faculty/calendar" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Academic Schedule & Calendar">
         <i class="bi bi-calendar-event text-primary"></i>
         <span>Schedule</span>
       </a>
 
       <!-- LMS Governance Switcher for Admins/Superadmin -->
       <?php if (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) && ($_SESSION['user_department'] ?? '') !== 'Registrar Office'): ?>
-      <a href="/sia/lms/admin/dashboard" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-primary d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="LMS Administration & Governance">
+      <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-primary d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="LMS Administration & Governance">
         <i class="bi bi-shield-lock-fill text-primary"></i>
         <span class="d-none d-sm-inline">LMS Governance</span>
       </a>
@@ -340,13 +340,13 @@ if (strpos($request_uri, '/calendar') !== false) {
             <span class="badge bg-primary bg-opacity-10 text-primary mt-1 px-2 py-0.5" style="font-size: 0.65rem;">Faculty Instructor</span>
           </li>
           <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="/sia/lms/faculty/profile.php">
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="<?= BASE_PATH ?>/lms/faculty/profile.php">
               <i class="bi bi-person-fill text-primary"></i>
               <span>My Profile &amp; Settings</span>
             </a>
           </li>
           <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="/sia/lms/faculty/messages.php">
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="<?= BASE_PATH ?>/lms/faculty/messages.php">
               <i class="bi bi-chat-dots-fill text-primary"></i>
               <span>Messages &amp; Inquiries</span>
             </a>
@@ -354,7 +354,7 @@ if (strpos($request_uri, '/calendar') !== false) {
           <?php if (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) && ($_SESSION['user_department'] ?? '') !== 'Registrar Office'): ?>
           <li class="border-top my-1"></li>
           <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-primary fw-semibold" href="/sia/lms/admin/dashboard">
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-primary fw-semibold" href="<?= BASE_PATH ?>/lms/admin/dashboard">
               <i class="bi bi-shield-lock-fill"></i>
               <span>LMS Governance Hub</span>
             </a>
@@ -362,7 +362,7 @@ if (strpos($request_uri, '/calendar') !== false) {
           <?php endif; ?>
           <li class="border-top my-1"></li>
           <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-danger" href="/sia/auth/lms_faculty_logout.php">
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-danger" href="<?= BASE_PATH ?>/auth/lms_faculty_logout.php">
               <i class="bi bi-box-arrow-right"></i>
               <span>Sign Out</span>
             </a>

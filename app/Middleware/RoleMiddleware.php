@@ -55,7 +55,7 @@ class RoleMiddleware implements MiddlewareInterface
     {
         if (empty($_SESSION['logged_in'])) {
             $response = new Response();
-            $response->redirect('/sia/auth/login.php');
+            $response->redirect(BASE_PATH . '/auth/login.php');
             exit;
         }
 
@@ -100,33 +100,33 @@ class RoleMiddleware implements MiddlewareInterface
         $response = new Response();
         
         if ($userRole === 'student') {
-            $response->redirect('/sia/lms/student/dashboard.php');
+            $response->redirect(BASE_PATH . '/lms/student/dashboard.php');
         } elseif ($userRole === 'applicant') {
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
         } else {
             $_SESSION['admin_error'] = 'Access denied. You do not have permission to view this module.';
             
             if ($userRole === 'admissions') {
-                $response->redirect('/sia/admin/admissions/admissions_dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/admissions/admissions_dashboard.php');
             } elseif ($userRole === 'admin') {
-                $response->redirect('/sia/admin/registrar/registrar_dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/registrar/registrar_dashboard.php');
             } elseif ($userRole === 'scholarship') {
-                $response->redirect('/sia/admin/scholarship/scholarship_dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/scholarship/scholarship_dashboard.php');
             } elseif ($userRole === 'cashier') {
-                $response->redirect('/sia/admin/finance/cashier_dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/finance/cashier_dashboard.php');
             } elseif ($userRole === 'scheduler') {
-                $response->redirect('/sia/admin/scheduler/scheduler_dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/scheduler/scheduler_dashboard.php');
             } elseif ($userRole === 'clinic') {
-                $response->redirect('/sia/admin/clinic/clinic_dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/clinic/clinic_dashboard.php');
             } elseif ($userRole === 'superadmin') {
-                $response->redirect('/sia/admin/system/sysadmin_dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/system/sysadmin_dashboard.php');
             } elseif ($userRole === 'faculty') {
-                $response->redirect('/sia/lms/faculty/dashboard.php');
+                $response->redirect(BASE_PATH . '/lms/faculty/dashboard.php');
             } else {
                 // If the role is empty or unknown, destroy session and force login to prevent redirect loops
                 session_unset();
                 session_destroy();
-                $response->redirect('/sia/auth/login.php');
+                $response->redirect(BASE_PATH . '/auth/login.php');
             }
         }
         exit;

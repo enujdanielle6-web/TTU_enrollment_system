@@ -96,6 +96,10 @@ mysql -u root sia < database/seed.sql
 
 ---
 
+## Production Deployment (InfinityFree)
+
+See **[DEPLOYMENT_INFINITYFREE.md](DEPLOYMENT_INFINITYFREE.md)** for the step-by-step guide: build the upload package with `php scripts/build_infinityfree_package.php`, import `database/infinityfree/*.sql` in phpMyAdmin, and configure `config/config.php` (copied from `config/config.example.php`). Never deploy `setup_database.php`, `.env`, or the demo seed data to a public site.
+
 ## Standard Test Credentials
 
 | Role | Identifier / Email | Password | Access Route |

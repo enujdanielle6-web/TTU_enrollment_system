@@ -15,9 +15,11 @@ class SessionSecurityMiddleware implements MiddlewareInterface
                 'lifetime' => 0,
                 'path' => '/',
                 'domain' => '',
-                'secure' => isset($_SERVER['HTTPS']),
+                'secure' => app_is_https(),
                 'httponly' => true,
-                'samesite' => 'Strict'
+                // Lax (not Strict) so the session survives the top-level redirect back from
+                // PayMongo checkout; cross-site POSTs are still blocked and CSRF tokens still apply.
+                'samesite' => 'Lax'
             ]);
             session_start();
         }
@@ -48,10 +50,10 @@ class SessionSecurityMiddleware implements MiddlewareInterface
             // Enforce forced password reset if flagged
             if (!empty($_SESSION['force_password_reset_required'])) {
                 $uri = $request->getUri();
-                $allowed = ['/sia/applicant/profile.php', '/sia/applicant/profile_process.php', '/sia/auth/logout.php', '/applicant/profile.php', '/applicant/profile_process.php', '/auth/logout.php'];
+                $allowed = [BASE_PATH . '/applicant/profile.php', BASE_PATH . '/applicant/profile_process.php', BASE_PATH . '/auth/logout.php', '/applicant/profile.php', '/applicant/profile_process.php', '/auth/logout.php'];
                 if (!in_array($uri, $allowed, true)) {
                     $res = new \App\Core\Response();
-                    $res->redirect('/sia/applicant/profile.php');
+                    $res->redirect(BASE_PATH . '/applicant/profile.php');
                     exit;
                 }
             }

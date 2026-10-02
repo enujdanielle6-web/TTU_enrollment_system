@@ -36,11 +36,11 @@ if (file_exists($lmsHeader)) {
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <a href="/sia/lms/admin/courses" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/courses" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-grid-3x3-gap text-primary"></i>
             <span>Course Catalog</span>
           </a>
-          <a href="/sia/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>Dashboard</span>
           </a>
@@ -105,7 +105,7 @@ if (file_exists($lmsHeader)) {
                     </div>
                     <div class="fw-bold text-dark fs-6">All Course Shells Generated</div>
                     <p class="small text-muted mb-3" style="max-width: 420px;">Every official timetable section subject has an active, provisioned LMS course space.</p>
-                    <a href="/sia/lms/admin/courses" class="btn btn-sm btn-primary rounded-pill px-3.5 shadow-xs hover-lift">
+                    <a href="<?= BASE_PATH ?>/lms/admin/courses" class="btn btn-sm btn-primary rounded-pill px-3.5 shadow-xs hover-lift">
                       <i class="bi bi-grid-3x3-gap me-1"></i> View Course Catalog
                     </a>
                   </div>
@@ -144,7 +144,7 @@ if (file_exists($lmsHeader)) {
 
                   <!-- Faculty Selector & Submit Form -->
                   <td class="pe-4">
-                    <form action="/sia/lms/admin/generate" method="POST" class="d-flex align-items-center gap-2 m-0 w-100">
+                    <form action="<?= BASE_PATH ?>/lms/admin/generate" method="POST" class="d-flex align-items-center gap-2 m-0 w-100">
                       <?= getCsrfInput() ?>
                       <input type="hidden" name="academic_level" value="<?= htmlspecialchars($course['academic_level'], ENT_QUOTES, 'UTF-8') ?>">
                       <input type="hidden" name="section_id" value="<?= (int)$course['section_id'] ?>">

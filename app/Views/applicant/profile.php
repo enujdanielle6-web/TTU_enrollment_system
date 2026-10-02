@@ -199,7 +199,7 @@ require_once __DIR__ . '/../components/header.php';
     </div>
   </div>
 
-<script src="/sia/public/vendor/jquery/jquery.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/jquery/jquery.min.js"></script>
 <script>
   function initProfileValidations() {
     var forms = $('.needs-validation');

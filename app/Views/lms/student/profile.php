@@ -4,7 +4,7 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
             <li class="breadcrumb-item active" aria-current="page">My Profile</li>
         </ol>
     </nav>

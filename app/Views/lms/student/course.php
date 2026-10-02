@@ -57,7 +57,7 @@
                                             </div>
                                         <?php else: ?>
                                             <?php foreach ($module['materials'] as $material): ?>
-                                                <a href="/sia/lms/download/material/<?= esc($material['id']) ?>" class="list-group-item list-group-item-action px-0 py-3 d-flex align-items-center gap-3 border-bottom-0 text-dark">
+                                                <a href="<?= BASE_PATH ?>/lms/download/material/<?= esc($material['id']) ?>" class="list-group-item list-group-item-action px-0 py-3 d-flex align-items-center gap-3 border-bottom-0 text-dark">
                                                     <i class="bi bi-file-earmark-arrow-down fs-4 text-primary"></i>
                                                     <div>
                                                         <span class="d-block fw-bold"><?= htmlspecialchars($material['file_name']) ?></span>

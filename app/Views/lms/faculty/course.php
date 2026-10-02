@@ -79,7 +79,7 @@
                                         <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5 py-1" data-bs-toggle="modal" data-bs-target="#editModuleModal<?= esc($module['id']) ?>" title="Edit Module Title">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        <form method="POST" action="/sia/lms/faculty/module_delete.php" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this module and all its materials?');">
+                                        <form method="POST" action="<?= BASE_PATH ?>/lms/faculty/module_delete.php" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this module and all its materials?');">
                                             <?= getCsrfInput() ?>
                                             <input type="hidden" name="lms_course_id" value="<?= esc($course['lms_course_id']) ?>">
                                             <input type="hidden" name="lms_module_id" value="<?= esc($module['id']) ?>">
@@ -162,10 +162,10 @@
                                                             </div>
                                                         </div>
                                                         <div class="d-flex align-items-center gap-2 flex-shrink-0 ms-3">
-                                                            <a href="/sia/lms/download/material/<?= esc($mat['id']) ?>" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold" target="_blank">
+                                                            <a href="<?= BASE_PATH ?>/lms/download/material/<?= esc($mat['id']) ?>" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold" target="_blank">
                                                                 <i class="bi bi-download me-1"></i> Download
                                                             </a>
-                                                            <form method="POST" action="/sia/lms/faculty/material_delete.php" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this material?');">
+                                                            <form method="POST" action="<?= BASE_PATH ?>/lms/faculty/material_delete.php" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this material?');">
                                                                 <?= getCsrfInput() ?>
                                                                 <input type="hidden" name="lms_course_id" value="<?= esc($course['lms_course_id'] ?? $course['id']) ?>">
                                                                 <input type="hidden" name="lms_material_id" value="<?= esc($mat['id']) ?>">
@@ -212,7 +212,7 @@
                         </li>
                         <li class="d-flex justify-content-between align-items-center py-2">
                             <span class="text-muted small">Enrolled Students</span>
-                            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/roster" class="text-decoration-none fw-bold text-primary">
+                            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/roster" class="text-decoration-none fw-bold text-primary">
                                 <i class="bi bi-people-fill me-1"></i>View Roster &rarr;
                             </a>
                         </li>
@@ -255,19 +255,19 @@
                         <i class="bi bi-lightning-charge-fill me-2 text-warning"></i> Quick Jump
                     </h5>
                     <div class="d-grid gap-2">
-                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="btn btn-light btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-3">
+                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="btn btn-light btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-3">
                             <span><i class="bi bi-journal-text me-2 text-primary"></i>Assignments</span>
                             <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="btn btn-light btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-3">
+                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="btn btn-light btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-3">
                             <span><i class="bi bi-pencil-square me-2 text-info"></i>Online Quizzes</span>
                             <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/gradebook" class="btn btn-light btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-3">
+                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/gradebook" class="btn btn-light btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-3">
                             <span><i class="bi bi-star me-2 text-warning"></i>Gradebook</span>
                             <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
-                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="btn btn-light btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-3">
+                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="btn btn-light btn-sm text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-3">
                             <span><i class="bi bi-person-check me-2 text-success"></i>Attendance</span>
                             <i class="bi bi-chevron-right text-muted small"></i>
                         </a>
@@ -284,7 +284,7 @@
         <!-- Edit Module Modal -->
         <div class="modal fade" id="editModuleModal<?= esc($module['id']) ?>" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
-                <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="/sia/lms/faculty/module_update.php">
+                <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="<?= BASE_PATH ?>/lms/faculty/module_update.php">
                     <?= getCsrfInput() ?>
                     <div class="modal-header border-bottom p-4">
                         <div class="d-flex align-items-center gap-2">
@@ -319,7 +319,7 @@
         <!-- Upload Material Modal -->
         <div class="modal fade" id="uploadMaterialModal<?= esc($module['id']) ?>" tabindex="-1">
             <div class="modal-dialog modal-dialog-centered">
-                <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="/sia/lms/faculty/material_upload.php" enctype="multipart/form-data">
+                <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="<?= BASE_PATH ?>/lms/faculty/material_upload.php" enctype="multipart/form-data">
                     <?= getCsrfInput() ?>
                     <div class="modal-header border-bottom p-4">
                         <div class="d-flex align-items-center gap-2">
@@ -358,7 +358,7 @@
 <!-- Create Module Modal -->
 <div class="modal fade" id="createModuleModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="/sia/lms/faculty/module_create.php">
+        <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="<?= BASE_PATH ?>/lms/faculty/module_create.php">
             <?= getCsrfInput() ?>
             <div class="modal-header border-bottom p-4">
                 <div class="d-flex align-items-center gap-2">

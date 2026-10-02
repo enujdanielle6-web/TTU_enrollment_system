@@ -75,7 +75,7 @@ require_once __DIR__ . '/../components/header.php';
 
             <!-- Actions -->
             <div class="d-flex flex-column flex-sm-row justify-content-center gap-3">
-              <form action="/sia/applicant/payment_queue_leave.php" method="POST" onsubmit="return confirm('Are you sure you want to leave the payment queue? You will forfeit your position in line.');">
+              <form action="<?= BASE_PATH ?>/applicant/payment_queue_leave.php" method="POST" onsubmit="return confirm('Are you sure you want to leave the payment queue? You will forfeit your position in line.');">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="session_token" value="<?= htmlspecialchars((string)$sessionToken, ENT_QUOTES, 'UTF-8'); ?>">
                 <button type="submit" class="btn btn-outline-secondary rounded-pill px-4">
@@ -109,7 +109,7 @@ require_once __DIR__ . '/../components/header.php';
     if (!sessionToken) return;
 
     try {
-      const response = await fetch('/sia/applicant/payment_queue_status.php?token=' + encodeURIComponent(sessionToken), {
+      const response = await fetch('<?= BASE_PATH ?>/applicant/payment_queue_status.php?token=' + encodeURIComponent(sessionToken), {
         headers: { 'Accept': 'application/json' }
       });
 
@@ -131,7 +131,7 @@ require_once __DIR__ . '/../components/header.php';
           if (data.checkout_url) {
             window.location.href = data.checkout_url;
           } else {
-            window.location.href = '/sia/applicant/assessment.php?session_token=' + encodeURIComponent(sessionToken);
+            window.location.href = '<?= BASE_PATH ?>/applicant/assessment.php?session_token=' + encodeURIComponent(sessionToken);
           }
         }, 800);
       } else if (data.status === 'waiting') {
@@ -142,12 +142,12 @@ require_once __DIR__ . '/../components/header.php';
         clearInterval(pollInterval);
         statusDisplay.innerHTML = '<span class="text-danger fs-2"><i class="bi bi-clock-history"></i> Expired</span>';
         messageDisplay.innerText = "Your checkout reservation has expired. Please rejoin the queue.";
-        setTimeout(() => { window.location.href = '/sia/applicant/assessment.php'; }, 2000);
+        setTimeout(() => { window.location.href = '<?= BASE_PATH ?>/applicant/assessment.php'; }, 2000);
       } else if (data.status === 'completed') {
         clearInterval(pollInterval);
         statusDisplay.innerHTML = '<span class="text-success fs-2"><i class="bi bi-receipt"></i> Completed</span>';
         messageDisplay.innerText = "Payment confirmed! Redirecting to your statement...";
-        setTimeout(() => { window.location.href = '/sia/applicant/assessment.php'; }, 1500);
+        setTimeout(() => { window.location.href = '<?= BASE_PATH ?>/applicant/assessment.php'; }, 1500);
       }
     } catch (err) {
       console.error('Error polling queue status:', err);

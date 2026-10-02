@@ -28,7 +28,7 @@ if (strpos($lmsCurrentUri, '/courses') !== false || strpos($lmsCurrentUri, '/gen
 $lmsCssFile = dirname(__DIR__, 5) . '/public/css/lms.css';
 $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
 ?>
-<link rel="stylesheet" href="/sia/public/css/lms.css?v=<?= esc($lmsCssVer) ?>">
+<link rel="stylesheet" href="<?= BASE_PATH ?>/public/css/lms.css?v=<?= esc($lmsCssVer) ?>">
 
 <style>
 /* TTU LMS Admin Enhanced Styling */
@@ -139,9 +139,9 @@ body {
   <div class="container-fluid px-lg-5 py-2 d-flex flex-wrap align-items-center justify-content-between gap-3">
     <!-- Brand & Portal Tag -->
     <div class="d-flex align-items-center gap-2.5">
-      <a href="/sia/lms/admin/dashboard" class="d-flex align-items-center gap-2.5 text-decoration-none">
+      <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="d-flex align-items-center gap-2.5 text-decoration-none">
         <div class="d-flex align-items-center justify-content-center bg-white border rounded-3 p-1 shadow-xs" style="width: 38px; height: 38px;">
-          <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 26px; width: auto; object-fit: contain;">
+          <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 26px; width: auto; object-fit: contain;">
         </div>
         <div>
           <div class="d-flex align-items-center gap-2">
@@ -154,35 +154,35 @@ body {
 
     <!-- Central Navigation Tabs (All 8 Modules) -->
     <nav class="d-flex align-items-center gap-1 overflow-auto py-1" aria-label="LMS Admin Navigation">
-      <a href="/sia/lms/admin/dashboard" class="lms-tab-link <?= $activeTab === 'dashboard' ? 'active' : '' ?>">
+      <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="lms-tab-link <?= $activeTab === 'dashboard' ? 'active' : '' ?>">
         <i class="bi bi-grid-1x2-fill"></i>
         <span>Dashboard</span>
       </a>
-      <a href="/sia/lms/admin/courses" class="lms-tab-link <?= $activeTab === 'courses' ? 'active' : '' ?>">
+      <a href="<?= BASE_PATH ?>/lms/admin/courses" class="lms-tab-link <?= $activeTab === 'courses' ? 'active' : '' ?>">
         <i class="bi bi-journal-bookmark-fill"></i>
         <span>Courses</span>
       </a>
-      <a href="/sia/lms/admin/sync" class="lms-tab-link <?= $activeTab === 'sync' ? 'active' : '' ?>">
+      <a href="<?= BASE_PATH ?>/lms/admin/sync" class="lms-tab-link <?= $activeTab === 'sync' ? 'active' : '' ?>">
         <i class="bi bi-arrow-repeat"></i>
         <span>Sync &amp; Conflicts</span>
       </a>
-      <a href="/sia/lms/admin/cloner" class="lms-tab-link <?= $activeTab === 'cloner' ? 'active' : '' ?>">
+      <a href="<?= BASE_PATH ?>/lms/admin/cloner" class="lms-tab-link <?= $activeTab === 'cloner' ? 'active' : '' ?>">
         <i class="bi bi-copy"></i>
         <span>Cloner</span>
       </a>
-      <a href="/sia/lms/admin/announcements" class="lms-tab-link <?= $activeTab === 'announcements' ? 'active' : '' ?>">
+      <a href="<?= BASE_PATH ?>/lms/admin/announcements" class="lms-tab-link <?= $activeTab === 'announcements' ? 'active' : '' ?>">
         <i class="bi bi-megaphone-fill"></i>
         <span>Announcements</span>
       </a>
-      <a href="/sia/lms/admin/users" class="lms-tab-link <?= $activeTab === 'users' ? 'active' : '' ?>">
+      <a href="<?= BASE_PATH ?>/lms/admin/users" class="lms-tab-link <?= $activeTab === 'users' ? 'active' : '' ?>">
         <i class="bi bi-person-badge-fill"></i>
         <span>User Access</span>
       </a>
-      <a href="/sia/lms/admin/archive" class="lms-tab-link <?= $activeTab === 'archive' ? 'active' : '' ?>">
+      <a href="<?= BASE_PATH ?>/lms/admin/archive" class="lms-tab-link <?= $activeTab === 'archive' ? 'active' : '' ?>">
         <i class="bi bi-archive-fill"></i>
         <span>Archival</span>
       </a>
-      <a href="/sia/lms/admin/audit_logs" class="lms-tab-link <?= $activeTab === 'audit_logs' ? 'active' : '' ?>">
+      <a href="<?= BASE_PATH ?>/lms/admin/audit_logs" class="lms-tab-link <?= $activeTab === 'audit_logs' ? 'active' : '' ?>">
         <i class="bi bi-shield-check"></i>
         <span>Audit Logs</span>
       </a>
@@ -190,7 +190,7 @@ body {
 
     <!-- Context & Quick Exit -->
     <div class="d-flex align-items-center gap-2">
-      <a href="/sia/admin/dashboard.php" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-inline-flex align-items-center gap-1 shadow-xs hover-lift" title="Back to University Main SIS">
+      <a href="<?= BASE_PATH ?>/admin/dashboard.php" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-inline-flex align-items-center gap-1 shadow-xs hover-lift" title="Back to University Main SIS">
         <i class="bi bi-box-arrow-left text-primary"></i>
         <span>Main SIS</span>
       </a>

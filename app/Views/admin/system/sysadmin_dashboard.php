@@ -87,7 +87,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
       <!-- Card 2: Application Records -->
       <div class="col-sm-6 col-xl-3">
-        <a href="/sia/admin/admissions/review.php" class="stat-card-kpi fade-in-up" style="animation-delay: 0.15s;">
+        <a href="<?= BASE_PATH ?>/admin/admissions/review.php" class="stat-card-kpi fade-in-up" style="animation-delay: 0.15s;">
           <div class="stat-card-glow bg-info"></div>
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
@@ -236,7 +236,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
           <!-- Shortcut 6: LMS Automation -->
           <div class="col-md-6 col-lg-4">
-            <a href="/sia/lms/admin/generator" class="p-3 bg-white border rounded-3 text-decoration-none d-flex align-items-start gap-3 h-100 hover-lift shadow-xs">
+            <a href="<?= BASE_PATH ?>/lms/admin/generator" class="p-3 bg-white border rounded-3 text-decoration-none d-flex align-items-start gap-3 h-100 hover-lift shadow-xs">
               <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-3 flex-shrink-0" style="width: 46px; height: 46px; font-size: 1.35rem;">
                 <i class="bi bi-cpu-fill"></i>
               </div>

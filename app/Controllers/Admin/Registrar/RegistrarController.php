@@ -634,14 +634,14 @@ try {
         requirePermission('enrollment.finalize');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/admin/registrar/college_enrollment_queue.php");
+            $response->redirect(BASE_PATH . "/admin/registrar/college_enrollment_queue.php");
             return;
         }
 
         $appId = (int)($_POST['application_id'] ?? 0);
         if ($appId <= 0) {
             $_SESSION['admin_error'] = 'Invalid application ID.';
-            $response->redirect("/sia/admin/registrar/college_enrollment_queue.php");
+            $response->redirect(BASE_PATH . "/admin/registrar/college_enrollment_queue.php");
             return;
         }
 
@@ -654,8 +654,8 @@ try {
         }
 
         $redirectUrl = ($result['academic_level'] ?? '') === 'Senior High School'
-            ? '/sia/admin/registrar/shs_enrollment_queue.php'
-            : '/sia/admin/registrar/college_enrollment_queue.php';
+            ? BASE_PATH . '/admin/registrar/shs_enrollment_queue.php'
+            : BASE_PATH . '/admin/registrar/college_enrollment_queue.php';
         $response->redirect($redirectUrl);
     }
 
@@ -669,7 +669,7 @@ try {
 
         if ($appId <= 0 || $newSectionId <= 0) {
             $_SESSION['admin_error'] = 'Invalid application or target section ID.';
-            $response->redirect('/sia/admin/registrar/students.php');
+            $response->redirect(BASE_PATH . '/admin/registrar/students.php');
             return;
         }
 
@@ -681,7 +681,7 @@ try {
             $_SESSION['admin_error'] = $result['error'];
         }
 
-        $response->redirect('/sia/admin/registrar/students.php');
+        $response->redirect(BASE_PATH . '/admin/registrar/students.php');
     }
 
     public function dropSubject(Request $request, Response $response)
@@ -696,7 +696,7 @@ try {
 
         if ($appId <= 0 || $subjectId <= 0) {
             $_SESSION['admin_error'] = 'Invalid application or subject ID.';
-            $response->redirect('/sia/admin/registrar/students.php');
+            $response->redirect(BASE_PATH . '/admin/registrar/students.php');
             return;
         }
 
@@ -708,7 +708,7 @@ try {
             $_SESSION['admin_error'] = $result['error'];
         }
 
-        $response->redirect('/sia/admin/registrar/students.php');
+        $response->redirect(BASE_PATH . '/admin/registrar/students.php');
     }
 }
 

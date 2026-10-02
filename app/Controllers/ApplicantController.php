@@ -234,7 +234,7 @@ class ApplicantController extends BaseController
         }
         
         if (!$user) {
-            $response->redirect('/sia/auth/login.php');
+            $response->redirect(BASE_PATH . '/auth/login.php');
             return;
         }
 
@@ -343,7 +343,7 @@ class ApplicantController extends BaseController
             $_SESSION['profile_success'] = $successMsg;
         }
 
-        $response->redirect('/sia/applicant/profile.php');
+        $response->redirect(BASE_PATH . '/applicant/profile.php');
     }
 
 
@@ -470,7 +470,7 @@ try {
         $pdo = Database::getConnection();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/applicant/assessment.php");
+            $response->redirect(BASE_PATH . "/applicant/assessment.php");
             return;
         }
 
@@ -586,7 +586,7 @@ try {
                 ]);
 
                 $_SESSION['success_msg'] = "Proof of payment for ₱" . number_format($amount, 2) . " (Ref: {$refNo}) was submitted successfully! The Cashier's office will review and verify your payment shortly.";
-                $response->redirect("/sia/applicant/assessment.php");
+                $response->redirect(BASE_PATH . "/applicant/assessment.php");
                 return;
             } elseif ($action === 'initiate_paymongo') {
                 $assessmentId = (int)($_POST['assessment_id'] ?? 0);
@@ -620,11 +620,11 @@ try {
                                     'success'   => false,
                                     'in_queue'  => true,
                                     'status'    => $sessionStatus['status'],
-                                    'queue_url' => "/sia/applicant/payment_queue.php?token=" . urlencode($sessionToken),
+                                    'queue_url' => BASE_PATH . "/applicant/payment_queue.php?token=" . urlencode($sessionToken),
                                 ]);
                                 return;
                             }
-                            $response->redirect("/sia/applicant/payment_queue.php?token=" . urlencode($sessionToken));
+                            $response->redirect(BASE_PATH . "/applicant/payment_queue.php?token=" . urlencode($sessionToken));
                             return;
                         }
                     } else {
@@ -641,11 +641,11 @@ try {
                                     'in_queue'  => true,
                                     'status'    => 'waiting',
                                     'position'  => $queueEntry['position'] ?? 1,
-                                    'queue_url' => "/sia/applicant/payment_queue.php?token=" . urlencode($sessionToken),
+                                    'queue_url' => BASE_PATH . "/applicant/payment_queue.php?token=" . urlencode($sessionToken),
                                 ]);
                                 return;
                             }
-                            $response->redirect("/sia/applicant/payment_queue.php?token=" . urlencode($sessionToken));
+                            $response->redirect(BASE_PATH . "/applicant/payment_queue.php?token=" . urlencode($sessionToken));
                             return;
                         }
                     }
@@ -676,7 +676,7 @@ try {
                 $paymentService = new PaymentService();
                 $paymentService->cancelPayMongoPayment($paymentId, $userId, 'Cancelled by student', $sessionId);
                 $_SESSION['info_msg'] = "Online payment checkout session was cancelled. Your allowable balance has been restored.";
-                $response->redirect("/sia/applicant/assessment.php");
+                $response->redirect(BASE_PATH . "/applicant/assessment.php");
                 return;
             }
         } catch (\Throwable $e) {
@@ -703,11 +703,11 @@ try {
             }
 
             $_SESSION['error_msg'] = $e->getMessage();
-            $response->redirect("/sia/applicant/assessment.php");
+            $response->redirect(BASE_PATH . "/applicant/assessment.php");
             return;
         }
 
-        $response->redirect("/sia/applicant/assessment.php");
+        $response->redirect(BASE_PATH . "/applicant/assessment.php");
         return;
     }
 
@@ -745,7 +745,7 @@ try {
             }
         }
 
-        $response->redirect("/sia/applicant/assessment.php");
+        $response->redirect(BASE_PATH . "/applicant/assessment.php");
         return;
     }
 
@@ -770,7 +770,7 @@ try {
 
         if (!$assessment) {
             $_SESSION['error_msg'] = 'No assessment found for your account.';
-            $response->redirect('/sia/applicant/assessment.php');
+            $response->redirect(BASE_PATH . '/applicant/assessment.php');
             return;
         }
 
@@ -780,7 +780,7 @@ try {
         if ($token !== '') {
             $statusData = $queueService->checkStatus($token);
             if ($statusData['status'] === 'active') {
-                $response->redirect('/sia/applicant/assessment.php?session_token=' . urlencode($token));
+                $response->redirect(BASE_PATH . '/applicant/assessment.php?session_token=' . urlencode($token));
                 return;
             }
             $position = $statusData['position'] ?? 1;
@@ -791,7 +791,7 @@ try {
             $_SESSION['payment_session_token'] = $sessionToken;
 
             if ($queueEntry['status'] === 'active') {
-                $response->redirect('/sia/applicant/assessment.php?session_token=' . urlencode($sessionToken));
+                $response->redirect(BASE_PATH . '/applicant/assessment.php?session_token=' . urlencode($sessionToken));
                 return;
             }
             $position = $queueEntry['position'] ?? 1;
@@ -914,7 +914,7 @@ try {
         }
 
         $_SESSION['info_msg'] = 'You have left the payment queue.';
-        $response->redirect('/sia/applicant/assessment.php');
+        $response->redirect(BASE_PATH . '/applicant/assessment.php');
         return;
     }
 
@@ -944,7 +944,7 @@ try {
             $healthStatus = HealthRecord::getStatus($userId);
             if ($healthStatus === null) {
                 $_SESSION['error_msg'] = 'Action Required: You must submit your Health Information before applying for scholarships.';
-                $response->redirect('/sia/applicant/health_info.php');
+                $response->redirect(BASE_PATH . '/applicant/health_info.php');
                 return;
             }
         }
@@ -1026,7 +1026,7 @@ try {
         $pdo = Database::getConnection();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/applicant/scholarships.php");
+            $response->redirect(BASE_PATH . "/applicant/scholarships.php");
             return;
         }
 
@@ -1035,7 +1035,7 @@ try {
 
         if ($scholarshipId <= 0) {
             $_SESSION['error_msg'] = 'Invalid scholarship selection.';
-            $response->redirect("/sia/applicant/scholarships.php");
+            $response->redirect(BASE_PATH . "/applicant/scholarships.php");
             return;
         }
 
@@ -1103,7 +1103,7 @@ try {
                         if (move_uploaded_file($tmpName, $uploadDir . $newName)) {
                             $uploadedDocs[] = [
                                 'name' => htmlspecialchars($_FILES['requirements']['name'][$key], ENT_QUOTES, 'UTF-8'),
-                                'url' => '/sia/uploads/scholarships/' . $newName
+                                'url' => BASE_PATH . '/uploads/scholarships/' . $newName
                             ];
                         }
                     }
@@ -1133,7 +1133,7 @@ try {
             $_SESSION['error_msg'] = $e->getMessage();
         }
 
-        $response->redirect("/sia/applicant/scholarships.php");
+        $response->redirect(BASE_PATH . "/applicant/scholarships.php");
         return;
     }
     public function printSlip(Request $request, Response $response)
@@ -1164,7 +1164,7 @@ try {
     $healthStatus = HealthRecord::getStatus($userId);
     if ($healthStatus === null) {
         $_SESSION['error_msg'] = 'Action Required: You must submit your Health Information before accessing your enrollment summary.';
-        $response->redirect('/sia/applicant/health_info.php');
+        $response->redirect(BASE_PATH . '/applicant/health_info.php');
         return;
     }
     

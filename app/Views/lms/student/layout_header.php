@@ -28,11 +28,11 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) : 'LMS Dashboard' ?></title>
     <!-- CSS & Fonts -->
-    <link href="/sia/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/sia/public/vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="/sia/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link href="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/vendor/fonts/fonts.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
     <!-- Custom LMS CSS -->
-    <link rel="stylesheet" href="/sia/public/css/lms.css?v=<?= esc(filemtime(__DIR__ . '/../../../../public/css/lms.css')) ?>">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/css/lms.css?v=<?= esc(filemtime(__DIR__ . '/../../../../public/css/lms.css')) ?>">
 </head>
 <body class="lms-layout bg-light">
 
@@ -51,8 +51,8 @@ try {
 
     <!-- Brand / Logo Area -->
     <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-shrink-0">
-      <a class="text-decoration-none d-flex align-items-center" href="/sia/lms/student/dashboard.php" aria-label="LMS Student Portal">
-        <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 36px; width: auto; object-fit: contain;">
+      <a class="text-decoration-none d-flex align-items-center" href="<?= BASE_PATH ?>/lms/student/dashboard.php" aria-label="LMS Student Portal">
+        <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 36px; width: auto; object-fit: contain;">
         <div class="ms-3 nav-text">
           <span class="text-dark fw-bold fs-5 d-block" style="line-height: 1.15;">TTU LMS</span>
           <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0 fw-semibold" style="font-size: 0.62rem; letter-spacing: 0.04em;">STUDENT PORTAL</span>
@@ -83,23 +83,23 @@ try {
         ?>
 
         <div class="sidebar-section-header">Academics</div>
-        <a title="Dashboard" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isDashboardActive ? 'active' : '') ?>" href="/sia/lms/student/dashboard.php">
+        <a title="Dashboard" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isDashboardActive ? 'active' : '') ?>" href="<?= BASE_PATH ?>/lms/student/dashboard.php">
             <i class="bi bi-grid-1x2 fs-5"></i> <span class="nav-text">Dashboard</span>
         </a>
-        <a title="My Courses" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isCoursesActive ? 'active' : '') ?>" href="/sia/lms/student/my_courses.php">
+        <a title="My Courses" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isCoursesActive ? 'active' : '') ?>" href="<?= BASE_PATH ?>/lms/student/my_courses.php">
             <i class="bi bi-journal-bookmark fs-5"></i> <span class="nav-text">My Courses</span>
         </a>
 
         <div class="sidebar-section-header mt-3">Campus Life</div>
-        <a title="Calendar" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isCalendarActive ? 'active' : '') ?>" href="/sia/lms/student/calendar">
+        <a title="Calendar" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isCalendarActive ? 'active' : '') ?>" href="<?= BASE_PATH ?>/lms/student/calendar">
             <i class="bi bi-calendar-event fs-5"></i> <span class="nav-text">Calendar</span>
         </a>
-        <a title="Messages / Forums" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isMessagesActive ? 'active' : '') ?>" href="/sia/lms/student/messages.php">
+        <a title="Messages / Forums" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isMessagesActive ? 'active' : '') ?>" href="<?= BASE_PATH ?>/lms/student/messages.php">
             <i class="bi bi-chat-dots fs-5"></i> <span class="nav-text">Messages / Forums</span>
         </a>
 
         <div class="sidebar-section-header mt-3">Preferences</div>
-        <a title="Profile" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isProfileActive ? 'active' : '') ?>" href="/sia/lms/student/profile.php">
+        <a title="Profile" class="nav-link lms-nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($isProfileActive ? 'active' : '') ?>" href="<?= BASE_PATH ?>/lms/student/profile.php">
             <i class="bi bi-person fs-5"></i> <span class="nav-text">Profile</span>
         </a>
     </nav>
@@ -129,7 +129,7 @@ try {
           </button>
         </div>
       </div>
-      <a class="btn btn-outline-danger w-100 btn-sm rounded-pill fw-medium shadow-sm py-1.5 d-flex align-items-center justify-content-center gap-1.5" href="/sia/auth/lms_student_logout.php">
+      <a class="btn btn-outline-danger w-100 btn-sm rounded-pill fw-medium shadow-sm py-1.5 d-flex align-items-center justify-content-center gap-1.5" href="<?= BASE_PATH ?>/auth/lms_student_logout.php">
         <i class="bi bi-box-arrow-right"></i> <span class="nav-text">Sign Out</span>
       </a>
     </div>

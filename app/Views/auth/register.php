@@ -10,7 +10,7 @@ require_once __DIR__ . '/../components/header.php';
         <div class="auth-island fade-in-up" style="max-width: 520px; animation-delay: 0.1s;">
           <div class="text-center mb-4">
             <div class="mx-auto mb-3">
-              <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain;">
+              <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain;">
             </div>
             <h1 class="h4 mb-2 fw-bold text-dark">Create Account</h1>
             <p class="text-muted mb-0 small">Start your online enrollment application.</p>
@@ -26,7 +26,7 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php endif; ?>
 
-          <form id="registerForm" class="no-spinner" action="/sia/auth/register_process.php" method="post" novalidate>
+          <form id="registerForm" class="no-spinner" action="<?= BASE_PATH ?>/auth/register_process.php" method="post" novalidate>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             <div class="row g-3">
               <div class="col-md-6">
@@ -78,8 +78,8 @@ require_once __DIR__ . '/../components/header.php';
           </form>
 
           <div class="mt-4 text-center border-top pt-4">
-            <p class="mb-2 text-muted small">Already have an account? <a href="/sia/auth/login.php" class="fw-bold text-decoration-none text-primary">Login here</a></p>
-            <a href="/sia/public/index.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1 mt-2 transition-all">
+            <p class="mb-2 text-muted small">Already have an account? <a href="<?= BASE_PATH ?>/auth/login.php" class="fw-bold text-decoration-none text-primary">Login here</a></p>
+            <a href="<?= BASE_PATH ?>/public/index.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1 mt-2 transition-all">
               <i class="bi bi-arrow-left"></i> Back to Homepage
             </a>
           </div>
@@ -89,8 +89,8 @@ require_once __DIR__ . '/../components/header.php';
   </div>
 </main>
 
-<script src="/sia/public/vendor/jquery/jquery.min.js"></script>
-<script src="/sia/public/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/jquery/jquery.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/sweetalert2/sweetalert2.all.min.js"></script>
 <script>
   $(function () {
     $('#registerForm').on('submit', function (event) {

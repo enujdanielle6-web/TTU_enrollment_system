@@ -20,13 +20,13 @@ $annCount = (int)($announcement_count ?? 0);
 ?>
 
 <div class="course-nav-container mb-4">
-    <a href="/sia/lms/student/course.php?id=<?= esc($courseId) ?>" 
+    <a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($courseId) ?>" 
        class="course-nav-link <?= esc($activeTab === 'modules' ? 'active' : '') ?>">
         <i class="bi bi-folder2-open"></i>
         <span>Modules &amp; Materials</span>
     </a>
 
-    <a href="/sia/lms/student/course/<?= esc($courseId) ?>/announcements" 
+    <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($courseId) ?>/announcements" 
        class="course-nav-link <?= esc($activeTab === 'announcements' ? 'active' : '') ?>">
         <i class="bi bi-megaphone"></i>
         <span>Announcements</span>
@@ -35,7 +35,7 @@ $annCount = (int)($announcement_count ?? 0);
         <?php endif; ?>
     </a>
 
-    <a href="/sia/lms/student/course/<?= esc($courseId) ?>/assignments" 
+    <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($courseId) ?>/assignments" 
        class="course-nav-link <?= esc($activeTab === 'assignments' ? 'active' : '') ?>">
         <i class="bi bi-journal-text"></i>
         <span>Assignments</span>
@@ -44,7 +44,7 @@ $annCount = (int)($announcement_count ?? 0);
         <?php endif; ?>
     </a>
 
-    <a href="/sia/lms/student/course/<?= esc($courseId) ?>/quizzes" 
+    <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($courseId) ?>/quizzes" 
        class="course-nav-link <?= esc($activeTab === 'quizzes' ? 'active' : '') ?>">
         <i class="bi bi-pencil-square"></i>
         <span>Online Quizzes</span>
@@ -53,13 +53,13 @@ $annCount = (int)($announcement_count ?? 0);
         <?php endif; ?>
     </a>
 
-    <a href="/sia/lms/student/course/<?= esc($courseId) ?>/gradebook" 
+    <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($courseId) ?>/gradebook" 
        class="course-nav-link <?= esc($activeTab === 'gradebook' ? 'active' : '') ?>">
         <i class="bi bi-star"></i>
         <span>Grades</span>
     </a>
 
-    <a href="/sia/lms/student/course/<?= esc($courseId) ?>/attendance" 
+    <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($courseId) ?>/attendance" 
        class="course-nav-link <?= esc($activeTab === 'attendance' ? 'active' : '') ?>">
         <i class="bi bi-person-check"></i>
         <span>Attendance</span>

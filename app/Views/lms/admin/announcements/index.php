@@ -36,7 +36,7 @@ $searchQuery = $filters['search'] ?? '';
             <i class="bi bi-plus-circle-fill"></i>
             <span>New Announcement</span>
           </button>
-          <a href="/sia/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>LMS Dashboard</span>
           </a>
@@ -155,7 +155,7 @@ $searchQuery = $filters['search'] ?? '';
     <!-- Filter & Search Toolbar (Dossier Card) -->
     <div class="dossier-card mb-4 fade-in-up" style="animation-delay: 0.3s;">
       <div class="p-3.5 px-4">
-        <form method="GET" action="/sia/lms/admin/announcements" class="row g-2.5 align-items-center">
+        <form method="GET" action="<?= BASE_PATH ?>/lms/admin/announcements" class="row g-2.5 align-items-center">
           <div class="col-12 col-md-4">
             <div class="input-group">
               <span class="input-group-text bg-light border-end-0 text-muted rounded-start-pill ps-3"><i class="bi bi-search"></i></span>
@@ -191,7 +191,7 @@ $searchQuery = $filters['search'] ?? '';
               <i class="bi bi-funnel"></i>
               <span>Filter</span>
             </button>
-            <a href="/sia/lms/admin/announcements" class="btn btn-light border rounded-pill px-3 shadow-xs hover-lift" title="Reset Filters">
+            <a href="<?= BASE_PATH ?>/lms/admin/announcements" class="btn btn-light border rounded-pill px-3 shadow-xs hover-lift" title="Reset Filters">
               <i class="bi bi-arrow-counterclockwise"></i>
             </a>
           </div>
@@ -333,7 +333,7 @@ $searchQuery = $filters['search'] ?? '';
                   <td class="text-end pe-4">
                     <div class="d-inline-flex align-items-center gap-1">
                       <!-- Toggle Status Form -->
-                      <form method="POST" action="/sia/lms/admin/announcements/<?= (int)$ann['id'] ?>/status" class="d-inline">
+                      <form method="POST" action="<?= BASE_PATH ?>/lms/admin/announcements/<?= (int)$ann['id'] ?>/status" class="d-inline">
                         <?= getCsrfInput() ?>
                         <button type="submit" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 small text-dark" title="<?= $status === 'published' ? 'Switch to Draft' : 'Publish Notice' ?>">
                           <?php if ($status === 'published'): ?>
@@ -384,7 +384,7 @@ $searchQuery = $filters['search'] ?? '';
 <div class="modal fade" id="createAnnouncementModal" tabindex="-1" aria-labelledby="createAnnouncementModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-lg">
     <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-      <form method="POST" action="/sia/lms/admin/announcements/store">
+      <form method="POST" action="<?= BASE_PATH ?>/lms/admin/announcements/store">
         <?= getCsrfInput() ?>
         <div class="modal-header bg-primary text-white p-3.5 px-4">
           <div class="d-flex align-items-center gap-2.5">
@@ -605,7 +605,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var publishedAt = this.getAttribute('data-published-at');
       var expiresAt = this.getAttribute('data-expires-at');
 
-      document.getElementById('editAnnouncementForm').action = '/sia/lms/admin/announcements/' + id + '/update';
+      document.getElementById('editAnnouncementForm').action = '<?= BASE_PATH ?>/lms/admin/announcements/' + id + '/update';
       document.getElementById('editTitle').value = title;
       document.getElementById('editContent').value = content;
       document.getElementById('editAudience').value = audience;
@@ -625,7 +625,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var id = this.getAttribute('data-id');
       var title = this.getAttribute('data-title');
 
-      document.getElementById('deleteAnnouncementForm').action = '/sia/lms/admin/announcements/' + id + '/delete';
+      document.getElementById('deleteAnnouncementForm').action = '<?= BASE_PATH ?>/lms/admin/announcements/' + id + '/delete';
       document.getElementById('deleteAnnouncementNoticeTitle').textContent = '"' + title + '" (ID #' + id + ')';
 
       var deleteModal = new bootstrap.Modal(document.getElementById('deleteAnnouncementModal'));

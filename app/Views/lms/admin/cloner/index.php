@@ -31,11 +31,11 @@ $preview = $preview ?? null;
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <a href="/sia/lms/admin/courses" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
+          <a href="<?= BASE_PATH ?>/lms/admin/courses" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
             <i class="bi bi-collection text-primary"></i>
             <span>Course Catalog</span>
           </a>
-          <a href="/sia/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
+          <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>LMS Dashboard</span>
           </a>
@@ -115,7 +115,7 @@ $preview = $preview ?? null;
         <span class="text-muted small">Choose origin content course & destination course shell</span>
       </div>
       <div class="card-body p-4">
-        <form method="GET" action="/sia/lms/admin/cloner" class="row g-3 align-items-end">
+        <form method="GET" action="<?= BASE_PATH ?>/lms/admin/cloner" class="row g-3 align-items-end">
           
           <!-- Source Course -->
           <div class="col-md-5">
@@ -593,7 +593,7 @@ $preview = $preview ?? null;
         </div>
         <div class="card-body p-4">
           
-          <form method="POST" action="/sia/lms/admin/cloner/process" id="cloneExecutionForm">
+          <form method="POST" action="<?= BASE_PATH ?>/lms/admin/cloner/process" id="cloneExecutionForm">
             <?= getCsrfInput() ?>
             <input type="hidden" name="source_course_id" value="<?= (int)$preview['source_course']['id'] ?>">
             <input type="hidden" name="target_course_id" value="<?= (int)$preview['target_course']['id'] ?>">
@@ -658,7 +658,7 @@ $preview = $preview ?? null;
 
             <!-- Execution Actions -->
             <div class="d-flex align-items-center justify-content-between pt-3 border-top">
-              <a href="/sia/lms/admin/cloner" class="btn btn-light border rounded-pill px-4 py-2 fw-medium text-dark shadow-xs">
+              <a href="<?= BASE_PATH ?>/lms/admin/cloner" class="btn btn-light border rounded-pill px-4 py-2 fw-medium text-dark shadow-xs">
                 Cancel & Clear Selection
               </a>
 

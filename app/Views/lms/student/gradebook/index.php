@@ -290,7 +290,7 @@
                                                     <small class="text-muted"><i class="bi bi-clock me-1"></i>Due <?= date('M d, Y', strtotime($a['due_date'])) ?></small>
                                                 <?php endif; ?>
                                             </div>
-                                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($a['id']) ?>" class="fw-bold text-dark text-decoration-none hover-primary">
+                                            <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($a['id']) ?>" class="fw-bold text-dark text-decoration-none hover-primary">
                                                 <?= htmlspecialchars($a['title']) ?>
                                             </a>
                                         </div>
@@ -327,7 +327,7 @@
                                 </div>
 
                                 <div class="col-md-2 text-md-end">
-                                    <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($a['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                                    <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($a['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
                                         View <i class="bi bi-chevron-right ms-1"></i>
                                     </a>
                                 </div>
@@ -358,7 +358,7 @@
                                                     <small class="text-muted"><i class="bi bi-clock me-1"></i>Closes <?= date('M d, Y', strtotime($q['end_date'])) ?></small>
                                                 <?php endif; ?>
                                             </div>
-                                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="fw-bold text-dark text-decoration-none hover-primary">
+                                            <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="fw-bold text-dark text-decoration-none hover-primary">
                                                 <?= htmlspecialchars($q['title']) ?>
                                             </a>
                                         </div>
@@ -395,7 +395,7 @@
                                 </div>
 
                                 <div class="col-md-2 text-md-end">
-                                    <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-semibold">
+                                    <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="btn btn-sm btn-outline-info rounded-pill px-3 fw-semibold">
                                         View <i class="bi bi-chevron-right ms-1"></i>
                                     </a>
                                 </div>
