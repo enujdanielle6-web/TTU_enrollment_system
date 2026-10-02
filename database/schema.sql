@@ -4,12 +4,10 @@
 -- ------------------------------------------------------
 -- Server version	10.4.32-MariaDB
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
+SET FOREIGN_KEY_CHECKS = 0;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+SET NAMES utf8mb4;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
 /*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
@@ -419,25 +417,11 @@ CREATE TABLE `faculty_specializations` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Temporary table structure for view `faculty_workloads_view`
+-- View cleanup for `faculty_workloads_view` (Created at end of file)
 --
 
+DROP VIEW IF EXISTS `faculty_workloads_view`;
 DROP TABLE IF EXISTS `faculty_workloads_view`;
-/*!50001 DROP VIEW IF EXISTS `faculty_workloads_view`*/;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-/*!50001 CREATE VIEW `faculty_workloads_view` AS SELECT
- 1 AS `faculty_user_id`,
-  1 AS `employee_id`,
-  1 AS `faculty_name`,
-  1 AS `academic_rank`,
-  1 AS `employment_type`,
-  1 AS `max_teaching_units`,
-  1 AS `total_assigned_classes`,
-  1 AS `total_teaching_units`,
-  1 AS `total_weekly_contact_hours`,
-  1 AS `workload_status` */;
-SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `fee_templates`
@@ -1249,29 +1233,11 @@ CREATE TABLE `shs_strands` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Temporary table structure for view `student_academic_records_view`
+-- View cleanup for `student_academic_records_view` (Created at end of file)
 --
 
+DROP VIEW IF EXISTS `student_academic_records_view`;
 DROP TABLE IF EXISTS `student_academic_records_view`;
-/*!50001 DROP VIEW IF EXISTS `student_academic_records_view`*/;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-/*!50001 CREATE VIEW `student_academic_records_view` AS SELECT
- 1 AS `user_id`,
-  1 AS `student_number`,
-  1 AS `first_name`,
-  1 AS `last_name`,
-  1 AS `email`,
-  1 AS `ttu_email`,
-  1 AS `application_id`,
-  1 AS `reference_number`,
-  1 AS `academic_level`,
-  1 AS `grade_level`,
-  1 AS `strand`,
-  1 AS `enrollment_status`,
-  1 AS `section_code`,
-  1 AS `total_enrolled_units` */;
-SET character_set_client = @saved_cs_client;
 
 --
 -- Table structure for table `student_assessments`
@@ -1416,45 +1382,66 @@ CREATE TABLE `users` (
 -- Final view structure for view `faculty_workloads_view`
 --
 
-/*!50001 DROP VIEW IF EXISTS `faculty_workloads_view`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = cp850 */;
-/*!50001 SET character_set_results     = cp850 */;
-/*!50001 SET collation_connection      = cp850_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `faculty_workloads_view` AS select `u`.`id` AS `faculty_user_id`,coalesce(`u`.`employee_id`,`u`.`student_number`) AS `employee_id`,concat(`u`.`first_name`,' ',`u`.`last_name`) AS `faculty_name`,`fp`.`academic_rank` AS `academic_rank`,`fp`.`employment_type` AS `employment_type`,`fp`.`max_teaching_units` AS `max_teaching_units`,count(distinct `css`.`id`) AS `total_assigned_classes`,coalesce(sum(`s`.`units`),0) AS `total_teaching_units`,coalesce(sum(round(time_to_sec(timediff(`css`.`end_time`,`css`.`start_time`)) / 3600.0,2)),0) AS `total_weekly_contact_hours`,case when coalesce(sum(`s`.`units`),0) > `fp`.`max_teaching_units` then 'Overload' when coalesce(sum(`s`.`units`),0) = `fp`.`max_teaching_units` then 'Full' else 'Underload' end AS `workload_status` from (((`users` `u` left join `faculty_profiles` `fp` on(`fp`.`user_id` = `u`.`id`)) left join `college_section_subjects` `css` on(`css`.`faculty_user_id` = `u`.`id`)) left join `subjects` `s` on(`s`.`id` = `css`.`subject_id`)) where `u`.`role` = 'faculty' and `u`.`is_active` = 1 group by `u`.`id`,`u`.`employee_id`,`u`.`student_number`,`u`.`first_name`,`u`.`last_name`,`fp`.`academic_rank`,`fp`.`employment_type`,`fp`.`max_teaching_units` */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
+DROP VIEW IF EXISTS `faculty_workloads_view`;
+CREATE OR REPLACE VIEW `faculty_workloads_view` AS 
+SELECT 
+  `u`.`id` AS `faculty_user_id`,
+  COALESCE(`u`.`employee_id`, `u`.`student_number`) AS `employee_id`,
+  CONCAT(`u`.`first_name`, ' ', `u`.`last_name`) AS `faculty_name`,
+  `fp`.`academic_rank` AS `academic_rank`,
+  `fp`.`employment_type` AS `employment_type`,
+  `fp`.`max_teaching_units` AS `max_teaching_units`,
+  COUNT(DISTINCT `css`.`id`) AS `total_assigned_classes`,
+  COALESCE(SUM(`s`.`units`), 0) AS `total_teaching_units`,
+  COALESCE(SUM(ROUND(TIME_TO_SEC(TIMEDIFF(`css`.`end_time`, `css`.`start_time`)) / 3600.0, 2)), 0) AS `total_weekly_contact_hours`,
+  CASE 
+    WHEN COALESCE(SUM(`s`.`units`), 0) > `fp`.`max_teaching_units` THEN 'Overload' 
+    WHEN COALESCE(SUM(`s`.`units`), 0) = `fp`.`max_teaching_units` THEN 'Full' 
+    ELSE 'Underload' 
+  END AS `workload_status` 
+FROM `users` `u`
+LEFT JOIN `faculty_profiles` `fp` ON `fp`.`user_id` = `u`.`id`
+LEFT JOIN `college_section_subjects` `css` ON `css`.`faculty_user_id` = `u`.`id`
+LEFT JOIN `subjects` `s` ON `s`.`id` = `css`.`subject_id`
+WHERE `u`.`role` = 'faculty' AND `u`.`is_active` = 1 
+GROUP BY `u`.`id`, `u`.`employee_id`, `u`.`student_number`, `u`.`first_name`, `u`.`last_name`, `fp`.`academic_rank`, `fp`.`employment_type`, `fp`.`max_teaching_units`;
 
 --
 -- Final view structure for view `student_academic_records_view`
 --
 
-/*!50001 DROP VIEW IF EXISTS `student_academic_records_view`*/;
-/*!50001 SET @saved_cs_client          = @@character_set_client */;
-/*!50001 SET @saved_cs_results         = @@character_set_results */;
-/*!50001 SET @saved_col_connection     = @@collation_connection */;
-/*!50001 SET character_set_client      = utf8mb4 */;
-/*!50001 SET character_set_results     = utf8mb4 */;
-/*!50001 SET collation_connection      = utf8mb4_general_ci */;
-/*!50001 CREATE ALGORITHM=UNDEFINED */
-/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
-/*!50001 VIEW `student_academic_records_view` AS select `u`.`id` AS `user_id`,`u`.`student_number` AS `student_number`,`u`.`first_name` AS `first_name`,`u`.`last_name` AS `last_name`,`u`.`email` AS `email`,`u`.`ttu_email` AS `ttu_email`,`a`.`id` AS `application_id`,`a`.`reference_number` AS `reference_number`,`a`.`academic_level` AS `academic_level`,`a`.`grade_level` AS `grade_level`,`a`.`strand` AS `strand`,`a`.`status` AS `enrollment_status`,coalesce(`csec`.`section_code`,`ssec`.`section_code`) AS `section_code`,case when `a`.`academic_level` = 'Senior High School' then (select coalesce(sum(`s`.`units`),0) from (`shs_enrollments` `se` join `subjects` `s` on(`se`.`subject_id` = `s`.`id`)) where `se`.`application_id` = `a`.`id`) else (select coalesce(sum(`s`.`units`),0) from (`college_enrollments` `ce` join `subjects` `s` on(`ce`.`subject_id` = `s`.`id`)) where `ce`.`application_id` = `a`.`id`) end AS `total_enrolled_units` from (((`users` `u` join `applications` `a` on(`u`.`id` = `a`.`user_id`)) left join `college_sections` `csec` on(`a`.`section_id` = `csec`.`id` and `a`.`academic_level` = 'College')) left join `shs_sections` `ssec` on(`a`.`section_id` = `ssec`.`id` and `a`.`academic_level` = 'Senior High School')) */;
-/*!50001 SET character_set_client      = @saved_cs_client */;
-/*!50001 SET character_set_results     = @saved_cs_results */;
-/*!50001 SET collation_connection      = @saved_col_connection */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+DROP VIEW IF EXISTS `student_academic_records_view`;
+CREATE OR REPLACE VIEW `student_academic_records_view` AS 
+SELECT 
+  `u`.`id` AS `user_id`,
+  `u`.`student_number` AS `student_number`,
+  `u`.`first_name` AS `first_name`,
+  `u`.`last_name` AS `last_name`,
+  `u`.`email` AS `email`,
+  `u`.`ttu_email` AS `ttu_email`,
+  `a`.`id` AS `application_id`,
+  `a`.`reference_number` AS `reference_number`,
+  `a`.`academic_level` AS `academic_level`,
+  `a`.`grade_level` AS `grade_level`,
+  `a`.`strand` AS `strand`,
+  `a`.`status` AS `enrollment_status`,
+  COALESCE(`csec`.`section_code`, `ssec`.`section_code`) AS `section_code`,
+  CASE 
+    WHEN `a`.`academic_level` = 'Senior High School' THEN 
+      (SELECT COALESCE(SUM(`s`.`units`), 0) 
+       FROM `shs_enrollments` `se` 
+       JOIN `subjects` `s` ON `se`.`subject_id` = `s`.`id` 
+       WHERE `se`.`application_id` = `a`.`id`) 
+    ELSE 
+      (SELECT COALESCE(SUM(`s`.`units`), 0) 
+       FROM `college_enrollments` `ce` 
+       JOIN `subjects` `s` ON `ce`.`subject_id` = `s`.`id` 
+       WHERE `ce`.`application_id` = `a`.`id`) 
+  END AS `total_enrolled_units` 
+FROM `users` `u` 
+JOIN `applications` `a` ON `u`.`id` = `a`.`user_id`
+LEFT JOIN `college_sections` `csec` ON `a`.`section_id` = `csec`.`id` AND `a`.`academic_level` = 'College'
+LEFT JOIN `shs_sections` `ssec` ON `a`.`section_id` = `ssec`.`id` AND `a`.`academic_level` = 'Senior High School';
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+SET FOREIGN_KEY_CHECKS = 1;
 
--- Dump completed on 2026-10-02  8:10:52
