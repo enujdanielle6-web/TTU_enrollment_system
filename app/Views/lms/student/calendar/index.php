@@ -57,7 +57,7 @@ $todayYear = date('Y');
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
                         <!-- View Switcher -->
                         <div class="btn-group btn-group-sm bg-light p-1 rounded-pill border" role="group">
                             <button type="button" class="btn btn-sm rounded-pill active px-3 py-1" id="calViewGridBtn" title="Month Grid View">

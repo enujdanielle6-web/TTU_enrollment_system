@@ -98,8 +98,10 @@
                         <?php if (empty($submissions)): ?>
                             <tr>
                                 <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
-                                    No student submissions turned in for this assignment yet.
+                                    <div class="lms-table-empty">
+                                      <i class="bi bi-inbox fs-1 d-block mb-2 opacity-50"></i>
+                                      No student submissions turned in for this assignment yet.
+                                    </div>
                                 </td>
                             </tr>
                         <?php else: ?>

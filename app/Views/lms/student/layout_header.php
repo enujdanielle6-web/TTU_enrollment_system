@@ -58,7 +58,7 @@ try {
           <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0 fw-semibold" style="font-size: 0.62rem; letter-spacing: 0.04em;">STUDENT PORTAL</span>
         </div>
       </a>
-      <button class="btn btn-sm btn-light d-lg-none" id="sidebarClose" onclick="document.getElementById('lmsSidebar').classList.remove('show'); document.getElementById('sidebarBackdrop').classList.add('d-none');">
+      <button type="button" class="btn btn-sm btn-light d-lg-none" id="sidebarClose" aria-label="Close navigation" onclick="document.getElementById('lmsSidebar').classList.remove('show'); document.getElementById('sidebarBackdrop').classList.add('d-none');">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
@@ -67,8 +67,8 @@ try {
     <div class="px-3 my-2 lms-search-container flex-shrink-0">
         <div class="lms-search-box d-flex align-items-center gap-2 px-3 py-1.5 rounded-3">
             <i class="bi bi-search text-muted small"></i>
-            <input type="text" class="form-control bg-transparent border-0 p-0 shadow-none nav-text small" placeholder="Quick search...">
-            <span class="lms-kbd-shortcut nav-text">⌘K</span>
+            <input type="search" class="form-control bg-transparent border-0 p-0 shadow-none nav-text small lms-sidebar-search" placeholder="Quick search..." aria-label="Search navigation" autocomplete="off">
+            <kbd class="lms-kbd-shortcut nav-text" aria-hidden="true">⌘K</kbd>
         </div>
     </div>
 
@@ -134,6 +134,80 @@ try {
       </a>
     </div>
   </aside>
+
+  <!-- Professor Updates Dropup Panel -->
+  <div class="lms-notification-panel shadow-lg" id="sidebarNotificationPanel">
+      <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
+          <div class="d-flex align-items-center gap-2">
+              <div class="icon-box-sm bg-primary bg-opacity-10 text-primary" style="width: 32px; height: 32px; font-size: 0.95rem; border-radius: 0.5rem;">
+                  <i class="bi bi-bell-fill"></i>
+              </div>
+              <div>
+                  <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.88rem;">Professor Updates</h6>
+                  <small class="text-muted" style="font-size: 0.7rem;">Notices, assignments & quizzes</small>
+              </div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+              <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 fw-bold" style="font-size: 0.65rem;"><?= (int) $updateCount ?> New</span>
+              <button type="button" class="btn btn-sm btn-light border-0 text-muted p-1 rounded-2" id="closeNotificationPanel" title="Close" aria-label="Close updates">
+                  <i class="bi bi-x-lg" style="font-size: 0.75rem;"></i>
+              </button>
+          </div>
+      </div>
+  
+      <div class="lms-notification-list">
+          <?php if (empty($professorUpdates)): ?>
+              <div class="p-4 text-center text-muted">
+                  <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
+                  <p class="mb-0 small fw-medium">All caught up!</p>
+                  <small class="text-muted" style="font-size: 0.72rem;">No recent updates from your professors.</small>
+              </div>
+          <?php else: ?>
+              <?php foreach ($professorUpdates as $up): 
+                  $type = $up['type'] ?? 'announcement';
+                  $iconClass = 'bi-megaphone-fill';
+                  $badgeBg = 'bg-primary bg-opacity-10 text-primary';
+                  if ($type === 'assignment') {
+                      $iconClass = 'bi-journal-text';
+                      $badgeBg = 'bg-success bg-opacity-10 text-success';
+                  } elseif ($type === 'quiz') {
+                      $iconClass = 'bi-pencil-square';
+                      $badgeBg = 'bg-info bg-opacity-10 text-info';
+                  }
+                  $timeAgo = date('M d, h:i A', strtotime($up['created_at']));
+              ?>
+                  <a href="<?= htmlspecialchars($up['url']) ?>" class="lms-notification-item d-flex gap-2 p-3 border-bottom text-decoration-none">
+                      <div class="icon-box-sm <?= esc($badgeBg) ?>" style="width: 34px; height: 34px; font-size: 0.95rem; border-radius: 0.55rem; flex-shrink: 0;">
+                          <i class="bi <?= esc($iconClass) ?>"></i>
+                      </div>
+                      <div class="flex-grow-1 min-w-0" style="overflow: hidden;">
+                          <div class="d-flex justify-content-between align-items-center mb-1 gap-1">
+                              <span class="badge bg-light text-secondary border px-2 py-0 small flex-shrink-0" style="font-size: 0.65rem;">
+                                  <?= htmlspecialchars($up['subject_code']) ?>
+                              </span>
+                              <span class="text-muted small text-nowrap flex-shrink-0" style="font-size: 0.68rem;"><?= esc($timeAgo) ?></span>
+                          </div>
+                          <div class="fw-bold text-dark small text-truncate" title="<?= htmlspecialchars($up['title']) ?>">
+                              <?= htmlspecialchars($up['title']) ?>
+                          </div>
+                          <div class="text-muted text-truncate small mt-1" style="font-size: 0.72rem;">
+                              <i class="bi bi-person me-1"></i><?= htmlspecialchars($up['professor_name']) ?>
+                              <?php if (!empty($up['due_date'])): ?>
+                                  <span class="text-danger ms-1">&bull; Due <?= date('M d', strtotime($up['due_date'])) ?></span>
+                              <?php endif; ?>
+                          </div>
+                      </div>
+                  </a>
+              <?php endforeach; ?>
+          <?php endif; ?>
+      </div>
+  
+      <div class="p-2 bg-light border-top text-center">
+          <a href="<?= BASE_PATH ?>/lms/student/calendar" class="small fw-semibold text-primary text-decoration-none">
+              View Academic Calendar &rarr;
+          </a>
+      </div>
+  </div>
 
   <!-- Main Content Area -->
   <div class="lms-main flex-grow-1 d-flex flex-column bg-light" id="spa-main">

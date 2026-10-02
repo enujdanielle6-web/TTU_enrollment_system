@@ -120,10 +120,12 @@ require_once __DIR__ . '/../layout_header.php';
             <?php if (empty($users)): ?>
               <tr>
                 <td colspan="7" class="text-center py-5 text-muted">
-                  <div class="py-4">
-                    <i class="bi bi-person-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                    <div class="fw-bold text-dark">No LMS Users Found</div>
-                    <div class="small text-muted mt-1">No accounts match your current filter parameters.</div>
+                  <div class="lms-table-empty">
+                    <div class="py-4">
+                      <i class="bi bi-person-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                      <div class="fw-bold text-dark">No LMS Users Found</div>
+                      <div class="small text-muted mt-1">No accounts match your current filter parameters.</div>
+                    </div>
                   </div>
                 </td>
               </tr>

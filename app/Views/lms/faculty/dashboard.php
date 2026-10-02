@@ -111,7 +111,7 @@
     <div class="row g-3 mb-4 fade-in-up">
       <div class="col-sm-6 col-md-3">
         <a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="shortcut-item h-100">
-          <div class="shortcut-icon-box">
+          <div class="icon-box">
             <i class="bi bi-journal-bookmark-fill"></i>
           </div>
           <div>
@@ -122,7 +122,7 @@
       </div>
       <div class="col-sm-6 col-md-3">
         <a href="<?= BASE_PATH ?>/lms/faculty/calendar" class="shortcut-item shortcut-item-orange h-100">
-          <div class="shortcut-icon-box">
+          <div class="icon-box">
             <i class="bi bi-calendar-event-fill"></i>
           </div>
           <div>
@@ -133,7 +133,7 @@
       </div>
       <div class="col-sm-6 col-md-3">
         <a href="<?= BASE_PATH ?>/lms/faculty/messages.php" class="shortcut-item shortcut-item-cyan h-100">
-          <div class="shortcut-icon-box">
+          <div class="icon-box">
             <i class="bi bi-chat-dots-fill"></i>
           </div>
           <div>
@@ -143,8 +143,8 @@
         </a>
       </div>
       <div class="col-sm-6 col-md-3">
-        <a href="<?= BASE_PATH ?>/lms/faculty/profile.php" class="shortcut-item shortcut-item-emerald h-100">
-          <div class="shortcut-icon-box">
+        <a href="<?= BASE_PATH ?>/lms/faculty/profile.php" class="shortcut-item shortcut-item-success h-100">
+          <div class="icon-box">
             <i class="bi bi-person-fill"></i>
           </div>
           <div>

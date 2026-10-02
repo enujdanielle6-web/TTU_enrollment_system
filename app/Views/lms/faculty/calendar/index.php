@@ -46,7 +46,7 @@ $todayYear = date('Y');
             </p>
           </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center flex-wrap gap-2">
           <span class="badge bg-white border text-secondary px-3 py-2 rounded-pill shadow-xs small fw-semibold">
             <i class="bi bi-clock me-1 text-primary"></i> <?= date('l, F d, Y') ?>
           </span>
@@ -76,7 +76,7 @@ $todayYear = date('Y');
                         </div>
                     </div>
 
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center flex-wrap gap-2">
                         <!-- View Switcher -->
                         <div class="btn-group btn-group-sm bg-light p-1 rounded-pill border" role="group">
                             <button type="button" class="btn btn-sm rounded-pill active px-3 py-1" id="calViewGridBtn" title="Month Grid View">

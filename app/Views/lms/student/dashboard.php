@@ -48,7 +48,7 @@
             <!-- Quick Actions -->
             <h4 class="fw-bold mb-3 h5 text-dark mt-2">Quick Actions</h4>
             <div class="row g-3 mb-4">
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6">
                     <a href="<?= BASE_PATH ?>/lms/student/my_courses.php" class="lms-quick-action lms-qa-blue">
                         <div class="lms-qa-icon">
                             <i class="bi bi-journal-bookmark-fill"></i>
@@ -62,7 +62,7 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6">
                     <a href="<?= BASE_PATH ?>/lms/student/calendar" class="lms-quick-action lms-qa-amber">
                         <div class="lms-qa-icon">
                             <i class="bi bi-calendar-event-fill"></i>
@@ -76,7 +76,7 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6">
                     <a href="<?= BASE_PATH ?>/lms/student/messages.php" class="lms-quick-action lms-qa-cyan">
                         <div class="lms-qa-icon">
                             <i class="bi bi-chat-dots-fill"></i>
@@ -90,7 +90,7 @@
                         </div>
                     </a>
                 </div>
-                <div class="col-6 col-md-3">
+                <div class="col-12 col-sm-6">
                     <a href="<?= BASE_PATH ?>/lms/student/profile.php" class="lms-quick-action lms-qa-green">
                         <div class="lms-qa-icon">
                             <i class="bi bi-person-fill"></i>
@@ -199,7 +199,7 @@
                         <?php if (!empty($upcoming_deadlines)): ?>
                             <span class="badge bg-warning bg-opacity-10 text-warning text-dark rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.65rem;"><?= count($upcoming_deadlines) ?> Pending</span>
                         <?php endif; ?>
-                        <a href="<?= BASE_PATH ?>/lms/student/calendar" class="text-primary small text-decoration-none fw-semibold">VIEW ALL &rarr;</a>
+                        <a href="<?= BASE_PATH ?>/lms/student/calendar" class="text-primary small text-decoration-none fw-semibold text-nowrap">View all &rarr;</a>
                     </div>
                 </div>
                 <div class="p-3 pt-0">
@@ -272,7 +272,7 @@
                         <?php 
                         $firstCourseId = !empty($enrolled_courses) ? ($enrolled_courses[0]['lms_course_id'] ?? 1) : 1;
                         ?>
-                        <a href="<?= BASE_PATH ?>/lms/student/course/<?= $firstCourseId ?>/announcements" class="text-primary small text-decoration-none fw-semibold">VIEW ALL &rarr;</a>
+                        <a href="<?= BASE_PATH ?>/lms/student/course/<?= $firstCourseId ?>/announcements" class="text-primary small text-decoration-none fw-semibold text-nowrap">View all &rarr;</a>
                     </div>
                 </div>
                 <div class="p-3 pt-0">

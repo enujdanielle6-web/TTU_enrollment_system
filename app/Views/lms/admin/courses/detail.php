@@ -196,7 +196,7 @@ require_once __DIR__ . '/../layout_header.php';
           <tbody>
             <?php if (empty($roster)): ?>
               <tr>
-                <td colspan="7" class="text-center py-4 text-muted">No students currently enrolled in this course subject.</td>
+                <td colspan="7" class="text-center py-4 text-muted"><div class="lms-table-empty">No students currently enrolled in this course subject.</div></td>
               </tr>
             <?php else: ?>
               <?php foreach ($roster as $s): ?>

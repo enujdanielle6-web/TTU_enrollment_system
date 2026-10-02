@@ -3,6 +3,7 @@
 <!-- Bootstrap JS -->
 <script src="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 <script src="<?= BASE_PATH ?>/public/js/spa-router.js?v=<?= esc(filemtime(__DIR__ . '/../../../../public/js/spa-router.js')) ?>"></script>
+<script src="<?= BASE_PATH ?>/public/js/lms-shell.js?v=<?= esc(filemtime(__DIR__ . '/../../../../public/js/lms-shell.js')) ?>"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const sidebar = document.getElementById('lmsSidebar');

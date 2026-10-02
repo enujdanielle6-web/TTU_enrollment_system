@@ -267,7 +267,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
               <tbody>
                 <?php if (empty($syncReport['missing_courses'])): ?>
                   <tr>
-                    <td colspan="5" class="text-center py-4 text-muted"><i class="bi bi-check2 text-success me-1"></i> All active timetable offerings have active LMS course shells.</td>
+                    <td colspan="5" class="text-center py-4 text-muted"><div class="lms-table-empty"><i class="bi bi-check2 text-success me-1"></i> All active timetable offerings have active LMS course shells.</div></td>
                   </tr>
                 <?php else: ?>
                   <?php foreach ($syncReport['missing_courses'] as $m): ?>
@@ -309,7 +309,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
               <tbody>
                 <?php if (empty($syncReport['faculty_mismatches'])): ?>
                   <tr>
-                    <td colspan="6" class="text-center py-4 text-muted"><i class="bi bi-check2 text-success me-1"></i> All LMS courses match their authoritative scheduling instructors.</td>
+                    <td colspan="6" class="text-center py-4 text-muted"><div class="lms-table-empty"><i class="bi bi-check2 text-success me-1"></i> All LMS courses match their authoritative scheduling instructors.</div></td>
                   </tr>
                 <?php else: ?>
                   <?php foreach ($syncReport['faculty_mismatches'] as $f): ?>

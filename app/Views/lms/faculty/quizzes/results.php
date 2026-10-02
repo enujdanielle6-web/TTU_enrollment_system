@@ -97,8 +97,10 @@
                         <?php if (empty($attempts)): ?>
                             <tr>
                                 <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-pencil-square fs-1 d-block mb-2 opacity-50"></i>
-                                    No student quiz attempts recorded yet.
+                                    <div class="lms-table-empty">
+                                      <i class="bi bi-pencil-square fs-1 d-block mb-2 opacity-50"></i>
+                                      No student quiz attempts recorded yet.
+                                    </div>
                                 </td>
                             </tr>
                         <?php else: ?>
