@@ -180,8 +180,13 @@ class FacultyQuizController extends BaseController
         if (!empty($errors)) {
             $this->setFlash('danger', 'Question was not saved: ' . implode(' ', $errors));
         } else {
-            $this->quizService->addValidatedQuestions($quizId, [$clean]);
-            $this->setFlash('success', 'Question added.');
+            try {
+                $this->quizService->addValidatedQuestions($quizId, [$clean]);
+                $this->setFlash('success', 'Question added.');
+            } catch (\Throwable $e) {
+                error_log('Quiz question save failed: ' . $e->getMessage());
+                $this->setFlash('danger', $this->saveFailureMessage($e, 'The question could not be saved. Please try again.'));
+            }
         }
 
         $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
@@ -301,6 +306,21 @@ class FacultyQuizController extends BaseController
     private function clearDraft(int $quizId): void
     {
         unset($_SESSION[self::DRAFT_SESSION_KEY][$quizId]);
+    }
+
+    /**
+     * Explains a failed save. The common cause is that the phase 11 migration has not been
+     * applied, so MySQL rejects the new columns or question types.
+     */
+    private function saveFailureMessage(\Throwable $e, string $fallback): string
+    {
+        $message = $e->getMessage();
+        $schemaMissing = str_contains($message, 'Unknown column')
+            || (str_contains($message, 'question_type') && (str_contains($message, 'truncated') || str_contains($message, 'incorrect')));
+        if ($schemaMissing) {
+            return 'The database has not been updated for the new question types yet. Import database/migrations/lms_phase11_quiz_builder_schema.sql into the sia database (phpMyAdmin > Import), then save again. Nothing was saved, and your draft is still here.';
+        }
+        return $fallback;
     }
 
     private function generator(): QuizGeneratorInterface
@@ -563,7 +583,7 @@ class FacultyQuizController extends BaseController
             $saved = $this->quizService->addValidatedQuestions($quizId, $clean, $publish);
         } catch (\Throwable $e) {
             error_log('Quiz draft save failed: ' . $e->getMessage());
-            $this->setFlash('danger', 'The questions could not be saved. Nothing was changed; please try again.');
+            $this->setFlash('danger', $this->saveFailureMessage($e, 'The questions could not be saved. Nothing was changed; please try again.'));
             $this->redirect($reviewUrl);
             return;
         }
