@@ -144,12 +144,14 @@ require_once __DIR__ . '/../layout_header.php';
               <?php if (empty($courses)): ?>
                 <tr>
                   <td colspan="9" class="text-center py-5 text-muted">
-                    <div class="d-flex flex-column align-items-center justify-content-center py-4">
-                      <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
-                        <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <div class="lms-table-empty">
+                      <div class="d-flex flex-column align-items-center justify-content-center py-4">
+                        <div class="bg-light rounded-circle d-flex align-items-center justify-content-center mb-3" style="width: 72px; height: 72px;">
+                          <i class="bi bi-inbox fs-1 text-muted"></i>
+                        </div>
+                        <h3 class="h6 fw-bold text-dark mb-1">No LMS Course Shells Found</h3>
+                        <p class="small text-muted mb-0">No course shells match your current search and filter criteria.</p>
                       </div>
-                      <h3 class="h6 fw-bold text-dark mb-1">No LMS Course Shells Found</h3>
-                      <p class="small text-muted mb-0">No course shells match your current search and filter criteria.</p>
                     </div>
                   </td>
                 </tr>

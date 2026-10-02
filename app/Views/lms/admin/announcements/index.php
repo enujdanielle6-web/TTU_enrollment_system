@@ -235,12 +235,14 @@ $searchQuery = $filters['search'] ?? '';
             <?php if (empty($announcements)): ?>
               <tr>
                 <td colspan="8" class="text-center py-5 text-muted">
-                  <i class="bi bi-megaphone text-muted fs-1 d-block mb-2"></i>
-                  <h6 class="fw-bold mb-1">No platform announcements found</h6>
-                  <p class="small text-muted mb-3">No announcements match your search filters or none have been published yet.</p>
-                  <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
-                    <i class="bi bi-plus me-1"></i> Create First Announcement
-                  </button>
+                  <div class="lms-table-empty">
+                    <i class="bi bi-megaphone text-muted fs-1 d-block mb-2"></i>
+                    <h6 class="fw-bold mb-1">No platform announcements found</h6>
+                    <p class="small text-muted mb-3">No announcements match your search filters or none have been published yet.</p>
+                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#createAnnouncementModal">
+                      <i class="bi bi-plus me-1"></i> Create First Announcement
+                    </button>
+                  </div>
                 </td>
               </tr>
             <?php else: ?>

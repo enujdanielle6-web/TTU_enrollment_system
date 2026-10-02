@@ -108,17 +108,19 @@ require_once __DIR__ . '/../layout_header.php';
             <?php if (empty($logs)): ?>
               <tr>
                 <td colspan="6" class="text-center py-5 text-muted">
-                  <div class="d-flex flex-column align-items-center justify-content-center py-4">
-                    <div class="d-flex align-items-center justify-content-center bg-light text-muted rounded-circle mb-3 shadow-xs" style="width: 68px; height: 68px; font-size: 1.8rem;">
-                      <i class="bi bi-journal-x opacity-50"></i>
+                  <div class="lms-table-empty">
+                    <div class="d-flex flex-column align-items-center justify-content-center py-4">
+                      <div class="d-flex align-items-center justify-content-center bg-light text-muted rounded-circle mb-3 shadow-xs" style="width: 68px; height: 68px; font-size: 1.8rem;">
+                        <i class="bi bi-journal-x opacity-50"></i>
+                      </div>
+                      <div class="fw-bold text-dark fs-6">No Audit Records Found</div>
+                      <p class="small text-muted mb-3" style="max-width: 380px;">No administrative audit entries matched your active search query.</p>
+                      <?php if (!empty($filters['search'])): ?>
+                        <a href="/sia/lms/admin/audit_logs" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                          <i class="bi bi-x-circle me-1"></i> Clear Search Query
+                        </a>
+                      <?php endif; ?>
                     </div>
-                    <div class="fw-bold text-dark fs-6">No Audit Records Found</div>
-                    <p class="small text-muted mb-3" style="max-width: 380px;">No administrative audit entries matched your active search query.</p>
-                    <?php if (!empty($filters['search'])): ?>
-                      <a href="/sia/lms/admin/audit_logs" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                        <i class="bi bi-x-circle me-1"></i> Clear Search Query
-                      </a>
-                    <?php endif; ?>
                   </div>
                 </td>
               </tr>

@@ -145,10 +145,12 @@ require_once __DIR__ . '/../layout_header.php';
             <?php if (empty($archivedCourses)): ?>
               <tr>
                 <td colspan="8" class="text-center py-5 text-muted">
-                  <div class="py-4">
-                    <i class="bi bi-archive fs-1 d-block mb-2 text-secondary opacity-50"></i>
-                    <div class="fw-bold text-dark">No Archived Course Shells</div>
-                    <div class="small text-muted mt-1">No concluded academic courses have been archived yet.</div>
+                  <div class="lms-table-empty">
+                    <div class="py-4">
+                      <i class="bi bi-archive fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                      <div class="fw-bold text-dark">No Archived Course Shells</div>
+                      <div class="small text-muted mt-1">No concluded academic courses have been archived yet.</div>
+                    </div>
                   </div>
                 </td>
               </tr>

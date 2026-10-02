@@ -173,8 +173,8 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
     <div class="px-3 my-3 lms-search-container">
         <div class="lms-search-box d-flex align-items-center gap-2 px-3 py-1.5 rounded-3">
             <i class="bi bi-search text-muted small"></i>
-            <input type="text" class="form-control bg-transparent border-0 p-0 shadow-none nav-text small" placeholder="Quick search modules...">
-            <span class="lms-kbd-shortcut nav-text">⌘K</span>
+            <input type="search" class="form-control bg-transparent border-0 p-0 shadow-none nav-text small lms-sidebar-search" placeholder="Quick search modules..." aria-label="Search navigation" autocomplete="off">
+            <kbd class="lms-kbd-shortcut nav-text" aria-hidden="true">⌘K</kbd>
         </div>
     </div>
 
