@@ -399,8 +399,9 @@ class LmsService
     }
 
     /**
-     * Resolves a material row to its file on disk, checking the canonical storage
-     * directory first and then the legacy locations. Returns null when missing.
+     * Resolves a material row to its file on disk for quiz generation, checking the
+     * canonical storage directory first and then the legacy locations (same order as
+     * DownloadController). Returns null when missing.
      */
     public function resolveMaterialPath(array $material): ?string
     {
@@ -409,8 +410,7 @@ class LmsService
             $root . '/storage/uploads/lms/materials/' . basename($material['file_path']),
             $root . '/storage/uploads/lms/' . ltrim($material['file_path'], '/\\'),
             $root . '/app/uploads/lms/' . basename($material['file_path']),
-            $root . '/app/uploads/lms/' . ltrim($material['file_path'], '/\\'),
-            'C:/xampp/storage/lms_materials/' . basename($material['file_path'])
+            $root . '/app/uploads/lms/' . ltrim($material['file_path'], '/\\')
         ];
 
         foreach ($candidatePaths as $candidate) {

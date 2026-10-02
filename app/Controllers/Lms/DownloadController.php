@@ -50,7 +50,25 @@ class DownloadController extends BaseController
             return;
         }
 
-        $resolvedPath = $lmsService->resolveMaterialPath($material);
+        // Canonical & fallback material storage directories
+        $candidatePaths = [
+            dirname(__DIR__, 3) . '/storage/uploads/lms/materials/' . basename($material['file_path']),
+            dirname(__DIR__, 3) . '/storage/uploads/lms/' . ltrim($material['file_path'], '/\\'),
+            dirname(__DIR__, 3) . '/app/uploads/lms/' . basename($material['file_path']),
+            dirname(__DIR__, 3) . '/app/uploads/lms/' . ltrim($material['file_path'], '/\\'),
+            'C:/xampp/storage/lms_materials/' . basename($material['file_path'])
+        ];
+
+        $resolvedPath = null;
+        foreach ($candidatePaths as $candidate) {
+            if (file_exists($candidate)) {
+                $real = realpath($candidate);
+                if ($real && file_exists($real)) {
+                    $resolvedPath = $real;
+                    break;
+                }
+            }
+        }
 
         if (!$resolvedPath) {
             error_log("LMS Material file not found on disk for material ID: {$materialId}");
