@@ -35,3 +35,6 @@ Desktop.ini
 /uploads/**/*
 !/uploads/**/
 !/uploads/**/.htaccess
+# Placeholder files referenced by the demo data (database/seed.sql, optional_demo_data.sql)
+!/uploads/documents/sample_*
+!/uploads/payments/proof_mary_downpayment.jpg
