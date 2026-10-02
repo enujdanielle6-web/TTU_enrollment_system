@@ -5,6 +5,9 @@ namespace App\Core;
 class Request
 {
     protected array $data = [];
+    protected ?string $rawBody = null;
+    protected array $customHeaders = [];
+    protected ?string $customMethod = null;
 
     public function __construct()
     {
@@ -13,6 +16,10 @@ class Request
 
     public function getMethod(): string
     {
+        if ($this->customMethod !== null) {
+            return $this->customMethod;
+        }
+
         $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
         
         // Method spoofing for PUT/DELETE via POST
@@ -25,6 +32,12 @@ class Request
         }
 
         return $method;
+    }
+
+    public function setMethod(string $method): self
+    {
+        $this->customMethod = strtoupper($method);
+        return $this;
     }
 
     public function getUri(): string
@@ -74,12 +87,36 @@ class Request
         return $uri;
     }
 
+    public function getRawBody(): string
+    {
+        if ($this->rawBody === null) {
+            $this->rawBody = (string) file_get_contents('php://input');
+        }
+        return $this->rawBody;
+    }
+
+    public function setRawBody(string $rawBody): self
+    {
+        $this->rawBody = $rawBody;
+        $decoded = json_decode($rawBody, true);
+        if (is_array($decoded)) {
+            $this->data = $decoded;
+        }
+        return $this;
+    }
+
+    public function setHeader(string $key, string $value): self
+    {
+        $this->customHeaders[strtolower($key)] = $value;
+        return $this;
+    }
+
     protected function parseJsonBody(): void
     {
-        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+        $contentType = $this->header('Content-Type') ?? ($_SERVER['CONTENT_TYPE'] ?? '');
         
         if (str_contains($contentType, 'application/json')) {
-            $input = file_get_contents('php://input');
+            $input = $this->getRawBody();
             $data = json_decode($input, true);
             if (is_array($data)) {
                 $this->data = $data;
@@ -123,6 +160,11 @@ class Request
         return $_GET[$key] ?? $default;
     }
 
+    public function getQueryParams(): array
+    {
+        return $_GET;
+    }
+
     public function post(?string $key = null, $default = null)
     {
         if ($key === null) {
@@ -133,6 +175,23 @@ class Request
 
     public function header(string $key, $default = null)
     {
+        $lowerKey = strtolower($key);
+        if (isset($this->customHeaders[$lowerKey])) {
+            return $this->customHeaders[$lowerKey];
+        }
+
+        // Check getallheaders() if available in web server environments
+        if (function_exists('getallheaders')) {
+            $allHeaders = getallheaders();
+            if (is_array($allHeaders)) {
+                foreach ($allHeaders as $hName => $hVal) {
+                    if (strcasecmp($hName, $key) === 0) {
+                        return $hVal;
+                    }
+                }
+            }
+        }
+
         // Convert header name to $_SERVER key format (e.g., Content-Type -> HTTP_CONTENT_TYPE)
         $serverKey = 'HTTP_' . strtoupper(str_replace('-', '_', $key));
         

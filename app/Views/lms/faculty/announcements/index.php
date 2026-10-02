@@ -24,43 +24,46 @@
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-primary">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Total Notices</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-dark"><?= $totalAnnouncements ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Total Notices</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
+                            <i class="bi bi-megaphone text-white"></i>
                         </div>
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-megaphone fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $totalAnnouncements ?></div>
+                    <div class="stat-subtext text-primary">
+                        <i class="bi bi-bell-fill me-1"></i> Course Announcements
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-success">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Published Broadcasts</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-success"><?= $publishedCount ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Published</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bi bi-broadcast text-white"></i>
                         </div>
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-broadcast fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $publishedCount ?></div>
+                    <div class="stat-subtext text-success">
+                        <i class="bi bi-check-circle-fill me-1"></i> Active Broadcasts
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-warning">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Draft Notices</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-warning"><?= $draftCount ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Draft Notices</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <i class="bi bi-pencil-square text-white"></i>
                         </div>
-                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-pencil-square fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $draftCount ?></div>
+                    <div class="stat-subtext text-warning">
+                        <i class="bi bi-clock-history me-1"></i> Unpublished Drafts
                     </div>
                 </div>
             </div>

@@ -33,57 +33,61 @@
         <!-- KPI Summary Strip -->
         <div class="row g-3 mb-4">
             <div class="col-sm-6 col-lg-3">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-primary">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Class Average</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-primary"><?= $classAverage ?>%</h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Class Average</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
+                            <i class="bi bi-graph-up-arrow text-white"></i>
                         </div>
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-graph-up-arrow fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $classAverage ?>%</div>
+                    <div class="stat-subtext text-primary">
+                        <i class="bi bi-bar-chart-fill me-1"></i> Section Mean Performance
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-6 col-lg-3">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-success">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Passing Rate</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-success"><?= $passingRate ?>%</h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Passing Rate</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bi bi-check2-all text-white"></i>
                         </div>
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-check2-all fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $passingRate ?>%</div>
+                    <div class="stat-subtext text-success">
+                        <i class="bi bi-mortarboard-fill me-1"></i> Passing Standing (>=75%)
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-6 col-lg-3">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-info">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Class Roster</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-dark"><?= $totalStudents ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Class Roster</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                            <i class="bi bi-people text-white"></i>
                         </div>
-                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-people fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $totalStudents ?></div>
+                    <div class="stat-subtext text-info">
+                        <i class="bi bi-person-check-fill me-1"></i> Total Enrolled
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-6 col-lg-3">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-warning">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Gradable Items</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-dark"><?= $totalAssessmentItems ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Gradable Items</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <i class="bi bi-clipboard2-check text-white"></i>
                         </div>
-                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-clipboard2-check fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $totalAssessmentItems ?></div>
+                    <div class="stat-subtext text-warning">
+                        <i class="bi bi-calculator me-1"></i> Assignments &amp; Quizzes
                     </div>
                 </div>
             </div>

@@ -13,6 +13,7 @@ use App\Models\Announcement;
 use App\Models\HealthRecord;
 use App\Models\StudentAssessment;
 use App\Models\ScholarshipApplication;
+use App\Services\PaymentService;
 use App\Core\Database;
 
 class ApplicantController extends BaseController
@@ -382,175 +383,541 @@ try {
     error_log('Applicant assessment fetch failed: ' . $e->getMessage());
 }
 
-$pageTitle = 'Financial Assessment - Applicant Portal';
+    $pageTitle = 'Financial Assessment - Applicant Portal';
 
-        return $this->render('applicant/assessment', get_defined_vars());
+    // Payment Queue Context & Real-Time Telemetry
+    $queueService = new \App\Services\PaymentQueueService(null, $pdo);
+    $queueMetrics = $queueService->getQueueMetrics();
+    $activeQueueSession = null;
+
+    if ($assessment) {
+        $assessmentId = (int) $assessment['id'];
+        $sessionRepo = new \App\Repositories\PaymentSessionRepository($pdo);
+        $sessionRepo->expireStaleActiveSessions();
+        $sessionRepo->abandonStaleWaitingSessions();
+
+        $found = $sessionRepo->findActiveByUserAndAssessment($userId, $assessmentId);
+        if (!$found) {
+            $found = $sessionRepo->findWaitingByUserAndAssessment($userId, $assessmentId);
+        }
+
+        if ($found) {
+            $statusInfo = $queueService->checkStatus((string)$found['session_token']);
+            $activeQueueSession = array_merge($found, $statusInfo);
+        }
+
+        // Reconcile and auto-verify any pending PayMongo sessions for this assessment
+        $activeOnlinePayment = null;
+        try {
+            $pmCheckStmt = $pdo->prepare('
+                SELECT * FROM payment_records 
+                WHERE assessment_id = :aid AND user_id = :uid AND gateway = "paymongo" AND status = "pending"
+                ORDER BY id DESC LIMIT 1
+            ');
+            $pmCheckStmt->execute(['aid' => $assessmentId, 'uid' => $userId]);
+            $pendingPM = $pmCheckStmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($pendingPM && !empty($pendingPM['checkout_session_id'])) {
+                $csId = (string) $pendingPM['checkout_session_id'];
+                $paymentService = new PaymentService();
+                $payMongoGateway = new \App\Services\PayMongoService();
+                $sessionData = $payMongoGateway->getCheckoutSession($csId);
+                $attrs = $sessionData['data']['attributes'] ?? [];
+                $sStatus = strtolower((string)($attrs['status'] ?? ''));
+                $paymentsArr = (array)($attrs['payments'] ?? []);
+
+                $hasPaid = ($sStatus === 'paid');
+                foreach ($paymentsArr as $p) {
+                    if (in_array(strtolower((string)($p['attributes']['status'] ?? '')), ['paid', 'succeeded'], true)) {
+                        $hasPaid = true;
+                        break;
+                    }
+                }
+
+                if ($hasPaid) {
+                    $verifyResult = $paymentService->autoVerifyPayMongoCheckoutSession($csId, $payMongoGateway);
+                    if ($verifyResult['status'] === 'verified') {
+                        $_SESSION['success_msg'] = "Your online payment of ₱" . number_format($verifyResult['amount'], 2) . " has been confirmed and verified! Official Receipt No: {$verifyResult['receipt_number']}";
+                        $breakdown = \App\Services\AssessmentService::getAssessmentBreakdown($pdo, null, $userId);
+                        if ($breakdown) {
+                            $assessment = $breakdown['assessment'];
+                            $payments = $breakdown['payments'];
+                            $assessmentItems = $breakdown['assessment_items'];
+                            $enrolledSubjects = $breakdown['enrolled_subjects'];
+                        }
+                    }
+                } elseif ($sStatus === 'expired') {
+                    $paymentService->cancelPayMongoPayment((int)$pendingPM['id'], $userId, 'PayMongo session expired', $csId, $payMongoGateway);
+                } else {
+                    $age = time() - strtotime((string)$pendingPM['created_at']);
+                    if ($age > 900) {
+                        $paymentService->cancelPayMongoPayment((int)$pendingPM['id'], $userId, 'Checkout session timed out after 15 minutes of inactivity', $csId, $payMongoGateway);
+                    } else {
+                        $activeOnlinePayment = $pendingPM;
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('Error checking PayMongo session in assessment: ' . $e->getMessage());
+        }
     }
+
+    return $this->render('applicant/assessment', get_defined_vars());
+}
+
     public function processPayment(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/applicant/assessment.php");
-    return;
-}
-
-
-
-$action = $_POST['action'] ?? '';
-$userId = (int)$_SESSION['user_id'];
-
-try {
-    if ($action === 'submit_payment_proof') {
-        $assessmentId = (int)($_POST['assessment_id'] ?? 0);
-        $amount = (float)($_POST['amount'] ?? 0);
-        $method = trim((string)($_POST['payment_method'] ?? ''));
-        $refNo = trim((string)($_POST['reference_number'] ?? ''));
-
-        if ($assessmentId <= 0) {
-            throw new \Exception("Invalid assessment selected. Please refresh the page and try again.");
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            $response->redirect("/sia/applicant/assessment.php");
+            return;
         }
 
-        if ($amount <= 0) {
-            throw new \Exception("Please enter a valid payment amount greater than ₱0.00.");
+        $action = $_POST['action'] ?? '';
+        $userId = (int)$_SESSION['user_id'];
+
+        $destPath = null;
+        $altDestPath = null;
+
+        try {
+            if ($action === 'submit_payment_proof') {
+                $assessmentId = (int)($_POST['assessment_id'] ?? 0);
+                $amount = (float)($_POST['amount'] ?? 0);
+                $method = trim((string)($_POST['payment_method'] ?? ''));
+                $refNo = trim((string)($_POST['reference_number'] ?? ''));
+
+                if ($assessmentId <= 0) {
+                    throw new \Exception("Invalid assessment selected. Please refresh the page and try again.");
+                }
+
+                if ($amount <= 0) {
+                    throw new \Exception("Please enter a valid payment amount greater than ₱0.00.");
+                }
+
+                if (empty($method)) {
+                    throw new \Exception("Please select the payment method you used (GCash, Maya, or Bank Transfer).");
+                }
+
+                if (empty($refNo) || strlen($refNo) < 4) {
+                    throw new \Exception("Please enter a valid transaction reference number (at least 4 characters).");
+                }
+
+                // Enforce Health Information submission check
+                $healthStatus = HealthRecord::getStatus($userId);
+                if ($healthStatus === null) {
+                    throw new \Exception("Action Required: You must submit your Health Information before submitting payments.");
+                }
+
+                // Validate File Upload before entering critical section
+                if (!isset($_FILES['proof_image']) || $_FILES['proof_image']['error'] !== UPLOAD_ERR_OK) {
+                    $errCode = $_FILES['proof_image']['error'] ?? UPLOAD_ERR_NO_FILE;
+                    $msg = match ($errCode) {
+                        UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => "The uploaded screenshot exceeds the maximum allowed file size (5MB).",
+                        UPLOAD_ERR_PARTIAL => "The file was only partially uploaded. Please re-select your file and try again.",
+                        UPLOAD_ERR_NO_FILE => "Please attach a screenshot or photo of your payment receipt.",
+                        default => "Upload failed (Error Code: $errCode). Please try again."
+                    };
+                    throw new \Exception($msg);
+                }
+
+                $fileTmpPath = $_FILES['proof_image']['tmp_name'];
+                $fileName = $_FILES['proof_image']['name'];
+                $fileSize = (int)$_FILES['proof_image']['size'];
+                $fileType = $_FILES['proof_image']['type'] ?? '';
+
+                // Max 5MB limit
+                if ($fileSize > 5 * 1024 * 1024) {
+                    throw new \Exception("The receipt image exceeds the 5MB size limit. Please upload a smaller image.");
+                }
+
+                $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+                $allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+                if (!in_array($ext, $allowedExts, true)) {
+                    throw new \Exception("Invalid file format (.$ext). Only JPG, PNG, and WEBP image screenshots are accepted.");
+                }
+
+                // MIME validation
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $detectedMime = $finfo ? finfo_file($finfo, $fileTmpPath) : $fileType;
+                if ($finfo) {
+                    finfo_close($finfo);
+                }
+
+                $allowedMimes = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp'];
+                if (!in_array($detectedMime, $allowedMimes, true) && !in_array($fileType, $allowedMimes, true)) {
+                    throw new \Exception("The selected file is not a valid image format. Please upload a clear JPG, PNG, or WEBP receipt screenshot.");
+                }
+
+                // Save uploaded proof image
+                $newFileName = 'proof_' . $userId . '_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
+                
+                // Primary upload target: root uploads/payments/
+                $uploadDir = __DIR__ . '/../../uploads/payments/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0777, true);
+                }
+
+                $destPath = $uploadDir . $newFileName;
+                $moved = @move_uploaded_file($fileTmpPath, $destPath);
+                if (!$moved && (php_sapi_name() === 'cli' || defined('TESTING_ENV'))) {
+                    $moved = @copy($fileTmpPath, $destPath);
+                }
+                if (!$moved) {
+                    throw new \Exception("Server could not save the uploaded receipt image. Please check server permissions and try again.");
+                }
+
+                // Secondary sync: app/uploads/payments/ if it exists
+                $altUploadDir = __DIR__ . '/../uploads/payments/';
+                if (is_dir($altUploadDir)) {
+                    $altDestPath = $altUploadDir . $newFileName;
+                    @copy($destPath, $altDestPath);
+                }
+
+                // Delegate domain persistence, validation, and locking to PaymentService
+                $paymentService = new PaymentService();
+                $paymentService->submitPaymentProof([
+                    'assessment_id'    => $assessmentId,
+                    'user_id'          => $userId,
+                    'amount'           => $amount,
+                    'payment_method'   => $method,
+                    'reference_number' => $refNo,
+                    'proof_image'      => $newFileName,
+                ]);
+
+                $_SESSION['success_msg'] = "Proof of payment for ₱" . number_format($amount, 2) . " (Ref: {$refNo}) was submitted successfully! The Cashier's office will review and verify your payment shortly.";
+                $response->redirect("/sia/applicant/assessment.php");
+                return;
+            } elseif ($action === 'initiate_paymongo') {
+                $assessmentId = (int)($_POST['assessment_id'] ?? 0);
+                $amount = (float)($_POST['amount'] ?? 0);
+
+                if ($assessmentId <= 0) {
+                    throw new \Exception("Invalid assessment selected. Please refresh the page and try again.");
+                }
+
+                if ($amount <= 0) {
+                    throw new \Exception("Please enter a valid payment amount greater than ₱0.00.");
+                }
+
+                // Enforce Health Information submission check
+                $healthStatus = HealthRecord::getStatus($userId);
+                if ($healthStatus === null) {
+                    throw new \Exception("Action Required: You must submit your Health Information before initiating online payment.");
+                }
+
+                // Check and enforce concurrent payment queue
+                $queueService = new \App\Services\PaymentQueueService();
+                $sessionToken = trim((string)($_POST['session_token'] ?? ($_SESSION['payment_session_token'] ?? '')));
+
+                if ($queueService->isQueueEnabled()) {
+                    if ($sessionToken !== '') {
+                        $sessionStatus = $queueService->checkStatus($sessionToken);
+                        if ($sessionStatus['status'] !== 'active') {
+                            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                                header('Content-Type: application/json');
+                                echo json_encode([
+                                    'success'   => false,
+                                    'in_queue'  => true,
+                                    'status'    => $sessionStatus['status'],
+                                    'queue_url' => "/sia/applicant/payment_queue.php?token=" . urlencode($sessionToken),
+                                ]);
+                                return;
+                            }
+                            $response->redirect("/sia/applicant/payment_queue.php?token=" . urlencode($sessionToken));
+                            return;
+                        }
+                    } else {
+                        // Enter queue to obtain or reserve slot
+                        $queueEntry = $queueService->enterQueue($userId, $assessmentId);
+                        $sessionToken = $queueEntry['session_token'];
+                        $_SESSION['payment_session_token'] = $sessionToken;
+
+                        if ($queueEntry['status'] === 'waiting') {
+                            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                                header('Content-Type: application/json');
+                                echo json_encode([
+                                    'success'   => false,
+                                    'in_queue'  => true,
+                                    'status'    => 'waiting',
+                                    'position'  => $queueEntry['position'] ?? 1,
+                                    'queue_url' => "/sia/applicant/payment_queue.php?token=" . urlencode($sessionToken),
+                                ]);
+                                return;
+                            }
+                            $response->redirect("/sia/applicant/payment_queue.php?token=" . urlencode($sessionToken));
+                            return;
+                        }
+                    }
+                }
+
+                $paymentService = new PaymentService();
+                $result = $paymentService->initiatePayMongoPayment([
+                    'assessment_id' => $assessmentId,
+                    'user_id'       => $userId,
+                    'amount'        => $amount,
+                    'session_token' => $sessionToken,
+                ]);
+
+                if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                    header('Content-Type: application/json');
+                    echo json_encode([
+                        'success'      => true,
+                        'checkout_url' => $result['checkout_url'],
+                    ]);
+                    return;
+                }
+
+                $response->redirect($result['checkout_url']);
+                return;
+            } elseif ($action === 'cancel_paymongo_session') {
+                $paymentId = (int)($_POST['payment_id'] ?? 0);
+                $sessionId = trim((string)($_POST['session_id'] ?? ''));
+                $paymentService = new PaymentService();
+                $paymentService->cancelPayMongoPayment($paymentId, $userId, 'Cancelled by student', $sessionId);
+                $_SESSION['info_msg'] = "Online payment checkout session was cancelled. Your allowable balance has been restored.";
+                $response->redirect("/sia/applicant/assessment.php");
+                return;
+            }
+        } catch (\Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+
+            // Clean up uploaded files if transaction or DB operation failed
+            if ($destPath && file_exists($destPath)) {
+                @unlink($destPath);
+            }
+            if ($altDestPath && file_exists($altDestPath)) {
+                @unlink($altDestPath);
+            }
+
+            if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+                http_response_code(400);
+                header('Content-Type: application/json');
+                echo json_encode([
+                    'success' => false,
+                    'error'   => $e->getMessage(),
+                ]);
+                return;
+            }
+
+            $_SESSION['error_msg'] = $e->getMessage();
+            $response->redirect("/sia/applicant/assessment.php");
+            return;
         }
 
-        if (empty($method)) {
-            throw new \Exception("Please select the payment method you used (GCash, Maya, or Bank Transfer).");
-        }
-
-        if (empty($refNo) || strlen($refNo) < 4) {
-            throw new \Exception("Please enter a valid transaction reference number (at least 4 characters).");
-        }
-
-        // Enforce Health Information submission check
-        $healthStatus = HealthRecord::getStatus($userId);
-        if ($healthStatus === null) {
-            throw new \Exception("Action Required: You must submit your Health Information before submitting payments.");
-        }
-
-        // Verify Assessment belongs to user
-        $assStmt = $pdo->prepare('
-            SELECT sa.* 
-            FROM student_assessments sa
-            INNER JOIN applications a ON sa.application_id = a.id
-            WHERE sa.id = :id AND a.user_id = :user_id
-        ');
-        $assStmt->execute(['id' => $assessmentId, 'user_id' => $userId]);
-        $assessment = $assStmt->fetch();
-
-        if (!$assessment) {
-            throw new \Exception("Assessment record not found or you are not authorized to submit payment for this account.");
-        }
-
-        $pendingStmt = $pdo->prepare('SELECT COALESCE(SUM(amount), 0) FROM payment_records WHERE assessment_id = :id AND status = "pending"');
-        $pendingStmt->execute(['id' => $assessmentId]);
-        $pendingAmount = (float)$pendingStmt->fetchColumn();
-
-        $balance = (float)$assessment['net_amount'] - (float)$assessment['total_paid'] - $pendingAmount;
-        
-        if ($balance <= 0) {
-            throw new \Exception("You have fully settled your balance or already have pending payments covering your full assessment.");
-        }
-
-        if ($amount > ($balance + 0.01)) {
-            throw new \Exception("The payment amount (₱" . number_format($amount, 2) . ") exceeds your allowable remaining balance of ₱" . number_format($balance, 2) . ".");
-        }
-
-        $minPayment = min(500.0, $balance);
-        if ($amount < $minPayment) {
-            throw new \Exception("The minimum payment allowed is ₱" . number_format($minPayment, 2) . ".");
-        }
-
-        // Handle File Upload
-        if (!isset($_FILES['proof_image']) || $_FILES['proof_image']['error'] !== UPLOAD_ERR_OK) {
-            $errCode = $_FILES['proof_image']['error'] ?? UPLOAD_ERR_NO_FILE;
-            $msg = match ($errCode) {
-                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => "The uploaded screenshot exceeds the maximum allowed file size (5MB).",
-                UPLOAD_ERR_PARTIAL => "The file was only partially uploaded. Please re-select your file and try again.",
-                UPLOAD_ERR_NO_FILE => "Please attach a screenshot or photo of your payment receipt.",
-                default => "Upload failed (Error Code: $errCode). Please try again."
-            };
-            throw new \Exception($msg);
-        }
-
-        $fileTmpPath = $_FILES['proof_image']['tmp_name'];
-        $fileName = $_FILES['proof_image']['name'];
-        $fileSize = (int)$_FILES['proof_image']['size'];
-        $fileType = $_FILES['proof_image']['type'] ?? '';
-
-        // Max 5MB limit
-        if ($fileSize > 5 * 1024 * 1024) {
-            throw new \Exception("The receipt image exceeds the 5MB size limit. Please upload a smaller image.");
-        }
-
-        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
-        $allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
-        if (!in_array($ext, $allowedExts, true)) {
-            throw new \Exception("Invalid file format (.$ext). Only JPG, PNG, and WEBP image screenshots are accepted.");
-        }
-
-        // MIME validation
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $detectedMime = $finfo ? finfo_file($finfo, $fileTmpPath) : $fileType;
-        if ($finfo) {
-            finfo_close($finfo);
-        }
-
-        $allowedMimes = ['image/jpeg', 'image/jpg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp'];
-        if (!in_array($detectedMime, $allowedMimes, true) && !in_array($fileType, $allowedMimes, true)) {
-            throw new \Exception("The selected file is not a valid image format. Please upload a clear JPG, PNG, or WEBP receipt screenshot.");
-        }
-
-        $newFileName = 'proof_' . $userId . '_' . time() . '.' . $ext;
-        
-        // Primary upload target: root uploads/payments/
-        $uploadDir = __DIR__ . '/../../uploads/payments/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $destPath = $uploadDir . $newFileName;
-        if (!move_uploaded_file($fileTmpPath, $destPath)) {
-            throw new \Exception("Server could not save the uploaded receipt image. Please check server permissions and try again.");
-        }
-
-        // Secondary sync: app/uploads/payments/ if it exists
-        $altUploadDir = __DIR__ . '/../uploads/payments/';
-        if (is_dir($altUploadDir)) {
-            copy($destPath, $altUploadDir . $newFileName);
-        }
-
-        // Insert into payment_records as "pending"
-        $stmt = $pdo->prepare('
-            INSERT INTO payment_records (assessment_id, user_id, amount, payment_date, payment_method, reference_number, proof_image, status)
-            VALUES (:ass_id, :user_id, :amount, CURDATE(), :method, :ref, :proof, "pending")
-        ');
-        
-        $stmt->execute([
-            'ass_id' => $assessmentId,
-            'user_id' => $userId,
-            'amount' => $amount,
-            'method' => $method,
-            'ref' => $refNo,
-            'proof' => $newFileName
-        ]);
-
-        logActivity($userId, 'bi-cloud-upload', 'Payment Proof Uploaded', "Submitted proof of payment (Ref: $refNo, Method: $method) for ₱" . number_format($amount, 2));
-
-        $_SESSION['success_msg'] = "Proof of payment for ₱" . number_format($amount, 2) . " (Ref: {$refNo}) was submitted successfully! The Cashier's office will review and verify your payment shortly.";
         $response->redirect("/sia/applicant/assessment.php");
         return;
     }
-} catch (\Exception $e) {
-    $_SESSION['error_msg'] = $e->getMessage();
-    $response->redirect("/sia/applicant/assessment.php");
-    return;
-}
 
-$response->redirect("/sia/applicant/assessment.php");
-return;
+    public function paymentCallback(Request $request, Response $response)
+    {
+        $sessionId = trim((string)($_GET['session_id'] ?? ''));
+        $isCancelled = !empty($_GET['cancelled']);
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $paymentRepo = new \App\Repositories\PaymentRepository();
+        $paymentService = new PaymentService();
+
+        if ($sessionId !== '') {
+            $record = $paymentRepo->findByCheckoutSessionId($sessionId);
+
+            if ($record) {
+                if ($isCancelled) {
+                    $paymentService->cancelPayMongoPayment((int)$record['id'], $userId, 'Cancelled by applicant on PayMongo checkout', $sessionId);
+                    $_SESSION['info_msg'] = "Online payment checkout was cancelled. No charges were made, and your assessment balance has been restored.";
+                } else {
+                    $verifyResult = $paymentService->autoVerifyPayMongoCheckoutSession($sessionId);
+                    if ($verifyResult['status'] === 'verified') {
+                        $rcpt = $verifyResult['receipt_number'] ?? 'N/A';
+                        $amt = number_format((float)($verifyResult['amount'] ?? $record['amount']), 2);
+                        $_SESSION['success_msg'] = "Your online payment of ₱{$amt} has been successfully verified! Official Receipt No: {$rcpt}";
+                    } elseif ($verifyResult['status'] === 'already_settled') {
+                        $_SESSION['info_msg'] = "Your tuition assessment is already fully settled.";
+                    } elseif (in_array($verifyResult['status'], ['cancelled', 'expired'], true)) {
+                        $_SESSION['warning_msg'] = "The PayMongo checkout session was not completed and has been cancelled. Your allowable balance remains intact.";
+                    } else {
+                        $_SESSION['warning_msg'] = $verifyResult['message'] ?? "Unable to verify online payment session.";
+                    }
+                }
+            } else {
+                $_SESSION['error_msg'] = "Payment session reference not found. If your account was charged, please contact the Cashier's office.";
+            }
+        }
+
+        $response->redirect("/sia/applicant/assessment.php");
+        return;
     }
+
+    /**
+     * Renders the applicant payment queue waiting room screen.
+     */
+    public function paymentQueue(Request $request, Response $response)
+    {
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $pdo = Database::getConnection();
+
+        // Fetch user assessment
+        $stmt = $pdo->prepare('
+            SELECT sa.*, a.status as app_status
+            FROM student_assessments sa
+            INNER JOIN applications a ON sa.application_id = a.id
+            WHERE a.user_id = :uid
+            ORDER BY sa.id DESC LIMIT 1
+        ');
+        $stmt->execute(['uid' => $userId]);
+        $assessment = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$assessment) {
+            $_SESSION['error_msg'] = 'No assessment found for your account.';
+            $response->redirect('/sia/applicant/assessment.php');
+            return;
+        }
+
+        $queueService = new \App\Services\PaymentQueueService(null, $pdo);
+        $token = trim((string)($request->query('token') ?? ($_SESSION['payment_session_token'] ?? '')));
+
+        if ($token !== '') {
+            $statusData = $queueService->checkStatus($token);
+            if ($statusData['status'] === 'active') {
+                $response->redirect('/sia/applicant/assessment.php?session_token=' . urlencode($token));
+                return;
+            }
+            $position = $statusData['position'] ?? 1;
+            $sessionToken = $token;
+        } else {
+            $queueEntry = $queueService->enterQueue($userId, (int)$assessment['id']);
+            $sessionToken = $queueEntry['session_token'];
+            $_SESSION['payment_session_token'] = $sessionToken;
+
+            if ($queueEntry['status'] === 'active') {
+                $response->redirect('/sia/applicant/assessment.php?session_token=' . urlencode($sessionToken));
+                return;
+            }
+            $position = $queueEntry['position'] ?? 1;
+        }
+
+        $pageTitle = 'Payment Virtual Queue - Triple T University';
+        $maxConcurrency = $queueService->getMaxConcurrency();
+        $sessionDuration = $queueService->getSessionDuration();
+
+        require_once __DIR__ . '/../Views/applicant/payment_queue.php';
+        return;
+    }
+
+    /**
+     * AJAX endpoint for polling real-time queue position and active promotion status.
+     */
+    public function paymentQueueStatus(Request $request, Response $response)
+    {
+        $token = trim((string)($request->query('token') ?? ($_SESSION['payment_session_token'] ?? '')));
+        if ($token === '') {
+            $response->json(['status' => 'not_found', 'message' => 'Session token is required.'], 400);
+            return;
+        }
+
+        $queueService = new \App\Services\PaymentQueueService();
+        $status = $queueService->checkStatus($token);
+
+        $response->json($status, 200);
+        return;
+    }
+
+    /**
+     * AJAX endpoint to enter or resume a payment queue session for online checkout.
+     */
+    public function paymentQueueJoin(Request $request, Response $response)
+    {
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $pdo = Database::getConnection();
+
+        if ($userId <= 0) {
+            $response->json(['success' => false, 'message' => 'Unauthorized. Please log in.'], 401);
+            return;
+        }
+
+        // Fetch user assessment
+        $stmt = $pdo->prepare('
+            SELECT sa.*, a.status as app_status
+            FROM student_assessments sa
+            INNER JOIN applications a ON sa.application_id = a.id
+            WHERE a.user_id = :uid
+            ORDER BY sa.id DESC LIMIT 1
+        ');
+        $stmt->execute(['uid' => $userId]);
+        $assessment = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$assessment) {
+            $response->json(['success' => false, 'message' => 'No active assessment found for your account.'], 404);
+            return;
+        }
+
+        $assessmentId = (int) $assessment['id'];
+        $netAmount = (float) $assessment['net_amount'];
+        $totalPaid = (float) $assessment['total_paid'];
+        $balance = $netAmount - $totalPaid;
+
+        if ($balance <= 0.0001 || $assessment['payment_status'] === 'paid') {
+            $response->json([
+                'success' => false,
+                'already_paid' => true,
+                'message' => 'This assessment has already been fully paid and settled.',
+            ], 422);
+            return;
+        }
+
+        $healthStatus = HealthRecord::getStatus($userId);
+        if ($healthStatus === null) {
+            $response->json([
+                'success' => false,
+                'health_required' => true,
+                'message' => 'Action Required: You must submit your Health & Medical Information before initiating online payment.',
+            ], 403);
+            return;
+        }
+
+        try {
+            $queueService = new \App\Services\PaymentQueueService(null, $pdo);
+            $result = $queueService->enterQueue($userId, $assessmentId);
+            $_SESSION['payment_session_token'] = $result['session_token'];
+
+            $response->json([
+                'success' => true,
+                'data'    => $result,
+            ], 200);
+            return;
+        } catch (\Throwable $e) {
+            error_log('paymentQueueJoin error: ' . $e->getMessage());
+            $response->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return;
+        }
+    }
+
+    /**
+     * Releases a queue position or active slot voluntarily.
+     */
+    public function paymentQueueLeave(Request $request, Response $response)
+    {
+        $token = trim((string)($request->input('session_token') ?? ($_SESSION['payment_session_token'] ?? '')));
+        if ($token !== '') {
+            $queueService = new \App\Services\PaymentQueueService();
+            $queueService->releaseSlot($token);
+            unset($_SESSION['payment_session_token']);
+        }
+
+        $isAjax = (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest')
+            || (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
+
+        if ($isAjax) {
+            $response->json(['success' => true, 'message' => 'You have left the payment queue.']);
+            return;
+        }
+
+        $_SESSION['info_msg'] = 'You have left the payment queue.';
+        $response->redirect('/sia/applicant/assessment.php');
+        return;
+    }
+
     public function scholarships(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
@@ -929,6 +1296,8 @@ $pageTitle = 'Enrollment Summary - ' . htmlspecialchars((string)($app['reference
         return $this->render('applicant/print_slip', get_defined_vars());
     }
 }
+
+
 
 
 

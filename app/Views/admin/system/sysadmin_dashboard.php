@@ -236,7 +236,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
           <!-- Shortcut 6: LMS Automation -->
           <div class="col-md-6 col-lg-4">
-            <a href="/sia/admin/lms/generator" class="p-3 bg-white border rounded-3 text-decoration-none d-flex align-items-start gap-3 h-100 hover-lift shadow-xs">
+            <a href="/sia/lms/admin/generator" class="p-3 bg-white border rounded-3 text-decoration-none d-flex align-items-start gap-3 h-100 hover-lift shadow-xs">
               <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-3 flex-shrink-0" style="width: 46px; height: 46px; font-size: 1.35rem;">
                 <i class="bi bi-cpu-fill"></i>
               </div>

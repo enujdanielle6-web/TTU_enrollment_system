@@ -44,6 +44,99 @@ require_once __DIR__ . '/../components/header.php';
           <?php unset($_SESSION['success_msg']); ?>
         <?php endif; ?>
 
+        <?php if (!empty($_SESSION['info_msg'])): ?>
+          <div class="alert alert-info alert-dismissible fade show shadow-sm rounded-4 border-0 p-3 mb-4 d-flex align-items-center gap-3" role="alert">
+            <div class="bg-primary text-white rounded-circle p-2 flex-shrink-0 d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+              <i class="bi bi-info-circle-fill fs-5"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="fw-bold mb-0 text-primary">Notice</h6>
+              <div class="small"><?= htmlspecialchars($_SESSION['info_msg'], ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <?php unset($_SESSION['info_msg']); ?>
+        <?php endif; ?>
+
+        <?php if (!empty($_SESSION['warning_msg'])): ?>
+          <div class="alert alert-warning alert-dismissible fade show shadow-sm rounded-4 border-0 p-3 mb-4 d-flex align-items-center gap-3" role="alert">
+            <div class="bg-warning text-dark rounded-circle p-2 flex-shrink-0 d-inline-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+              <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h6 class="fw-bold mb-0 text-dark">Checkout Notice</h6>
+              <div class="small"><?= htmlspecialchars($_SESSION['warning_msg'], ENT_QUOTES, 'UTF-8'); ?></div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          <?php unset($_SESSION['warning_msg']); ?>
+        <?php endif; ?>
+
+        <?php if (!empty($activeOnlinePayment)): ?>
+          <div class="alert alert-info border-0 shadow-sm rounded-4 p-3 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" style="background: linear-gradient(135deg, #e0f2fe 0%, #dbeafe 100%); border-left: 5px solid #0284c7 !important;">
+            <div class="d-flex align-items-center gap-3">
+              <div class="bg-primary text-white rounded-circle p-2 flex-shrink-0 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                <i class="bi bi-credit-card-2-front fs-5"></i>
+              </div>
+              <div>
+                <h6 class="fw-bold mb-1 text-dark">Ongoing PayMongo Checkout Session (₱<?= number_format((float)$activeOnlinePayment['amount'], 2) ?>)</h6>
+                <p class="mb-0 small text-muted">
+                  You initiated an online payment session. If you have finished paying, click <strong>Verify Status</strong>. You can also resume on PayMongo or cancel the session to unlock your balance.
+                </p>
+              </div>
+            </div>
+            <div class="d-flex flex-wrap align-items-center gap-2 flex-shrink-0">
+              <a href="/sia/applicant/payment_callback.php?session_id=<?= urlencode($activeOnlinePayment['checkout_session_id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> Verify Status
+              </a>
+              <?php if (!empty($activeOnlinePayment['checkout_url'])): ?>
+                <a href="<?= htmlspecialchars($activeOnlinePayment['checkout_url'], ENT_QUOTES, 'UTF-8') ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                  <i class="bi bi-box-arrow-up-right me-1"></i> Resume PayMongo
+                </a>
+              <?php endif; ?>
+              <form action="/sia/applicant/payment_process.php" method="POST" class="d-inline m-0 p-0">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="action" value="cancel_paymongo_session">
+                <input type="hidden" name="payment_id" value="<?= esc($activeOnlinePayment['id']) ?>">
+                <input type="hidden" name="session_id" value="<?= esc($activeOnlinePayment['checkout_session_id']) ?>">
+                <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold" onclick="return confirm('Cancel this online checkout attempt and restore your assessment balance?')">
+                  <i class="bi bi-x-circle me-1"></i> Cancel Session
+                </button>
+              </form>
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <!-- Persistent Dynamic Payment Queue Session Banner -->
+        <div id="queueStickyBanner" class="alert alert-primary border-0 rounded-4 shadow-sm p-3 mb-4 d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 <?= empty($activeQueueSession) ? 'd-none' : '' ?>">
+          <div class="d-flex align-items-center gap-3">
+            <div id="stickyPulseIcon" class="bg-primary text-white rounded-circle p-2 flex-shrink-0 d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+              <i class="bi bi-clock-history fs-5"></i>
+            </div>
+            <div>
+              <h6 class="fw-bold mb-0 text-primary" id="stickyBannerTitle">
+                <?= (!empty($activeQueueSession) && ($activeQueueSession['status'] ?? '') === 'waiting') ? 'You are in line in the Payment Queue' : 'Active Payment Reservation Slot' ?>
+              </h6>
+              <div class="small text-muted" id="stickyBannerSubtitle">
+                <?php if (!empty($activeQueueSession) && ($activeQueueSession['status'] ?? '') === 'waiting'): ?>
+                  Current Position: <strong id="stickyPositionDisplay">#<?= esc((string)($activeQueueSession['position'] ?? 1)) ?></strong> &bull; Live queue monitoring active
+                <?php elseif (!empty($activeQueueSession) && ($activeQueueSession['status'] ?? '') === 'active'): ?>
+                  Time Remaining: <span id="stickyTimer" class="font-monospace fw-bold text-success">--:--</span> &bull; Click to proceed to checkout
+                <?php else: ?>
+                  Status ready &bull; Reservation window open
+                <?php endif; ?>
+              </div>
+            </div>
+          </div>
+          <div class="flex-shrink-0">
+            <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-semibold shadow-sm text-nowrap" data-bs-toggle="modal" data-bs-target="#paymentModal">
+              <span id="stickyBtnText">
+                <?= (!empty($activeQueueSession) && ($activeQueueSession['status'] ?? '') === 'waiting') ? 'View Queue Status' : 'Open Checkout Window' ?>
+              </span> <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+
         <?php if (($userAppStatus ?? '') === 'approved' && empty($healthStatus)): ?>
           <div class="alert alert-warning border-0 shadow-sm rounded-4 p-3.5 mb-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3" style="background-color: #fff9e6; border-left: 5px solid #ffc107 !important;">
             <div class="d-flex align-items-start gap-3">
@@ -350,87 +443,292 @@ require_once __DIR__ . '/../components/header.php';
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
       <div class="modal-header bg-primary text-white border-0 py-3">
-        <h5 class="modal-title fw-bold" id="paymentModalLabel"><i class="bi bi-wallet2 me-2"></i> Submit Proof of Payment</h5>
+        <h5 class="modal-title fw-bold" id="paymentModalLabel"><i class="bi bi-wallet2 me-2"></i> Payment Options</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form id="paymentProofForm" action="payment_process.php" method="POST" enctype="multipart/form-data">
-        <div class="modal-body p-4 bg-light">
-          <input type="hidden" name="assessment_id" value="<?= esc($assessment['id'] ?? 0) ?>">
-          <input type="hidden" name="action" value="submit_payment_proof">
-          <?= getCsrfInput() ?>
 
-          <div id="paymentFormAlert" class="alert alert-danger d-none rounded-3 py-2 px-3 small mb-3"></div>
+      <div class="modal-body p-4 bg-light">
+        <!-- Navigation Pills between PayMongo and Manual Upload -->
+        <ul class="nav nav-pills nav-fill mb-3 p-1 bg-white rounded-pill shadow-sm border" id="paymentTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill fw-semibold py-2 small" id="tab-paymongo-btn" data-bs-toggle="pill" data-bs-target="#tab-paymongo" type="button" role="tab" aria-selected="true">
+              <i class="bi bi-lightning-charge-fill text-warning me-1"></i> PayMongo (GCash / Cards)
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill fw-semibold py-2 small text-muted" id="tab-manual-btn" data-bs-toggle="pill" data-bs-target="#tab-manual" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-cloud-arrow-up-fill me-1"></i> Manual Proof Upload
+            </button>
+          </li>
+        </ul>
 
-          <!-- Payment Instructions -->
-          <div class="alert alert-info border-0 rounded-3 mb-3 shadow-sm">
-            <h6 class="fw-bold mb-2"><i class="bi bi-info-circle-fill me-1"></i> Payment Instructions</h6>
-            <p class="small mb-2 text-muted">Please transfer the amount to any of the accounts below and upload a clear screenshot of your transaction.</p>
-            <ul class="small mb-0 list-unstyled fw-medium text-dark">
-              <li class="mb-1"><i class="bi bi-phone text-primary me-2"></i><strong>GCash:</strong> 0912 345 6789 <span class="text-muted">(SIA Finance)</span></li>
-              <li class="mb-1"><i class="bi bi-phone text-primary me-2"></i><strong>Maya:</strong> 0998 765 4321 <span class="text-muted">(SIA Finance)</span></li>
-              <li><i class="bi bi-bank text-primary me-2"></i><strong>BDO:</strong> 0012 3456 7890 <span class="text-muted">(SIA Academy)</span></li>
-            </ul>
-          </div>
+        <div class="tab-content" id="paymentTabsContent">
+          <!-- TAB 1: PayMongo Online Checkout & High-Traffic Queue -->
+          <div class="tab-pane fade show active" id="tab-paymongo" role="tabpanel">
 
-          <div class="mb-3">
-            <?php 
-              $minPayment = min(500.0, (float)($allowablePayment ?? 0)); 
-            ?>
-            <label class="form-label small fw-semibold text-dark">Amount Paid (₱) <span class="text-danger">*</span></label>
-            <input type="number" step="0.01" min="<?= esc($minPayment) ?>" max="<?= esc($allowablePayment ?? 0) ?>" name="amount" id="payAmountInput" class="form-control bg-white" required placeholder="e.g. <?= number_format($allowablePayment ?? 0, 2, '.', '') ?>" value="<?= number_format($allowablePayment ?? 0, 2, '.', '') ?>">
-            <div class="form-text" style="font-size: 0.72rem;">
-              Minimum allowed: <strong>₱<?= number_format($minPayment, 2) ?></strong>. Max allowable: <strong>₱<?= number_format($allowablePayment ?? 0, 2) ?></strong>
-              <?php if (($pendingAmount ?? 0) > 0): ?>
-                <span class="text-warning d-block mt-0.5">(Pending verification: ₱<?= number_format($pendingAmount, 2) ?>)</span>
-              <?php endif; ?>
-            </div>
-          </div>
-          
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Payment Method Used <span class="text-danger">*</span></label>
-            <select name="payment_method" id="payMethodInput" class="form-select bg-white" required>
-              <option value="GCash">GCash</option>
-              <option value="Maya">Maya</option>
-              <option value="Bank Transfer">Bank Transfer (BDO / BPI / UnionBank)</option>
-              <option value="Other">Other Electronic Payment</option>
-            </select>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label small fw-semibold text-dark">Transaction Reference Number <span class="text-danger">*</span></label>
-            <input type="text" name="reference_number" id="payRefInput" class="form-control bg-white" required placeholder="e.g. 100294828192" minlength="4" maxlength="100">
-            <div class="form-text" style="font-size: 0.72rem;">Enter the exact reference or confirmation code from your receipt.</div>
-          </div>
-
-          <div class="mb-2">
-            <label class="form-label small fw-semibold text-dark">Upload Receipt / Screenshot <span class="text-danger">*</span></label>
-            <input type="file" name="proof_image" id="payFileInput" class="form-control bg-white" accept="image/png, image/jpeg, image/jpg, image/webp" required>
-            <div class="form-text" style="font-size: 0.72rem;">Accepted formats: JPG, PNG, WEBP. Max file size: 5MB.</div>
-            
-            <!-- Live Preview -->
-            <div id="proofPreviewBox" class="mt-2 p-2 bg-white rounded-3 border d-none">
-              <div class="d-flex align-items-center gap-3">
-                <img id="proofPreviewImg" src="" alt="Receipt Preview" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;">
-                <div class="flex-grow-1 text-truncate">
-                  <div id="proofFileName" class="fw-semibold text-dark small text-truncate">file.jpg</div>
-                  <div id="proofFileSize" class="text-muted" style="font-size: 0.7rem;">0 KB</div>
+            <!-- System Telemetry Badge Header -->
+            <div class="card border-0 rounded-3 mb-3 bg-white shadow-sm p-3 border-start border-primary border-4">
+              <div class="d-flex align-items-center justify-content-between">
+                <div>
+                  <span class="text-uppercase text-muted fw-bold" style="font-size: 0.68rem; letter-spacing: 0.06em;">High-Traffic Payment Queue</span>
+                  <div class="fw-bold text-dark small" id="queueCapacityLabel">
+                    <i class="bi bi-cpu text-primary me-1"></i> <span id="queueCapacityText"><?= esc((string)($queueMetrics['max_concurrency'] ?? 100)) ?> simultaneous slots</span>
+                  </div>
                 </div>
-                <button type="button" id="proofRemoveBtn" class="btn btn-outline-danger btn-sm rounded-circle p-1" style="width: 28px; height: 28px;" title="Remove image">
-                  <i class="bi bi-x"></i>
+                <div class="text-end">
+                  <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 small" id="queueActiveBadge">
+                    <span class="spinner-grow spinner-grow-sm me-1" style="width: 0.45rem; height: 0.45rem;" role="status"></span>
+                    <span id="queueActiveText"><?= esc((string)($queueMetrics['active_sessions'] ?? 0)) ?> / <?= esc((string)($queueMetrics['max_concurrency'] ?? 100)) ?> Active</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Queue Notification / Error Box -->
+            <div id="queueAlertBox" class="alert alert-danger d-none rounded-3 py-2 px-3 small mb-3"></div>
+
+            <!-- STATE 1: Enter / Join Queue -->
+            <div id="queueViewJoin" class="<?= !empty($activeQueueSession) ? 'd-none' : '' ?>">
+              <div class="card border-0 rounded-3 mb-3 shadow-sm bg-white p-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="small fw-bold text-dark"><i class="bi bi-shield-check text-success me-1"></i> Supported Channels</span>
+                  <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">Official PayMongo Gateway</span>
+                </div>
+                <div class="d-flex flex-wrap gap-1.5 align-items-center small">
+                  <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-phone text-primary me-1"></i>GCash</span>
+                  <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-wallet text-success me-1"></i>Maya</span>
+                  <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-credit-card text-danger me-1"></i>Cards (Visa/MC)</span>
+                  <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-car-front text-success me-1"></i>GrabPay</span>
+                  <span class="badge bg-light text-dark border px-2 py-1"><i class="bi bi-bank text-primary me-1"></i>Online Banking</span>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <?php 
+                  $minPayment = min(500.0, (float)($allowablePayment ?? 0)); 
+                  if ($minPayment < 100.0) $minPayment = min(100.0, (float)($allowablePayment ?? 0));
+                ?>
+                <label class="form-label small fw-semibold text-dark">Payment Amount (₱) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text bg-white fw-bold text-muted">₱</span>
+                  <input type="number" step="0.01" min="100.00" max="<?= esc($allowablePayment ?? 0) ?>" id="queueJoinAmountInput" class="form-control bg-white fw-semibold" required placeholder="e.g. <?= number_format($allowablePayment ?? 0, 2, '.', '') ?>" value="<?= number_format($allowablePayment ?? 0, 2, '.', '') ?>">
+                </div>
+                <div class="form-text" style="font-size: 0.72rem;">
+                  Min: <strong>₱100.00</strong>. Remaining Allowable: <strong>₱<?= number_format($allowablePayment ?? 0, 2) ?></strong>
+                </div>
+              </div>
+
+              <div class="alert alert-info border-0 rounded-3 mb-3 p-2.5 small d-flex align-items-start gap-2 shadow-sm">
+                <i class="bi bi-info-circle-fill text-primary flex-shrink-0 mt-0.5"></i>
+                <div style="font-size: 0.75rem; line-height: 1.35;">
+                  To protect against duplicate billing during peak hours, checkout slots are reserved sequentially. You will receive an exclusive <strong>15-minute checkout window</strong> as soon as you enter.
+                </div>
+              </div>
+
+              <button type="button" id="btnJoinQueue" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold w-100 py-2.5">
+                <span class="spinner-border spinner-border-sm me-1.5 d-none" id="btnJoinQueueSpinner" role="status" aria-hidden="true"></span>
+                <span id="btnJoinQueueText"><i class="bi bi-shield-lock-fill me-1"></i> Reserve Checkout Slot & Pay</span>
+              </button>
+            </div>
+
+            <!-- STATE 2: Waiting in Line -->
+            <div id="queueViewWaiting" class="<?= (!empty($activeQueueSession) && ($activeQueueSession['status'] ?? '') === 'waiting') ? '' : 'd-none' ?>">
+              <div class="card border-0 rounded-4 bg-white p-4 text-center shadow-sm mb-3">
+                <div class="position-relative d-inline-block mx-auto mb-3">
+                  <div class="spinner-grow text-primary" style="width: 4rem; height: 4rem;" role="status">
+                    <span class="visually-hidden">Waiting in line...</span>
+                  </div>
+                  <div class="position-absolute top-50 start-50 translate-middle">
+                    <i class="bi bi-people-fill text-white fs-4"></i>
+                  </div>
+                </div>
+
+                <span class="text-uppercase text-muted fw-bold small tracking-wide">Your Position In Line</span>
+                <div class="display-3 fw-bold text-primary my-1" id="uiQueuePosition">
+                  #<?= esc((string)($activeQueueSession['position'] ?? 1)) ?>
+                </div>
+                <p class="text-muted small mb-3" id="uiQueueWaitingMsg">
+                  All payment slots are currently in use. Please keep this screen open; your browser will automatically reserve your checkout slot the moment one opens.
+                </p>
+
+                <div class="p-2.5 rounded-3 bg-light border small text-muted d-flex align-items-center justify-content-between mb-3">
+                  <span><i class="bi bi-arrow-repeat me-1 text-primary"></i> Live Connection</span>
+                  <span class="badge bg-white text-secondary border fw-medium" id="uiQueuePollBadge">Checking every 2.5s</span>
+                </div>
+
+                <button type="button" id="btnLeaveWaitingQueue" class="btn btn-outline-secondary btn-sm rounded-pill px-4 py-1.5 align-self-center">
+                  <i class="bi bi-x-circle me-1"></i> Leave Line & Return
                 </button>
               </div>
             </div>
+
+            <!-- STATE 3: Payment Slot Active / Ready to Checkout -->
+            <div id="queueViewActive" class="<?= (!empty($activeQueueSession) && ($activeQueueSession['status'] ?? '') === 'active') ? '' : 'd-none' ?>">
+              <div class="alert alert-success border-0 rounded-3 mb-3 p-3 shadow-sm d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                  <div class="bg-success text-white rounded-circle p-1.5 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
+                    <i class="bi bi-check-lg fs-5"></i>
+                  </div>
+                  <div>
+                    <span class="badge bg-success bg-opacity-25 text-success-emphasis border border-success-subtle px-2 py-0.5 rounded-pill small fw-bold">Slot Reserved</span>
+                    <div class="fw-bold text-dark small">Checkout Ready</div>
+                  </div>
+                </div>
+                <div class="text-end">
+                  <span class="text-muted small d-block" style="font-size: 0.7rem;">Time Remaining</span>
+                  <span class="fs-5 fw-bold font-monospace text-success" id="uiActiveCountdown">--:--</span>
+                </div>
+              </div>
+
+              <!-- Checkout Form -->
+              <form id="payMongoActiveForm" action="payment_process.php" method="POST">
+                <input type="hidden" name="assessment_id" value="<?= esc($assessment['id'] ?? 0) ?>">
+                <input type="hidden" name="action" value="initiate_paymongo">
+                <input type="hidden" name="session_token" id="activeSessionTokenInput" value="<?= esc($activeQueueSession['session_token'] ?? '') ?>">
+                <?= getCsrfInput() ?>
+
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold text-dark">Payment Amount (₱) <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-white fw-bold text-muted">₱</span>
+                    <input type="number" step="0.01" min="100.00" max="<?= esc($allowablePayment ?? 0) ?>" name="amount" id="activePayAmountInput" class="form-control bg-white fw-semibold" required placeholder="e.g. <?= number_format($allowablePayment ?? 0, 2, '.', '') ?>" value="<?= number_format($allowablePayment ?? 0, 2, '.', '') ?>">
+                  </div>
+                  <div class="form-text" style="font-size: 0.72rem;">
+                    Min: <strong>₱100.00</strong>. Remaining Allowable: <strong>₱<?= number_format($allowablePayment ?? 0, 2) ?></strong>
+                  </div>
+                </div>
+
+                <div class="alert alert-info border-0 rounded-3 mb-3 p-2.5 small d-flex align-items-start gap-2 shadow-sm">
+                  <i class="bi bi-shield-lock-fill text-primary flex-shrink-0 mt-0.5"></i>
+                  <div style="font-size: 0.75rem; line-height: 1.35;">
+                    Clicking below will advance you directly to the secure PayMongo payment page for GCash, Maya, GrabPay, or Cards.
+                  </div>
+                </div>
+
+                <button type="submit" id="btnActiveProceed" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold w-100 py-2.5">
+                  <span class="spinner-border spinner-border-sm me-1.5 d-none" id="btnActiveProceedSpinner" role="status" aria-hidden="true"></span>
+                  <span id="btnActiveProceedText"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Proceed to PayMongo Checkout</span>
+                </button>
+
+                <div class="text-center mt-2">
+                  <button type="button" id="btnActiveRelease" class="btn btn-link text-muted text-decoration-none small" style="font-size: 0.75rem;">
+                    <i class="bi bi-x-circle me-1"></i> Cancel & Release Reserved Slot
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- STATE 4: Session Expired -->
+            <div id="queueViewExpired" class="d-none">
+              <div class="card border-0 rounded-4 bg-white p-4 text-center shadow-sm mb-3">
+                <div class="bg-danger bg-opacity-10 text-danger rounded-circle p-3 d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                  <i class="bi bi-clock-history fs-3"></i>
+                </div>
+                <h6 class="fw-bold text-dark mb-1">Reservation Expired</h6>
+                <p class="text-muted small mb-3">
+                  Your 15-minute checkout window has elapsed. To keep checkout slots open for other students, your slot was recycled. You may re-enter the queue at any time.
+                </p>
+                <button type="button" id="btnRejoinFromExpired" class="btn btn-primary rounded-pill px-4 py-2 small fw-semibold shadow-sm align-self-center">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Rejoin Payment Queue
+                </button>
+              </div>
+            </div>
+
+            <!-- STATE 5: Completed Payment -->
+            <div id="queueViewCompleted" class="d-none">
+              <div class="card border-0 rounded-4 bg-white p-4 text-center shadow-sm mb-3">
+                <div class="bg-success text-white rounded-circle p-3 d-inline-flex align-items-center justify-content-center mx-auto mb-3" style="width: 60px; height: 60px;">
+                  <i class="bi bi-check-lg fs-3"></i>
+                </div>
+                <h5 class="fw-bold text-success mb-1">Payment Confirmed!</h5>
+                <p class="text-muted small mb-3">
+                  Your payment has been successfully recorded and verified. Your assessment balance has been updated.
+                </p>
+                <button type="button" class="btn btn-outline-success rounded-pill px-4 py-2 small fw-semibold" onclick="window.location.reload();">
+                  <i class="bi bi-arrow-clockwise me-1"></i> Refresh Statement
+                </button>
+              </div>
+            </div>
+
           </div>
 
+          <!-- TAB 2: Manual Proof Upload -->
+          <div class="tab-pane fade" id="tab-manual" role="tabpanel">
+            <form id="paymentProofForm" action="payment_process.php" method="POST" enctype="multipart/form-data">
+              <input type="hidden" name="assessment_id" value="<?= esc($assessment['id'] ?? 0) ?>">
+              <input type="hidden" name="action" value="submit_payment_proof">
+              <?= getCsrfInput() ?>
+
+              <div id="paymentFormAlert" class="alert alert-danger d-none rounded-3 py-2 px-3 small mb-3"></div>
+
+              <!-- Payment Instructions -->
+              <div class="alert alert-info border-0 rounded-3 mb-3 shadow-sm">
+                <h6 class="fw-bold mb-2"><i class="bi bi-info-circle-fill me-1"></i> Bank Account Details</h6>
+                <p class="small mb-2 text-muted">Please transfer to any of the accounts below and upload your receipt screenshot.</p>
+                <ul class="small mb-0 list-unstyled fw-medium text-dark">
+                  <li class="mb-1"><i class="bi bi-phone text-primary me-2"></i><strong>GCash:</strong> 0912 345 6789 <span class="text-muted">(SIA Finance)</span></li>
+                  <li class="mb-1"><i class="bi bi-phone text-primary me-2"></i><strong>Maya:</strong> 0998 765 4321 <span class="text-muted">(SIA Finance)</span></li>
+                  <li><i class="bi bi-bank text-primary me-2"></i><strong>BDO:</strong> 0012 3456 7890 <span class="text-muted">(SIA Academy)</span></li>
+                </ul>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">Amount Paid (₱) <span class="text-danger">*</span></label>
+                <input type="number" step="0.01" min="<?= esc($minPayment) ?>" max="<?= esc($allowablePayment ?? 0) ?>" name="amount" id="payAmountInput" class="form-control bg-white" required placeholder="e.g. <?= number_format($allowablePayment ?? 0, 2, '.', '') ?>" value="<?= number_format($allowablePayment ?? 0, 2, '.', '') ?>">
+                <div class="form-text" style="font-size: 0.72rem;">
+                  Minimum allowed: <strong>₱<?= number_format($minPayment, 2) ?></strong>. Max allowable: <strong>₱<?= number_format($allowablePayment ?? 0, 2) ?></strong>
+                  <?php if (($pendingAmount ?? 0) > 0): ?>
+                    <span class="text-warning d-block mt-0.5">(Pending verification: ₱<?= number_format($pendingAmount, 2) ?>)</span>
+                  <?php endif; ?>
+                </div>
+              </div>
+              
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">Payment Method Used <span class="text-danger">*</span></label>
+                <select name="payment_method" id="payMethodInput" class="form-select bg-white" required>
+                  <option value="GCash">GCash</option>
+                  <option value="Maya">Maya</option>
+                  <option value="Bank Transfer">Bank Transfer (BDO / BPI / UnionBank)</option>
+                  <option value="Other">Other Electronic Payment</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">Transaction Reference Number <span class="text-danger">*</span></label>
+                <input type="text" name="reference_number" id="payRefInput" class="form-control bg-white" required placeholder="e.g. 100294828192" minlength="4" maxlength="100">
+                <div class="form-text" style="font-size: 0.72rem;">Enter the exact reference or confirmation code from your receipt.</div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-dark">Upload Receipt / Screenshot <span class="text-danger">*</span></label>
+                <input type="file" name="proof_image" id="payFileInput" class="form-control bg-white" accept="image/png, image/jpeg, image/jpg, image/webp" required>
+                <div class="form-text" style="font-size: 0.72rem;">Accepted formats: JPG, PNG, WEBP. Max file size: 5MB.</div>
+                
+                <div id="proofPreviewBox" class="mt-2 p-2 bg-white rounded-3 border d-none">
+                  <div class="d-flex align-items-center gap-3">
+                    <img id="proofPreviewImg" src="" alt="Receipt Preview" class="rounded border" style="width: 55px; height: 55px; object-fit: cover;">
+                    <div class="flex-grow-1 text-truncate">
+                      <div id="proofFileName" class="fw-semibold text-dark small text-truncate">file.jpg</div>
+                      <div id="proofFileSize" class="text-muted" style="font-size: 0.7rem;">0 KB</div>
+                    </div>
+                    <button type="button" id="proofRemoveBtn" class="btn btn-outline-danger btn-sm rounded-circle p-1" style="width: 28px; height: 28px;" title="Remove image">
+                      <i class="bi bi-x"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" id="paySubmitBtn" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold">
+                  <span class="spinner-border spinner-border-sm me-1.5 d-none" id="paySubmitSpinner" role="status" aria-hidden="true"></span>
+                  <span id="paySubmitText">Upload Proof</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div class="modal-footer border-top-0 pt-0 bg-light">
-          <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" id="paySubmitBtn" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold">
-            <span class="spinner-border spinner-border-sm me-1.5 d-none" id="paySubmitSpinner" role="status" aria-hidden="true"></span>
-            <span id="paySubmitText">Submit Payment</span>
-          </button>
-        </div>
-      </form>
+      </div>
     </div>
   </div>
 </div>
@@ -575,6 +873,355 @@ require_once __DIR__ . '/../components/header.php';
                 if (submitText) submitText.textContent = 'Uploading...';
             }
         });
+
+        // --- High-Traffic Payment Queue & Online Checkout Controller ---
+        let currentSessionToken = <?= json_encode((string)($activeQueueSession['session_token'] ?? '')) ?>;
+        let currentStatus = <?= json_encode((string)($activeQueueSession['status'] ?? '')) ?>;
+        let countdownSeconds = <?= json_encode((int)($activeQueueSession['seconds_remaining'] ?? 0)) ?>;
+        let queuePosition = <?= json_encode((int)($activeQueueSession['position'] ?? 1)) ?>;
+        let queueMaxCapacity = <?= json_encode((int)($queueMetrics['max_concurrency'] ?? 100)) ?>;
+        let queueActiveSessions = <?= json_encode((int)($queueMetrics['active_sessions'] ?? 0)) ?>;
+
+        const viewJoin = document.getElementById('queueViewJoin');
+        const viewWaiting = document.getElementById('queueViewWaiting');
+        const viewActive = document.getElementById('queueViewActive');
+        const viewExpired = document.getElementById('queueViewExpired');
+        const viewCompleted = document.getElementById('queueViewCompleted');
+
+        const alertBox = document.getElementById('queueAlertBox');
+        const capacityText = document.getElementById('queueCapacityText');
+        const activeText = document.getElementById('queueActiveText');
+        const activeBadge = document.getElementById('queueActiveBadge');
+
+        const btnJoin = document.getElementById('btnJoinQueue');
+        const btnJoinSpinner = document.getElementById('btnJoinQueueSpinner');
+        const btnJoinText = document.getElementById('btnJoinQueueText');
+        const joinAmountInput = document.getElementById('queueJoinAmountInput');
+
+        const posDisplay = document.getElementById('uiQueuePosition');
+        const pollBadge = document.getElementById('uiQueuePollBadge');
+        const btnLeaveWaiting = document.getElementById('btnLeaveWaitingQueue');
+
+        const countdownDisplay = document.getElementById('uiActiveCountdown');
+        const activeForm = document.getElementById('payMongoActiveForm');
+        const activeTokenInput = document.getElementById('activeSessionTokenInput');
+        const activeAmountInput = document.getElementById('activePayAmountInput');
+        const btnActiveProceed = document.getElementById('btnActiveProceed');
+        const btnActiveSpinner = document.getElementById('btnActiveProceedSpinner');
+        const btnActiveText = document.getElementById('btnActiveProceedText');
+        const btnActiveRelease = document.getElementById('btnActiveRelease');
+
+        const btnRejoinExpired = document.getElementById('btnRejoinFromExpired');
+
+        // Sticky Banner Elements
+        const stickyBanner = document.getElementById('queueStickyBanner');
+        const stickyTitle = document.getElementById('stickyBannerTitle');
+        const stickySubtitle = document.getElementById('stickyBannerSubtitle');
+        const stickyBtnText = document.getElementById('stickyBtnText');
+        const stickyTimer = document.getElementById('stickyTimer');
+
+        let timerInterval = null;
+        let pollInterval = null;
+
+        function showQueueAlert(msg) {
+            if (alertBox) {
+                alertBox.textContent = msg;
+                alertBox.classList.remove('d-none');
+            }
+        }
+
+        function hideQueueAlert() {
+            if (alertBox) {
+                alertBox.classList.add('d-none');
+            }
+        }
+
+        function switchQueueView(viewName) {
+            if (viewJoin) viewJoin.classList.toggle('d-none', viewName !== 'join');
+            if (viewWaiting) viewWaiting.classList.toggle('d-none', viewName !== 'waiting');
+            if (viewActive) viewActive.classList.toggle('d-none', viewName !== 'active');
+            if (viewExpired) viewExpired.classList.toggle('d-none', viewName !== 'expired');
+            if (viewCompleted) viewCompleted.classList.toggle('d-none', viewName !== 'completed');
+            updateStickyBanner(viewName);
+        }
+
+        function formatTimer(totalSec) {
+            if (totalSec < 0) totalSec = 0;
+            const m = Math.floor(totalSec / 60);
+            const s = totalSec % 60;
+            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+        }
+
+        function startActiveCountdown(seconds) {
+            clearInterval(timerInterval);
+            countdownSeconds = seconds;
+            if (countdownDisplay) countdownDisplay.textContent = formatTimer(countdownSeconds);
+            if (stickyTimer) stickyTimer.textContent = formatTimer(countdownSeconds);
+
+            timerInterval = setInterval(() => {
+                countdownSeconds--;
+                const formatted = formatTimer(countdownSeconds);
+                if (countdownDisplay) countdownDisplay.textContent = formatted;
+                if (stickyTimer) stickyTimer.textContent = formatted;
+
+                if (countdownSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    currentStatus = 'expired';
+                    switchQueueView('expired');
+                }
+            }, 1000);
+        }
+
+        function updateStickyBanner(state) {
+            if (!stickyBanner) return;
+            if (state === 'active') {
+                stickyBanner.classList.remove('d-none');
+                if (stickyTitle) stickyTitle.textContent = 'Active Payment Reservation Slot';
+                if (stickySubtitle) stickySubtitle.innerHTML = 'Time Remaining: <span id="stickyTimer" class="font-monospace fw-bold text-success">' + formatTimer(countdownSeconds) + '</span> &bull; Click to proceed to checkout';
+                if (stickyBtnText) stickyBtnText.textContent = 'Open Checkout Window';
+            } else if (state === 'waiting') {
+                stickyBanner.classList.remove('d-none');
+                if (stickyTitle) stickyTitle.textContent = 'You are in line in the Payment Queue';
+                if (stickySubtitle) stickySubtitle.innerHTML = 'Current Position: <strong id="stickyPositionDisplay">#' + queuePosition + '</strong> &bull; Live queue monitoring active';
+                if (stickyBtnText) stickyBtnText.textContent = 'View Queue Status';
+            } else {
+                stickyBanner.classList.add('d-none');
+            }
+        }
+
+        function updateTelemetry(active, max) {
+            if (max !== undefined && capacityText) {
+                capacityText.textContent = max + ' simultaneous slots';
+            }
+            if (active !== undefined && max !== undefined && activeText) {
+                activeText.textContent = active + ' / ' + max + ' Active';
+            }
+        }
+
+        async function pollQueueStatus() {
+            if (!currentSessionToken || currentStatus !== 'waiting') {
+                return;
+            }
+
+            try {
+                const res = await fetch('/sia/applicant/payment_queue_status.php?token=' + encodeURIComponent(currentSessionToken), {
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (!res.ok) {
+                    if (pollBadge) pollBadge.innerHTML = '<span class="text-warning"><i class="bi bi-wifi-off"></i> Reconnecting...</span>';
+                    return;
+                }
+
+                const data = await res.json();
+                if (pollBadge) pollBadge.innerHTML = 'Live &bull; Connected';
+
+                if (data.max_concurrency && data.active_sessions !== undefined) {
+                    updateTelemetry(data.active_sessions, data.max_concurrency);
+                }
+
+                if (data.status === 'active') {
+                    // Promoted to active slot!
+                    clearInterval(pollInterval);
+                    currentStatus = 'active';
+                    if (activeTokenInput) activeTokenInput.value = currentSessionToken;
+                    startActiveCountdown(data.seconds_remaining || 900);
+                    switchQueueView('active');
+                } else if (data.status === 'waiting') {
+                    queuePosition = data.position || queuePosition;
+                    if (posDisplay) posDisplay.textContent = '#' + queuePosition;
+                    const posEl = document.getElementById('stickyPositionDisplay');
+                    if (posEl) posEl.textContent = '#' + queuePosition;
+                } else if (data.status === 'expired') {
+                    clearInterval(pollInterval);
+                    currentStatus = 'expired';
+                    switchQueueView('expired');
+                } else if (data.status === 'completed') {
+                    clearInterval(pollInterval);
+                    currentStatus = 'completed';
+                    switchQueueView('completed');
+                }
+            } catch (err) {
+                if (pollBadge) pollBadge.innerHTML = '<span class="text-warning"><i class="bi bi-wifi-off"></i> Reconnecting...</span>';
+            }
+        }
+
+        function startWaitingPolling() {
+            clearInterval(pollInterval);
+            pollInterval = setInterval(pollQueueStatus, 2500);
+            pollQueueStatus();
+        }
+
+        // Initialize state on render
+        if (currentStatus === 'active') {
+            startActiveCountdown(countdownSeconds > 0 ? countdownSeconds : 900);
+            switchQueueView('active');
+        } else if (currentStatus === 'waiting') {
+            switchQueueView('waiting');
+            startWaitingPolling();
+        } else {
+            switchQueueView('join');
+        }
+
+        // Join Queue Action
+        if (btnJoin) {
+            btnJoin.addEventListener('click', async function() {
+                hideQueueAlert();
+                btnJoin.disabled = true;
+                if (btnJoinSpinner) btnJoinSpinner.classList.remove('d-none');
+                if (btnJoinText) btnJoinText.textContent = 'Securing Queue Position...';
+
+                try {
+                    const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+                    const res = await fetch('/sia/applicant/payment_queue_join.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: new URLSearchParams({
+                            csrf_token: csrfToken
+                        })
+                    });
+
+                    const json = await res.json();
+
+                    if (!json.success) {
+                        showQueueAlert(json.message || 'Failed to enter payment queue.');
+                        btnJoin.disabled = false;
+                        if (btnJoinSpinner) btnJoinSpinner.classList.add('d-none');
+                        if (btnJoinText) btnJoinText.innerHTML = '<i class="bi bi-shield-lock-fill me-1"></i> Reserve Checkout Slot & Pay';
+                        return;
+                    }
+
+                    const entry = json.data;
+                    currentSessionToken = entry.session_token;
+                    currentStatus = entry.status;
+                    if (activeTokenInput) activeTokenInput.value = currentSessionToken;
+
+                    if (entry.max_concurrency && entry.active_sessions !== undefined) {
+                        updateTelemetry(entry.active_sessions, entry.max_concurrency);
+                    }
+
+                    if (entry.status === 'active') {
+                        // Immediately reserved active slot!
+                        startActiveCountdown(entry.seconds_remaining || 900);
+                        switchQueueView('active');
+                    } else {
+                        // Placed in waiting queue
+                        queuePosition = entry.position || 1;
+                        if (posDisplay) posDisplay.textContent = '#' + queuePosition;
+                        switchQueueView('waiting');
+                        startWaitingPolling();
+                    }
+                } catch (err) {
+                    showQueueAlert('A connection error occurred. Please check your network and try again.');
+                    btnJoin.disabled = false;
+                    if (btnJoinSpinner) btnJoinSpinner.classList.add('d-none');
+                    if (btnJoinText) btnJoinText.innerHTML = '<i class="bi bi-shield-lock-fill me-1"></i> Reserve Checkout Slot & Pay';
+                }
+            });
+        }
+
+        // Leave Waiting Queue Action
+        if (btnLeaveWaiting) {
+            btnLeaveWaiting.addEventListener('click', async function() {
+                if (!confirm('Are you sure you want to leave the payment queue? You will forfeit your position in line.')) {
+                    return;
+                }
+                btnLeaveWaiting.disabled = true;
+                clearInterval(pollInterval);
+
+                const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+                await fetch('/sia/applicant/payment_queue_leave.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        session_token: currentSessionToken,
+                        csrf_token: csrfToken
+                    })
+                });
+
+                currentSessionToken = '';
+                currentStatus = '';
+                btnLeaveWaiting.disabled = false;
+                switchQueueView('join');
+                if (btnJoin) {
+                    btnJoin.disabled = false;
+                    if (btnJoinSpinner) btnJoinSpinner.classList.add('d-none');
+                    if (btnJoinText) btnJoinText.innerHTML = '<i class="bi bi-shield-lock-fill me-1"></i> Reserve Checkout Slot & Pay';
+                }
+            });
+        }
+
+        // Cancel / Release Active Slot Action
+        if (btnActiveRelease) {
+            btnActiveRelease.addEventListener('click', async function() {
+                if (!confirm('Are you sure you want to cancel and release your reserved payment slot?')) {
+                    return;
+                }
+                clearInterval(timerInterval);
+
+                const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
+                await fetch('/sia/applicant/payment_queue_leave.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: new URLSearchParams({
+                        session_token: currentSessionToken,
+                        csrf_token: csrfToken
+                    })
+                });
+
+                currentSessionToken = '';
+                currentStatus = '';
+                switchQueueView('join');
+                if (btnJoin) {
+                    btnJoin.disabled = false;
+                    if (btnJoinSpinner) btnJoinSpinner.classList.add('d-none');
+                    if (btnJoinText) btnJoinText.innerHTML = '<i class="bi bi-shield-lock-fill me-1"></i> Reserve Checkout Slot & Pay';
+                }
+            });
+        }
+
+        // Rejoin from Expired Action
+        if (btnRejoinExpired) {
+            btnRejoinExpired.addEventListener('click', function() {
+                switchQueueView('join');
+                if (btnJoin) btnJoin.click();
+            });
+        }
+
+        // Proceed to PayMongo Active Form Submission
+        if (activeForm) {
+            activeForm.addEventListener('submit', function(e) {
+                const amt = parseFloat(activeAmountInput ? activeAmountInput.value : 0);
+                const maxAmt = parseFloat(activeAmountInput ? activeAmountInput.max : 0);
+                if (isNaN(amt) || amt < 100) {
+                    e.preventDefault();
+                    alert('Minimum PayMongo checkout amount is ₱100.00.');
+                    return;
+                }
+                if (maxAmt > 0 && amt > maxAmt + 0.01) {
+                    e.preventDefault();
+                    alert('Payment amount cannot exceed remaining balance of ₱' + maxAmt.toFixed(2));
+                    return;
+                }
+                if (btnActiveProceed) {
+                    btnActiveProceed.disabled = true;
+                    if (btnActiveSpinner) btnActiveSpinner.classList.remove('d-none');
+                    if (btnActiveText) btnActiveText.textContent = 'Redirecting to PayMongo...';
+                }
+            });
+        }
     }
 
     if (document.readyState === 'loading') {

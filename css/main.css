@@ -1076,42 +1076,396 @@
 }
 
 .auth-page {
-  background-image: linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url('../images/TTU_INSIDE.png');
+  background-image: 
+    radial-gradient(circle at 12% 18%, rgba(37, 99, 235, 0.22) 0%, transparent 42%),
+    radial-gradient(circle at 88% 82%, rgba(99, 102, 241, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(14, 165, 233, 0.12) 0%, transparent 55%),
+    linear-gradient(145deg, rgba(10, 18, 38, 0.88) 0%, rgba(15, 23, 42, 0.94) 100%),
+    url('/sia/images/TTU_INSIDE.png');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  padding: 2rem;
+  align-items: center;
+  padding: 2.5rem 1rem;
   box-sizing: border-box;
+  position: relative;
+}
+
+.auth-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.auth-page .container {
+  margin-top: auto;
+  margin-bottom: auto;
+  max-width: 100%;
+  position: relative;
+  z-index: 2;
 }
 
 .auth-island {
-  max-width: 440px;
+  max-width: 530px;
   width: 100%;
-  margin: auto;
-  padding: 3rem 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
-  background-color: #ffffff;
-  border: none;
+  margin: 0 auto;
+  padding: 2.5rem 2.25rem 2rem;
+  border-radius: 1.75rem;
+  box-shadow: 0 25px 65px -12px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.85) inset, 0 12px 30px -8px rgba(13, 110, 253, 0.12);
+  background-color: rgba(255, 255, 255, 0.97);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-.auth-page~footer {
-  position: fixed;
-  bottom: 0;
+.auth-island::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4.5px;
+  background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 35%, #38bdf8 70%, #818cf8 100%);
+}
+
+.auth-island.portal-student::before {
+  background: linear-gradient(90deg, #1d4ed8 0%, #3b82f6 40%, #60a5fa 70%, #93c5fd 100%);
+}
+
+.auth-island.portal-faculty::before {
+  background: linear-gradient(90deg, #0369a1 0%, #0284c7 40%, #0ea5e9 70%, #14b8a6 100%);
+}
+
+.auth-island.portal-admin::before {
+  background: linear-gradient(90deg, #3730a3 0%, #4f46e5 40%, #6366f1 70%, #a855f7 100%);
+}
+
+.auth-brand-badge {
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 25px -4px rgba(13, 110, 253, 0.22), 0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 4.5px rgba(13, 110, 253, 0.12);
+  padding: 8px;
+  margin-bottom: 0.85rem;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.auth-brand-badge:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 14px 30px -4px rgba(13, 110, 253, 0.3), 0 0 0 2px rgba(255, 255, 255, 0.95), 0 0 0 5px rgba(13, 110, 253, 0.18);
+}
+
+.auth-brand-badge img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@media (max-width: 576px) {
+  .auth-page {
+    padding: 1.25rem 0.75rem;
+  }
+  .auth-island {
+    padding: 1.75rem 1.25rem;
+    border-radius: 1.25rem;
+  }
+}
+
+.auth-page ~ footer {
+  position: relative;
   width: 100%;
   background-color: transparent !important;
   border-top: none !important;
-  z-index: 10;
+  margin-top: 1rem;
+  padding: 0.75rem 0 1.5rem;
+  z-index: 5;
 }
 
-.auth-page~footer p {
-  color: rgba(255, 255, 255, 0.6) !important;
+.auth-page ~ footer p {
+  color: rgba(255, 255, 255, 0.85) !important;
   text-align: center;
   width: 100%;
+  font-size: 0.82rem;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+}
+
+/* Enhanced Auth Input Groups & Fields */
+.auth-input-group {
+  display: flex;
+  align-items: stretch;
+  border-radius: 0.85rem;
+  border: 1.5px solid #e2e8f0;
+  background-color: #f8fafc;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  height: 48px;
+}
+
+.auth-input-group:hover {
+  border-color: #cbd5e1;
+  background-color: #ffffff;
+}
+
+.auth-input-group:focus-within {
+  border-color: #2563eb;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.auth-input-group .form-control {
+  border: none;
+  background: transparent;
+  padding: 0.65rem 0.95rem;
+  font-size: 0.925rem;
+  color: #0f172a;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.auth-input-group .form-control:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.auth-input-group .form-control::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.auth-input-group .input-group-text {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding-left: 1.05rem;
+  padding-right: 0.3rem;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s ease;
+}
+
+.auth-input-group:focus-within .input-group-text {
+  color: #2563eb;
+}
+
+.auth-input-group .btn-password-toggle {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding: 0 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.18s ease;
+}
+
+.auth-input-group .btn-password-toggle:hover {
+  color: #2563eb;
+  background-color: rgba(37, 99, 235, 0.06);
+}
+
+/* Auth Portal Segmented Switcher */
+.auth-portal-nav {
+  display: flex;
+  background: rgba(241, 245, 249, 0.95);
+  border-radius: 9999px;
+  padding: 0.35rem;
+  gap: 0.3rem;
+  margin-bottom: 1.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+}
+
+.auth-portal-nav a {
+  flex: 1;
+  text-align: center;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  text-decoration: none;
+  border-radius: 9999px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.auth-portal-nav a:hover {
+  color: #0f172a;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.auth-portal-nav a.active {
+  background: #ffffff;
+  color: #1e40af;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+  font-weight: 700;
+}
+
+.auth-portal-nav.portal-student-nav a.active {
+  color: #1d4ed8;
+}
+
+.auth-portal-nav.portal-faculty-nav a.active {
+  color: #0369a1;
+}
+
+.auth-portal-nav.portal-admin-nav a.active {
+  color: #4f46e5;
+}
+
+/* Fast Test Access Chips & Dock */
+.test-access-panel {
+  background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 1.15rem;
+  padding: 1rem 1.15rem;
+  text-align: left;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02) inset;
+}
+
+.btn-test-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.btn-test-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.09);
+}
+
+.btn-test-chip:active {
+  transform: translateY(0);
+}
+
+.btn-test-chip.chip-registrar {
+  border-color: rgba(37, 99, 235, 0.3);
+  background: rgba(37, 99, 235, 0.05);
+  color: #1d4ed8;
+}
+.btn-test-chip.chip-registrar:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+.btn-test-chip.chip-admissions {
+  border-color: rgba(2, 132, 199, 0.3);
+  background: rgba(2, 132, 199, 0.05);
+  color: #0284c7;
+}
+.btn-test-chip.chip-admissions:hover {
+  background: #0284c7;
+  color: #ffffff;
+  border-color: #0284c7;
+}
+
+.btn-test-chip.chip-cashier {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.05);
+  color: #059669;
+}
+.btn-test-chip.chip-cashier:hover {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+}
+
+.btn-test-chip.chip-scheduler {
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.05);
+  color: #7c3aed;
+}
+.btn-test-chip.chip-scheduler:hover {
+  background: #7c3aed;
+  color: #ffffff;
+  border-color: #7c3aed;
+}
+
+.btn-test-chip.chip-scholarship {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.05);
+  color: #d97706;
+}
+.btn-test-chip.chip-scholarship:hover {
+  background: #d97706;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
+.btn-test-chip.chip-superadmin {
+  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(99, 102, 241, 0.05);
+  color: #4f46e5;
+}
+.btn-test-chip.chip-superadmin:hover {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+}
+
+.btn-test-chip.chip-applicant {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(56, 189, 248, 0.08) 100%);
+  color: #1d4ed8;
+  font-weight: 700;
+}
+.btn-test-chip.chip-applicant:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+/* Quick Test Login Cards & Helpers */
+.test-cred-card {
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  border: 1.5px solid #e2e8f0;
+  background-color: #ffffff;
+  border-radius: 0.85rem;
+}
+
+.test-cred-card:hover {
+  border-color: #2563eb !important;
+  background-color: #f8faff !important;
+  transform: translateY(-2.5px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12) !important;
+}
+
+.test-cred-card:active {
+  transform: translateY(0);
 }
 
 .island-hero {
@@ -2392,6 +2746,48 @@ body {
   border: 1px solid #e2e8f0;
 }
 
+/* Frosted Glass Badges for Header Ribbons & Cards */
+.badge-frosted-white {
+  background: rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+.badge-frosted-dark {
+  background: rgba(0, 0, 0, 0.22) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+}
+.badge-frosted-solid {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Universal Opacity Fallback Utilities */
+.bg-opacity-10 { --bs-bg-opacity: 0.1 !important; }
+.bg-opacity-15 { --bs-bg-opacity: 0.15 !important; }
+.bg-opacity-20 { --bs-bg-opacity: 0.2 !important; }
+.bg-opacity-25 { --bs-bg-opacity: 0.25 !important; }
+.bg-opacity-30 { --bs-bg-opacity: 0.3 !important; }
+.border-opacity-10 { --bs-border-opacity: 0.1 !important; }
+.border-opacity-15 { --bs-border-opacity: 0.15 !important; }
+.border-opacity-20 { --bs-border-opacity: 0.2 !important; }
+.border-opacity-25 { --bs-border-opacity: 0.25 !important; }
+.border-opacity-30 { --bs-border-opacity: 0.3 !important; }
+
 /* Pulse Dot */
 .pulse-dot {
   width: 8px;
@@ -2399,7 +2795,8 @@ body {
   border-radius: 50%;
   display: inline-block;
 }
-.pulse-dot-emerald {
+.pulse-dot-emerald,
+.pulse-dot-green {
   background-color: #10b981;
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
 }
@@ -2497,4 +2894,129 @@ body {
   color: rgba(16, 185, 129, 0.04);
   pointer-events: none;
   line-height: 1;
-}
+}
+
+/* ==========================================================================
+   Quick Navigation Shortcuts (Registrar & LMS Design System)
+   ========================================================================== */
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.95rem 1.15rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  text-decoration: none !important;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shortcut-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+  border-color: #0d6efd;
+  background: #ffffff;
+}
+
+.shortcut-item .icon-box {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(13, 110, 253, 0.08);
+  color: #0d6efd;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.shortcut-item:hover .icon-box {
+  background: #0d6efd;
+  color: #ffffff;
+  transform: scale(1.05);
+}
+
+/* Accent variants */
+.shortcut-item-shs .icon-box,
+.shortcut-item-cyan .icon-box {
+  background: rgba(8, 145, 178, 0.1);
+  color: #0891b2;
+}
+.shortcut-item-shs:hover .icon-box,
+.shortcut-item-cyan:hover .icon-box {
+  background: #0891b2;
+  color: #ffffff;
+}
+.shortcut-item-shs:hover,
+.shortcut-item-cyan:hover {
+  border-color: #0891b2;
+}
+
+.shortcut-item-orange .icon-box {
+  background: rgba(249, 115, 22, 0.1);
+  color: #ea580c;
+}
+.shortcut-item-orange:hover .icon-box {
+  background: #ea580c;
+  color: #ffffff;
+}
+.shortcut-item-orange:hover {
+  border-color: #ea580c;
+}
+
+.shortcut-item-emerald .icon-box,
+.shortcut-item-success .icon-box {
+  background: rgba(16, 185, 129, 0.1);
+  color: #059669;
+}
+.shortcut-item-emerald:hover .icon-box,
+.shortcut-item-success:hover .icon-box {
+  background: #059669;
+  color: #ffffff;
+}
+.shortcut-item-emerald:hover,
+.shortcut-item-success:hover {
+  border-color: #059669;
+}
+
+.shortcut-item-purple .icon-box {
+  background: rgba(124, 58, 237, 0.1);
+  color: #7c3aed;
+}
+.shortcut-item-purple:hover .icon-box {
+  background: #7c3aed;
+  color: #ffffff;
+}
+.shortcut-item-purple:hover {
+  border-color: #7c3aed;
+}
+
+.shortcut-item-rose .icon-box,
+.shortcut-item-red .icon-box {
+  background: rgba(225, 29, 72, 0.1);
+  color: #e11d48;
+}
+.shortcut-item-rose:hover .icon-box,
+.shortcut-item-red:hover .icon-box {
+  background: #e11d48;
+  color: #ffffff;
+}
+.shortcut-item-rose:hover,
+.shortcut-item-red:hover {
+  border-color: #e11d48;
+}
+
+.shortcut-item-indigo .icon-box {
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
+}
+.shortcut-item-indigo:hover .icon-box {
+  background: #4f46e5;
+  color: #ffffff;
+}
+.shortcut-item-indigo:hover {
+  border-color: #4f46e5;
+}
+

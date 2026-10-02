@@ -1,9 +1,11 @@
 <?php
 $portalTitles = [
+    'admin' => 'Reset Admin Password - Triple T University',
     'faculty' => 'Reset Faculty Password - Triple T University',
     'student' => 'Reset Student Password - Triple T University',
     'applicant' => 'Reset Password - Triple T University'
 ];
+$portal = $portal ?? 'applicant';
 $pageTitle = $portalTitles[$portal] ?? $portalTitles['applicant'];
 require_once __DIR__ . '/../components/header.php';
 ?>
@@ -19,7 +21,9 @@ require_once __DIR__ . '/../components/header.php';
             </div>
             <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-2 fw-semibold">
               <i class="bi bi-shield-lock me-1"></i> 
-              <?php if ($portal === 'faculty'): ?>
+              <?php if ($portal === 'admin'): ?>
+                Admin Password Reset
+              <?php elseif ($portal === 'faculty'): ?>
                 Faculty Password Reset
               <?php elseif ($portal === 'student'): ?>
                 Student Password Reset
@@ -131,7 +135,11 @@ require_once __DIR__ . '/../components/header.php';
               <span id="countdownTimer" class="small text-muted d-none ms-1"></span>
             </div>
             
-            <?php if ($portal === 'faculty'): ?>
+            <?php if ($portal === 'admin'): ?>
+              <a href="/sia/auth/lms_admin_login.php" class="small text-muted text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i> Back to LMS Admin Login
+              </a>
+            <?php elseif ($portal === 'faculty'): ?>
               <a href="/sia/auth/lms_faculty_login.php" class="small text-muted text-decoration-none">
                 <i class="bi bi-arrow-left me-1"></i> Back to Faculty Login
               </a>
@@ -141,7 +149,7 @@ require_once __DIR__ . '/../components/header.php';
               </a>
             <?php else: ?>
               <a href="/sia/auth/login.php" class="small text-muted text-decoration-none">
-                <i class="bi bi-arrow-left me-1"></i> Back to Applicant Login
+                <i class="bi bi-arrow-left me-1"></i> Back to Login
               </a>
             <?php endif; ?>
           </div>

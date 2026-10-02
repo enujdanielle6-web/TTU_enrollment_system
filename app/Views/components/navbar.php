@@ -64,6 +64,17 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
               </a>
             </li>
+            <li>
+              <a class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-3 mt-1 transition-all hover-lift" href="/sia/auth/lms_admin_login.php">
+                <div class="rounded-3 d-flex align-items-center justify-content-center text-white" style="width: 42px; height: 42px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);">
+                  <i class="bi bi-shield-lock-fill fs-5"></i>
+                </div>
+                <div>
+                  <span class="d-block fw-bold text-dark" style="font-size: 0.9rem;">Admin Portal</span>
+                  <span class="d-block text-muted" style="font-size: 0.75rem;">Platform & course governance</span>
+                </div>
+              </a>
+            </li>
           </ul>
         </li>
         <?php if (!empty($_SESSION['logged_in'])): ?>

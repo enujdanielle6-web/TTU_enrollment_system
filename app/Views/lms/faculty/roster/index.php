@@ -23,41 +23,44 @@
         ?>
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-primary">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Total Class Size</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-dark"><?= $totalStudents ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Total Class Size</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
+                            <i class="bi bi-mortarboard-fill"></i>
                         </div>
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-mortarboard fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $totalStudents ?></div>
+                    <div class="stat-subtext text-primary">
+                        <i class="bi bi-people-fill me-1"></i> Official Enrolled Students
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-success">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Regular Students</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-success"><?= $regularCount ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Regular Students</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bi bi-person-check-fill"></i>
                         </div>
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-person-check fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $regularCount ?></div>
+                    <div class="stat-subtext text-success">
+                        <i class="bi bi-check-circle-fill me-1"></i> Block Section Enrollees
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-info">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Irregular Students</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-info"><?= $irregularCount ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Irregular Students</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);">
+                            <i class="bi bi-shuffle"></i>
                         </div>
-                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-shuffle fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $irregularCount ?></div>
+                    <div class="stat-subtext text-info">
+                        <i class="bi bi-arrow-left-right me-1"></i> Cross-Enrolled / Retakers
                     </div>
                 </div>
             </div>
@@ -72,29 +75,29 @@
                 <p class="text-muted small mb-0">Officially enrolled students taking <?= htmlspecialchars($course['subject_code']) ?> in Section <?= htmlspecialchars($course['section_code']) ?>.</p>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <div style="min-width: 250px;">
+                <div style="min-width: 260px;">
                     <div class="input-group input-group-sm">
-                        <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" id="rosterSearchInput" class="form-control bg-white border-start-0" placeholder="Filter student name or #...">
+                        <span class="input-group-text bg-white border-end-0 text-muted rounded-start-pill ps-3"><i class="bi bi-search"></i></span>
+                        <input type="text" id="rosterSearchInput" class="form-control bg-white border-start-0 rounded-end-pill py-2 shadow-none small" placeholder="Filter student name or #...">
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Roster Table Card -->
-        <div class="lms-card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <div class="dossier-card border-0 shadow-sm rounded-4 bg-white overflow-hidden mb-4">
             <div class="p-0">
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="rosterTable">
-                        <thead class="table-light">
+                    <table class="table table-hover align-middle mb-0 dashboard-table" id="rosterTable">
+                        <thead>
                             <tr>
-                                <th class="ps-4 py-3 text-muted text-uppercase small" style="width: 60px; letter-spacing: 0.04em;">#</th>
-                                <th class="py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Student Number</th>
-                                <th class="py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Student Name</th>
-                                <th class="py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Institutional Email</th>
-                                <th class="py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Classification</th>
-                                <th class="py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Enrollment Status</th>
-                                <th class="text-end pe-4 py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Enrolled Date</th>
+                                <th class="ps-4 py-3" style="width: 60px;">#</th>
+                                <th class="py-3">Student Number</th>
+                                <th class="py-3">Student Name</th>
+                                <th class="py-3">Institutional Email</th>
+                                <th class="py-3">Classification</th>
+                                <th class="py-3">Enrollment Status</th>
+                                <th class="text-end pe-4 py-3">Enrolled Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,13 +117,13 @@
                                     <tr class="roster-row">
                                         <td class="ps-4 text-muted small fw-semibold"><?= $idx + 1 ?></td>
                                         <td>
-                                            <span class="badge bg-light text-dark border px-2.5 py-1 font-monospace roster-snum">
-                                                <?= htmlspecialchars($st['student_number']) ?>
+                                            <span class="applicant-ref-badge font-monospace roster-snum">
+                                                <i class="bi bi-fingerprint text-primary me-1"></i><?= htmlspecialchars($st['student_number']) ?>
                                             </span>
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center gap-2.5">
-                                                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; flex-shrink: 0; font-size: 0.8rem;">
+                                                <div class="applicant-avatar text-white fw-bold shadow-xs flex-shrink-0" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;">
                                                     <?= esc($initial) ?>
                                                 </div>
                                                 <span class="fw-bold text-dark roster-student-name">

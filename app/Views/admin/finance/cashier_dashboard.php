@@ -36,6 +36,10 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
+          <a href="payment_monitoring.php" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-2 shadow-xs">
+            <i class="bi bi-speedometer2"></i>
+            <span>Queue Monitor</span>
+          </a>
           <a href="cashier_payments.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
             <i class="bi bi-receipt-cutoff text-primary"></i>
             <span>Payment Ledger</span>

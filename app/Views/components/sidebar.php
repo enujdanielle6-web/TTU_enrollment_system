@@ -5,7 +5,7 @@ $currentPage = basename($uri);
 if (($qPos = strpos($currentPage, '?')) !== false) {
     $currentPage = substr($currentPage, 0, $qPos);
 }
-$isLms = (strpos($uri, '/admin/lms') !== false);
+$isLms = (strpos($uri, '/admin/lms') !== false || strpos($uri, '/lms/admin') !== false);
 $baseAdminUrl = '/sia/admin/';
 ?>
 <aside class="admin-sidebar bg-white border-end shadow-sm d-flex flex-column" style="width: 260px; height: 100vh; max-height: 100vh; position: sticky; top: 0; overflow: hidden;">
@@ -48,8 +48,8 @@ $baseAdminUrl = '/sia/admin/';
     </a>
     <?php endif; ?>
 
-    <?php if (hasPermission(['*', 'lms.manage', 'lms.admin', 'lms.courses.manage']) || in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true)): ?>
-    <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-2.5 <?= esc($isLms ? 'active bg-primary text-white' : 'text-dark hover-bg-light') ?>" href="/sia/admin/lms/dashboard">
+    <?php if (($_SESSION['user_department'] ?? '') !== 'Registrar Office' && (hasPermission(['*', 'lms.manage', 'lms.admin', 'lms.courses.manage']) || in_array($_SESSION['user_role'] ?? '', ['superadmin', 'lms_admin'], true))): ?>
+    <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center gap-2.5 <?= esc($isLms ? 'active bg-primary text-white' : 'text-dark hover-bg-light') ?>" href="/sia/lms/admin/dashboard">
       <i class="bi bi-mortarboard-fill fs-5"></i>
       <span class="fw-medium">LMS Governance</span>
     </a>

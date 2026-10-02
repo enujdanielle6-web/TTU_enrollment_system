@@ -6,19 +6,19 @@
 
 $lmsCurrentUri = $_SERVER['REQUEST_URI'] ?? '';
 $activeTab = 'dashboard';
-if (strpos($lmsCurrentUri, '/admin/lms/courses') !== false || strpos($lmsCurrentUri, '/admin/lms/generator') !== false) {
+if (strpos($lmsCurrentUri, '/courses') !== false || strpos($lmsCurrentUri, '/generator') !== false) {
     $activeTab = 'courses';
-} elseif (strpos($lmsCurrentUri, '/admin/lms/sync') !== false) {
+} elseif (strpos($lmsCurrentUri, '/sync') !== false) {
     $activeTab = 'sync';
-} elseif (strpos($lmsCurrentUri, '/admin/lms/cloner') !== false) {
+} elseif (strpos($lmsCurrentUri, '/cloner') !== false) {
     $activeTab = 'cloner';
-} elseif (strpos($lmsCurrentUri, '/admin/lms/announcements') !== false) {
+} elseif (strpos($lmsCurrentUri, '/announcements') !== false) {
     $activeTab = 'announcements';
-} elseif (strpos($lmsCurrentUri, '/admin/lms/users') !== false) {
+} elseif (strpos($lmsCurrentUri, '/users') !== false) {
     $activeTab = 'users';
-} elseif (strpos($lmsCurrentUri, '/admin/lms/archive') !== false) {
+} elseif (strpos($lmsCurrentUri, '/archive') !== false) {
     $activeTab = 'archive';
-} elseif (strpos($lmsCurrentUri, '/admin/lms/audit_logs') !== false) {
+} elseif (strpos($lmsCurrentUri, '/audit_logs') !== false) {
     $activeTab = 'audit_logs';
 }
 ?>
@@ -139,7 +139,7 @@ body {
   <div class="container-fluid px-lg-5 py-2 d-flex flex-wrap align-items-center justify-content-between gap-3">
     <!-- Brand & Portal Tag -->
     <div class="d-flex align-items-center gap-2.5">
-      <a href="/sia/admin/lms/dashboard" class="d-flex align-items-center gap-2.5 text-decoration-none">
+      <a href="/sia/lms/admin/dashboard" class="d-flex align-items-center gap-2.5 text-decoration-none">
         <div class="d-flex align-items-center justify-content-center bg-white border rounded-3 p-1 shadow-xs" style="width: 38px; height: 38px;">
           <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 26px; width: auto; object-fit: contain;">
         </div>
@@ -154,35 +154,35 @@ body {
 
     <!-- Central Navigation Tabs (All 8 Modules) -->
     <nav class="d-flex align-items-center gap-1 overflow-auto py-1" aria-label="LMS Admin Navigation">
-      <a href="/sia/admin/lms/dashboard" class="lms-tab-link <?= $activeTab === 'dashboard' ? 'active' : '' ?>">
+      <a href="/sia/lms/admin/dashboard" class="lms-tab-link <?= $activeTab === 'dashboard' ? 'active' : '' ?>">
         <i class="bi bi-grid-1x2-fill"></i>
         <span>Dashboard</span>
       </a>
-      <a href="/sia/admin/lms/courses" class="lms-tab-link <?= $activeTab === 'courses' ? 'active' : '' ?>">
+      <a href="/sia/lms/admin/courses" class="lms-tab-link <?= $activeTab === 'courses' ? 'active' : '' ?>">
         <i class="bi bi-journal-bookmark-fill"></i>
         <span>Courses</span>
       </a>
-      <a href="/sia/admin/lms/sync" class="lms-tab-link <?= $activeTab === 'sync' ? 'active' : '' ?>">
+      <a href="/sia/lms/admin/sync" class="lms-tab-link <?= $activeTab === 'sync' ? 'active' : '' ?>">
         <i class="bi bi-arrow-repeat"></i>
         <span>Sync &amp; Conflicts</span>
       </a>
-      <a href="/sia/admin/lms/cloner" class="lms-tab-link <?= $activeTab === 'cloner' ? 'active' : '' ?>">
+      <a href="/sia/lms/admin/cloner" class="lms-tab-link <?= $activeTab === 'cloner' ? 'active' : '' ?>">
         <i class="bi bi-copy"></i>
         <span>Cloner</span>
       </a>
-      <a href="/sia/admin/lms/announcements" class="lms-tab-link <?= $activeTab === 'announcements' ? 'active' : '' ?>">
+      <a href="/sia/lms/admin/announcements" class="lms-tab-link <?= $activeTab === 'announcements' ? 'active' : '' ?>">
         <i class="bi bi-megaphone-fill"></i>
         <span>Announcements</span>
       </a>
-      <a href="/sia/admin/lms/users" class="lms-tab-link <?= $activeTab === 'users' ? 'active' : '' ?>">
+      <a href="/sia/lms/admin/users" class="lms-tab-link <?= $activeTab === 'users' ? 'active' : '' ?>">
         <i class="bi bi-person-badge-fill"></i>
         <span>User Access</span>
       </a>
-      <a href="/sia/admin/lms/archive" class="lms-tab-link <?= $activeTab === 'archive' ? 'active' : '' ?>">
+      <a href="/sia/lms/admin/archive" class="lms-tab-link <?= $activeTab === 'archive' ? 'active' : '' ?>">
         <i class="bi bi-archive-fill"></i>
         <span>Archival</span>
       </a>
-      <a href="/sia/admin/lms/audit_logs" class="lms-tab-link <?= $activeTab === 'audit_logs' ? 'active' : '' ?>">
+      <a href="/sia/lms/admin/audit_logs" class="lms-tab-link <?= $activeTab === 'audit_logs' ? 'active' : '' ?>">
         <i class="bi bi-shield-check"></i>
         <span>Audit Logs</span>
       </a>

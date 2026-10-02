@@ -107,15 +107,30 @@ $is403 = ($err !== null && $err->getStatusCode() === 403);
 assertTest($is403, "scheduler -> LMS Admin [SECURITY CRITICAL]", "Server-side rejection: HTTP 403 Access Denied despite sections.manage");
 
 // -------------------------------------------------------------------------
-// TEST 4: registrar (represented as role 'admin' in TTU) -> LMS Admin (PASS)
+// TEST 4: registrar (department 'Registrar Office' / manage_registrar) -> LMS Admin (DENIED WITH 403)
+// The Registrar account must NOT handle LMS Administration; handled on LMS side by LMS Admin
 // -------------------------------------------------------------------------
 $_SESSION['logged_in'] = true;
 $_SESSION['user_id'] = 3;
 $_SESSION['user_role'] = 'admin';
+$_SESSION['user_department'] = 'Registrar Office';
 $_SESSION['user_permissions'] = ['manage_registrar', 'manage_curriculum', 'enrollment.finalize'];
 
 $err = invokeEnforceAdminAccess($controller);
-assertTest($err === null, "registrar (admin role) -> LMS Admin", "Registrar authorized under administrative governance");
+$is403 = ($err !== null && $err->getStatusCode() === 403);
+assertTest($is403, "registrar (Registrar Office) -> LMS Admin [DOMAIN ISOLATION]", "Server-side rejection: HTTP 403 Access Denied. Handled by LMS Admin on LMS side.");
+
+// -------------------------------------------------------------------------
+// TEST 4b: LMS Admin / IT Department Admin -> LMS Admin (PASS)
+// -------------------------------------------------------------------------
+$_SESSION['logged_in'] = true;
+$_SESSION['user_id'] = 14;
+$_SESSION['user_role'] = 'admin';
+$_SESSION['user_department'] = 'LMS Administration';
+$_SESSION['user_permissions'] = ['lms.manage', 'lms.admin'];
+
+$err = invokeEnforceAdminAccess($controller);
+assertTest($err === null, "LMS Admin (LMS Administration dept) -> LMS Admin", "Access authorized for LMS Administrator on LMS side");
 
 // -------------------------------------------------------------------------
 // TEST 5: faculty -> LMS Admin (DENIED WITH 403)

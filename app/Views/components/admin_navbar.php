@@ -322,6 +322,9 @@ $isSysAdmin = strpos($uri, '/system/') !== false;
           <a title="Payment History" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.15s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(in_array($current_page, ['cashier_payments.php', 'cashier_receipt.php']) ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>finance/cashier_payments.php">
             <i class="bi bi-cash-stack fs-5"></i> <span class="nav-text">Payment History</span>
           </a>
+          <a title="Queue & Gateway Monitor" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.18s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'payment_monitoring.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>finance/payment_monitoring.php">
+            <i class="bi bi-speedometer2 fs-5"></i> <span class="nav-text">Queue & Gateway Monitor</span>
+          </a>
           <a title="Fee Templates" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.2s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc($current_page === 'fees.php' ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>finance/fees.php">
             <i class="bi bi-tags fs-5"></i> <span class="nav-text">Fee Templates</span>
           </a>
@@ -398,18 +401,11 @@ $isSysAdmin = strpos($uri, '/system/') !== false;
           <a title="Audit Logs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.35s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(in_array($current_page, ['audit_logs.php', 'user_activity.php']) ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>system/audit_logs.php">
             <i class="bi bi-shield-check fs-5"></i> <span class="nav-text">Audit Logs</span>
           </a>
-          <a title="LMS Governance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.38s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(strpos($uri, '/admin/lms') !== false ? 'active' : '') ?>" href="/sia/admin/lms/dashboard">
+          <a title="LMS Governance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.38s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc((strpos($uri, '/admin/lms') !== false || strpos($uri, '/lms/admin') !== false) ? 'active' : '') ?>" href="/sia/lms/admin/dashboard">
             <i class="bi bi-mortarboard-fill fs-5"></i> <span class="nav-text">LMS Governance</span>
           </a>
         </div>
       </div>
-      <?php endif; ?>
-
-      <?php if (!hasPermission(['*']) && (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) || hasPermission(['lms.manage', 'lms.admin', 'lms.courses.manage']))): ?>
-      <div class="sidebar-section-header">LMS Operations</div>
-      <a title="LMS Governance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.38s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(strpos($uri, '/admin/lms') !== false ? 'active' : '') ?>" href="/sia/admin/lms/dashboard">
-        <i class="bi bi-mortarboard-fill fs-5"></i> <span class="nav-text">LMS Governance</span>
-      </a>
       <?php endif; ?>
     </nav>
 

@@ -144,7 +144,7 @@
                             <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-dark d-block h-100">
                                 <div class="lms-card h-100 transition-all shadow-sm-hover overflow-hidden border bg-white rounded-4" style="border-color: #eef2f6 !important;">
                                     <div class="p-3 text-white d-flex justify-content-between align-items-center" style="background: <?= $grad ?>;">
-                                        <span class="badge bg-white bg-opacity-25 text-white fw-bold px-3 py-1 rounded-pill small"><?= htmlspecialchars($course['code']) ?></span>
+                                        <span class="badge badge-frosted-solid fw-bold px-3 py-1 rounded-pill small"><?= htmlspecialchars($course['code']) ?></span>
                                         <span class="small fw-semibold opacity-90"><i class="bi bi-journal-text me-1"></i><?= htmlspecialchars($course['units'] ?? 3) ?> Units</span>
                                     </div>
                                     <div class="p-3">

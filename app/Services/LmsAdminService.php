@@ -17,6 +17,17 @@ class LmsAdminService
     }
 
     /**
+     * Retrieves the currently active academic term.
+     */
+    public function getActiveTerm(): array
+    {
+        return [
+            'academic_year' => '2026-2027',
+            'semester' => 'First Semester'
+        ];
+    }
+
+    /**
      * Retrieves aggregated KPI statistics for the LMS Admin Dashboard.
      */
     public function getDashboardStats(): array

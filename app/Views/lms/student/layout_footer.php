@@ -1,4 +1,5 @@
-</div> <!-- End lms-main -->
+  </div> <!-- End lms-main -->
+</div> <!-- End lms-wrapper -->
 
 <!-- Bootstrap JS -->
 <script src="/sia/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
@@ -6,31 +7,57 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const sidebar = document.getElementById('lmsSidebar');
-        const mainContent = document.querySelector('.lms-main');
-        const toggleBtn = document.getElementById('sidebarToggle');
+        const mainContent = document.getElementById('spa-main');
+        const minimizeBtn = document.getElementById('sidebarMinimize');
+        const mobileToggleBtn = document.getElementById('sidebarToggle');
+        const sidebarCloseBtn = document.getElementById('sidebarClose');
+        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
         
         if (sidebar && mainContent) {
             // Check preference on desktop
             const isMobile = window.innerWidth < 992;
-            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            const isMinimized = localStorage.getItem('sidebarMinimized') === 'true' || localStorage.getItem('sidebarCollapsed') === 'true';
             
-            if (!isMobile && isCollapsed) {
-                sidebar.classList.add('collapsed');
-                mainContent.classList.add('collapsed');
+            if (!isMobile && isMinimized) {
+                sidebar.classList.add('minimized', 'collapsed');
+                mainContent.classList.add('minimized', 'collapsed');
             }
 
-            document.addEventListener('click', function(e) {
-                const toggle = e.target.closest('#sidebarToggle');
-                if (!toggle) return;
-                e.preventDefault();
-                if (window.innerWidth < 992) {
-                    sidebar.classList.toggle('show');
-                } else {
+            // Desktop Floating Minimize Toggle
+            if (minimizeBtn) {
+                minimizeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sidebar.classList.toggle('minimized');
                     sidebar.classList.toggle('collapsed');
+                    mainContent.classList.toggle('minimized');
                     mainContent.classList.toggle('collapsed');
-                    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
-                }
-            });
+                    const hasMinimized = sidebar.classList.contains('minimized');
+                    localStorage.setItem('sidebarMinimized', hasMinimized);
+                    localStorage.setItem('sidebarCollapsed', hasMinimized);
+                });
+            }
+
+            // Mobile Hamburger Toggle
+            if (mobileToggleBtn) {
+                mobileToggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sidebar.classList.toggle('show');
+                    if (sidebarBackdrop) {
+                        sidebarBackdrop.classList.toggle('d-none', !sidebar.classList.contains('show'));
+                    }
+                });
+            }
+
+            // Mobile Close Button
+            if (sidebarCloseBtn) {
+                sidebarCloseBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    sidebar.classList.remove('show');
+                    if (sidebarBackdrop) {
+                        sidebarBackdrop.classList.add('d-none');
+                    }
+                });
+            }
 
             // Sidebar Notification Dropup Toggle & Dismissal
             document.addEventListener('click', function(e) {

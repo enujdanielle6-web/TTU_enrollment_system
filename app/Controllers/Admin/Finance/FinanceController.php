@@ -5,6 +5,8 @@ use App\Core\BaseController;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Database;
+use App\Services\PaymentService;
+use App\Repositories\PaymentRepository;
 use PDO;
 use PDOException;
 use Exception;
@@ -184,7 +186,9 @@ class FinanceController extends BaseController
             error_log('Payment history system settings fetch failed: ' . $e->getMessage());
         }
 
-        // Compute Payment Statistics
+        $paymentRepo = new PaymentRepository($pdo);
+
+        // Compute Payment Statistics via PaymentRepository
         $stats = [
             'total_collections' => 0.0,
             'today_collections' => 0.0,
@@ -193,54 +197,20 @@ class FinanceController extends BaseController
         ];
 
         try {
-            $stmtTot = $pdo->query('SELECT COALESCE(SUM(amount), 0) FROM payment_records WHERE status = "verified"');
-            $stats['total_collections'] = (float)$stmtTot->fetchColumn();
-
-            $stmtToday = $pdo->query('SELECT COALESCE(SUM(amount), 0) FROM payment_records WHERE DATE(payment_date) = CURDATE() AND status = "verified"');
-            $stats['today_collections'] = (float)$stmtToday->fetchColumn();
-
-            $stmtPending = $pdo->query('SELECT COUNT(*) FROM payment_records WHERE status = "pending"');
-            $stats['pending_reviews'] = (int)$stmtPending->fetchColumn();
-
-            $stmtCount = $pdo->query('SELECT COUNT(*) FROM payment_records');
-            $stats['total_transactions'] = (int)$stmtCount->fetchColumn();
+            $stats = $paymentRepo->getFinancialStats();
         } catch (PDOException $e) {
             error_log('Payment stats error: ' . $e->getMessage());
         }
 
-        // Fetch All Payments
+        // Fetch All Payments via PaymentRepository
         $page = max(1, (int)($request->query('page') ?? ($_GET['page'] ?? 1)));
         $limit = 15;
         $offset = ($page - 1) * $limit;
         $total_items = 0;
         $payments = [];
         try {
-            $total_items = (int)$pdo->query('
-                SELECT COUNT(*)
-                FROM payment_records pr
-                INNER JOIN users u ON pr.user_id = u.id
-                LEFT JOIN users c ON pr.cashier_id = c.id
-                INNER JOIN student_assessments sa ON pr.assessment_id = sa.id
-                INNER JOIN applications a ON sa.application_id = a.id
-            ')->fetchColumn();
-
-            $stmt = $pdo->prepare('
-                SELECT pr.*, 
-                       u.first_name as student_first, u.last_name as student_last, u.student_number, u.email as student_email,
-                       c.first_name as cashier_first, c.last_name as cashier_last,
-                       a.reference_number as app_ref, a.academic_level, a.strand
-                FROM payment_records pr
-                INNER JOIN users u ON pr.user_id = u.id
-                LEFT JOIN users c ON pr.cashier_id = c.id
-                INNER JOIN student_assessments sa ON pr.assessment_id = sa.id
-                INNER JOIN applications a ON sa.application_id = a.id
-                ORDER BY pr.created_at DESC
-                LIMIT :limit OFFSET :offset
-            ');
-            $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-            $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-            $stmt->execute();
-            $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $total_items = $paymentRepo->countPayments();
+            $payments = $paymentRepo->getPaginatedPayments($limit, $offset);
         } catch (PDOException $e) {
             error_log('Cashier payments fetch failed: ' . $e->getMessage());
         }
@@ -255,7 +225,6 @@ class FinanceController extends BaseController
     public function receipt(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
-        requirePermission('receipts.print');
 
         $paymentId = (int)($_GET['id'] ?? 0);
         if ($paymentId <= 0) {
@@ -264,16 +233,8 @@ class FinanceController extends BaseController
             return;
         }
 
-        $stmt = $pdo->prepare('
-            SELECT p.*, a.reference_number as app_ref, u.student_number, u.first_name, u.last_name, u.email
-            FROM payment_records p
-            JOIN student_assessments sa ON p.assessment_id = sa.id
-            JOIN applications a ON sa.application_id = a.id
-            JOIN users u ON p.user_id = u.id
-            WHERE p.id = :id
-        ');
-        $stmt->execute(['id' => $paymentId]);
-        $payment = $stmt->fetch(PDO::FETCH_ASSOC);
+        $paymentRepo = new PaymentRepository($pdo);
+        $payment = $paymentRepo->findWithDetails($paymentId);
 
         if (!$payment) {
             $_SESSION['admin_error'] = 'Payment record not found.';
@@ -281,7 +242,42 @@ class FinanceController extends BaseController
             return;
         }
 
-        return $this->render('admin/finance/receipt', ['payment' => $payment, 'pageTitle' => 'Payment Receipt']);
+        // Allow permission if user has receipts.print OR if user is the student who owns this payment record
+        $currentUserId = (int)($_SESSION['user_id'] ?? 0);
+        $isOwner = ($currentUserId > 0 && (int)$payment['user_id'] === $currentUserId);
+        if (!hasPermission('receipts.print') && !$isOwner) {
+            requirePermission('receipts.print');
+        }
+
+        // Fetch line items for this assessment
+        $items = [];
+        $assessment = null;
+        if (!empty($payment['assessment_id'])) {
+            $stmt = $pdo->prepare('SELECT * FROM assessment_items WHERE assessment_id = :aid ORDER BY id ASC');
+            $stmt->execute(['aid' => (int)$payment['assessment_id']]);
+            $items = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+            $stmtAss = $pdo->prepare('SELECT * FROM student_assessments WHERE id = :aid LIMIT 1');
+            $stmtAss->execute(['aid' => (int)$payment['assessment_id']]);
+            $assessment = $stmtAss->fetch(PDO::FETCH_ASSOC) ?: null;
+        }
+
+        // Fetch system settings for institutional header
+        $systemSettings = [];
+        try {
+            $stmtSys = $pdo->query('SELECT setting_key, setting_value FROM system_settings');
+            $systemSettings = $stmtSys->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        } catch (\Exception $e) {
+            // fallback
+        }
+
+        return $this->render('admin/finance/receipt', [
+            'payment'        => $payment,
+            'items'          => $items,
+            'assessment'     => $assessment,
+            'systemSettings' => $systemSettings,
+            'pageTitle'      => 'Official Receipt - ' . ($payment['receipt_number'] ?? 'OR'),
+        ]);
     }
 
     public function process(Request $request, Response $response)
@@ -292,9 +288,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     return;
 }
 
-
+requirePermission('payments.record');
 
 $action = $_POST['action'] ?? '';
+$paymentService = new PaymentService();
 
 try {
     if ($action === 'record_payment') {
@@ -306,96 +303,18 @@ try {
         $refNo = trim($_POST['reference_number'] ?? '');
         $cashierId = (int)$_SESSION['user_id'];
 
-        if ($assessmentId <= 0 || !in_array($method, ['Cash', 'GCash', 'Bank Transfer'])) {
-            throw new Exception('Invalid payment details provided.');
-        }
+        $result = $paymentService->recordOverTheCounterPayment([
+            'assessment_id'    => $assessmentId,
+            'user_id'          => $userId,
+            'application_id'   => $appId,
+            'amount'           => $amount,
+            'payment_method'   => $method,
+            'reference_number' => $refNo,
+        ], $cashierId);
 
-        $pdo->beginTransaction();
-
-        try {
-            // Fetch Assessment
-            $assStmt = $pdo->prepare('SELECT * FROM student_assessments WHERE id = :id FOR UPDATE');
-            $assStmt->execute(['id' => $assessmentId]);
-            $assessment = $assStmt->fetch();
-
-            if (!$assessment) {
-                throw new Exception('Assessment not found.');
-            }
-
-            $netAmount = (float)$assessment['net_amount'];
-            $currentPaid = (float)$assessment['total_paid'];
-            $balance = $netAmount - $currentPaid;
-
-            if ($amount > $balance) {
-                throw new Exception('Payment amount cannot exceed the remaining balance.');
-            }
-
-            $minPayment = min(3000, $balance);
-            if ($amount < $minPayment) {
-                throw new Exception('Minimum payment amount is ₱' . number_format($minPayment, 2) . '.');
-            }
-
-            // Generate Concurrency-Safe Atomic Receipt Number (Format: REC-YYYYMMDD-XXXX)
-            $receiptNumber = generateAtomicReceiptNumber($pdo);
-
-            // Record Payment
-            $insertPayStmt = $pdo->prepare('
-                INSERT INTO payment_records (assessment_id, user_id, cashier_id, amount, payment_date, payment_method, receipt_number, reference_number, status)
-                VALUES (:ass_id, :user_id, :cashier_id, :amount, CURDATE(), :method, :receipt, :ref, "verified")
-            ');
-            $insertPayStmt->execute([
-                'ass_id' => $assessmentId,
-                'user_id' => $userId,
-                'cashier_id' => $cashierId,
-                'amount' => $amount,
-                'method' => $method,
-                'receipt' => $receiptNumber,
-                'ref' => $refNo !== '' ? $refNo : null
-            ]);
-            
-            $paymentId = $pdo->lastInsertId();
-
-            // Update Assessment
-            $newPaid = $currentPaid + $amount;
-            $newStatus = ($newPaid >= $netAmount) ? 'paid' : 'partial';
-
-            $updAssStmt = $pdo->prepare('UPDATE student_assessments SET total_paid = :paid, payment_status = :status WHERE id = :id');
-            $updAssStmt->execute([
-                'paid' => $newPaid,
-                'status' => $newStatus,
-                'id' => $assessmentId
-            ]);
-
-            // Transition application status to payment_verified so Registrar can validate & finalize
-            if ($newStatus === 'paid' || $newStatus === 'partial') {
-                $updApp = $pdo->prepare('UPDATE applications SET status = "payment_verified" WHERE id = :app_id AND status != "enrolled"');
-                $updApp->execute(['app_id' => (int)$assessment['application_id']]);
-            }
-
-            // Log payment activity for student
-            $logPayStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, ip_address, affected_record, icon, title, description) VALUES (:user_id, :ip_address, :affected_record, "bi-receipt-cutoff text-primary", "Payment Received", "A payment of ₱' . number_format($amount, 2) . ' was successfully recorded. Receipt No: ' . $receiptNumber . '")');
-            $logPayStmt->execute(['user_id' => $userId, 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null, 'affected_record' => "Assessment #$assessmentId"]);
-
-            // Admin log
-            logActivity(
-                (int)$_SESSION['user_id'], 
-                'bi-cash', 
-                'Payment Recorded', 
-                "Recorded payment of ₱" . number_format($amount, 2) . " (Receipt: $receiptNumber) for Assessment #$assessmentId.",
-                "Payment Record #$paymentId",
-                ['total_paid' => $currentPaid, 'payment_status' => $assessment['payment_status']],
-                ['total_paid' => $newPaid, 'payment_status' => $newStatus]
-            );
-
-            $pdo->commit();
-            
-            $_SESSION['success_msg'] = "Payment recorded successfully. Receipt No: $receiptNumber";
-            $response->redirect("/sia/admin/finance/cashier_receipt.php?id=$paymentId");
-            return;
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            throw $e;
-        }
+        $_SESSION['success_msg'] = $result['message'];
+        $response->redirect("/sia/admin/finance/cashier_receipt.php?id=" . $result['payment_id']);
+        return;
     } elseif ($action === 'verify_online_payment') {
         $paymentId = (int)($_POST['payment_id'] ?? 0);
         $decision = $_POST['decision'] ?? 'approve';
@@ -403,125 +322,49 @@ try {
         $cashierId = (int)$_SESSION['user_id'];
         $redirectUrl = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : "/sia/admin/finance/cashier_payments.php";
 
-        if ($paymentId <= 0) {
-            throw new Exception('Invalid payment ID provided.');
-        }
-
-        $pdo->beginTransaction();
-
         try {
-            // Fetch Payment Record
-            $payStmt = $pdo->prepare('SELECT * FROM payment_records WHERE id = :id FOR UPDATE');
-            $payStmt->execute(['id' => $paymentId]);
-            $payment = $payStmt->fetch();
-
-            if (!$payment || $payment['status'] !== 'pending') {
-                throw new Exception('Payment record not found or already processed.');
-            }
-
-            $assessmentId = (int)$payment['assessment_id'];
-            $userId = (int)$payment['user_id'];
-            $amount = (float)$payment['amount'];
-
-            // Fetch Assessment
-            $assStmt = $pdo->prepare('SELECT * FROM student_assessments WHERE id = :id FOR UPDATE');
-            $assStmt->execute(['id' => $assessmentId]);
-            $assessment = $assStmt->fetch();
-
-            if (!$assessment) {
-                throw new Exception('Assessment not found.');
-            }
-
-            $netAmount = (float)$assessment['net_amount'];
-            $currentPaid = (float)$assessment['total_paid'];
-            $balance = $netAmount - $currentPaid;
-
             if ($decision === 'reject') {
-                if (empty($remarks)) {
-                    throw new Exception('A reason for rejection is required. Please provide a remark.');
-                }
-                
-                // Update Payment Record
-                $updPayStmt = $pdo->prepare('UPDATE payment_records SET status = "rejected", remarks = :remarks, cashier_id = :cashier WHERE id = :id');
-                $updPayStmt->execute([
-                    'remarks' => $remarks,
-                    'cashier' => $cashierId,
-                    'id' => $paymentId
-                ]);
-
-                // Log payment activity for student
-                $studentLogDesc = "Your online payment of ₱" . number_format($amount, 2) . " was rejected by the cashier. Reason: " . htmlspecialchars($remarks, ENT_QUOTES, 'UTF-8') . " Please submit a valid proof of payment.";
-                $logPayStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, ip_address, affected_record, icon, title, description) VALUES (:user_id, :ip_address, :affected_record, "bi-x-circle text-danger", "Payment Rejected", :desc)');
-                $logPayStmt->execute(['user_id' => $userId, 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null, 'affected_record' => "Assessment #$assessmentId", 'desc' => $studentLogDesc]);
-
-                // Admin log
-                logActivity(
-                    $cashierId, 
-                    'bi-shield-x', 
-                    'Online Payment Rejected', 
-                    "Rejected online payment of ₱" . number_format($amount, 2) . " for Assessment #$assessmentId.",
-                    "Payment Record #$paymentId",
-                    ['status' => 'pending'],
-                    ['status' => 'rejected']
-                );
-
-                $pdo->commit();
-                
+                $paymentService->rejectOnlinePayment($paymentId, $cashierId, $remarks);
                 $_SESSION['success_msg'] = "Online payment successfully rejected.";
                 $response->redirect($redirectUrl);
                 return;
             }
 
-            // Generate Concurrency-Safe Atomic Receipt Number (Format: REC-YYYYMMDD-XXXX)
-            $receiptNumber = generateAtomicReceiptNumber($pdo);
-
-            // Update Payment Record
-            $updPayStmt = $pdo->prepare('UPDATE payment_records SET status = "verified", cashier_id = :cashier, receipt_number = :receipt WHERE id = :id');
-            $updPayStmt->execute([
-                'cashier' => $cashierId,
-                'receipt' => $receiptNumber,
-                'id' => $paymentId
-            ]);
-
-            // Update Assessment
-            $newPaid = $currentPaid + $amount;
-            $newStatus = ($newPaid >= $netAmount) ? 'paid' : 'partial';
-
-            $updAssStmt = $pdo->prepare('UPDATE student_assessments SET total_paid = :paid, payment_status = :status WHERE id = :id');
-            $updAssStmt->execute([
-                'paid' => $newPaid,
-                'status' => $newStatus,
-                'id' => $assessmentId
-            ]);
-
-            // Transition application status to payment_verified so Registrar can validate & finalize
-            if ($newStatus === 'paid' || $newStatus === 'partial') {
-                $updApp = $pdo->prepare('UPDATE applications SET status = "payment_verified" WHERE id = :app_id AND status != "enrolled"');
-                $updApp->execute(['app_id' => (int)$assessment['application_id']]);
-            }
-
-            // Log payment activity for student
-            $logPayStmt = $pdo->prepare('INSERT INTO activity_logs (user_id, ip_address, affected_record, icon, title, description) VALUES (:user_id, :ip_address, :affected_record, "bi-receipt-cutoff text-primary", "Payment Verified", "Your online payment of ₱' . number_format($amount, 2) . ' was verified. Receipt No: ' . $receiptNumber . '")');
-            $logPayStmt->execute(['user_id' => $userId, 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null, 'affected_record' => "Assessment #$assessmentId"]);
-
-            // Admin log
-            logActivity(
-                $cashierId, 
-                'bi-shield-check', 
-                'Online Payment Verified', 
-                "Verified online payment of ₱" . number_format($amount, 2) . " (Receipt: $receiptNumber) for Assessment #$assessmentId.",
-                "Payment Record #$paymentId",
-                ['status' => 'pending'],
-                ['status' => 'verified']
-            );
-
-            $pdo->commit();
-            
-            $_SESSION['success_msg'] = "Online payment verified successfully! Receipt No: $receiptNumber";
+            $result = $paymentService->verifyOnlinePayment($paymentId, $cashierId);
+            $_SESSION['success_msg'] = $result['message'];
             $response->redirect($redirectUrl);
             return;
         } catch (Exception $e) {
-            $pdo->rollBack();
+            $_SESSION['error_msg'] = $e->getMessage();
+            $response->redirect($redirectUrl);
+            return;
+        }
+    } elseif ($action === 'reconcile_paymongo') {
+        $sessionId = trim((string)($_POST['session_id'] ?? ''));
+        $paymentId = (int)($_POST['payment_id'] ?? 0);
+        $redirectUrl = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : "/sia/admin/finance/cashier_payments.php";
+
+        try {
+            if ($sessionId === '' && $paymentId > 0) {
+                $pRow = $paymentRepo->findById($paymentId);
+                $sessionId = (string)($pRow['checkout_session_id'] ?? '');
+            }
+
+            if ($sessionId === '') {
+                throw new Exception('Missing PayMongo checkout session ID to reconcile.');
+            }
+
+            $result = $paymentService->autoVerifyPayMongoCheckoutSession($sessionId);
+            if ($result['status'] === 'verified') {
+                $_SESSION['success_msg'] = "PayMongo payment verified! Receipt: " . ($result['receipt_number'] ?? 'N/A');
+            } elseif (in_array($result['status'], ['cancelled', 'expired'], true)) {
+                $_SESSION['warning_msg'] = "Gateway reported session is unpaid or expired. Record marked as {$result['status']}.";
+            } else {
+                $_SESSION['info_msg'] = $result['message'] ?? 'Reconciliation complete.';
+            }
+            $response->redirect($redirectUrl);
+            return;
+        } catch (Exception $e) {
             $_SESSION['error_msg'] = $e->getMessage();
             $response->redirect($redirectUrl);
             return;
@@ -539,7 +382,219 @@ try {
     }
     return;
 }
+    }
 
+    /**
+     * Renders the real-time Payment Queue and PayMongo Gateway Monitoring Dashboard.
+     */
+    public function paymentMonitoring(Request $request, Response $response)
+    {
+        $pdo = Database::getConnection();
+        requirePermission(['payments.record', 'fees.manage', 'settings.manage']);
+
+        $pageTitle = 'Payment Queue & Gateway Monitor - Triple T University';
+
+        // Load System Settings for Header Information
+        $systemSettings = [];
+        try {
+            $stmt = $pdo->query('SELECT setting_key, setting_value FROM system_settings');
+            $systemSettings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+        } catch (PDOException $e) {
+            error_log('Monitoring system settings fetch failed: ' . $e->getMessage());
+        }
+
+        $queueService = new \App\Services\PaymentQueueService(null, $pdo);
+        $monitoringData = $queueService->getMonitoringDashboardData();
+
+        $metrics = $monitoringData['metrics'];
+        $sessionCounts = $monitoringData['session_counts'];
+        $activeSessions = $monitoringData['active_sessions'];
+        $waitingSessions = $monitoringData['waiting_sessions'];
+        $payMongoStats = $monitoringData['paymongo_stats'];
+        $recentTransactions = $monitoringData['recent_transactions'];
+
+        // Determine if current user has permission to configure queue capacity/settings
+        $canManageSettings = hasPermission(['fees.manage', 'settings.manage']);
+
+        $successMsg = $_SESSION['success_msg'] ?? null;
+        $errorMsg = $_SESSION['error_msg'] ?? null;
+        unset($_SESSION['success_msg'], $_SESSION['error_msg']);
+
+        return $this->render('admin/finance/payment_monitoring', get_defined_vars());
+    }
+
+    /**
+     * AJAX endpoint for real-time polling of queue metrics and gateway telemetry.
+     */
+    public function paymentMonitoringData(Request $request, Response $response)
+    {
+        $pdo = Database::getConnection();
+        if (!hasPermission(['payments.record', 'fees.manage', 'settings.manage'])) {
+            $response->json(['success' => false, 'message' => 'Access Denied: Insufficient permissions.'], 403);
+            return;
+        }
+
+        $queueService = new \App\Services\PaymentQueueService(null, $pdo);
+        $data = $queueService->getMonitoringDashboardData();
+
+        $response->json([
+            'success' => true,
+            'data'    => $data,
+        ], 200);
+        return;
+    }
+
+    /**
+     * Handles administrative queue configuration updates (Capacity, Window Duration, Toggle).
+     * Strictly gated by 'fees.manage' or 'settings.manage' permissions.
+     */
+    public function updateQueueSettings(Request $request, Response $response)
+    {
+        $pdo = Database::getConnection();
+        $isAjax = $request->isAjax();
+
+        if (!hasPermission(['fees.manage', 'settings.manage'])) {
+            if ($isAjax) {
+                $response->json(['success' => false, 'message' => 'Access Denied: You do not have permission to modify payment queue configuration.'], 403);
+                return;
+            }
+            $_SESSION['error_msg'] = 'Access Denied: You do not have permission to modify payment queue configuration.';
+            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            return;
+        }
+
+        try {
+            $queueService = new \App\Services\PaymentQueueService(null, $pdo);
+
+            $newCapacity = (int)($request->input('max_concurrency') ?? 100);
+            $newDuration = (int)($request->input('session_duration_minutes') ?? 15);
+            $queueEnabled = (bool)($request->input('queue_enabled') !== null ? (int)$request->input('queue_enabled') : 1);
+
+            if ($newCapacity < 1) {
+                throw new Exception('Configured capacity must be at least 1 slot.');
+            }
+            if ($newDuration < 1 || $newDuration > 120) {
+                throw new Exception('Session duration must be between 1 and 120 minutes.');
+            }
+
+            $oldCapacity = $queueService->getMaxConcurrency();
+            $queueService->setMaxConcurrency($newCapacity);
+            $queueService->setSessionDuration($newDuration);
+            $queueService->setQueueEnabled($queueEnabled);
+
+            // If capacity expanded, immediately promote eligible waiting students
+            $promoted = 0;
+            if ($newCapacity > $oldCapacity) {
+                $promoted = $queueService->promoteEligibleWaitingSessions();
+            }
+
+            // Record audit log
+            $userId = (int)($_SESSION['user_id'] ?? 0);
+            logActivity(
+                $userId,
+                'bi-sliders',
+                'Payment Queue Settings Updated',
+                "Updated payment queue: Capacity={$newCapacity} (was {$oldCapacity}), Duration={$newDuration}m, Enabled=" . ($queueEnabled ? 'Yes' : 'No') . ($promoted > 0 ? " ({$promoted} waiting students promoted)" : ""),
+                'system_settings'
+            );
+
+            $msg = "Payment queue settings updated successfully. Capacity: {$newCapacity} slots." . ($promoted > 0 ? " Promoted {$promoted} waiting student(s)." : "");
+
+            if ($isAjax) {
+                $response->json([
+                    'success'  => true,
+                    'message'  => $msg,
+                    'promoted' => $promoted,
+                    'metrics'  => $queueService->getQueueMetrics(),
+                ], 200);
+                return;
+            }
+
+            $_SESSION['success_msg'] = $msg;
+            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            return;
+
+        } catch (Exception $e) {
+            if ($isAjax) {
+                $response->json(['success' => false, 'message' => $e->getMessage()], 400);
+                return;
+            }
+            $_SESSION['error_msg'] = $e->getMessage();
+            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            return;
+        }
+    }
+
+    /**
+     * Executes administrative queue maintenance actions (Recycle stale sessions, force release).
+     */
+    public function queueActionProcess(Request $request, Response $response)
+    {
+        $pdo = Database::getConnection();
+        $isAjax = $request->isAjax();
+
+        if (!hasPermission(['fees.manage', 'settings.manage'])) {
+            if ($isAjax) {
+                $response->json(['success' => false, 'message' => 'Access Denied: Insufficient administrative permissions.'], 403);
+                return;
+            }
+            $_SESSION['error_msg'] = 'Access Denied: Insufficient administrative permissions.';
+            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            return;
+        }
+
+        $action = trim((string)($request->input('action') ?? ''));
+        $queueService = new \App\Services\PaymentQueueService(null, $pdo);
+
+        try {
+            if ($action === 'recycle_stale') {
+                $repo = new \App\Repositories\PaymentSessionRepository($pdo);
+                $expiredCount = $repo->expireStaleActiveSessions();
+                $abandonedCount = $repo->abandonStaleWaitingSessions();
+                $promotedCount = $queueService->promoteEligibleWaitingSessions();
+
+                $msg = "Queue sweep completed: {$expiredCount} expired active slot(s) recycled, {$abandonedCount} dead waiting session(s) reclaimed, {$promotedCount} student(s) promoted.";
+
+                if ($isAjax) {
+                    $response->json(['success' => true, 'message' => $msg], 200);
+                    return;
+                }
+                $_SESSION['success_msg'] = $msg;
+                $response->redirect('/sia/admin/finance/payment_monitoring.php');
+                return;
+
+            } elseif ($action === 'force_release') {
+                $token = trim((string)($request->input('session_token') ?? ''));
+                if ($token === '') {
+                    throw new Exception('Session token is required.');
+                }
+
+                $released = $queueService->releaseSlot($token);
+                if (!$released) {
+                    throw new Exception('Session not found or already terminated.');
+                }
+
+                $msg = "Session successfully released and slot made available.";
+                if ($isAjax) {
+                    $response->json(['success' => true, 'message' => $msg], 200);
+                    return;
+                }
+                $_SESSION['success_msg'] = $msg;
+                $response->redirect('/sia/admin/finance/payment_monitoring.php');
+                return;
+
+            } else {
+                throw new Exception('Unknown queue action.');
+            }
+        } catch (Exception $e) {
+            if ($isAjax) {
+                $response->json(['success' => false, 'message' => $e->getMessage()], 400);
+                return;
+            }
+            $_SESSION['error_msg'] = $e->getMessage();
+            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            return;
+        }
     }
 }
 

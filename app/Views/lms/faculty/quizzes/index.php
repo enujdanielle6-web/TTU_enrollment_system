@@ -24,41 +24,44 @@
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-info">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Total Quizzes</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-dark"><?= $totalQuizzes ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Total Quizzes</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
+                            <i class="bi bi-pencil-square text-white"></i>
                         </div>
-                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-pencil-square fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $totalQuizzes ?></div>
+                    <div class="stat-subtext text-primary">
+                        <i class="bi bi-collection me-1"></i> Assessment Repository
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-success">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Active / Published</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-success"><?= $publishedQuizzes ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Active / Published</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bi bi-check2-circle text-white"></i>
                         </div>
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-check2-circle fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $publishedQuizzes ?></div>
+                    <div class="stat-subtext text-success">
+                        <i class="bi bi-broadcast me-1"></i> Open to Students
                     </div>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-warning">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Drafts / In-Progress</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-warning"><?= $draftQuizzes ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Drafts / In-Progress</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                            <i class="bi bi-clock-history text-white"></i>
                         </div>
-                        <div class="bg-warning bg-opacity-10 text-warning rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-clock-history fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $draftQuizzes ?></div>
+                    <div class="stat-subtext text-warning">
+                        <i class="bi bi-pen-fill me-1"></i> Hidden / In Authoring
                     </div>
                 </div>
             </div>

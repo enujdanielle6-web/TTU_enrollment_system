@@ -24,19 +24,38 @@ $todayMonth = date('m');
 $todayYear = date('Y');
 ?>
 
-<div class="container-fluid py-4">
+<main class="py-4 bg-light min-vh-100">
+  <div class="container-fluid px-lg-4">
 
-    <!-- Breadcrumb & Top Bar -->
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
-                <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Teaching Calendar</li>
-            </ol>
-        </nav>
-        <span class="badge bg-white border text-secondary px-3 py-1.5 rounded-pill shadow-xs small">
+    <!-- Hero Header Strip -->
+    <div class="dossier-hero-strip mb-4 fade-in-up">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary rounded-4 shadow-sm" style="width: 54px; height: 54px; font-size: 1.6rem; flex-shrink: 0;">
+            <i class="bi bi-calendar3"></i>
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <h1 class="h4 fw-bold text-dark mb-0">Academic &amp; Teaching Calendar</h1>
+              <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-0.5 small fw-semibold">
+                Schedules &amp; Deadlines
+              </span>
+            </div>
+            <p class="text-muted small mb-0">
+              Track assignment due dates, quiz schedules, and class sessions across all your active courses.
+            </p>
+          </div>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="badge bg-white border text-secondary px-3 py-2 rounded-pill shadow-xs small fw-semibold">
             <i class="bi bi-clock me-1 text-primary"></i> <?= date('l, F d, Y') ?>
-        </span>
+          </span>
+          <a href="/sia/lms/faculty/dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+            <i class="bi bi-arrow-left"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+      </div>
     </div>
 
     <div class="row g-4">
@@ -335,11 +354,11 @@ $todayYear = date('Y');
                     </div>
                 </div>
             </div>
-        </div>
-
+      </div>
     </div>
 
-</div>
+  </div>
+</main>
 
 <!-- Interactive Event Detail Modal -->
 <div class="modal fade" id="calendarEventModal" tabindex="-1" aria-labelledby="calendarEventModalLabel" aria-hidden="true">

@@ -16,7 +16,12 @@ INSERT INTO `system_settings` (`id`, `setting_key`, `setting_value`, `created_at
 (2, 'enrollment_status', 'open', NOW(), NOW()),
 (3, 'college_cost_per_unit', '500.00', NOW(), NOW()),
 (4, 'system_name', 'Triple T University Enrollment & LMS', NOW(), NOW()),
-(5, 'contact_email', 'admissions@ttu.edu.ph', NOW(), NOW());
+(5, 'contact_email', 'admissions@ttu.edu.ph', NOW(), NOW()),
+(6, 'active_semester', 'First', NOW(), NOW()),
+(7, 'payment_max_concurrency', '100', NOW(), NOW()),
+(8, 'payment_session_duration_minutes', '15', NOW(), NOW()),
+(9, 'payment_queue_enabled', '1', NOW(), NOW());
+
 
 -- ----------------------------------------------------------------------------
 -- 2. PUBLIC & INSTITUTIONAL ANNOUNCEMENTS
@@ -313,5 +318,17 @@ INSERT INTO `lms_attendance_records` (`id`, `lms_attendance_session_id`, `studen
 INSERT INTO `lms_announcements` (`id`, `lms_course_id`, `author_user_id`, `title`, `content`, `status`, `published_at`, `expires_at`, `created_at`, `updated_at`) VALUES
 (1, 1, 9, 'Welcome to CC101 Introduction to Computing!', 'Please download the course syllabus from Module 1 and review the lecture slides before our next lab meeting on Wednesday.', 'published', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW());
 
+-- ----------------------------------------------------------------------------
+-- 15. ATOMIC SYSTEM SEQUENCES
+-- ----------------------------------------------------------------------------
+DELETE FROM `student_number_sequences`;
+INSERT INTO `student_number_sequences` (`sequence_year`, `current_value`, `updated_at`) VALUES
+(2026, 2, NOW());
+
+DELETE FROM `receipt_sequences`;
+INSERT INTO `receipt_sequences` (`sequence_year`, `current_value`, `updated_at`) VALUES
+(2026, 1, NOW());
+
 SET FOREIGN_KEY_CHECKS = 1;
+
 

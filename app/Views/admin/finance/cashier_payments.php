@@ -36,6 +36,10 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
+          <a href="payment_monitoring.php" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-2 shadow-xs">
+            <i class="bi bi-speedometer2"></i>
+            <span>Queue Monitor</span>
+          </a>
           <a href="cashier_dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>Back to Dashboard</span>
@@ -260,9 +264,15 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     <!-- Receipt / Status -->
                     <td class="ps-4">
                       <?php if ($pStatus === 'pending'): ?>
-                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1.5">
-                          <i class="bi bi-hourglass-split"></i> Pending Verification
-                        </span>
+                        <?php if (($payment['gateway'] ?? '') === 'paymongo'): ?>
+                          <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1.5">
+                            <i class="bi bi-clock-history"></i> PayMongo In-Flight
+                          </span>
+                        <?php else: ?>
+                          <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1.5">
+                            <i class="bi bi-hourglass-split"></i> Pending Verification
+                          </span>
+                        <?php endif; ?>
                       <?php elseif ($pStatus === 'rejected'): ?>
                         <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2.5 py-1 small fw-semibold d-inline-flex align-items-center gap-1.5">
                           <i class="bi bi-x-circle-fill"></i> Rejected
@@ -314,7 +324,11 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     <!-- Processed By -->
                     <td>
                       <?php if ($pStatus === 'pending'): ?>
-                        <span class="badge bg-light text-warning border rounded-pill px-2.5 py-0.5 small fw-semibold">Needs Review</span>
+                        <?php if (($payment['gateway'] ?? '') === 'paymongo'): ?>
+                          <span class="badge bg-light text-info border rounded-pill px-2.5 py-0.5 small fw-semibold">Gateway In-Flight</span>
+                        <?php else: ?>
+                          <span class="badge bg-light text-warning border rounded-pill px-2.5 py-0.5 small fw-semibold">Needs Review</span>
+                        <?php endif; ?>
                       <?php elseif ($pStatus === 'rejected'): ?>
                         <span class="badge bg-light text-danger border rounded-pill px-2.5 py-0.5 small fw-semibold">Rejected</span>
                       <?php else: ?>
@@ -328,17 +342,25 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                     <!-- Action -->
                     <td class="text-end pe-4">
                       <?php if ($pStatus === 'pending'): ?>
-                        <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 fw-semibold verify-btn shadow-xs d-inline-flex align-items-center gap-1.5"
-                                data-id="<?= esc($payment['id']) ?>"
-                                data-name="<?= htmlspecialchars($studentName, ENT_QUOTES, 'UTF-8') ?>"
-                                data-amount="<?= number_format((float)$payment['amount'], 2) ?>"
-                                data-method="<?= htmlspecialchars($payment['payment_method'], ENT_QUOTES, 'UTF-8') ?>"
-                                data-ref="<?= htmlspecialchars($payment['reference_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>"
-                                data-img="/sia/uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
-                                data-bs-toggle="modal" data-bs-target="#verifyModal">
-                          <i class="bi bi-shield-check"></i>
-                          <span>Verify</span>
-                        </button>
+                        <?php if (($payment['gateway'] ?? '') === 'paymongo'): ?>
+                          <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-medium d-inline-flex align-items-center gap-1.5"
+                                  onclick="reconcilePayMongo('<?= esc($payment['checkout_session_id'] ?? '') ?>', <?= esc($payment['id']) ?>)">
+                            <i class="bi bi-arrow-repeat"></i>
+                            <span>Check Gateway</span>
+                          </button>
+                        <?php else: ?>
+                          <button type="button" class="btn btn-sm btn-warning rounded-pill px-3 fw-semibold verify-btn shadow-xs d-inline-flex align-items-center gap-1.5"
+                                  data-id="<?= esc($payment['id']) ?>"
+                                  data-name="<?= htmlspecialchars($studentName, ENT_QUOTES, 'UTF-8') ?>"
+                                  data-amount="<?= number_format((float)$payment['amount'], 2) ?>"
+                                  data-method="<?= htmlspecialchars($payment['payment_method'], ENT_QUOTES, 'UTF-8') ?>"
+                                  data-ref="<?= htmlspecialchars($payment['reference_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>"
+                                  data-img="/sia/uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                  data-bs-toggle="modal" data-bs-target="#verifyModal">
+                            <i class="bi bi-shield-check"></i>
+                            <span>Verify</span>
+                          </button>
+                        <?php endif; ?>
                       <?php elseif ($pStatus === 'rejected'): ?>
                         <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-medium d-inline-flex align-items-center gap-1.5"
                                 onclick="showRejectReason('<?= htmlspecialchars(addslashes($payment['remarks'] ?? 'No reason provided.')) ?>')">
@@ -853,6 +875,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+window.reconcilePayMongo = function(sessionId, paymentId) {
+    if (!sessionId && !paymentId) return;
+    if (!confirm('Query PayMongo API directly to check if this payment was completed?')) return;
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/sia/admin/finance/cashier_process.php';
+
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrf_token';
+    csrfInput.value = '<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>';
+    form.appendChild(csrfInput);
+
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = 'reconcile_paymongo';
+    form.appendChild(actionInput);
+
+    const sessionInput = document.createElement('input');
+    sessionInput.type = 'hidden';
+    sessionInput.name = 'session_id';
+    sessionInput.value = sessionId || '';
+    form.appendChild(sessionInput);
+
+    const idInput = document.createElement('input');
+    idInput.type = 'hidden';
+    idInput.name = 'payment_id';
+    idInput.value = paymentId || '';
+    form.appendChild(idInput);
+
+    document.body.appendChild(form);
+    form.submit();
+};
 </script>
 
 <?php require_once __DIR__ . '/../../components/footer.php'; ?>

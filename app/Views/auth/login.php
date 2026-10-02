@@ -1,90 +1,156 @@
 <?php
-$pageTitle = 'Login - Triple T University';
+$pageTitle = 'Login - Admissions & Academic Portal - Triple T University';
 require_once __DIR__ . '/../components/header.php';
 ?>
 
 <main class="auth-page">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="col-12">
-        <div class="auth-island fade-in-up" style="animation-delay: 0.1s;">
-          <div class="text-center mb-4">
-            <div class="mx-auto mb-3">
-              <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain;">
+      <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="auth-island fade-in-up" style="animation-delay: 0.08s;">
+          
+          <!-- Portal Switcher Pill Link -->
+          <div class="d-flex justify-content-center mb-3">
+            <div class="d-inline-flex align-items-center gap-2 p-1 px-2.5 rounded-pill bg-slate-100 border border-slate-200 shadow-2xs" style="background: rgba(241, 245, 249, 0.95); font-size: 0.75rem;">
+              <span class="badge bg-primary text-white rounded-pill px-2 py-0.5 fw-semibold">
+                <i class="bi bi-shield-check me-1"></i> SIS Portal
+              </span>
+              <a href="/sia/auth/lms_student_login.php" class="text-decoration-none text-muted fw-semibold hover-text-primary d-inline-flex align-items-center gap-1 transition-all">
+                <span>Switch to LMS Portal</span>
+                <i class="bi bi-arrow-right-short fs-6"></i>
+              </a>
             </div>
-            <h1 class="h4 mb-2 fw-bold text-dark">TRIPLE T UNIVERSITY</h1>
-            <p class="text-muted mb-0 small">Login to continue your enrollment account.</p>
           </div>
 
+          <!-- Brand & Header -->
+          <div class="text-center mb-4">
+            <a href="/sia/" class="auth-brand-badge text-decoration-none" title="Triple T University Home">
+              <img src="/sia/images/TTU_LOGO.png" alt="TTU Seal">
+            </a>
+            <h1 class="h4 fw-bold text-dark mb-1" style="letter-spacing: -0.025em; font-family: 'Poppins', var(--font-family-sans, sans-serif);">Triple T University</h1>
+            <div class="d-inline-flex align-items-center gap-1.5 px-3 py-1 rounded-pill mb-2 bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">
+              <i class="bi bi-mortarboard-fill"></i> Admissions &amp; Enrollment Portal
+            </div>
+            <p class="text-muted mb-0 small" style="font-size: 0.84rem; line-height: 1.45;">Sign in to access your administrative workspace or student applicant account.</p>
+          </div>
+
+          <!-- Alert Notifications -->
           <?php if (!empty($success)): ?>
-            <div class="alert alert-success rounded-3 border-0 bg-success text-white py-2 px-3 small shadow-sm mb-4">
-              <div class="d-flex align-items-center gap-2">
-                <i class="bi bi-check-circle-fill"></i>
-                <span><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></span>
-              </div>
+            <div class="alert alert-success rounded-3 border-0 bg-success bg-opacity-10 text-success border border-success border-opacity-25 py-2.5 px-3 small shadow-xs mb-3 d-flex align-items-center gap-2">
+              <i class="bi bi-check-circle-fill fs-5 flex-shrink-0 text-success"></i>
+              <div class="fw-medium"><?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8'); ?></div>
             </div>
           <?php endif; ?>
 
           <?php if (!empty($errors)): ?>
-            <div class="alert alert-danger rounded-3 border-0 bg-danger text-white py-2 px-3 small shadow-sm mb-4">
-              <?php foreach ($errors as $error): ?>
-                <div class="d-flex align-items-center gap-2">
-                  <i class="bi bi-exclamation-circle-fill"></i>
-                  <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></span>
+            <div class="alert alert-danger rounded-3 border-0 bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 py-2.5 px-3 small shadow-xs mb-3">
+              <?php foreach ((array)$errors as $error): ?>
+                <div class="d-flex align-items-center gap-2 mb-1 last-mb-0">
+                  <i class="bi bi-exclamation-circle-fill fs-5 flex-shrink-0 text-danger"></i>
+                  <span class="fw-medium"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8'); ?></span>
                 </div>
               <?php endforeach; ?>
             </div>
           <?php endif; ?>
 
-          <form action="/sia/auth/login_process.php" method="post" novalidate>
+          <!-- Main Login Form -->
+          <form id="sisLoginForm" action="/sia/auth/login_process.php" method="post" novalidate>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
-            <div class="mb-3">
-              <label class="form-label text-muted small fw-semibold" for="email">Email Address</label>
-              <input class="form-control" style="padding: 0.75rem 1rem; border-radius: 10px;" type="email" id="email" name="email" value="<?= htmlspecialchars($old['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required placeholder="name@example.com">
+            
+            <div class="mb-3 text-start">
+              <label class="form-label text-dark small fw-bold text-uppercase mb-1" for="email" style="font-size: 0.72rem; letter-spacing: 0.04em;">Email Address</label>
+              <div class="auth-input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input class="form-control" type="email" id="email" name="email" value="<?= htmlspecialchars($old['email'] ?? '', ENT_QUOTES, 'UTF-8'); ?>" required placeholder="name@ttu.edu.ph or applicant email" autofocus autocomplete="email">
+              </div>
             </div>
 
-            <div class="mb-4">
+            <div class="mb-3 text-start">
               <div class="d-flex justify-content-between align-items-center mb-1">
-                <label class="form-label text-muted small fw-semibold mb-0" for="password">Password</label>
-                <a href="/sia/auth/forgot_password.php?portal=applicant" class="small text-decoration-none text-primary fw-semibold">Forgot Password?</a>
+                <label class="form-label text-dark small fw-bold text-uppercase mb-0" for="password" style="font-size: 0.72rem; letter-spacing: 0.04em;">Password</label>
+                <a href="/sia/auth/forgot_password.php?portal=applicant" class="small text-decoration-none text-primary fw-semibold" style="font-size: 0.78rem;">Forgot Password?</a>
               </div>
-              <div class="input-group" style="border-radius: 10px; overflow: hidden; border: 1px solid #dee2e6;">
-                <input class="form-control border-0" style="padding: 0.75rem 1rem;" type="password" id="password" name="password" required placeholder="••••••••">
-                <button class="btn btn-light border-0 px-3 text-muted" type="button" id="togglePassword" tabindex="-1">
+              <div class="auth-input-group">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input class="form-control" type="password" id="password" name="password" required placeholder="Enter your password" autocomplete="current-password">
+                <button class="btn-password-toggle" type="button" id="togglePassword" aria-label="Toggle password visibility">
                   <i class="bi bi-eye"></i>
                 </button>
               </div>
             </div>
 
-            <button class="btn btn-primary w-100 fw-semibold" style="padding: 0.75rem 1rem; border-radius: 10px;" type="submit">
-              <i class="bi bi-unlock"></i> Sign In
+            <!-- Submit Button (With immediate debouncing) -->
+            <button class="btn btn-primary w-100 fw-bold rounded-pill py-2.5 shadow-sm d-flex align-items-center justify-content-center gap-2 mt-3" id="submitBtn" type="submit" style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); border: none; font-size: 0.95rem; box-shadow: 0 10px 24px -4px rgba(37, 99, 235, 0.45); transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
+              <i class="bi bi-box-arrow-in-right fs-5"></i>
+              <span id="btnText">Sign In to SIS Portal</span>
             </button>
           </form>
 
-          <div class="mt-4 text-center border-top pt-4">
-            
-            <!-- TEMPORARY TESTING SHORTCUTS -->
-            <div class="mb-4 bg-light rounded-3 p-3 border border-warning border-opacity-50 text-start">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="small text-muted fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.05em;"><i class="bi bi-lightning-charge-fill text-warning me-1"></i> Test Accounts <span class="text-primary fw-normal text-none ms-1">(1-Click Fast Login)</span></span>
+          <!-- Quick Test Accounts Panel -->
+          <div class="mt-4 pt-3 border-top">
+            <div class="test-access-panel">
+              <div class="d-flex align-items-center justify-content-between mb-2">
+                <span class="small fw-bold text-uppercase d-flex align-items-center gap-1.5" style="font-size: 0.68rem; letter-spacing: 0.05em; color: #475569;">
+                  <i class="bi bi-lightning-charge-fill text-warning"></i> Fast Demo Access
+                </span>
+                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">1-Click Auto-Login</span>
+              </div>
+              
+              <div class="mb-2.5">
+                <div class="text-muted mb-1.5 d-flex align-items-center gap-1" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">
+                  <i class="bi bi-building text-secondary"></i> Institutional Staff
                 </div>
-                <div class="d-flex flex-wrap gap-2 justify-content-center">
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('admin@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Superadmin"><i class="bi bi-shield-check me-1 text-primary"></i>Superadmin</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('registrar@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Registrar"><i class="bi bi-journal-check me-1 text-info"></i>Registrar</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('cashier@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Cashier"><i class="bi bi-cash-coin me-1 text-success"></i>Cashier</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('admissions@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Admissions"><i class="bi bi-person-check me-1 text-warning"></i>Admissions</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('scholarship@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Scholarship"><i class="bi bi-award me-1 text-danger"></i>Scholarship</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('clinic@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Clinic"><i class="bi bi-heart-pulse me-1 text-danger"></i>Clinic</button>
-                    <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('scheduler@ttu.edu.ph', 'admin123')" title="Click to instantly sign in as Scheduler"><i class="bi bi-calendar3 me-1 text-secondary"></i>Scheduler</button>
-                    <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 shadow-xs" onclick="fillLogin('jane.applicant@example.com', 'password123')" title="Click to instantly sign in as Applicant"><i class="bi bi-person-lines-fill me-1"></i>Applicant</button>
+                <div class="d-flex flex-wrap gap-1.5">
+                  <button type="button" class="btn-test-chip chip-registrar" onclick="fillLogin('registrar@ttu.edu.ph', 'admin123', 'Registrar')" title="Registrar Officer (Marcus Aurelius)">
+                    <i class="bi bi-journal-check"></i>Registrar
+                  </button>
+                  <button type="button" class="btn-test-chip chip-admissions" onclick="fillLogin('admissions@ttu.edu.ph', 'admin123', 'Admissions')" title="Admissions Officer (Eleanor Vance)">
+                    <i class="bi bi-person-check"></i>Admissions
+                  </button>
+                  <button type="button" class="btn-test-chip chip-cashier" onclick="fillLogin('cashier@ttu.edu.ph', 'admin123', 'Cashier')" title="Cashier / Finance (Clara Oswald)">
+                    <i class="bi bi-cash-coin"></i>Cashier
+                  </button>
+                  <button type="button" class="btn-test-chip chip-scheduler" onclick="fillLogin('scheduler@ttu.edu.ph', 'admin123', 'Scheduler')" title="Academic Scheduler (Theodore Nott)">
+                    <i class="bi bi-calendar3"></i>Scheduler
+                  </button>
+                  <button type="button" class="btn-test-chip chip-scholarship" onclick="fillLogin('scholarship@ttu.edu.ph', 'admin123', 'Scholarship')" title="Scholarship Officer (Gwendolyn Stacy)">
+                    <i class="bi bi-award"></i>Scholarship
+                  </button>
+                  <button type="button" class="btn-test-chip chip-superadmin" onclick="fillLogin('admin@ttu.edu.ph', 'admin123', 'Superadmin')" title="System Administrator">
+                    <i class="bi bi-shield-check"></i>Superadmin
+                  </button>
                 </div>
+              </div>
+
+              <div>
+                <div class="text-muted mb-1.5 d-flex align-items-center gap-1" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">
+                  <i class="bi bi-mortarboard text-secondary"></i> Applicant Portal
+                </div>
+                <div class="d-flex flex-wrap gap-1.5">
+                  <button type="button" class="btn-test-chip chip-applicant" onclick="fillLogin('jane.applicant@example.com', 'password123', 'Jane Applicant')" title="Enrolled Student / Applicant (Jane Applicant)">
+                    <i class="bi bi-person-lines-fill"></i>Jane Applicant (Applicant / Enrollee)
+                  </button>
+                </div>
+              </div>
             </div>
-            
-            <p class="mb-2 text-muted small">Don't have an account? <a href="/sia/auth/register.php" class="fw-bold text-decoration-none text-primary">Register here</a></p>
-            <a href="/sia/public/index.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1 mt-2 transition-all">
-              <i class="bi bi-arrow-left"></i> Back to Homepage
-            </a>
+
+            <!-- Registration & Home links -->
+            <div class="text-center mt-3 pt-1">
+              <p class="mb-2 text-muted small" style="font-size: 0.82rem;">
+                New student applicant? <a href="/sia/auth/register.php" class="fw-bold text-decoration-none text-primary hover-underline">Start registration here &rarr;</a>
+              </p>
+              <div class="d-flex justify-content-center align-items-center gap-3 mt-2 flex-wrap" style="font-size: 0.8rem;">
+                <a href="/sia/auth/lms_student_login.php" class="text-decoration-none text-primary fw-semibold d-inline-flex align-items-center gap-1.5">
+                  <i class="bi bi-mortarboard-fill"></i> Access TTU LMS Portal
+                </a>
+                <span class="text-muted opacity-50">&bull;</span>
+                <a href="/sia/" class="text-muted text-decoration-none d-inline-flex align-items-center gap-1.5 hover-text-dark transition-all">
+                  <i class="bi bi-arrow-left"></i> Back to Homepage
+                </a>
+              </div>
+            </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -92,29 +158,52 @@ require_once __DIR__ . '/../components/header.php';
 </main>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-    // Clear any cached enrollment form data from previous sessions
-    sessionStorage.removeItem('enrollmentFormData');
+document.addEventListener("DOMContentLoaded", function() {
+  sessionStorage.removeItem('enrollmentFormData');
 
-    const togglePassword = document.getElementById("togglePassword");
-    const passwordInput = document.getElementById("password");
+  const togglePassword = document.getElementById("togglePassword");
+  const passwordInput = document.getElementById("password");
+  const loginForm = document.getElementById("sisLoginForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const btnText = document.getElementById("btnText");
 
-    if (togglePassword && passwordInput) {
-      togglePassword.addEventListener("click", function() {
-        const type = passwordInput.getAttribute("type") === "password" ? "text" : "password";
-        passwordInput.setAttribute("type", type);
-        this.innerHTML = type === "password" ? '<i class="bi bi-eye"></i>' : '<i class="bi bi-eye-slash"></i>';
-      });
-    }
-  });
-</script>
-<script>
-  function fillLogin(email, password) {
-      document.getElementById('email').value = email;
-      document.getElementById('password').value = password;
-      document.querySelector('form').submit();
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener("click", function() {
+      const isPass = passwordInput.getAttribute("type") === "password";
+      passwordInput.setAttribute("type", isPass ? "text" : "password");
+      this.innerHTML = isPass ? '<i class="bi bi-eye-slash"></i>' : '<i class="bi bi-eye"></i>';
+      this.setAttribute("aria-label", isPass ? "Hide password" : "Show password");
+    });
   }
+
+  if (loginForm && submitBtn) {
+    loginForm.addEventListener("submit", function() {
+      submitBtn.disabled = true;
+      if (btnText) {
+        btnText.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5" role="status" aria-hidden="true"></span> Authenticating...';
+      }
+    });
+  }
+});
+
+function fillLogin(email, password, roleName = '') {
+  const emailInput = document.getElementById('email');
+  const passwordInput = document.getElementById('password');
+  const form = document.getElementById('sisLoginForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText = document.getElementById('btnText');
+
+  if (emailInput && passwordInput && form) {
+    emailInput.value = email;
+    passwordInput.value = password;
+    if (submitBtn && btnText) {
+      submitBtn.disabled = true;
+      const label = roleName ? `Logging in as ${roleName}...` : 'Authenticating...';
+      btnText.innerHTML = `<span class="spinner-border spinner-border-sm me-1.5" role="status" aria-hidden="true"></span> ${label}`;
+    }
+    form.submit();
+  }
+}
 </script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
-

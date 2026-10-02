@@ -96,7 +96,7 @@ require_once __DIR__ . '/components/navbar.php';
         <p class="text-muted mx-auto" style="max-width: 600px;">Access your courses, interactive modules, real-time grades, and digital assignments anytime.</p>
       </div>
       <div class="row g-4 justify-content-center">
-        <div class="col-lg-5 col-md-6">
+        <div class="col-lg-4 col-md-6">
           <div class="card h-100 lms-card p-4">
             <div class="card-body d-flex flex-column text-center">
               <div class="lms-icon-box text-white" style="background: linear-gradient(135deg, #0d6efd 0%, #2563eb 100%); box-shadow: 0 10px 24px rgba(13, 110, 253, 0.28);">
@@ -117,7 +117,7 @@ require_once __DIR__ . '/components/navbar.php';
             </div>
           </div>
         </div>
-        <div class="col-lg-5 col-md-6">
+        <div class="col-lg-4 col-md-6">
           <div class="card h-100 lms-card p-4">
             <div class="card-body d-flex flex-column text-center">
               <div class="lms-icon-box text-white" style="background: linear-gradient(135deg, #0284c7 0%, #06b6d4 100%); box-shadow: 0 10px 24px rgba(2, 132, 199, 0.28);">
@@ -133,6 +133,27 @@ require_once __DIR__ . '/components/navbar.php';
               </div>
               <a href="/sia/auth/lms_faculty_login.php" class="btn btn-outline-primary rounded-pill py-2 px-4 fw-bold mt-auto w-100 d-flex align-items-center justify-content-center gap-2">
                 <span>Faculty Login</span>
+                <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 lms-card p-4">
+            <div class="card-body d-flex flex-column text-center">
+              <div class="lms-icon-box text-white" style="background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%); box-shadow: 0 10px 24px rgba(79, 70, 229, 0.28);">
+                <i class="bi bi-shield-lock-fill"></i>
+              </div>
+              <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 align-self-center mb-2 fw-semibold small">Admin Governance</span>
+              <h3 class="h4 fw-bold mb-2 text-dark">LMS Admin Portal</h3>
+              <p class="text-muted mb-3 small">Course shell bindings, timetable sync, content cloning, and institutional LMS user access management.</p>
+              <div class="d-flex flex-wrap justify-content-center gap-1 mb-4">
+                <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-journal-bookmark me-1 text-primary"></i> Course Catalog</span>
+                <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-arrow-repeat me-1 text-info"></i> Timetable Sync</span>
+                <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-shield-check me-1 text-success"></i> Access Control</span>
+              </div>
+              <a href="/sia/auth/lms_admin_login.php" class="btn btn-outline-dark rounded-pill py-2 px-4 fw-bold mt-auto w-100 d-flex align-items-center justify-content-center gap-2">
+                <span>Admin Login</span>
                 <i class="bi bi-arrow-right"></i>
               </a>
             </div>

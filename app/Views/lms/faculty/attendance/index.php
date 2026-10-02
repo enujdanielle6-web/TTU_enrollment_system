@@ -16,45 +16,50 @@
         <!-- KPI Summary Cards -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-success">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Total Class Sessions</span>
-                            <h3 class="mb-0 fw-bold mt-1 text-dark"><?= $totalSessions ?></h3>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Total Class Sessions</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                            <i class="bi bi-calendar-check text-white"></i>
                         </div>
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-calendar-check fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value"><?= $totalSessions ?></div>
+                    <div class="stat-subtext text-success">
+                        <i class="bi bi-calendar3 me-1"></i> Recorded Roll Calls
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-primary">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Latest Attendance</span>
-                            <h4 class="mb-0 fw-bold mt-1 text-primary fs-5">
-                                <?= $latestSession ? date('M d, Y', strtotime($latestSession)) : 'No sessions' ?>
-                            </h4>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Latest Attendance</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);">
+                            <i class="bi bi-clock-history text-white"></i>
                         </div>
-                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-clock-history fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value" style="font-size: 1.5rem; line-height: 1.6;">
+                        <?= $latestSession ? date('M d, Y', strtotime($latestSession)) : 'No sessions' ?>
+                    </div>
+                    <div class="stat-subtext text-primary">
+                        <i class="bi bi-check-circle-fill me-1"></i> Most Recent Log
                     </div>
                 </div>
             </div>
 
             <div class="col-md-4">
-                <div class="lms-card p-3 bg-white border-0 shadow-sm rounded-4 border-start border-4 border-info">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <span class="text-muted small fw-bold text-uppercase">Class Section</span>
-                            <h4 class="mb-0 fw-bold mt-1 text-dark fs-5"><?= htmlspecialchars($course['section_code']) ?></h4>
+                <div class="stat-card-kpi h-100">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="stat-label">Class Section</span>
+                        <div class="stat-icon-wrapper" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                            <i class="bi bi-diagram-2 text-white"></i>
                         </div>
-                        <div class="bg-info bg-opacity-10 text-info rounded-circle p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
-                            <i class="bi bi-diagram-2 fs-5"></i>
-                        </div>
+                    </div>
+                    <div class="stat-value font-monospace" style="font-size: 1.85rem; line-height: 1.4;">
+                        <?= htmlspecialchars($course['section_code']) ?>
+                    </div>
+                    <div class="stat-subtext text-info">
+                        <i class="bi bi-building me-1"></i> Enrolled Cohort
                     </div>
                 </div>
             </div>

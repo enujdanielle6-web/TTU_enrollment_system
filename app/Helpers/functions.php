@@ -860,16 +860,24 @@ function generateAtomicReceiptNumber(\PDO $pdo): string
     $year = (int) date('Y');
     $datePrefix = date('Ymd');
 
-    // Atomically increment the sequence for the current year
-    $pdo->prepare("
+    // 1. Ensure seed row exists for the sequence year without affecting connection LAST_INSERT_ID
+    $seedStmt = $pdo->prepare("
         INSERT INTO receipt_sequences (sequence_year, current_value) 
-        VALUES (:year, 1) 
-        ON DUPLICATE KEY UPDATE current_value = current_value + 1
-    ")->execute(['year' => $year]);
+        VALUES (:year, 0) 
+        ON DUPLICATE KEY UPDATE sequence_year = sequence_year
+    ");
+    $seedStmt->execute(['year' => $year]);
 
-    $stmt = $pdo->prepare("SELECT current_value FROM receipt_sequences WHERE sequence_year = :year LIMIT 1");
-    $stmt->execute(['year' => $year]);
-    $seq = (int) $stmt->fetchColumn();
+    // 2. Atomically increment the sequence and set connection-scoped LAST_INSERT_ID
+    $updStmt = $pdo->prepare("
+        UPDATE receipt_sequences 
+        SET current_value = LAST_INSERT_ID(current_value + 1) 
+        WHERE sequence_year = :year
+    ");
+    $updStmt->execute(['year' => $year]);
+
+    // 3. Retrieve the strictly connection-scoped sequence value
+    $seq = (int) $pdo->query("SELECT LAST_INSERT_ID()")->fetchColumn();
 
     return sprintf("REC-%s-%04d", $datePrefix, $seq);
 }

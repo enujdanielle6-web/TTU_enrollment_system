@@ -35,10 +35,11 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
     <link href="/sia/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/sia/public/vendor/fonts/fonts.css">
     <link rel="stylesheet" href="/sia/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
-    <!-- Custom LMS CSS -->
+    <!-- Main Design System & Custom LMS CSS -->
+    <link rel="stylesheet" href="/sia/css/main.css?v=<?= time() ?>">
     <link rel="stylesheet" href="/sia/public/css/lms.css?v=<?= esc(filemtime(__DIR__ . '/../../../../public/css/lms.css')) ?>">
 </head>
-<body class="lms-layout">
+<body class="lms-layout lms-faculty-layout">
 
 <!-- Sidebar -->
 <aside class="lms-sidebar" id="lmsSidebar">
@@ -145,6 +146,16 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
             </div>
             <span class="nav-text">Profile</span>
         </a>
+
+        <?php if (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) && ($_SESSION['user_department'] ?? '') !== 'Registrar Office'): ?>
+            <div class="lms-section-label mt-3">Administration</div>
+            <a href="/sia/lms/admin/dashboard" class="lms-nav-link text-primary fw-semibold">
+                <div class="lms-nav-icon text-primary">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <span class="nav-text">LMS Governance</span>
+            </a>
+        <?php endif; ?>
     </div>
 
     <!-- Footer Profile & Actions -->
@@ -256,6 +267,111 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
 
 <!-- Main Content Area -->
 <div class="lms-main" id="spa-main">
+
+<?php
+$facultyModuleTitle = 'Dashboard';
+if (strpos($request_uri, '/calendar') !== false) {
+    $facultyModuleTitle = 'Calendar';
+} elseif (strpos($request_uri, 'messages') !== false) {
+    $facultyModuleTitle = 'Messages & Forums';
+} elseif (strpos($request_uri, 'profile') !== false) {
+    $facultyModuleTitle = 'Faculty Profile';
+} elseif (isset($course) && !empty($course['subject_code'])) {
+    $facultyModuleTitle = htmlspecialchars($course['subject_code']) . ' Management';
+}
+?>
+
+<!-- Sleek LMS Faculty Topbar -->
+<header class="lms-admin-topbar">
+  <div class="container-fluid px-lg-4 d-flex align-items-center justify-content-between gap-3">
+    <!-- Left: Mobile Toggle & Breadcrumbs -->
+    <div class="d-flex align-items-center gap-3">
+      <button class="btn btn-sm btn-light border d-lg-none shadow-xs" type="button" onclick="document.getElementById('lmsSidebar').classList.toggle('show');" aria-label="Toggle Navigation">
+        <i class="bi bi-list fs-5"></i>
+      </button>
+      <nav aria-label="Breadcrumb">
+        <ul class="lms-breadcrumb d-flex align-items-center mb-0">
+          <li>
+            <a href="/sia/lms/faculty/dashboard.php">
+              <i class="bi bi-mortarboard text-primary"></i>
+              <span>Faculty Portal</span>
+            </a>
+          </li>
+          <li class="separator"><i class="bi bi-chevron-right"></i></li>
+          <li class="current"><?= esc($facultyModuleTitle) ?></li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Right: Context Indicators & Profile Dropdown -->
+    <div class="d-flex align-items-center gap-2.5">
+      <!-- Active Term Badge -->
+      <div class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1.5 small fw-semibold d-none d-md-inline-flex align-items-center gap-1.5 shadow-xs">
+        <span class="pulse-dot-green"></span>
+        <span>2026-2027 First Sem</span>
+      </div>
+
+      <!-- Quick Calendar Link -->
+      <a href="/sia/lms/faculty/calendar" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Academic Schedule & Calendar">
+        <i class="bi bi-calendar-event text-primary"></i>
+        <span>Schedule</span>
+      </a>
+
+      <!-- LMS Governance Switcher for Admins/Superadmin -->
+      <?php if (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) && ($_SESSION['user_department'] ?? '') !== 'Registrar Office'): ?>
+      <a href="/sia/lms/admin/dashboard" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-primary d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="LMS Administration & Governance">
+        <i class="bi bi-shield-lock-fill text-primary"></i>
+        <span class="d-none d-sm-inline">LMS Governance</span>
+      </a>
+      <?php endif; ?>
+
+      <!-- User Profile Dropdown Pill -->
+      <div class="dropdown">
+        <button class="btn btn-sm btn-white border rounded-pill px-2.5 py-1 d-flex align-items-center gap-2 shadow-xs dropdown-toggle" type="button" id="facultyUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <div class="lms-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 26px; height: 26px; font-size: 0.75rem;">
+            <?= esc($facultyInitial) ?>
+          </div>
+          <span class="fw-semibold small text-dark d-none d-md-inline"><?= esc($facultyName) ?></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 py-2 mt-1" aria-labelledby="facultyUserDropdown" style="min-width: 220px;">
+          <li class="px-3 py-1.5 border-bottom mb-1">
+            <div class="fw-bold text-dark small text-truncate"><?= esc($facultyName) ?></div>
+            <div class="text-muted small text-truncate" style="font-size: 0.72rem;"><?= esc($facultyEmail) ?></div>
+            <span class="badge bg-primary bg-opacity-10 text-primary mt-1 px-2 py-0.5" style="font-size: 0.65rem;">Faculty Instructor</span>
+          </li>
+          <li>
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="/sia/lms/faculty/profile.php">
+              <i class="bi bi-person-fill text-primary"></i>
+              <span>My Profile &amp; Settings</span>
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="/sia/lms/faculty/messages.php">
+              <i class="bi bi-chat-dots-fill text-primary"></i>
+              <span>Messages &amp; Inquiries</span>
+            </a>
+          </li>
+          <?php if (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) && ($_SESSION['user_department'] ?? '') !== 'Registrar Office'): ?>
+          <li class="border-top my-1"></li>
+          <li>
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-primary fw-semibold" href="/sia/lms/admin/dashboard">
+              <i class="bi bi-shield-lock-fill"></i>
+              <span>LMS Governance Hub</span>
+            </a>
+          </li>
+          <?php endif; ?>
+          <li class="border-top my-1"></li>
+          <li>
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-danger" href="/sia/auth/lms_faculty_logout.php">
+              <i class="bi bi-box-arrow-right"></i>
+              <span>Sign Out</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</header>
 
 <?php if (!empty($platformAnnouncements)): ?>
     <div class="px-3 pt-3">
