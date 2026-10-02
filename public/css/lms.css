@@ -2279,7 +2279,14 @@ body.lms-layout > .lms-wrapper {
 .border-opacity-10 { --bs-border-opacity: 0.1 !important; }
 .border-opacity-15 { --bs-border-opacity: 0.15 !important; }
 .border-opacity-20 { --bs-border-opacity: 0.2 !important; }
-.border-opacity-25 { --bs-border-opacity: 0.25 !important; }
 
-
-
+/* Bootstrap Modal Stacking Context & Backdrop Ordering */
+.modal-backdrop {
+    z-index: 1050 !important;
+}
+.modal {
+    z-index: 1055 !important;
+}
+.modal-dialog {
+    z-index: 1060 !important;
+}

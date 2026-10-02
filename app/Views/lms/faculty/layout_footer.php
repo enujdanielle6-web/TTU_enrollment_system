@@ -76,6 +76,13 @@
                 }
             });
         }
+
+        // Global safeguard: Ensure any Bootstrap modal is appended to document.body on show
+        document.addEventListener('show.bs.modal', function(event) {
+            if (event.target && event.target.parentNode !== document.body) {
+                document.body.appendChild(event.target);
+            }
+        });
     });
 </script>
 </body>

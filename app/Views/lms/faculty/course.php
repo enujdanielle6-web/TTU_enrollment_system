@@ -181,78 +181,6 @@
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Edit Module Modal -->
-                            <div class="modal fade" id="editModuleModal<?= esc($module['id']) ?>" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="/sia/lms/faculty/module_update.php">
-                                        <?= getCsrfInput() ?>
-                                        <div class="modal-header border-bottom p-4">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div class="icon-box-sm bg-primary bg-opacity-10 text-primary">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </div>
-                                                <h5 class="modal-title fw-bold text-dark mb-0">Edit Module Title</h5>
-                                            </div>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body p-4">
-                                            <input type="hidden" name="lms_course_id" value="<?= esc($course['lms_course_id']) ?>">
-                                            <input type="hidden" name="lms_module_id" value="<?= esc($module['id']) ?>">
-                                            <div class="mb-3">
-                                                <label class="form-label fw-bold text-dark">Module Title</label>
-                                                <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($module['title']) ?>" required>
-                                            </div>
-                                            <div class="mb-2">
-                                                <label class="form-label fw-bold text-dark">Display Order</label>
-                                                <input type="number" name="order_index" class="form-control" value="<?= esc($module['display_order'] ?? 1) ?>" min="0">
-                                                <div class="form-text">Modules are sorted in ascending order of their display index.</div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer bg-light border-top p-3 rounded-bottom-4">
-                                            <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Save Changes</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-
-                            <!-- Upload Material Modal -->
-                            <div class="modal fade" id="uploadMaterialModal<?= esc($module['id']) ?>" tabindex="-1">
-                                <div class="modal-dialog modal-dialog-centered">
-                                    <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="/sia/lms/faculty/material_upload.php" enctype="multipart/form-data">
-                                        <?= getCsrfInput() ?>
-                                        <div class="modal-header border-bottom p-4">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <div class="icon-box-sm bg-primary bg-opacity-10 text-primary">
-                                                    <i class="bi bi-cloud-arrow-up"></i>
-                                                </div>
-                                                <h5 class="modal-title fw-bold text-dark mb-0">Upload to <?= htmlspecialchars($module['title']) ?></h5>
-                                            </div>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body p-4">
-                                            <input type="hidden" name="lms_course_id" value="<?= esc($course['lms_course_id']) ?>">
-                                            <input type="hidden" name="lms_module_id" value="<?= esc($module['id']) ?>">
-                                            <div class="mb-3">
-                                                <label class="form-label fw-bold text-dark">Material Title</label>
-                                                <input type="text" name="title" class="form-control" placeholder="e.g. Chapter 1 Lecture Slides" required>
-                                            </div>
-                                            <div class="mb-2">
-                                                <label class="form-label fw-bold text-dark">Document File</label>
-                                                <input type="file" name="material_file" class="form-control" required accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt">
-                                                <div class="form-text"><i class="bi bi-info-circle me-1"></i>Supported formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX (Max 25MB)</div>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer bg-light border-top p-3 rounded-bottom-4">
-                                            <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
-                                                <i class="bi bi-upload me-1"></i> Upload File
-                                            </button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
                         <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
@@ -349,6 +277,83 @@
         </div>
     </div>
 </div>
+
+<!-- Modals for Modules (Placed top-level to prevent backdrop z-index containment) -->
+<?php if (!empty($modulesWithMaterials)): ?>
+    <?php foreach ($modulesWithMaterials as $module): ?>
+        <!-- Edit Module Modal -->
+        <div class="modal fade" id="editModuleModal<?= esc($module['id']) ?>" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="/sia/lms/faculty/module_update.php">
+                    <?= getCsrfInput() ?>
+                    <div class="modal-header border-bottom p-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="icon-box-sm bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-pencil-square"></i>
+                            </div>
+                            <h5 class="modal-title fw-bold text-dark mb-0">Edit Module Title</h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="lms_course_id" value="<?= esc($course['lms_course_id']) ?>">
+                        <input type="hidden" name="lms_module_id" value="<?= esc($module['id']) ?>">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark">Module Title</label>
+                            <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($module['title']) ?>" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-dark">Display Order</label>
+                            <input type="number" name="order_index" class="form-control" value="<?= esc($module['display_order'] ?? 1) ?>" min="0">
+                            <div class="form-text">Modules are sorted in ascending order of their display index.</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top p-3 rounded-bottom-4">
+                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Upload Material Modal -->
+        <div class="modal fade" id="uploadMaterialModal<?= esc($module['id']) ?>" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <form class="modal-content border-0 shadow-lg rounded-4" method="POST" action="/sia/lms/faculty/material_upload.php" enctype="multipart/form-data">
+                    <?= getCsrfInput() ?>
+                    <div class="modal-header border-bottom p-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="icon-box-sm bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-cloud-arrow-up"></i>
+                            </div>
+                            <h5 class="modal-title fw-bold text-dark mb-0">Upload to <?= htmlspecialchars($module['title']) ?></h5>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <input type="hidden" name="lms_course_id" value="<?= esc($course['lms_course_id']) ?>">
+                        <input type="hidden" name="lms_module_id" value="<?= esc($module['id']) ?>">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark">Material Title</label>
+                            <input type="text" name="title" class="form-control" placeholder="e.g. Chapter 1 Lecture Slides" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label fw-bold text-dark">Document File</label>
+                            <input type="file" name="material_file" class="form-control" required accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt">
+                            <div class="form-text"><i class="bi bi-info-circle me-1"></i>Supported formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX (Max 25MB)</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top p-3 rounded-bottom-4">
+                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm">
+                            <i class="bi bi-upload me-1"></i> Upload File
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
 
 <!-- Create Module Modal -->
 <div class="modal fade" id="createModuleModal" tabindex="-1">
