@@ -127,11 +127,11 @@ class StudentQuizController extends BaseController
         $attemptId = $this->quizService->startAttempt($quizId, $userId);
 
         if (!$attemptId) {
-            $this->redirect("/sia/lms/student/course/{$lmsCourseId}/quizzes/{$quizId}");
+            $this->redirect(BASE_PATH . "/lms/student/course/{$lmsCourseId}/quizzes/{$quizId}");
             return;
         }
 
-        $this->redirect("/sia/lms/student/course/{$lmsCourseId}/quizzes/{$quizId}/attempt/{$attemptId}");
+        $this->redirect(BASE_PATH . "/lms/student/course/{$lmsCourseId}/quizzes/{$quizId}/attempt/{$attemptId}");
     }
 
     public function attempt(Request $request, Response $response, string $courseId, string $quizId, string $attemptId)
@@ -157,7 +157,7 @@ class StudentQuizController extends BaseController
         }
 
         if ($attempt['status'] !== 'in_progress') {
-            $this->redirect("/sia/lms/student/course/{$lmsCourseId}/quizzes/{$qId}/result/{$aId}");
+            $this->redirect(BASE_PATH . "/lms/student/course/{$lmsCourseId}/quizzes/{$qId}/result/{$aId}");
             return;
         }
 
@@ -198,7 +198,7 @@ class StudentQuizController extends BaseController
 
         $success = $this->quizService->submitAttempt($aId, $answers);
 
-        $this->redirect("/sia/lms/student/course/{$lmsCourseId}/quizzes/{$qId}/result/{$aId}");
+        $this->redirect(BASE_PATH . "/lms/student/course/{$lmsCourseId}/quizzes/{$qId}/result/{$aId}");
     }
 
     public function result(Request $request, Response $response, string $courseId, string $quizId, string $attemptId)

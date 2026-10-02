@@ -340,7 +340,7 @@ $statusIconClass = match($paymentStatusRaw) {
                                     data-amount="<?= number_format((float)$payment['amount'], 2) ?>"
                                     data-method="<?= htmlspecialchars($payment['payment_method'], ENT_QUOTES, 'UTF-8') ?>"
                                     data-ref="<?= htmlspecialchars($payment['reference_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>"
-                                    data-img="/sia/uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                    data-img="<?= BASE_PATH ?>/uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                     data-bs-toggle="modal" data-bs-target="#verifyModal">
                               <i class="bi bi-shield-check"></i> Verify
                             </button>
@@ -457,7 +457,7 @@ $statusIconClass = match($paymentStatusRaw) {
           <div class="modal-body p-4 bg-light">
             <input type="hidden" name="action" value="verify_online_payment">
             <input type="hidden" name="payment_id" id="verifyPaymentId" value="">
-            <input type="hidden" name="redirect_to" value="/sia/admin/finance/cashier_assessment.php?id=<?= esc($assessmentId) ?>">
+            <input type="hidden" name="redirect_to" value="<?= BASE_PATH ?>/admin/finance/cashier_assessment.php?id=<?= esc($assessmentId) ?>">
             <?= getCsrfInput() ?>
 
             <div class="row g-4">
@@ -729,8 +729,8 @@ $statusIconClass = match($paymentStatusRaw) {
             if (imgEl) {
                 imgEl.src = img;
                 imgEl.onerror = function() {
-                    if (img && img.includes('/sia/uploads/payments/')) {
-                        this.src = img.replace('/sia/uploads/payments/', '/sia/app/uploads/payments/');
+                    if (img && img.includes('<?= BASE_PATH ?>/uploads/payments/')) {
+                        this.src = img.replace('<?= BASE_PATH ?>/uploads/payments/', '<?= BASE_PATH ?>/app/uploads/payments/');
                     }
                 };
             }

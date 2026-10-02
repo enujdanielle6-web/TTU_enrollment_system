@@ -80,7 +80,7 @@ $pageTitle = 'SHS Strands - Administrator';
 
         $curriculumId = (int)($_GET['curriculum_id'] ?? $_GET['id'] ?? 0);
         if ($curriculumId <= 0) {
-            $response->redirect("/sia/admin/registrar/shs_curriculum.php");
+            $response->redirect(BASE_PATH . "/admin/registrar/shs_curriculum.php");
             return;
         }
 
@@ -99,7 +99,7 @@ $pageTitle = 'SHS Strands - Administrator';
         }
 
         if (!$curriculum) {
-            $response->redirect("/sia/admin/registrar/shs_curriculum.php");
+            $response->redirect(BASE_PATH . "/admin/registrar/shs_curriculum.php");
             return;
         }
 
@@ -165,7 +165,7 @@ $pageTitle = 'SHS Strands - Administrator';
     {
         $pdo = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/admin/registrar/shs_strands.php");
+            $response->redirect(BASE_PATH . "/admin/registrar/shs_strands.php");
             return;
         }
 
@@ -302,7 +302,7 @@ $pageTitle = 'SHS Strands - Administrator';
             $_SESSION['error_msg'] = $e->getMessage();
         }
 
-        $response->redirect("/sia/admin/registrar/shs_strands.php");
+        $response->redirect(BASE_PATH . "/admin/registrar/shs_strands.php");
         return;
     }
 
@@ -310,7 +310,7 @@ $pageTitle = 'SHS Strands - Administrator';
     {
         $pdo = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/admin/registrar/shs_curriculum.php");
+            $response->redirect(BASE_PATH . "/admin/registrar/shs_curriculum.php");
             return;
         }
 
@@ -332,7 +332,7 @@ $pageTitle = 'SHS Strands - Administrator';
             } else {
                 $_SESSION['error_msg'] = $message;
             }
-            $response->redirect($redirectUrl ?: "/sia/admin/registrar/shs_curriculum.php");
+            $response->redirect($redirectUrl ?: BASE_PATH . "/admin/registrar/shs_curriculum.php");
             return;
         };
 
@@ -378,7 +378,7 @@ $pageTitle = 'SHS Strands - Administrator';
                 $newId = (int) $pdo->lastInsertId();
 
                 logActivity((int)$_SESSION['user_id'], 'bi-journal-plus', 'SHS Curriculum Created', "Created new draft SHS curriculum '{$name}' (v{$version}) for strand #{$strandId}.");
-                $sendResponse(true, "SHS Curriculum created successfully in Draft status. You can now build its subject catalog.", ['curriculum_id' => $newId], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id={$newId}");
+                $sendResponse(true, "SHS Curriculum created successfully in Draft status. You can now build its subject catalog.", ['curriculum_id' => $newId], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id={$newId}");
                 return;
             } catch (PDOException $e) {
                 $sendResponse(false, "Failed to create SHS curriculum: " . $e->getMessage());
@@ -454,7 +454,7 @@ $pageTitle = 'SHS Strands - Administrator';
 
                 $pdo->commit();
                 logActivity((int)$_SESSION['user_id'], 'bi-files', 'SHS Curriculum Cloned', "Cloned SHS curriculum '{$src['curriculum_name']}' (v{$src['version']}) into new Draft '{$name}' (v{$version}).");
-                $sendResponse(true, "SHS Curriculum successfully cloned into new Draft version (v{$version}). You can now customize its subjects.", ['curriculum_id' => $newCurrId], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id={$newCurrId}");
+                $sendResponse(true, "SHS Curriculum successfully cloned into new Draft version (v{$version}). You can now customize its subjects.", ['curriculum_id' => $newCurrId], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id={$newCurrId}");
                 return;
             } catch (Exception $e) {
                 if ($pdo->inTransaction()) {
@@ -503,7 +503,7 @@ $pageTitle = 'SHS Strands - Administrator';
 
                 if ($count === 0) {
                     $pdo->rollBack();
-                    $sendResponse(false, "Cannot activate an empty curriculum. Please add at least one subject in the Builder first.", [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id={$id}");
+                    $sendResponse(false, "Cannot activate an empty curriculum. Please add at least one subject in the Builder first.", [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id={$id}");
                     return;
                 }
 
@@ -603,7 +603,7 @@ $pageTitle = 'SHS Strands - Administrator';
 
                 // Strict Guard: Metadata edits are only permitted in DRAFT state
                 if ($curr['status'] !== 'draft') {
-                    $sendResponse(false, "Action Denied: '{$curr['curriculum_name']}' is " . strtoupper($curr['status']) . " and cannot be modified. Create a new version instead.", [], "/sia/admin/registrar/shs_curriculum.php");
+                    $sendResponse(false, "Action Denied: '{$curr['curriculum_name']}' is " . strtoupper($curr['status']) . " and cannot be modified. Create a new version instead.", [], BASE_PATH . "/admin/registrar/shs_curriculum.php");
                     return;
                 }
 
@@ -702,7 +702,7 @@ $pageTitle = 'SHS Strands - Administrator';
             }
 
             if ($currLock['status'] !== 'draft') {
-                $sendResponse(false, "Action Denied: '{$currLock['curriculum_name']}' is " . strtoupper($currLock['status']) . " and structurally immutable. To add, edit, move, or remove subjects, clone this curriculum into a new Draft version.", [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id={$currId}");
+                $sendResponse(false, "Action Denied: '{$currLock['curriculum_name']}' is " . strtoupper($currLock['status']) . " and structurally immutable. To add, edit, move, or remove subjects, clone this curriculum into a new Draft version.", [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id={$currId}");
                 return;
             }
         }
@@ -714,7 +714,7 @@ $pageTitle = 'SHS Strands - Administrator';
             $subjectIds = $_POST['subject_ids'] ?? ($_POST['subject_id'] ?? []);
 
             if ($currId <= 0 || $gradeLevel === '' || $semester === '') {
-                $sendResponse(false, "Grade level and semester are required.", [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, "Grade level and semester are required.", [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             }
 
@@ -763,18 +763,18 @@ $pageTitle = 'SHS Strands - Administrator';
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                $sendResponse(false, "An error occurred while adding subjects: " . $e->getMessage(), [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, "An error occurred while adding subjects: " . $e->getMessage(), [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             }
 
             if ($added > 0) {
                 logActivity((int)$_SESSION['user_id'], 'bi-book', 'SHS Curriculum Subjects Added', "Added $added subject(s) to SHS Curriculum #$currId ($gradeLevel, $semester).");
                 $msg = "$added subject(s) added successfully." . ($duplicates > 0 ? " ($duplicates duplicates ignored)" : "");
-                $sendResponse(true, $msg, [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(true, $msg, [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
             } else if ($duplicates > 0) {
-                $sendResponse(false, 'All selected subjects are already assigned to this semester.', [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, 'All selected subjects are already assigned to this semester.', [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
             } else {
-                $sendResponse(false, 'No subjects were selected or failed to add.', [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, 'No subjects were selected or failed to add.', [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
             }
             return;
         }
@@ -786,17 +786,17 @@ $pageTitle = 'SHS Strands - Administrator';
             $semester = trim($_POST['semester'] ?? '');
 
             if ($currId <= 0 || $mappingId <= 0 || $gradeLevel === '' || $semester === '') {
-                $sendResponse(false, "Invalid data for editing subject placement.", [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, "Invalid data for editing subject placement.", [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             }
 
             try {
                 $stmt = $pdo->prepare("UPDATE shs_curriculum_subjects SET grade_level = ?, semester = ? WHERE id = ? AND curriculum_id = ?");
                 $stmt->execute([$gradeLevel, $semester, $mappingId, $currId]);
-                $sendResponse(true, "Subject placement updated successfully.", [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(true, "Subject placement updated successfully.", [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             } catch (PDOException $e) {
-                $sendResponse(false, "Failed to update subject placement: " . $e->getMessage(), [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, "Failed to update subject placement: " . $e->getMessage(), [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             }
         }
@@ -807,7 +807,7 @@ $pageTitle = 'SHS Strands - Administrator';
             $direction = trim($_POST['direction'] ?? ''); // 'up' or 'down'
 
             if ($currId <= 0 || $mappingId <= 0 || !in_array($direction, ['up', 'down'])) {
-                $sendResponse(false, "Invalid move parameters.", [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, "Invalid move parameters.", [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             }
 
@@ -821,7 +821,7 @@ $pageTitle = 'SHS Strands - Administrator';
 
                 if (!$currSub) {
                     $pdo->rollBack();
-                    $sendResponse(false, "Subject mapping not found.", [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                    $sendResponse(false, "Subject mapping not found.", [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                     return;
                 }
 
@@ -859,13 +859,13 @@ $pageTitle = 'SHS Strands - Administrator';
                 }
 
                 $pdo->commit();
-                $sendResponse(true, "Subject reordered successfully.", [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(true, "Subject reordered successfully.", [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             } catch (Exception $e) {
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                $sendResponse(false, "Failed to reorder subject: " . $e->getMessage(), [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, "Failed to reorder subject: " . $e->getMessage(), [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             }
         }
@@ -875,7 +875,7 @@ $pageTitle = 'SHS Strands - Administrator';
             $mappingId = (int) ($_POST['mapping_id'] ?? 0);
 
             if ($currId <= 0 || $mappingId <= 0) {
-                $sendResponse(false, 'Invalid curriculum or subject mapping ID.', [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, 'Invalid curriculum or subject mapping ID.', [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             }
 
@@ -891,13 +891,13 @@ $pageTitle = 'SHS Strands - Administrator';
                         "Removed a subject mapping (ID: $mappingId) from SHS Curriculum #$currId.",
                         "SHS Curriculum #$currId"
                     );
-                    $sendResponse(true, 'Subject successfully removed from the curriculum.', [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                    $sendResponse(true, 'Subject successfully removed from the curriculum.', [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 } else {
-                    $sendResponse(false, 'Failed to remove subject or it was already removed.', [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                    $sendResponse(false, 'Failed to remove subject or it was already removed.', [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 }
                 return;
             } catch (PDOException $e) {
-                $sendResponse(false, 'Error removing subject: ' . $e->getMessage(), [], "/sia/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
+                $sendResponse(false, 'Error removing subject: ' . $e->getMessage(), [], BASE_PATH . "/admin/registrar/shs_curriculum_builder.php?curriculum_id=$currId");
                 return;
             }
         } 

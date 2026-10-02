@@ -70,7 +70,7 @@ class FacultyQuizController extends BaseController
 
         $this->quizService->createQuiz($data);
 
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes");
     }
 
     public function edit(Request $request, Response $response, string $courseId, string $id)
@@ -108,7 +108,7 @@ class FacultyQuizController extends BaseController
         $data = $request->getBody();
         $this->quizService->updateQuiz($quizId, $data);
 
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes");
     }
 
     public function questions(Request $request, Response $response, string $courseId, string $id)
@@ -189,7 +189,7 @@ class FacultyQuizController extends BaseController
             }
         }
 
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
     }
 
     public function results(Request $request, Response $response, string $courseId, string $id)
@@ -229,7 +229,7 @@ class FacultyQuizController extends BaseController
         }
 
         $this->quizService->deleteQuiz($quizId);
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes");
     }
 
     public function deleteQuestion(Request $request, Response $response, string $courseId, string $id, string $questionId)
@@ -252,7 +252,7 @@ class FacultyQuizController extends BaseController
         }
 
         $this->quizService->deleteQuestion($qId);
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
     }
 
     // --- QUESTION BUILDER: CSV IMPORT, CONTENT GENERATION, DRAFT REVIEW --- //

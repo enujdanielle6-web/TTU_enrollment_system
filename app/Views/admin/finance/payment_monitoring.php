@@ -586,7 +586,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         isPolling = true;
 
         try {
-            const res = await fetch('/sia/admin/finance/payment_monitoring_data.php', {
+            const res = await fetch('<?= BASE_PATH ?>/admin/finance/payment_monitoring_data.php', {
                 headers: { 'Accept': 'application/json' }
             });
 
@@ -703,7 +703,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
             try {
                 const formData = new FormData(settingsForm);
-                const res = await fetch('/sia/admin/finance/queue_settings_process.php', {
+                const res = await fetch('<?= BASE_PATH ?>/admin/finance/queue_settings_process.php', {
                     method: 'POST',
                     headers: {
                         'Accept': 'application/json',
@@ -738,7 +738,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
             const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
             try {
-                const res = await fetch('/sia/admin/finance/queue_action_process.php', {
+                const res = await fetch('<?= BASE_PATH ?>/admin/finance/queue_action_process.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -778,7 +778,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
         btn.disabled = true;
         const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
         try {
-            const res = await fetch('/sia/admin/finance/queue_action_process.php', {
+            const res = await fetch('<?= BASE_PATH ?>/admin/finance/queue_action_process.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

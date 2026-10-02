@@ -63,7 +63,7 @@ class FacultyAssignmentController extends BaseController
 
         $this->lmsService->createAssignment($data);
 
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/assignments");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/assignments");
     }
 
     public function edit(Request $request, Response $response, string $courseId, string $id)
@@ -105,7 +105,7 @@ class FacultyAssignmentController extends BaseController
 
         $this->lmsService->updateAssignment($assignmentId, $data);
 
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/assignments");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/assignments");
     }
 
     public function submissions(Request $request, Response $response, string $courseId, string $id)
@@ -160,7 +160,7 @@ class FacultyAssignmentController extends BaseController
 
         $this->lmsService->gradeSubmission($submissionId, $graderId, $grade, $feedback);
 
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/assignments/{$assignmentId}/submissions");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/assignments/{$assignmentId}/submissions");
     }
 
     public function delete(Request $request, Response $response, string $courseId, string $id)
@@ -177,6 +177,6 @@ class FacultyAssignmentController extends BaseController
         }
 
         $this->lmsService->deleteAssignment($assignmentId);
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/assignments");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/assignments");
     }
 }

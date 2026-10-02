@@ -76,7 +76,7 @@ require_once __DIR__ . '/components/navbar.php';
 /* PARALLAX ABOUT SECTION */
 .parallax-section {
     position: relative;
-    background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('/sia/images/TTU_CAMPUS.png');
+    background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('<?= BASE_PATH ?>/images/TTU_CAMPUS.png');
     background-attachment: fixed;
     background-position: center;
     background-repeat: no-repeat;
@@ -144,7 +144,7 @@ require_once __DIR__ . '/components/navbar.php';
                 A next-generation learning platform built to empower minds and transform futures. Join our vibrant digital campus today.
             </p>
             <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="/sia/auth/register.php" class="glass-btn glass-btn-primary shadow-lg">
+                <a href="<?= BASE_PATH ?>/auth/register.php" class="glass-btn glass-btn-primary shadow-lg">
                     Begin Application <i class="bi bi-arrow-right"></i>
                 </a>
                 <a href="#explore" class="glass-btn">

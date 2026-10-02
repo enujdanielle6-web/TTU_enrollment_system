@@ -10,7 +10,7 @@ require_once __DIR__ . '/../components/header.php';
         <div class="auth-island fade-in-up" style="max-width: 480px; animation-delay: 0.1s;">
           <div class="text-center mb-4">
             <div class="mx-auto mb-3">
-              <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain;">
+              <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain;">
             </div>
             <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-2 fw-semibold">
               <i class="bi bi-envelope-check me-1"></i> Email Verification
@@ -49,7 +49,7 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php endif; ?>
 
-          <form id="verifyForm" class="no-spinner" action="/sia/auth/verify_email_process.php" method="post" novalidate>
+          <form id="verifyForm" class="no-spinner" action="<?= BASE_PATH ?>/auth/verify_email_process.php" method="post" novalidate>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             <input type="hidden" id="fullCodeInput" name="code" value="">
 
@@ -78,7 +78,7 @@ require_once __DIR__ . '/../components/header.php';
 
           <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-4">
             <div>
-              <form action="/sia/auth/resend_verification.php" method="post" id="resendForm" class="d-inline">
+              <form action="<?= BASE_PATH ?>/auth/resend_verification.php" method="post" id="resendForm" class="d-inline">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                 <button type="submit" class="btn btn-link p-0 text-decoration-none small text-primary fw-semibold" id="resendBtn">
                   <i class="bi bi-arrow-repeat me-1"></i> Resend Code
@@ -87,7 +87,7 @@ require_once __DIR__ . '/../components/header.php';
               <span id="countdownTimer" class="small text-muted d-none ms-1"></span>
             </div>
             
-            <a href="/sia/auth/register.php" class="small text-muted text-decoration-none">
+            <a href="<?= BASE_PATH ?>/auth/register.php" class="small text-muted text-decoration-none">
               <i class="bi bi-arrow-left me-1"></i> Change Email
             </a>
           </div>

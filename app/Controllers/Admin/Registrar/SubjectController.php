@@ -195,7 +195,7 @@ class SubjectController extends BaseController
     {
         $pdo = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/admin/registrar/subjects.php");
+            $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
             return;
         }
 
@@ -214,13 +214,13 @@ class SubjectController extends BaseController
 
             if ($code === '' || $name === '') {
                 $_SESSION['error_msg'] = 'Subject code and name are required.';
-                $response->redirect("/sia/admin/registrar/subjects.php");
+                $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                 return;
             }
             
             if ($units < 0 || $units > 12) {
                 $_SESSION['error_msg'] = 'Subject units must be between 0 and 12.';
-                $response->redirect("/sia/admin/registrar/subjects.php");
+                $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                 return;
             }
 
@@ -263,13 +263,13 @@ class SubjectController extends BaseController
 
             if ($id <= 0 || $code === '' || $name === '') {
                 $_SESSION['error_msg'] = 'Subject ID, code, and name are required.';
-                $response->redirect("/sia/admin/registrar/subjects.php");
+                $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                 return;
             }
             
             if ($units < 0 || $units > 12) {
                 $_SESSION['error_msg'] = 'Subject units must be between 0 and 12.';
-                $response->redirect("/sia/admin/registrar/subjects.php");
+                $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                 return;
             }
 
@@ -281,7 +281,7 @@ class SubjectController extends BaseController
 
                 if (!$currentSubject) {
                     $_SESSION['error_msg'] = 'Subject not found.';
-                    $response->redirect("/sia/admin/registrar/subjects.php");
+                    $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                     return;
                 }
 
@@ -296,7 +296,7 @@ class SubjectController extends BaseController
 
                     if ($codeChanged || $unitsChanged || $typeChanged || $levelChanged) {
                         $_SESSION['error_msg'] = "Action Denied: Structural fields (Code, Units, Type, Level) are locked because '{$currentSubject['subject_code']}' is in active or historical use ({$usage['total_usage']} references). To change structural specifications, create a new subject record and retire this subject by setting its status to Inactive.";
-                        $response->redirect("/sia/admin/registrar/subjects.php");
+                        $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                         return;
                     }
 
@@ -350,7 +350,7 @@ class SubjectController extends BaseController
             
             if ($id <= 0) {
                 $_SESSION['error_msg'] = 'Invalid subject ID.';
-                $response->redirect("/sia/admin/registrar/subjects.php");
+                $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                 return;
             }
             
@@ -361,7 +361,7 @@ class SubjectController extends BaseController
 
                 if (!$currentSubject) {
                     $_SESSION['error_msg'] = 'Subject not found.';
-                    $response->redirect("/sia/admin/registrar/subjects.php");
+                    $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                     return;
                 }
 
@@ -370,7 +370,7 @@ class SubjectController extends BaseController
                 // Absolute Rule: Total usage must be exactly 0
                 if ($usage['total_usage'] > 0) {
                     $_SESSION['error_msg'] = "Cannot delete subject: '{$currentSubject['subject_code']}' is referenced by {$usage['total_usage']} record(s) (Curricula, Sections, Enrollments, or LMS). Set the subject to Inactive to retire it.";
-                    $response->redirect("/sia/admin/registrar/subjects.php");
+                    $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                     return;
                 }
 
@@ -392,7 +392,7 @@ class SubjectController extends BaseController
             
             if ($id <= 0) {
                 $_SESSION['error_msg'] = 'Invalid subject ID.';
-                $response->redirect("/sia/admin/registrar/subjects.php");
+                $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                 return;
             }
 
@@ -403,7 +403,7 @@ class SubjectController extends BaseController
 
                 if (!$currentSubject) {
                     $_SESSION['error_msg'] = 'Subject not found.';
-                    $response->redirect("/sia/admin/registrar/subjects.php");
+                    $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
                     return;
                 }
 
@@ -420,7 +420,7 @@ class SubjectController extends BaseController
             }
         }
 
-        $response->redirect("/sia/admin/registrar/subjects.php");
+        $response->redirect(BASE_PATH . "/admin/registrar/subjects.php");
         return;
     }
 }

@@ -4,7 +4,7 @@ $current_page = basename($_SERVER['REQUEST_URI']);
 if (($pos = strpos($current_page, '?')) !== false) {
     $current_page = substr($current_page, 0, $pos);
 }
-$baseAdminUrl = '/sia/admin/';
+$baseAdminUrl = BASE_PATH . '/admin/';
 
 // Query live queue counts safely with failure tolerance
 $sidebarCounts = [
@@ -401,7 +401,7 @@ $isSysAdmin = strpos($uri, '/system/') !== false;
           <a title="Audit Logs" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.35s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc(in_array($current_page, ['audit_logs.php', 'user_activity.php']) ? 'active' : '') ?>" href="<?= esc($baseAdminUrl) ?>system/audit_logs.php">
             <i class="bi bi-shield-check fs-5"></i> <span class="nav-text">Audit Logs</span>
           </a>
-          <a title="LMS Governance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.38s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc((strpos($uri, '/admin/lms') !== false || strpos($uri, '/lms/admin') !== false) ? 'active' : '') ?>" href="/sia/lms/admin/dashboard">
+          <a title="LMS Governance" data-sidebar-tooltip="true" data-bs-placement="right" style="animation-delay: 0.38s;" class="nav-link d-flex fade-in-left align-items-center gap-3 <?= esc((strpos($uri, '/admin/lms') !== false || strpos($uri, '/lms/admin') !== false) ? 'active' : '') ?>" href="<?= BASE_PATH ?>/lms/admin/dashboard">
             <i class="bi bi-mortarboard-fill fs-5"></i> <span class="nav-text">LMS Governance</span>
           </a>
         </div>

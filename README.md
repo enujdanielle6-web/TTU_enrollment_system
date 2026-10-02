@@ -84,17 +84,25 @@ php database/migrations/setup_database.php
 *(Or navigate to `http://localhost/sia/database/migrations/setup_database.php` in your browser).*
 
 This automated script will:
-- Initialize database `sia` with `utf8mb4_unicode_ci` collation.
+- Initialize database `sia` with `utf8mb4_unicode_ci` collation. **Warning:** if `sia` already exists, it is dropped and rebuilt, erasing its data. Back it up first if you want to keep it.
 - Import the complete 42-table schema and views from `database/schema.sql`.
 - Seed standard institutional accounts, degree programs, subjects, versioned curricula, class sections, fee templates, scholarships, sample students, and interactive LMS courses from `database/seed.sql`.
 
 #### Alternative Manual Database Import:
+Create an empty `sia` database first (e.g. in phpMyAdmin), then:
 ```bash
 mysql -u root sia < database/schema.sql
 mysql -u root sia < database/seed.sql
 ```
+**Warning:** `schema.sql` replaces every table it defines (`DROP TABLE IF EXISTS`), so importing it into an existing database erases those tables' data.
+
+The seed includes demo accounts with sample applications, documents, payments and LMS content. Their placeholder files (`uploads/documents/sample_*`, `uploads/payments/proof_mary_downpayment.jpg`, `storage/uploads/lms/materials/*.pdf`) ship with the repo; all other uploads are ignored by git.
 
 ---
+
+## Production Deployment (InfinityFree)
+
+See **[DEPLOYMENT_INFINITYFREE.md](DEPLOYMENT_INFINITYFREE.md)** for the step-by-step guide: build the upload package with `php scripts/build_infinityfree_package.php`, import `database/infinityfree/*.sql` in phpMyAdmin, and configure `config/config.php` (copied from `config/config.example.php`). Never deploy `setup_database.php`, `.env`, or the demo seed data to a public site.
 
 ## Standard Test Credentials
 

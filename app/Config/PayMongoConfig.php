@@ -13,23 +13,7 @@ class PayMongoConfig
 {
     private static function ensureEnvLoaded(): void
     {
-        if (getenv('PAYMONGO_SECRET_KEY') !== false && getenv('PAYMONGO_SECRET_KEY') !== '') {
-            return;
-        }
-        $envFile = dirname(__DIR__, 2) . '/.env';
-        if (file_exists($envFile)) {
-            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                if (strpos(trim($line), '#') === 0) continue;
-                if (strpos($line, '=') === false) continue;
-                list($name, $value) = explode('=', $line, 2);
-                $name = trim($name);
-                $value = trim(trim($value), '"\'');
-                putenv(sprintf('%s=%s', $name, $value));
-                $_ENV[$name] = $value;
-                $_SERVER[$name] = $value;
-            }
-        }
+        require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
     }
 
     /**
@@ -55,6 +39,7 @@ class PayMongoConfig
      */
     public static function getPublicKey(): ?string
     {
+        self::ensureEnvLoaded();
         $key = getenv('PAYMONGO_PUBLIC_KEY') ?: ($_ENV['PAYMONGO_PUBLIC_KEY'] ?? ($_SERVER['PAYMONGO_PUBLIC_KEY'] ?? ''));
         $key = trim((string) $key);
 
@@ -66,6 +51,7 @@ class PayMongoConfig
      */
     public static function getBaseUrl(): string
     {
+        self::ensureEnvLoaded();
         $url = getenv('PAYMONGO_BASE_URL') ?: ($_ENV['PAYMONGO_BASE_URL'] ?? ($_SERVER['PAYMONGO_BASE_URL'] ?? 'https://api.paymongo.com/v1'));
         return rtrim(trim((string) $url), '/');
     }
@@ -75,6 +61,7 @@ class PayMongoConfig
      */
     public static function getWebhookSecret(): ?string
     {
+        self::ensureEnvLoaded();
         $secret = getenv('PAYMONGO_WEBHOOK_SECRET') ?: ($_ENV['PAYMONGO_WEBHOOK_SECRET'] ?? ($_SERVER['PAYMONGO_WEBHOOK_SECRET'] ?? ''));
         $secret = trim((string) $secret);
 
@@ -86,6 +73,7 @@ class PayMongoConfig
      */
     public static function getAppUrl(): string
     {
+        self::ensureEnvLoaded();
         $appUrl = getenv('APP_URL') ?: ($_ENV['APP_URL'] ?? ($_SERVER['APP_URL'] ?? ''));
         $appUrl = trim((string) $appUrl);
 
@@ -93,11 +81,8 @@ class PayMongoConfig
             return rtrim($appUrl, '/');
         }
 
-        // Infer dynamically from request headers if available
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-
-        return "{$scheme}://{$host}/sia";
+        // Infer dynamically from the current request (scheme, host and base path)
+        return rtrim(app_absolute_url('/'), '/');
     }
 
     /**

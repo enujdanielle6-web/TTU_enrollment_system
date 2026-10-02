@@ -355,7 +355,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                                   data-amount="<?= number_format((float)$payment['amount'], 2) ?>"
                                   data-method="<?= htmlspecialchars($payment['payment_method'], ENT_QUOTES, 'UTF-8') ?>"
                                   data-ref="<?= htmlspecialchars($payment['reference_number'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?>"
-                                  data-img="/sia/uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
+                                  data-img="<?= BASE_PATH ?>/uploads/payments/<?= htmlspecialchars($payment['proof_image'] ?? '', ENT_QUOTES, 'UTF-8') ?>"
                                   data-bs-toggle="modal" data-bs-target="#verifyModal">
                             <i class="bi bi-shield-check"></i>
                             <span>Verify</span>
@@ -782,8 +782,8 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
             if (imgEl) {
                 imgEl.src = img;
                 imgEl.onerror = function() {
-                    if (img && img.includes('/sia/uploads/payments/')) {
-                        this.src = img.replace('/sia/uploads/payments/', '/sia/app/uploads/payments/');
+                    if (img && img.includes('<?= BASE_PATH ?>/uploads/payments/')) {
+                        this.src = img.replace('<?= BASE_PATH ?>/uploads/payments/', '<?= BASE_PATH ?>/app/uploads/payments/');
                     }
                 };
             }
@@ -881,7 +881,7 @@ window.reconcilePayMongo = function(sessionId, paymentId) {
     if (!confirm('Query PayMongo API directly to check if this payment was completed?')) return;
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = '/sia/admin/finance/cashier_process.php';
+    form.action = '<?= BASE_PATH ?>/admin/finance/cashier_process.php';
 
     const csrfInput = document.createElement('input');
     csrfInput.type = 'hidden';

@@ -77,7 +77,7 @@
                 </h4>
                 <p class="text-muted small mb-0">Broadcast messages, exam guidelines, room adjustments, and reminders to your class.</p>
             </div>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
                 <i class="bi bi-plus-lg"></i>
                 <span>New Announcement</span>
             </a>
@@ -93,7 +93,7 @@
                         <p class="text-muted mb-4" style="max-width: 450px; margin: 0 auto;">
                             Keep your students updated by posting your first course notice, syllabus adjustment, or deadline reminder.
                         </p>
-                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
                             <i class="bi bi-plus-lg me-1"></i> Post Announcement
                         </a>
                     </div>
@@ -134,10 +134,10 @@
                                         </div>
                                     </div>
                                     <div class="d-flex align-items-center gap-1.5 flex-shrink-0">
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/<?= esc($ann['id']) ?>/edit" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 fw-semibold">
+                                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/<?= esc($ann['id']) ?>/edit" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1 fw-semibold">
                                             <i class="bi bi-pencil me-1"></i> Edit
                                         </a>
-                                        <form method="POST" action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/<?= esc($ann['id']) ?>/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this announcement?');">
+                                        <form method="POST" action="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/announcements/<?= esc($ann['id']) ?>/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this announcement?');">
                                             <?= getCsrfInput() ?>
                                             <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 py-1" title="Delete Announcement">
                                                 <i class="bi bi-trash"></i>

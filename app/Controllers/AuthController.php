@@ -16,9 +16,9 @@ class AuthController extends BaseController
             $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
             
             if (in_array($userRole, $adminRoles, true)) {
-                $response->redirect('/sia/admin/dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/dashboard.php');
             } else {
-                $response->redirect('/sia/applicant/dashboard.php');
+                $response->redirect(BASE_PATH . '/applicant/dashboard.php');
             }
             return;
         }
@@ -52,7 +52,7 @@ class AuthController extends BaseController
         if (!empty($errors)) {
             $_SESSION['login_errors'] = $errors;
             $_SESSION['login_old'] = ['email' => $email];
-            $response->redirect('/sia/auth/login.php');
+            $response->redirect(BASE_PATH . '/auth/login.php');
             return;
         }
 
@@ -67,14 +67,14 @@ class AuthController extends BaseController
             $_SESSION['login_errors'] = ['Invalid email or password.'];
             $_SESSION['login_old'] = ['email' => $email];
 
-            $response->redirect('/sia/auth/login.php');
+            $response->redirect(BASE_PATH . '/auth/login.php');
             return;
         }
 
         if ((int)$user['is_active'] !== 1) {
             $_SESSION['login_errors'] = ['Your account has been deactivated. Please contact the administrator.'];
             $_SESSION['login_old'] = ['email' => $email];
-            $response->redirect('/sia/auth/login.php');
+            $response->redirect(BASE_PATH . '/auth/login.php');
             return;
         }
 
@@ -101,7 +101,7 @@ class AuthController extends BaseController
                 $_SESSION['verification_warning'] = "Please verify your email address. We attempted to send a new code to {$user['email']}, but encountered a delivery issue. You may click 'Resend Code'.";
             }
 
-            $response->redirect('/sia/auth/verify_email.php');
+            $response->redirect(BASE_PATH . '/auth/verify_email.php');
             return;
         }
 
@@ -129,21 +129,21 @@ class AuthController extends BaseController
         if (!empty($user['force_password_reset'])) {
             $_SESSION['force_password_reset_required'] = true;
             $_SESSION['profile_errors'] = ['Security Notice: Please set a new personal password before accessing your account.'];
-            $response->redirect('/sia/applicant/profile.php');
+            $response->redirect(BASE_PATH . '/applicant/profile.php');
             return;
         }
 
         $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
         if (in_array($user['role'], $adminRoles, true)) {
             User::logActivity((int)$user['id'], "Logged In", "Administrator logged into the system.", "bi-box-arrow-in-right");
-            $response->redirect('/sia/admin/dashboard.php');
+            $response->redirect(BASE_PATH . '/admin/dashboard.php');
         } elseif ($user['role'] === 'faculty') {
             $_SESSION['lms_logged_in'] = true;
             $_SESSION['lms_user_id'] = (int)$user['id'];
             $_SESSION['lms_role'] = 'faculty';
             $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['lms_email'] = $user['email'];
-            $response->redirect('/sia/lms/faculty/dashboard.php');
+            $response->redirect(BASE_PATH . '/lms/faculty/dashboard.php');
         } elseif ($user['role'] === 'student') {
             // Student logging in through the Enrollment System portal accesses their completed applicant/enrollment dashboard
             // LMS has its own dedicated portal at /sia/auth/lms_student_login.php
@@ -152,16 +152,16 @@ class AuthController extends BaseController
             $_SESSION['lms_role'] = 'student';
             $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['lms_email'] = $user['email'];
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
         } else {
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
         }
     }
 
     public function showRegister(Request $request, Response $response)
     {
         if (!empty($_SESSION['logged_in'])) {
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
             return;
         }
 
@@ -200,7 +200,7 @@ class AuthController extends BaseController
         if (!empty($errors)) {
             $_SESSION['register_errors'] = $errors;
             $_SESSION['register_old'] = ['first_name' => $firstName, 'last_name' => $lastName, 'email' => $email];
-            $response->redirect('/sia/auth/register.php');
+            $response->redirect(BASE_PATH . '/auth/register.php');
             return;
         }
 
@@ -233,7 +233,7 @@ class AuthController extends BaseController
             error_log("Email delivery warning for {$email}: {$mailError}");
         }
 
-        $response->redirect('/sia/auth/verify_email.php');
+        $response->redirect(BASE_PATH . '/auth/verify_email.php');
     }
 
     public function showVerifyEmail(Request $request, Response $response)
@@ -244,7 +244,7 @@ class AuthController extends BaseController
             $stmt->execute([(int)$_SESSION['user_id']]);
             $isVerified = (int)$stmt->fetchColumn();
             if ($isVerified === 1) {
-                $response->redirect('/sia/applicant/dashboard.php');
+                $response->redirect(BASE_PATH . '/applicant/dashboard.php');
                 return;
             }
         }
@@ -252,7 +252,7 @@ class AuthController extends BaseController
         $email = $_SESSION['pending_registration']['email'] ?? ($_SESSION['pending_verification_email'] ?? ($_SESSION['user_email'] ?? ''));
 
         if (empty($email)) {
-            $response->redirect('/sia/auth/register.php');
+            $response->redirect(BASE_PATH . '/auth/register.php');
             return;
         }
 
@@ -285,7 +285,7 @@ class AuthController extends BaseController
 
         if (strlen($code) !== 6) {
             $_SESSION['verify_errors'] = ['Please enter the complete 6-digit verification code.'];
-            $response->redirect('/sia/auth/verify_email.php');
+            $response->redirect(BASE_PATH . '/auth/verify_email.php');
             return;
         }
 
@@ -297,7 +297,7 @@ class AuthController extends BaseController
 
             if ($storedCode !== $code || time() > $expiresAt) {
                 $_SESSION['verify_errors'] = ['The verification code is incorrect or has expired. Please try again or click Resend Code.'];
-                $response->redirect('/sia/auth/verify_email.php');
+                $response->redirect(BASE_PATH . '/auth/verify_email.php');
                 return;
             }
 
@@ -305,7 +305,7 @@ class AuthController extends BaseController
             if (User::findByEmail($pending['email'])) {
                 unset($_SESSION['pending_registration'], $_SESSION['pending_verification_email'], $_SESSION['pending_verification_name']);
                 $_SESSION['register_errors'] = ['Email is already registered. Please log in.'];
-                $response->redirect('/sia/auth/login.php');
+                $response->redirect(BASE_PATH . '/auth/login.php');
                 return;
             }
 
@@ -349,14 +349,14 @@ class AuthController extends BaseController
 
             User::logActivity($userId, "Account Created & Verified", "Applicant completed email verification and account was created.", "bi-patch-check-fill");
 
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
             return;
         }
 
         // Scenario 2: Legacy unverified user logging in
         $userId = (int)($_SESSION['pending_verification_user_id'] ?? ($_SESSION['user_id'] ?? 0));
         if ($userId <= 0) {
-            $response->redirect('/sia/auth/register.php');
+            $response->redirect(BASE_PATH . '/auth/register.php');
             return;
         }
 
@@ -367,7 +367,7 @@ class AuthController extends BaseController
 
         if (!$user) {
             $_SESSION['register_errors'] = ['User record not found. Please register again.'];
-            $response->redirect('/sia/auth/register.php');
+            $response->redirect(BASE_PATH . '/auth/register.php');
             return;
         }
 
@@ -377,7 +377,7 @@ class AuthController extends BaseController
 
         if ($storedCode !== $code || ($expiresAt !== '' && $expiresAt < $now)) {
             $_SESSION['verify_errors'] = ['The verification code is incorrect or has expired. Please try again or click Resend Code.'];
-            $response->redirect('/sia/auth/verify_email.php');
+            $response->redirect(BASE_PATH . '/auth/verify_email.php');
             return;
         }
 
@@ -409,7 +409,7 @@ class AuthController extends BaseController
 
         User::logActivity($userId, "Email Verified", "Applicant successfully verified email address.", "bi-patch-check-fill");
 
-        $response->redirect('/sia/applicant/dashboard.php');
+        $response->redirect(BASE_PATH . '/applicant/dashboard.php');
     }
 
     public function resendVerification(Request $request, Response $response)
@@ -432,14 +432,14 @@ class AuthController extends BaseController
                 $_SESSION['verify_errors'] = ["Failed to send email to {$email}. " . ($mailError ?: 'Please try again in a few moments.')];
             }
 
-            $response->redirect('/sia/auth/verify_email.php');
+            $response->redirect(BASE_PATH . '/auth/verify_email.php');
             return;
         }
 
         // Scenario 2: Legacy unverified user
         $userId = (int)($_SESSION['pending_verification_user_id'] ?? ($_SESSION['user_id'] ?? 0));
         if ($userId <= 0) {
-            $response->redirect('/sia/auth/register.php');
+            $response->redirect(BASE_PATH . '/auth/register.php');
             return;
         }
 
@@ -449,7 +449,7 @@ class AuthController extends BaseController
         $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$user) {
-            $response->redirect('/sia/auth/register.php');
+            $response->redirect(BASE_PATH . '/auth/register.php');
             return;
         }
 
@@ -469,12 +469,12 @@ class AuthController extends BaseController
             $_SESSION['verify_errors'] = ["Failed to send email to {$user['email']}. " . ($mailError ?: 'Please try again in a few moments.')];
         }
 
-        $response->redirect('/sia/auth/verify_email.php');
+        $response->redirect(BASE_PATH . '/auth/verify_email.php');
     }
 
     public function logout(Request $request, Response $response)
     {
-        $redirectUrl = '/sia/auth/login.php';
+        $redirectUrl = BASE_PATH . '/auth/login.php';
 
         if (session_status() === PHP_SESSION_ACTIVE) {
             $userRole = $_SESSION['user_role'] ?? ($_SESSION['lms_role'] ?? '');
@@ -482,9 +482,9 @@ class AuthController extends BaseController
             $isLms = !empty($_SESSION['lms_logged_in']) || $userRole === 'student' || $userRole === 'faculty' || strpos((string)$fromParam, 'lms') !== false;
 
             if ($userRole === 'faculty' || $fromParam === 'lms_faculty') {
-                $redirectUrl = '/sia/auth/lms_faculty_login.php';
+                $redirectUrl = BASE_PATH . '/auth/lms_faculty_login.php';
             } elseif ($isLms || $userRole === 'student' || $fromParam === 'lms_student') {
-                $redirectUrl = '/sia/auth/lms_student_login.php';
+                $redirectUrl = BASE_PATH . '/auth/lms_student_login.php';
             }
 
             if (!empty($_SESSION['user_id']) && !empty($_SESSION['user_role'])) {
@@ -521,13 +521,13 @@ class AuthController extends BaseController
             $userRole = $_SESSION['user_role'] ?? '';
             $adminRoles = ['superadmin', 'admin', 'admissions', 'scholarship', 'cashier', 'clinic', 'scheduler'];
             if (in_array($userRole, $adminRoles, true)) {
-                $response->redirect('/sia/admin/dashboard.php');
+                $response->redirect(BASE_PATH . '/admin/dashboard.php');
             } elseif ($userRole === 'faculty') {
-                $response->redirect('/sia/lms/faculty/dashboard.php');
+                $response->redirect(BASE_PATH . '/lms/faculty/dashboard.php');
             } elseif ($userRole === 'student') {
-                $response->redirect('/sia/lms/student/dashboard.php');
+                $response->redirect(BASE_PATH . '/lms/student/dashboard.php');
             } else {
-                $response->redirect('/sia/applicant/dashboard.php');
+                $response->redirect(BASE_PATH . '/applicant/dashboard.php');
             }
             return;
         }
@@ -573,7 +573,7 @@ class AuthController extends BaseController
             if (!empty($errors)) {
                 $_SESSION['forgot_errors'] = $errors;
                 $_SESSION['forgot_old'] = ['identifier' => $identifier];
-                $response->redirect('/sia/auth/forgot_password.php?portal=faculty');
+                $response->redirect(BASE_PATH . '/auth/forgot_password.php?portal=faculty');
                 return;
             }
 
@@ -593,7 +593,7 @@ class AuthController extends BaseController
             if (!$user) {
                 $_SESSION['forgot_errors'] = ["No active faculty account found matching '{$identifier}'. Please check your Employee ID or institutional email."];
                 $_SESSION['forgot_old'] = ['identifier' => $identifier];
-                $response->redirect('/sia/auth/forgot_password.php?portal=faculty');
+                $response->redirect(BASE_PATH . '/auth/forgot_password.php?portal=faculty');
                 return;
             }
         } elseif ($portal === 'student') {
@@ -605,7 +605,7 @@ class AuthController extends BaseController
             if (!empty($errors)) {
                 $_SESSION['forgot_errors'] = $errors;
                 $_SESSION['forgot_old'] = ['identifier' => $identifier];
-                $response->redirect('/sia/auth/forgot_password.php?portal=student');
+                $response->redirect(BASE_PATH . '/auth/forgot_password.php?portal=student');
                 return;
             }
 
@@ -624,7 +624,7 @@ class AuthController extends BaseController
             if (!$user) {
                 $_SESSION['forgot_errors'] = ["No active student account found matching '{$identifier}'. Please check your Student ID or institutional email."];
                 $_SESSION['forgot_old'] = ['identifier' => $identifier];
-                $response->redirect('/sia/auth/forgot_password.php?portal=student');
+                $response->redirect(BASE_PATH . '/auth/forgot_password.php?portal=student');
                 return;
             }
         } else {
@@ -636,7 +636,7 @@ class AuthController extends BaseController
             if (!empty($errors)) {
                 $_SESSION['forgot_errors'] = $errors;
                 $_SESSION['forgot_old'] = ['email' => $email];
-                $response->redirect('/sia/auth/forgot_password.php?portal=applicant');
+                $response->redirect(BASE_PATH . '/auth/forgot_password.php?portal=applicant');
                 return;
             }
 
@@ -653,7 +653,7 @@ class AuthController extends BaseController
             if (!$user) {
                 $_SESSION['forgot_errors'] = ["No active applicant account found with email '{$email}'."];
                 $_SESSION['forgot_old'] = ['email' => $email];
-                $response->redirect('/sia/auth/forgot_password.php?portal=applicant');
+                $response->redirect(BASE_PATH . '/auth/forgot_password.php?portal=applicant');
                 return;
             }
         }
@@ -671,9 +671,7 @@ class AuthController extends BaseController
             'id' => (int)$user['id']
         ]);
 
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $resetUrl = "{$scheme}://{$host}/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']) . "&code={$code}";
+        $resetUrl = app_absolute_url("/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']) . "&code={$code}");
 
         $mailError = null;
         $recipientName = trim($user['first_name'] . ' ' . $user['last_name']);
@@ -695,7 +693,7 @@ class AuthController extends BaseController
             error_log("Password reset email delivery issue for {$user['email']}: {$mailError}");
         }
 
-        $response->redirect("/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']));
+        $response->redirect(BASE_PATH . "/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']));
     }
 
     public function showResetPassword(Request $request, Response $response)
@@ -709,7 +707,7 @@ class AuthController extends BaseController
         $code = trim((string)$request->query('code', ''));
 
         if ($email === '' && empty($_SESSION['reset_user_id'])) {
-            $response->redirect("/sia/auth/forgot_password.php?portal={$portal}");
+            $response->redirect(BASE_PATH . "/auth/forgot_password.php?portal={$portal}");
             return;
         }
 
@@ -776,7 +774,7 @@ class AuthController extends BaseController
 
         if (!empty($errors)) {
             $_SESSION['reset_errors'] = $errors;
-            $response->redirect("/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($email) . "&code=" . urlencode($code));
+            $response->redirect(BASE_PATH . "/auth/reset_password.php?portal={$portal}&email=" . urlencode($email) . "&code=" . urlencode($code));
             return;
         }
 
@@ -793,7 +791,7 @@ class AuthController extends BaseController
 
         if (!$user) {
             $_SESSION['reset_errors'] = ['Account not found or inactive. Please request a new password reset.'];
-            $response->redirect("/sia/auth/forgot_password.php?portal={$portal}");
+            $response->redirect(BASE_PATH . "/auth/forgot_password.php?portal={$portal}");
             return;
         }
 
@@ -803,7 +801,7 @@ class AuthController extends BaseController
 
         if ($storedCode === '' || $storedCode !== $code || ($expiresAt !== '' && $expiresAt < $now)) {
             $_SESSION['reset_errors'] = ['The 6-digit verification code is invalid or has expired. Please try again or click Resend Code.'];
-            $response->redirect("/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($email));
+            $response->redirect(BASE_PATH . "/auth/reset_password.php?portal={$portal}&email=" . urlencode($email));
             return;
         }
 
@@ -827,11 +825,11 @@ class AuthController extends BaseController
         $_SESSION['login_success'] = 'Your password has been successfully reset! You can now log in with your new password.';
 
         if ($portal === 'faculty') {
-            $response->redirect('/sia/auth/lms_faculty_login.php');
+            $response->redirect(BASE_PATH . '/auth/lms_faculty_login.php');
         } elseif ($portal === 'student') {
-            $response->redirect('/sia/auth/lms_student_login.php');
+            $response->redirect(BASE_PATH . '/auth/lms_student_login.php');
         } else {
-            $response->redirect('/sia/auth/login.php');
+            $response->redirect(BASE_PATH . '/auth/login.php');
         }
     }
 
@@ -849,7 +847,7 @@ class AuthController extends BaseController
         $email = trim((string)($request->input('email') ?: ($_SESSION['reset_email'] ?? '')));
 
         if ($email === '') {
-            $response->redirect("/sia/auth/forgot_password.php?portal={$portal}");
+            $response->redirect(BASE_PATH . "/auth/forgot_password.php?portal={$portal}");
             return;
         }
 
@@ -866,7 +864,7 @@ class AuthController extends BaseController
 
         if (!$user) {
             $_SESSION['reset_errors'] = ['User record not found. Please initiate password recovery again.'];
-            $response->redirect("/sia/auth/forgot_password.php?portal={$portal}");
+            $response->redirect(BASE_PATH . "/auth/forgot_password.php?portal={$portal}");
             return;
         }
 
@@ -882,9 +880,7 @@ class AuthController extends BaseController
             'id' => (int)$user['id']
         ]);
 
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $resetUrl = "{$scheme}://{$host}/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']) . "&code={$newCode}";
+        $resetUrl = app_absolute_url("/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']) . "&code={$newCode}");
 
         $mailError = null;
         $recipientName = trim($user['first_name'] . ' ' . $user['last_name']);
@@ -896,7 +892,7 @@ class AuthController extends BaseController
             $_SESSION['reset_errors'] = ["Failed to send email to {$user['email']}. " . ($mailError ?: 'Please try again in a few moments.')];
         }
 
-        $response->redirect("/sia/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']));
+        $response->redirect(BASE_PATH . "/auth/reset_password.php?portal={$portal}&email=" . urlencode($user['email']));
     }
 }
 

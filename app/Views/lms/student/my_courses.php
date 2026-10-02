@@ -120,7 +120,7 @@ $programStrand = !empty($student_meta['strand']) ? htmlspecialchars($student_met
             <p class="text-muted mx-auto mb-4" style="max-width: 480px;">
                 You are not currently registered in any active courses for this term. Your subjects will appear automatically upon official admissions section assignment.
             </p>
-            <a href="/sia/applicant/dashboard.php" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+            <a href="<?= BASE_PATH ?>/applicant/dashboard.php" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
                 <i class="bi bi-arrow-left me-1.5"></i>Check Admissions Status
             </a>
         </div>
@@ -213,15 +213,15 @@ $programStrand = !empty($student_meta['strand']) ? htmlspecialchars($student_met
 
                             <!-- Course Metrics / Activity Counters -->
                             <div class="d-flex align-items-center gap-1.5 mb-3 flex-wrap">
-                                <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="lms-activity-badge text-decoration-none" title="Course Modules">
+                                <a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="lms-activity-badge text-decoration-none" title="Course Modules">
                                     <i class="bi bi-folder2-open text-primary"></i>
                                     <span><?= (int)($course['module_count'] ?? 0) ?> Modules</span>
                                 </a>
-                                <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments" class="lms-activity-badge text-decoration-none" title="Assignments">
+                                <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments" class="lms-activity-badge text-decoration-none" title="Assignments">
                                     <i class="bi bi-journal-text text-success"></i>
                                     <span><?= (int)($course['assignment_count'] ?? 0) ?> Assignments</span>
                                 </a>
-                                <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="lms-activity-badge text-decoration-none" title="Quizzes">
+                                <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="lms-activity-badge text-decoration-none" title="Quizzes">
                                     <i class="bi bi-ui-checks text-warning"></i>
                                     <span><?= (int)($course['quiz_count'] ?? 0) ?> Quizzes</span>
                                 </a>
@@ -246,20 +246,20 @@ $programStrand = !empty($student_meta['strand']) ? htmlspecialchars($student_met
                             <!-- Classroom Action Buttons -->
                             <div class="mt-3 pt-2">
                                 <?php if (!empty($course['lms_course_id'])): ?>
-                                    <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="lms-btn-classroom">
+                                    <a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="lms-btn-classroom">
                                         <span>Enter Classroom</span>
                                         <i class="bi bi-arrow-right"></i>
                                     </a>
                                     <div class="d-flex justify-content-around mt-2 pt-1">
-                                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments" class="lms-quick-jump-link">
+                                        <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments" class="lms-quick-jump-link">
                                             <i class="bi bi-file-earmark-text me-1"></i>Assignments
                                         </a>
                                         <span class="text-muted opacity-25">&bull;</span>
-                                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="lms-quick-jump-link">
+                                        <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="lms-quick-jump-link">
                                             <i class="bi bi-pencil-square me-1"></i>Quizzes
                                         </a>
                                         <span class="text-muted opacity-25">&bull;</span>
-                                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/attendance" class="lms-quick-jump-link">
+                                        <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/attendance" class="lms-quick-jump-link">
                                             <i class="bi bi-calendar-check me-1"></i>Attendance
                                         </a>
                                     </div>
@@ -342,7 +342,7 @@ $programStrand = !empty($student_meta['strand']) ? htmlspecialchars($student_met
                                 </td>
                                 <td class="text-end pe-4">
                                     <?php if (!empty($course['lms_course_id'])): ?>
-                                        <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+                                        <a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
                                             Open Room &rarr;
                                         </a>
                                     <?php else: ?>

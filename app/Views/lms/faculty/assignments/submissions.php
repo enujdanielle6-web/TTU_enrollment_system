@@ -5,13 +5,13 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 align-items-center">
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="text-decoration-none text-muted">Assignments</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="text-decoration-none text-muted">Assignments</a></li>
                 <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Submissions</li>
             </ol>
         </nav>
-        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-2">
+        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-2">
             <i class="bi bi-arrow-left"></i> Back to Assignments
         </a>
     </div>
@@ -142,7 +142,7 @@
                                     </td>
                                     <td>
                                         <?php if (!empty($sub['file_name'])): ?>
-                                            <a href="/sia/lms/download/submission/<?= esc($sub['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" target="_blank">
+                                            <a href="<?= BASE_PATH ?>/lms/download/submission/<?= esc($sub['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" target="_blank">
                                                 <i class="bi bi-file-earmark-arrow-down"></i>
                                                 <span class="text-truncate" style="max-width: 160px;"><?= htmlspecialchars($sub['file_name']) ?></span>
                                             </a>
@@ -180,7 +180,7 @@
                                                         </div>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
-                                                    <form action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/submissions/<?= esc($sub['id']) ?>/grade" method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true;">
+                                                    <form action="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/submissions/<?= esc($sub['id']) ?>/grade" method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true;">
                                                         <?= getCsrfInput() ?>
                                                         <input type="hidden" name="submission_id" value="<?= esc($sub['id']) ?>">
                                                         <div class="modal-body p-4">

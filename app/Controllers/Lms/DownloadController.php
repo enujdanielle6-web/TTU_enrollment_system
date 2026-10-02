@@ -55,8 +55,7 @@ class DownloadController extends BaseController
             dirname(__DIR__, 3) . '/storage/uploads/lms/materials/' . basename($material['file_path']),
             dirname(__DIR__, 3) . '/storage/uploads/lms/' . ltrim($material['file_path'], '/\\'),
             dirname(__DIR__, 3) . '/app/uploads/lms/' . basename($material['file_path']),
-            dirname(__DIR__, 3) . '/app/uploads/lms/' . ltrim($material['file_path'], '/\\'),
-            'C:/xampp/storage/lms_materials/' . basename($material['file_path'])
+            dirname(__DIR__, 3) . '/app/uploads/lms/' . ltrim($material['file_path'], '/\\')
         ];
 
         $resolvedPath = null;

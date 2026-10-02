@@ -19,7 +19,7 @@
                 <?php else: ?>
                     <div class="list-group list-group-flush">
                         <?php foreach ($quizzes as $q): ?>
-                            <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="list-group-item list-group-item-action p-4">
+                            <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($q['id']) ?>" class="list-group-item list-group-item-action p-4">
                                 <div class="d-flex justify-content-between align-items-start">
                                     <div>
                                         <h5 class="mb-1 text-primary fw-bold">

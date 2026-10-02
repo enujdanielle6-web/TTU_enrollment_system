@@ -20,3 +20,29 @@ Desktop.ini
 .vscode/
 *.swp
 *~
+
+# Production configuration (contains database/SMTP/PayMongo secrets)
+/config/config.php
+
+# InfinityFree deployment build output (regenerate with scripts/build_infinityfree_package.php)
+/dist/
+
+# Local database backups
+/storage/backups/
+
+# User uploads (applicant documents, payment proofs) - personal data, never commit.
+# Keep the folder structure and protective .htaccess files.
+/uploads/**/*
+!/uploads/**/
+!/uploads/**/.htaccess
+# Placeholder files referenced by the demo data (database/seed.sql, optional_demo_data.sql)
+!/uploads/documents/sample_*
+!/uploads/payments/proof_mary_downpayment.jpg
+
+# Legacy duplicate upload store and LMS uploads (materials, submissions)
+/app/uploads/
+/storage/uploads/**/*
+!/storage/uploads/**/
+!/storage/uploads/lms/materials/cc101_lec1.pdf
+!/storage/uploads/lms/materials/cc101_syllabus.pdf
+!/storage/uploads/lms/materials/cc102_lec1.pdf

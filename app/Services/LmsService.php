@@ -701,7 +701,7 @@ class LmsService
                 'type' => 'Assignment',
                 'course_code' => $asg['subject_code'],
                 'course_name' => $asg['subject_name'],
-                'url' => "/sia/lms/student/course/" . $asg['lms_course_id'] . "/assignments/" . $asg['id']
+                'url' => BASE_PATH . "/lms/student/course/" . $asg['lms_course_id'] . "/assignments/" . $asg['id']
             ];
         }
 
@@ -734,7 +734,7 @@ class LmsService
                 'type' => 'Quiz',
                 'course_code' => $qz['subject_code'],
                 'course_name' => $qz['subject_name'],
-                'url' => "/sia/lms/student/course/" . $qz['lms_course_id'] . "/quizzes/" . $qz['id']
+                'url' => BASE_PATH . "/lms/student/course/" . $qz['lms_course_id'] . "/quizzes/" . $qz['id']
             ];
         }
 
@@ -802,7 +802,7 @@ class LmsService
                 'title' => 'Class Session: ' . $firstCourse['code'],
                 'time' => 'Upcoming Semester Session',
                 'course' => $firstCourse['name'] . ' (' . $firstCourse['section_name'] . ')',
-                'url' => '/sia/lms/student/course.php?id=' . $firstCourse['lms_course_id']
+                'url' => BASE_PATH . '/lms/student/course.php?id=' . $firstCourse['lms_course_id']
             ];
         }
 
@@ -851,7 +851,7 @@ class LmsService
                 s.subject_code,
                 COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Instructor') as professor_name,
                 'announcement' as type,
-                CONCAT('/sia/lms/student/course/', ann.lms_course_id, '/announcements') as url,
+                CONCAT('" . BASE_PATH . "/lms/student/course/', ann.lms_course_id, '/announcements') as url,
                 NULL as due_date
             FROM lms_announcements ann
             JOIN lms_courses lc ON ann.lms_course_id = lc.id
@@ -878,7 +878,7 @@ class LmsService
                 s.subject_code,
                 COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Instructor') as professor_name,
                 'assignment' as type,
-                CONCAT('/sia/lms/student/course/', a.lms_course_id, '/assignments/', a.id) as url,
+                CONCAT('" . BASE_PATH . "/lms/student/course/', a.lms_course_id, '/assignments/', a.id) as url,
                 a.due_date
             FROM lms_assignments a
             JOIN lms_courses lc ON a.lms_course_id = lc.id
@@ -905,7 +905,7 @@ class LmsService
                 s.subject_code,
                 COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Instructor') as professor_name,
                 'quiz' as type,
-                CONCAT('/sia/lms/student/course/', q.lms_course_id, '/quizzes/', q.id) as url,
+                CONCAT('" . BASE_PATH . "/lms/student/course/', q.lms_course_id, '/quizzes/', q.id) as url,
                 q.end_date as due_date
             FROM lms_quizzes q
             JOIN lms_courses lc ON q.lms_course_id = lc.id
@@ -1018,7 +1018,7 @@ class LmsService
                 s.subject_code,
                 COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Student') as student_name,
                 'submission' as type,
-                CONCAT('/sia/lms/faculty/course/', a.lms_course_id, '/assignments/', a.id, '/submissions') as url,
+                CONCAT('" . BASE_PATH . "/lms/faculty/course/', a.lms_course_id, '/assignments/', a.id, '/submissions') as url,
                 sub.status
             FROM lms_submissions sub
             JOIN lms_assignments a ON sub.assignment_id = a.id
@@ -1046,7 +1046,7 @@ class LmsService
                 s.subject_code,
                 'You' as student_name,
                 'announcement' as type,
-                CONCAT('/sia/lms/faculty/course/', ann.lms_course_id, '/announcements') as url,
+                CONCAT('" . BASE_PATH . "/lms/faculty/course/', ann.lms_course_id, '/announcements') as url,
                 ann.status
             FROM lms_announcements ann
             JOIN lms_courses lc ON ann.lms_course_id = lc.id

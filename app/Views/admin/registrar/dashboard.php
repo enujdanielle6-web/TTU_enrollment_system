@@ -146,7 +146,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
       <!-- Card 3: Active Sections -->
       <div class="col-sm-6 col-xl-3">
-        <a href="/sia/admin/scheduler/college_sections.php" class="stat-card-kpi fade-in-up" style="animation-delay: 0.2s;">
+        <a href="<?= BASE_PATH ?>/admin/scheduler/college_sections.php" class="stat-card-kpi fade-in-up" style="animation-delay: 0.2s;">
           <div class="stat-card-glow bg-info"></div>
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
@@ -230,7 +230,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <i class="bi bi-chevron-right text-muted small"></i>
               </a>
 
-              <a href="/sia/admin/scheduler/college_sections.php" class="shortcut-item">
+              <a href="<?= BASE_PATH ?>/admin/scheduler/college_sections.php" class="shortcut-item">
                 <div class="icon-box"><i class="bi bi-grid-3x3-gap-fill"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">Sections & Schedules</span>
@@ -293,7 +293,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                 <i class="bi bi-chevron-right text-muted small"></i>
               </a>
 
-              <a href="/sia/admin/scheduler/shs_sections.php" class="shortcut-item shortcut-item-shs">
+              <a href="<?= BASE_PATH ?>/admin/scheduler/shs_sections.php" class="shortcut-item shortcut-item-shs">
                 <div class="icon-box"><i class="bi bi-grid-3x3-gap-fill"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">Sections & Schedules</span>

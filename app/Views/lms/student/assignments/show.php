@@ -5,13 +5,13 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 align-items-center">
-                <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="/sia/lms/student/my_courses.php" class="text-decoration-none text-muted">My Courses</a></li>
-                <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-primary fw-semibold"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/my_courses.php" class="text-decoration-none text-muted">My Courses</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-primary fw-semibold"><?= htmlspecialchars($course['subject_code']) ?></a></li>
                 <li class="breadcrumb-item active text-dark fw-bold" aria-current="page">Assignment</li>
             </ol>
         </nav>
-        <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>&tab=assignments" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs">
+        <a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>&tab=assignments" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs">
             <i class="bi bi-arrow-left"></i> <span>Back to Assignments</span>
         </a>
     </div>
@@ -128,7 +128,7 @@
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="text-muted small fw-semibold">Uploaded File</span>
-                            <a href="/sia/lms/download/submission/<?= esc($submission['id']) ?>" class="btn btn-sm btn-white border rounded-pill px-2.5 py-1 text-primary text-decoration-none fw-semibold shadow-xs d-inline-flex align-items-center gap-1.5" style="max-width: 170px;">
+                            <a href="<?= BASE_PATH ?>/lms/download/submission/<?= esc($submission['id']) ?>" class="btn btn-sm btn-white border rounded-pill px-2.5 py-1 text-primary text-decoration-none fw-semibold shadow-xs d-inline-flex align-items-center gap-1.5" style="max-width: 170px;">
                                 <i class="bi bi-file-earmark-arrow-down-fill"></i>
                                 <span class="text-truncate" style="font-size: 0.78rem;"><?= htmlspecialchars($submission['file_name']) ?></span>
                             </a>
@@ -174,7 +174,7 @@
                 ?>
                 
                 <?php if ($canSubmit): ?>
-                    <form action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submit" method="POST" enctype="multipart/form-data" id="assignmentSubmitForm">
+                    <form action="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submit" method="POST" enctype="multipart/form-data" id="assignmentSubmitForm">
                         <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
                         <div class="mb-3">
                             <label class="form-label fw-bold text-muted small text-uppercase d-block mb-2" style="font-size: 0.72rem; letter-spacing: 0.05em;">

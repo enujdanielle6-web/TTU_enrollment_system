@@ -717,9 +717,9 @@ require_once __DIR__ . '/../components/header.php';
   </div>
 </div>
 
-<script src="/sia/public/vendor/jquery/jquery.min.js"></script>
-<script src="/sia/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
-<script src="/sia/public/vendor/sweetalert2/sweetalert2.all.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/jquery/jquery.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/sweetalert2/sweetalert2.all.min.js"></script>
 <script>
   $(function () {
     $('#enrollmentForm').on('submit', function (event) {

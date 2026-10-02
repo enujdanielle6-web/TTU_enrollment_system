@@ -145,7 +145,7 @@ class LmsAdminController extends BaseController
 
         if (!$inspection) {
             $_SESSION['error_message'] = "Course #{$courseId} not found.";
-            $response->redirect('/sia/lms/admin/courses');
+            $response->redirect(BASE_PATH . '/lms/admin/courses');
             return;
         }
 
@@ -171,7 +171,7 @@ class LmsAdminController extends BaseController
 
         if (!$this->validateCsrfToken($request)) {
             $_SESSION['error_message'] = 'Invalid or expired CSRF token.';
-            $response->redirect("/sia/lms/admin/courses/{$id}");
+            $response->redirect(BASE_PATH . "/lms/admin/courses/{$id}");
             return;
         }
 
@@ -188,7 +188,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "Failed to reassign course instructor.";
         }
 
-        $response->redirect("/sia/lms/admin/courses/{$courseId}");
+        $response->redirect(BASE_PATH . "/lms/admin/courses/{$courseId}");
     }
 
     /**
@@ -200,7 +200,7 @@ class LmsAdminController extends BaseController
 
         if (!$this->validateCsrfToken($request)) {
             $_SESSION['error_message'] = 'Invalid or expired CSRF token.';
-            $response->redirect("/sia/lms/admin/courses/{$id}");
+            $response->redirect(BASE_PATH . "/lms/admin/courses/{$id}");
             return;
         }
 
@@ -216,7 +216,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "Failed to update course status.";
         }
 
-        $response->redirect("/sia/lms/admin/courses/{$courseId}");
+        $response->redirect(BASE_PATH . "/lms/admin/courses/{$courseId}");
     }
 
     /**
@@ -253,7 +253,7 @@ class LmsAdminController extends BaseController
 
         if (!$this->validateCsrfToken($request)) {
             $_SESSION['error_message'] = 'Invalid or expired CSRF token.';
-            $response->redirect('/sia/lms/admin/users');
+            $response->redirect(BASE_PATH . '/lms/admin/users');
             return;
         }
 
@@ -270,7 +270,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "Failed to update user LMS status.";
         }
 
-        $response->redirect('/sia/lms/admin/users');
+        $response->redirect(BASE_PATH . '/lms/admin/users');
     }
 
     /**
@@ -296,7 +296,7 @@ class LmsAdminController extends BaseController
 
         if (!$this->validateCsrfToken($request)) {
             $_SESSION['error_message'] = 'Invalid or expired CSRF token.';
-            $response->redirect('/sia/lms/admin/sync');
+            $response->redirect(BASE_PATH . '/lms/admin/sync');
             return;
         }
 
@@ -309,7 +309,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "Reconciliation encountered an error: " . ($result['error'] ?? 'Unknown error');
         }
 
-        $response->redirect('/sia/lms/admin/sync');
+        $response->redirect(BASE_PATH . '/lms/admin/sync');
     }
 
     /**
@@ -321,7 +321,7 @@ class LmsAdminController extends BaseController
 
         if (!$this->validateCsrfToken($request)) {
             $_SESSION['error_message'] = 'Security validation failed: Invalid or expired CSRF token.';
-            $response->redirect('/sia/lms/admin/sync');
+            $response->redirect(BASE_PATH . '/lms/admin/sync');
             return;
         }
 
@@ -333,7 +333,7 @@ class LmsAdminController extends BaseController
 
         if ($courseId <= 0 || empty($action)) {
             $_SESSION['error_message'] = 'Invalid conflict resolution request. Missing course ID or action.';
-            $response->redirect('/sia/lms/admin/sync');
+            $response->redirect(BASE_PATH . '/lms/admin/sync');
             return;
         }
 
@@ -347,7 +347,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = $e->getMessage();
         }
 
-        $response->redirect('/sia/lms/admin/sync');
+        $response->redirect(BASE_PATH . '/lms/admin/sync');
     }
 
     /**
@@ -383,7 +383,7 @@ class LmsAdminController extends BaseController
 
         if (!$this->validateCsrfToken($request)) {
             $_SESSION['error_message'] = 'Invalid or expired CSRF token.';
-            $response->redirect('/sia/lms/admin/archive');
+            $response->redirect(BASE_PATH . '/lms/admin/archive');
             return;
         }
 
@@ -394,7 +394,7 @@ class LmsAdminController extends BaseController
 
         if (empty($academicYear) || empty($semester)) {
             $_SESSION['error_message'] = 'Please select a valid academic year and semester.';
-            $response->redirect('/sia/lms/admin/archive');
+            $response->redirect(BASE_PATH . '/lms/admin/archive');
             return;
         }
 
@@ -406,7 +406,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "No active courses found matching the selected term.";
         }
 
-        $response->redirect('/sia/lms/admin/archive');
+        $response->redirect(BASE_PATH . '/lms/admin/archive');
     }
 
     /**
@@ -482,7 +482,7 @@ class LmsAdminController extends BaseController
         if ($request->isPost()) {
             if (!$this->validateCsrfToken($request)) {
                 $_SESSION['error_message'] = 'Invalid or expired CSRF token.';
-                $response->redirect('/sia/lms/admin/generator');
+                $response->redirect(BASE_PATH . '/lms/admin/generator');
                 return;
             }
 
@@ -494,7 +494,7 @@ class LmsAdminController extends BaseController
 
             if (!in_array($academic_level, ['College', 'SHS']) || !$section_id || !$subject_id) {
                 $_SESSION['error_message'] = 'Invalid form data provided.';
-                $response->redirect('/sia/lms/admin/generator');
+                $response->redirect(BASE_PATH . '/lms/admin/generator');
                 return;
             }
 
@@ -548,11 +548,11 @@ class LmsAdminController extends BaseController
                 $_SESSION['error_message'] = 'An error occurred while generating the course.';
             }
 
-            $response->redirect('/sia/lms/admin/generator');
+            $response->redirect(BASE_PATH . '/lms/admin/generator');
             return;
         }
 
-        $response->redirect('/sia/lms/admin/generator');
+        $response->redirect(BASE_PATH . '/lms/admin/generator');
     }
 
     /**
@@ -588,7 +588,7 @@ class LmsAdminController extends BaseController
 
         if (!$this->validateCsrfToken($request)) {
             $_SESSION['error_message'] = 'Security validation failed (invalid CSRF token). Please try again.';
-            $response->redirect('/sia/lms/admin/cloner');
+            $response->redirect(BASE_PATH . '/lms/admin/cloner');
             return;
         }
 
@@ -599,13 +599,13 @@ class LmsAdminController extends BaseController
 
         if ($sourceCourseId <= 0 || $targetCourseId <= 0) {
             $_SESSION['error_message'] = 'Please select both a valid source course and a target course.';
-            $response->redirect('/sia/lms/admin/cloner');
+            $response->redirect(BASE_PATH . '/lms/admin/cloner');
             return;
         }
 
         if ($sourceCourseId === $targetCourseId) {
             $_SESSION['error_message'] = 'Source course and target course cannot be identical.';
-            $response->redirect("/sia/lms/admin/cloner?source_id={$sourceCourseId}&target_id={$targetCourseId}");
+            $response->redirect(BASE_PATH . "/lms/admin/cloner?source_id={$sourceCourseId}&target_id={$targetCourseId}");
             return;
         }
 
@@ -626,11 +626,11 @@ class LmsAdminController extends BaseController
                 $stats['choices']
             );
 
-            $response->redirect("/sia/lms/admin/courses/{$targetCourseId}");
+            $response->redirect(BASE_PATH . "/lms/admin/courses/{$targetCourseId}");
             return;
         } catch (Exception $e) {
             $_SESSION['error_message'] = $e->getMessage();
-            $response->redirect("/sia/lms/admin/cloner?source_id={$sourceCourseId}&target_id={$targetCourseId}");
+            $response->redirect(BASE_PATH . "/lms/admin/cloner?source_id={$sourceCourseId}&target_id={$targetCourseId}");
             return;
         }
     }
@@ -689,7 +689,7 @@ class LmsAdminController extends BaseController
         $csrfToken = $_POST['csrf_token'] ?? '';
         if (!function_exists('validateCsrfToken') || !validateCsrfToken($csrfToken)) {
             $_SESSION['error_message'] = 'Security validation failed: Invalid or expired CSRF token.';
-            $response->redirect('/sia/lms/admin/announcements');
+            $response->redirect(BASE_PATH . '/lms/admin/announcements');
             return;
         }
 
@@ -711,7 +711,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "Failed to create platform announcement: " . $e->getMessage();
         }
 
-        $response->redirect('/sia/lms/admin/announcements');
+        $response->redirect(BASE_PATH . '/lms/admin/announcements');
     }
 
     /**
@@ -724,7 +724,7 @@ class LmsAdminController extends BaseController
         $csrfToken = $_POST['csrf_token'] ?? '';
         if (!function_exists('validateCsrfToken') || !validateCsrfToken($csrfToken)) {
             $_SESSION['error_message'] = 'Security validation failed: Invalid or expired CSRF token.';
-            $response->redirect('/sia/lms/admin/announcements');
+            $response->redirect(BASE_PATH . '/lms/admin/announcements');
             return;
         }
 
@@ -746,7 +746,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "Failed to update platform announcement: " . $e->getMessage();
         }
 
-        $response->redirect('/sia/lms/admin/announcements');
+        $response->redirect(BASE_PATH . '/lms/admin/announcements');
     }
 
     /**
@@ -759,7 +759,7 @@ class LmsAdminController extends BaseController
         $csrfToken = $_POST['csrf_token'] ?? '';
         if (!function_exists('validateCsrfToken') || !validateCsrfToken($csrfToken)) {
             $_SESSION['error_message'] = 'Security validation failed: Invalid or expired CSRF token.';
-            $response->redirect('/sia/lms/admin/announcements');
+            $response->redirect(BASE_PATH . '/lms/admin/announcements');
             return;
         }
 
@@ -773,7 +773,7 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "Failed to toggle announcement status: " . $e->getMessage();
         }
 
-        $response->redirect('/sia/lms/admin/announcements');
+        $response->redirect(BASE_PATH . '/lms/admin/announcements');
     }
 
     /**
@@ -786,7 +786,7 @@ class LmsAdminController extends BaseController
         $csrfToken = $_POST['csrf_token'] ?? '';
         if (!function_exists('validateCsrfToken') || !validateCsrfToken($csrfToken)) {
             $_SESSION['error_message'] = 'Security validation failed: Invalid or expired CSRF token.';
-            $response->redirect('/sia/lms/admin/announcements');
+            $response->redirect(BASE_PATH . '/lms/admin/announcements');
             return;
         }
 
@@ -799,6 +799,6 @@ class LmsAdminController extends BaseController
             $_SESSION['error_message'] = "Failed to delete announcement: " . $e->getMessage();
         }
 
-        $response->redirect('/sia/lms/admin/announcements');
+        $response->redirect(BASE_PATH . '/lms/admin/announcements');
     }
 }

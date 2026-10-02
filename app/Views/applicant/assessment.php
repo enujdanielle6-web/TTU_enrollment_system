@@ -86,7 +86,7 @@ require_once __DIR__ . '/../components/header.php';
               </div>
             </div>
             <div class="d-flex flex-wrap align-items-center gap-2 flex-shrink-0">
-              <a href="/sia/applicant/payment_callback.php?session_id=<?= urlencode($activeOnlinePayment['checkout_session_id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
+              <a href="<?= BASE_PATH ?>/applicant/payment_callback.php?session_id=<?= urlencode($activeOnlinePayment['checkout_session_id']) ?>" class="btn btn-sm btn-primary rounded-pill px-3 fw-semibold">
                 <i class="bi bi-shield-check me-1"></i> Verify Status
               </a>
               <?php if (!empty($activeOnlinePayment['checkout_url'])): ?>
@@ -94,7 +94,7 @@ require_once __DIR__ . '/../components/header.php';
                   <i class="bi bi-box-arrow-up-right me-1"></i> Resume PayMongo
                 </a>
               <?php endif; ?>
-              <form action="/sia/applicant/payment_process.php" method="POST" class="d-inline m-0 p-0">
+              <form action="<?= BASE_PATH ?>/applicant/payment_process.php" method="POST" class="d-inline m-0 p-0">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                 <input type="hidden" name="action" value="cancel_paymongo_session">
                 <input type="hidden" name="payment_id" value="<?= esc($activeOnlinePayment['id']) ?>">
@@ -1004,7 +1004,7 @@ require_once __DIR__ . '/../components/header.php';
             }
 
             try {
-                const res = await fetch('/sia/applicant/payment_queue_status.php?token=' + encodeURIComponent(currentSessionToken), {
+                const res = await fetch('<?= BASE_PATH ?>/applicant/payment_queue_status.php?token=' + encodeURIComponent(currentSessionToken), {
                     headers: { 'Accept': 'application/json' }
                 });
 
@@ -1073,7 +1073,7 @@ require_once __DIR__ . '/../components/header.php';
 
                 try {
                     const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
-                    const res = await fetch('/sia/applicant/payment_queue_join.php', {
+                    const res = await fetch('<?= BASE_PATH ?>/applicant/payment_queue_join.php', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/x-www-form-urlencoded',
@@ -1134,7 +1134,7 @@ require_once __DIR__ . '/../components/header.php';
                 clearInterval(pollInterval);
 
                 const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
-                await fetch('/sia/applicant/payment_queue_leave.php', {
+                await fetch('<?= BASE_PATH ?>/applicant/payment_queue_leave.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',
@@ -1168,7 +1168,7 @@ require_once __DIR__ . '/../components/header.php';
                 clearInterval(timerInterval);
 
                 const csrfToken = document.querySelector('input[name="csrf_token"]')?.value || '';
-                await fetch('/sia/applicant/payment_queue_leave.php', {
+                await fetch('<?= BASE_PATH ?>/applicant/payment_queue_leave.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded',

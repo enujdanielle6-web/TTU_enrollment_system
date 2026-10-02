@@ -1,22 +1,56 @@
+# Triple T University - Apache rules
+# Works both in a sub-folder (http://localhost/sia/) and at a domain root (InfinityFree htdocs/).
+
+# Disable directory listing
+Options -Indexes
+
+# Basic security headers (skipped automatically if mod_headers is unavailable)
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Never serve secrets, dumps, docs, logs or dependency manifests
+<FilesMatch "(^\.|\.(sql|md|log|bak|old|orig|swp|ini|lock|dist|sh|bat|ps1|example)$|^composer\.(json|lock)$)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Disable directory listing
-    Options -Indexes
+    # --- Force HTTPS -------------------------------------------------------
+    # Uncomment the 3 lines below ONLY after the SSL certificate is active on your domain.
+    # Both conditions are required on InfinityFree to avoid an infinite redirect loop.
+    # RewriteCond %{HTTPS} off
+    # RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    # RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-    # Allow direct access to setup_database.php
+    # Let SSL certificate validation files through untouched
+    RewriteRule ^\.well-known/ - [L]
+
+    # Block hidden files and folders (.env, .git, .agents, ...)
+    RewriteRule (^|/)\. - [F,L]
+
+    # Block private application folders (code, config, SQL, logs, private uploads, tooling)
+    RewriteRule ^(app|config|database|storage|scripts|docs|vendor|uploads/documents)(/|$) - [F,L]
+
+    # Allow direct access to setup_database.php (the script itself refuses to run when APP_ENV=production)
     RewriteCond %{REQUEST_URI} setup_database\.php$
     RewriteRule ^ - [L]
-
-    # Prevent direct access to sensitive directories
-    RewriteRule ^(app|config|database|storage)/ - [F,L]
 
     # If it's not an existing file, route it to public/index.php
     # We remove the !-d condition so the root directory '/' is also routed to the front controller
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^(.*)$ public/index.php [QSA,L]
 
-    # Optionally, force all .php requests (except index.php in public and setup_database.php) to the router
+    # Force all .php requests (except index.php in public and setup_database.php) to the router
     # This prevents anyone from directly executing any lingering PHP files.
     RewriteCond %{REQUEST_URI} \.php$
     RewriteCond %{REQUEST_URI} !public/index\.php$

@@ -81,7 +81,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
 $currId = (int)($_GET['id'] ?? 0);
 if ($currId <= 0) {
-    $response->redirect("/sia/admin/registrar/college_curriculum.php");
+    $response->redirect(BASE_PATH . "/admin/registrar/college_curriculum.php");
     return;
 }
 
@@ -103,7 +103,7 @@ try {
 }
 
 if (!$curriculum) {
-    $response->redirect("/sia/admin/registrar/college_curriculum.php");
+    $response->redirect(BASE_PATH . "/admin/registrar/college_curriculum.php");
     return;
 }
 
@@ -291,14 +291,14 @@ try {
     $_SESSION['error_msg'] = $e->getMessage();
 }
 
-$response->redirect("/sia/admin/registrar/college_programs.php");
+$response->redirect(BASE_PATH . "/admin/registrar/college_programs.php");
 return;
     }
     public function processCurriculum(Request $request, Response $response)
     {
         $pdo = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/admin/registrar/college_curriculum.php");
+            $response->redirect(BASE_PATH . "/admin/registrar/college_curriculum.php");
             return;
         }
 
@@ -320,7 +320,7 @@ return;
             } else {
                 $_SESSION['error_msg'] = $message;
             }
-            $response->redirect($redirectUrl ?: "/sia/admin/registrar/college_curriculum.php");
+            $response->redirect($redirectUrl ?: BASE_PATH . "/admin/registrar/college_curriculum.php");
             return;
         };
 
@@ -366,7 +366,7 @@ return;
                 $newId = (int) $pdo->lastInsertId();
 
                 logActivity((int)$_SESSION['user_id'], 'bi-journal-plus', 'Curriculum Created', "Created new draft curriculum '{$name}' (v{$version}) for program #{$programId}.");
-                $sendResponse(true, "Curriculum created successfully in Draft status. You can now build its subject catalog.", ['curriculum_id' => $newId], "/sia/admin/registrar/college_curriculum_builder.php?id={$newId}");
+                $sendResponse(true, "Curriculum created successfully in Draft status. You can now build its subject catalog.", ['curriculum_id' => $newId], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id={$newId}");
                 return;
             } catch (PDOException $e) {
                 $sendResponse(false, "Failed to create curriculum: " . $e->getMessage());
@@ -442,7 +442,7 @@ return;
 
                 $pdo->commit();
                 logActivity((int)$_SESSION['user_id'], 'bi-files', 'Curriculum Cloned', "Cloned curriculum '{$src['curriculum_name']}' (v{$src['version']}) into new Draft '{$name}' (v{$version}).");
-                $sendResponse(true, "Curriculum successfully cloned into new Draft version (v{$version}). You can now customize its subjects.", ['curriculum_id' => $newCurrId], "/sia/admin/registrar/college_curriculum_builder.php?id={$newCurrId}");
+                $sendResponse(true, "Curriculum successfully cloned into new Draft version (v{$version}). You can now customize its subjects.", ['curriculum_id' => $newCurrId], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id={$newCurrId}");
                 return;
             } catch (Exception $e) {
                 if ($pdo->inTransaction()) {
@@ -491,7 +491,7 @@ return;
 
                 if ($count === 0) {
                     $pdo->rollBack();
-                    $sendResponse(false, "Cannot activate an empty curriculum. Please add at least one subject in the Builder first.", [], "/sia/admin/registrar/college_curriculum_builder.php?id={$id}");
+                    $sendResponse(false, "Cannot activate an empty curriculum. Please add at least one subject in the Builder first.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id={$id}");
                     return;
                 }
 
@@ -591,7 +591,7 @@ return;
 
                 // Strict Guard: Metadata edits are only permitted in DRAFT state
                 if ($curr['status'] !== 'draft') {
-                    $sendResponse(false, "Action Denied: '{$curr['curriculum_name']}' is " . strtoupper($curr['status']) . " and cannot be modified. Create a new version instead.", [], "/sia/admin/registrar/college_curriculum.php");
+                    $sendResponse(false, "Action Denied: '{$curr['curriculum_name']}' is " . strtoupper($curr['status']) . " and cannot be modified. Create a new version instead.", [], BASE_PATH . "/admin/registrar/college_curriculum.php");
                     return;
                 }
 
@@ -692,7 +692,7 @@ return;
             }
 
             if ($currLock['status'] !== 'draft') {
-                $sendResponse(false, "Action Denied: '{$currLock['curriculum_name']}' is " . strtoupper($currLock['status']) . " and structurally immutable. To add, edit, move, or remove subjects, clone this curriculum into a new Draft version.", [], "/sia/admin/registrar/college_curriculum_builder.php?id={$currId}");
+                $sendResponse(false, "Action Denied: '{$currLock['curriculum_name']}' is " . strtoupper($currLock['status']) . " and structurally immutable. To add, edit, move, or remove subjects, clone this curriculum into a new Draft version.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id={$currId}");
                 return;
             }
         }
@@ -704,7 +704,7 @@ return;
             $semester = trim($_POST['semester'] ?? '');
             
             if ($currId <= 0 || $subjectId <= 0 || $yearLevel === '' || $semester === '') {
-                $sendResponse(false, "All fields are required to add a subject.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                $sendResponse(false, "All fields are required to add a subject.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 return;
             }
 
@@ -713,7 +713,7 @@ return;
                 $subCheck = $pdo->prepare("SELECT id FROM subjects WHERE id = ?");
                 $subCheck->execute([$subjectId]);
                 if (!$subCheck->fetch()) {
-                    $sendResponse(false, "Selected subject does not exist.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                    $sendResponse(false, "Selected subject does not exist.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                     return;
                 }
 
@@ -727,13 +727,13 @@ return;
                     VALUES (?, ?, ?, ?, ?)
                 ");
                 $stmt->execute([$currId, $subjectId, $yearLevel, $semester, $maxOrder + 1]);
-                $sendResponse(true, "Subject added successfully.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                $sendResponse(true, "Subject added successfully.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 return;
             } catch (PDOException $e) {
                 if ($e->getCode() == 23000) {
-                    $sendResponse(false, "Subject is already assigned to this year and semester.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                    $sendResponse(false, "Subject is already assigned to this year and semester.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 } else {
-                    $sendResponse(false, "Failed to add subject: " . $e->getMessage(), [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                    $sendResponse(false, "Failed to add subject: " . $e->getMessage(), [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 }
                 return;
             }
@@ -753,13 +753,13 @@ return;
 
                 $stmt = $pdo->prepare("UPDATE college_curriculum_subjects SET year_level = ?, semester = ?, display_order = ? WHERE id = ?");
                 $stmt->execute([$yearLevel, $semester, $maxOrder + 1, $subId]);
-                $sendResponse(true, "Subject updated successfully.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                $sendResponse(true, "Subject updated successfully.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 return;
             } catch (PDOException $e) {
                 if ($e->getCode() == 23000) {
-                    $sendResponse(false, "Subject is already assigned to that year and semester.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                    $sendResponse(false, "Subject is already assigned to that year and semester.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 } else {
-                    $sendResponse(false, "Failed to update subject: " . $e->getMessage(), [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                    $sendResponse(false, "Failed to update subject: " . $e->getMessage(), [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 }
                 return;
             }
@@ -772,10 +772,10 @@ return;
             try {
                 $stmt = $pdo->prepare("DELETE FROM college_curriculum_subjects WHERE id = ?");
                 $stmt->execute([$subId]);
-                $sendResponse(true, "Subject removed from curriculum.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                $sendResponse(true, "Subject removed from curriculum.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 return;
             } catch (PDOException $e) {
-                $sendResponse(false, "Failed to remove subject: " . $e->getMessage(), [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                $sendResponse(false, "Failed to remove subject: " . $e->getMessage(), [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 return;
             }
         } 
@@ -826,13 +826,13 @@ return;
                     }
                 }
                 $pdo->commit();
-                $sendResponse(true, "Order updated.", [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                $sendResponse(true, "Order updated.", [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 return;
             } catch (Exception $e) {
                 if ($pdo->inTransaction()) {
                     $pdo->rollBack();
                 }
-                $sendResponse(false, "Failed to reorder subject: " . $e->getMessage(), [], "/sia/admin/registrar/college_curriculum_builder.php?id=$currId");
+                $sendResponse(false, "Failed to reorder subject: " . $e->getMessage(), [], BASE_PATH . "/admin/registrar/college_curriculum_builder.php?id=$currId");
                 return;
             }
         }

@@ -68,7 +68,7 @@
                   $lastMsg = !empty($t['last_message_body']) ? htmlspecialchars($t['last_message_body']) : 'Conversation started';
                   $timeStr = !empty($t['last_message_at']) ? date('M j, g:i A', strtotime($t['last_message_at'])) : '';
                 ?>
-                  <a href="/sia/lms/faculty/messages.php?thread_id=<?= (int)$t['id'] ?>" 
+                  <a href="<?= BASE_PATH ?>/lms/faculty/messages.php?thread_id=<?= (int)$t['id'] ?>" 
                      class="list-group-item list-group-item-action p-3 border-bottom transition-all thread-item <?= $isActive ? 'bg-primary bg-opacity-10 border-start border-primary border-4' : '' ?>"
                      data-contact-name="<?= esc(strtolower($contactName)) ?>"
                      data-subject="<?= esc(strtolower($t['subject'] ?? '')) ?>"
@@ -155,7 +155,7 @@
                 </div>
               </div>
               <div>
-                <a href="/sia/lms/faculty/messages.php?thread_id=<?= (int)$activeThread['id'] ?>" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-muted hover-lift" title="Refresh messages">
+                <a href="<?= BASE_PATH ?>/lms/faculty/messages.php?thread_id=<?= (int)$activeThread['id'] ?>" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-muted hover-lift" title="Refresh messages">
                   <i class="bi bi-arrow-clockwise"></i>
                 </a>
               </div>
@@ -210,7 +210,7 @@
 
             <!-- Message Composer Box -->
             <div class="p-3 bg-white border-top">
-              <form action="/sia/lms/faculty/messages/send" method="POST" id="replyMessageForm" class="d-flex align-items-center gap-2">
+              <form action="<?= BASE_PATH ?>/lms/faculty/messages/send" method="POST" id="replyMessageForm" class="d-flex align-items-center gap-2">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                 <input type="hidden" name="thread_id" value="<?= (int)$activeThread['id'] ?>">
                 <div class="flex-grow-1 position-relative">
@@ -242,7 +242,7 @@
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="/sia/lms/faculty/messages/send" method="POST" id="newThreadForm">
+      <form action="<?= BASE_PATH ?>/lms/faculty/messages/send" method="POST" id="newThreadForm">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
         <input type="hidden" name="lms_course_id" id="modalCourseId" value="">
         <div class="modal-body p-4">
