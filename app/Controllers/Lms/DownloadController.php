@@ -156,29 +156,72 @@ class DownloadController extends BaseController
         $this->streamFile($resolvedPath, $submission['file_name'], $submission['mime_type']);
     }
 
+    /**
+     * MIME types for common course files, keyed by extension. Used when the stored
+     * MIME type is missing or generic (fileinfo often reports Office files as zip).
+     */
+    private const MIME_BY_EXTENSION = [
+        'pdf'  => 'application/pdf',
+        'ppt'  => 'application/vnd.ms-powerpoint',
+        'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'pps'  => 'application/vnd.ms-powerpoint',
+        'ppsx' => 'application/vnd.openxmlformats-officedocument.presentationml.slideshow',
+        'doc'  => 'application/msword',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'xls'  => 'application/vnd.ms-excel',
+        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'csv'  => 'text/csv',
+        'txt'  => 'text/plain',
+        'zip'  => 'application/zip',
+        'png'  => 'image/png',
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'gif'  => 'image/gif',
+        'mp4'  => 'video/mp4',
+        'mp3'  => 'audio/mpeg',
+    ];
+
     private function streamFile(string $filePath, string $originalName, ?string $mimeType)
     {
+        $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+
         // Prevent execution
-        if (pathinfo($filePath, PATHINFO_EXTENSION) === 'php') {
+        if ($ext === 'php') {
             die("Invalid file type.");
         }
 
+        // The stored name is the display title (e.g. "Week 1 Lecture"), which usually has
+        // no extension. Append the stored file's extension so the browser saves a usable file.
+        $downloadName = str_replace(["\r", "\n", '"', '/', '\\'], '', trim($originalName));
+        if ($downloadName === '') {
+            $downloadName = 'download';
+        }
+        if ($ext !== '' && strtolower(pathinfo($downloadName, PATHINFO_EXTENSION)) !== $ext) {
+            $downloadName .= '.' . $ext;
+        }
+
+        $genericTypes = ['', 'application/octet-stream', 'application/zip', 'application/x-zip-compressed', 'application/vnd.ms-office', 'application/cdfv2'];
+        if (in_array(strtolower((string)$mimeType), $genericTypes, true) && isset(self::MIME_BY_EXTENSION[$ext])) {
+            $mimeType = self::MIME_BY_EXTENSION[$ext];
+        }
         $mimeType = $mimeType ?: 'application/octet-stream';
+
+        // Drop anything already buffered (stray whitespace, notices) so it isn't prepended to the file
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        $asciiName = preg_replace('/[^\x20-\x7E]/', '_', $downloadName);
 
         header('Content-Description: File Transfer');
         header('Content-Type: ' . $mimeType);
-        header('Content-Disposition: attachment; filename="' . addslashes($originalName) . '"');
+        header('Content-Disposition: attachment; filename="' . $asciiName . '"; filename*=UTF-8\'\'' . rawurlencode($downloadName));
+        header('X-Content-Type-Options: nosniff');
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
         header('Pragma: public');
         header('Content-Length: ' . filesize($filePath));
 
-        // Clear output buffer to prevent corrupted downloads
-        if (ob_get_length()) {
-            ob_clean();
-        }
-        flush();
-        
         readfile($filePath);
         exit;
     }
