@@ -12,10 +12,16 @@ class BaseController
         return ob_get_clean();
     }
 
+    public ?string $redirectUrl = null;
+
     protected function redirect(string $url): void
     {
+        $this->redirectUrl = $url;
         $response = new Response();
         $response->redirect($url);
+        if (defined('TESTING_ENV') && TESTING_ENV) {
+            return;
+        }
         exit;
     }
 

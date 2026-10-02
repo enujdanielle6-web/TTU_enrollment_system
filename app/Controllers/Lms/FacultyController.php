@@ -245,7 +245,114 @@ class FacultyController extends BaseController
 
     public function messages(Request $request, Response $response)
     {
+        $facultyUserId = (int)($_SESSION['user_id'] ?? 0);
+        $messageService = new \App\Services\LmsMessageService();
+
+        $threads = $messageService->getUserThreads($facultyUserId);
+        $contacts = $messageService->getFacultyContacts($facultyUserId);
+
+        $activeThreadId = (int)$request->input('thread_id');
+        $activeThread = null;
+        $activeMessages = [];
+
+        if ($activeThreadId > 0) {
+            $activeThread = $messageService->getThread($activeThreadId, $facultyUserId);
+            if ($activeThread) {
+                $activeMessages = $messageService->getThreadMessages($activeThreadId, $facultyUserId);
+            }
+        } elseif (!empty($threads)) {
+            $activeThreadId = (int)$threads[0]['id'];
+            $activeThread = $messageService->getThread($activeThreadId, $facultyUserId);
+            $activeMessages = $messageService->getThreadMessages($activeThreadId, $facultyUserId);
+        }
+
         $pageTitle = 'Messages & Forums - TTU LMS';
-        return $this->render('lms/faculty/messages', get_defined_vars());
+        return $this->render('lms/faculty/messages', [
+            'pageTitle' => $pageTitle,
+            'threads' => $threads,
+            'contacts' => $contacts,
+            'activeThread' => $activeThread,
+            'activeMessages' => $activeMessages,
+            'activeThreadId' => $activeThreadId
+        ]);
+    }
+
+    public function getThreadMessages(Request $request, Response $response, string $id)
+    {
+        $facultyUserId = (int)($_SESSION['user_id'] ?? 0);
+        $threadId = (int)$id;
+        $messageService = new \App\Services\LmsMessageService();
+
+        if (!$messageService->isParticipant($threadId, $facultyUserId)) {
+            $response->setStatusCode(403);
+            return $response->json(['success' => false, 'error' => 'Unauthorized access to this conversation.']);
+        }
+
+        $thread = $messageService->getThread($threadId, $facultyUserId);
+        $messages = $messageService->getThreadMessages($threadId, $facultyUserId);
+
+        return $response->json([
+            'success' => true,
+            'thread' => $thread,
+            'messages' => $messages
+        ]);
+    }
+
+    public function sendMessage(Request $request, Response $response)
+    {
+        $facultyUserId = (int)($_SESSION['user_id'] ?? 0);
+        $messageService = new \App\Services\LmsMessageService();
+        $data = $request->getBody();
+
+        $threadId = (int)($data['thread_id'] ?? 0);
+        $body = trim($data['body'] ?? ($data['message'] ?? ''));
+
+        if (empty($body)) {
+            if ($request->header('Accept') === 'application/json' || $request->input('ajax')) {
+                $response->setStatusCode(422);
+                return $response->json(['success' => false, 'error' => 'Message content cannot be empty.']);
+            }
+            $this->redirect('/sia/lms/faculty/messages.php');
+            return;
+        }
+
+        try {
+            if ($threadId > 0) {
+                $messageId = $messageService->replyThread($threadId, $facultyUserId, $body);
+            } else {
+                $recipientId = (int)($data['recipient_id'] ?? 0);
+                if ($recipientId <= 0) {
+                    throw new \Exception("Please select a valid student recipient.");
+                }
+                $subject = trim($data['subject'] ?? 'Academic Consultation');
+                $courseId = !empty($data['lms_course_id']) ? (int)$data['lms_course_id'] : null;
+
+                $threadId = $messageService->createThread($facultyUserId, [$recipientId], $subject, $body, $courseId);
+            }
+
+            if ($request->header('Accept') === 'application/json' || $request->input('ajax')) {
+                return $response->json([
+                    'success' => true,
+                    'thread_id' => $threadId,
+                    'redirect_url' => '/sia/lms/faculty/messages.php?thread_id=' . $threadId
+                ]);
+            }
+
+            $this->redirect('/sia/lms/faculty/messages.php?thread_id=' . $threadId);
+        } catch (\Exception $e) {
+            if ($request->header('Accept') === 'application/json' || $request->input('ajax')) {
+                $response->setStatusCode(400);
+                return $response->json(['success' => false, 'error' => $e->getMessage()]);
+            }
+            $this->redirect('/sia/lms/faculty/messages.php');
+        }
+    }
+
+    public function getContacts(Request $request, Response $response)
+    {
+        $facultyUserId = (int)($_SESSION['user_id'] ?? 0);
+        $messageService = new \App\Services\LmsMessageService();
+        $contacts = $messageService->getFacultyContacts($facultyUserId);
+        return $response->json(['success' => true, 'contacts' => $contacts]);
     }
 }

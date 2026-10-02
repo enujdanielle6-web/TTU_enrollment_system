@@ -458,6 +458,11 @@ Downloadable lecture files and learning assets.
 ### `lms_announcements`
 - **`lms_announcements`**: `id`, `lms_course_id` (FK $\rightarrow$ `lms_courses.id`), `author_id` (FK $\rightarrow$ `users.id`), `title`, `content`, `created_at`, `updated_at`.
 
+### `lms_threads`, `lms_thread_participants`, `lms_messages`
+- **`lms_threads`**: `id`, `lms_course_id` (FK $\rightarrow$ `lms_courses.id` ON DELETE SET NULL), `subject` (VARCHAR(255)), `created_by` (FK $\rightarrow$ `users.id` ON DELETE CASCADE), `last_message_at` (TIMESTAMP), `created_at`, `updated_at`. Groups conversation messages into cohesive subject-based dialogues.
+- **`lms_thread_participants`**: `id`, `thread_id` (FK $\rightarrow$ `lms_threads.id` ON DELETE CASCADE), `user_id` (FK $\rightarrow$ `users.id` ON DELETE CASCADE), `last_read_at` (TIMESTAMP NULL). Tracks thread members and enables granular per-user unread badge calculations.
+- **`lms_messages`**: `id`, `thread_id` (FK $\rightarrow$ `lms_threads.id` ON DELETE CASCADE), `sender_id` (FK $\rightarrow$ `users.id` ON DELETE CASCADE), `body` (TEXT), `created_at` (TIMESTAMP). Immutable sequential message entries.
+
 ---
 **Related:**
 - [[Database Overview]]
