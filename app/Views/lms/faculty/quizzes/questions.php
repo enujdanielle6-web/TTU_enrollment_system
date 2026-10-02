@@ -22,7 +22,7 @@
     <?php if (!empty($has_draft)): ?>
         <div class="alert alert-warning rounded-4 border-0 shadow-sm mb-4 d-flex flex-wrap align-items-center justify-content-between gap-2">
             <span><i class="bi bi-exclamation-circle me-1"></i> You have imported or generated questions that are not saved yet.</span>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions/review" class="btn btn-sm btn-warning rounded-pill px-3 fw-semibold">Review draft</a>
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions/review" class="btn btn-sm btn-warning rounded-pill px-3 fw-semibold">Review draft</a>
         </div>
     <?php endif; ?>
 
@@ -51,7 +51,7 @@
                     <i class="bi bi-filetype-csv"></i>
                     <span>Import CSV</span>
                 </button>
-                <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions/generate" class="btn btn-outline-primary rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-2">
+                <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions/generate" class="btn btn-outline-primary rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-2">
                     <i class="bi bi-journal-text"></i>
                     <span>Generate from Content</span>
                 </a>
@@ -272,7 +272,7 @@ function toggleQuestionType() {
 <div class="modal fade" id="importCsvModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow-lg">
-            <form action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions/import" method="POST" enctype="multipart/form-data" onsubmit="this.querySelector('button[type=submit]').disabled=true;">
+            <form action="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions/import" method="POST" enctype="multipart/form-data" onsubmit="this.querySelector('button[type=submit]').disabled=true;">
                 <?= getCsrfInput() ?>
                 <input type="hidden" name="MAX_FILE_SIZE" value="1048576">
                 <div class="modal-header border-bottom px-4 py-3">
@@ -284,7 +284,7 @@ function toggleQuestionType() {
                         Use the template's columns: <code>type</code>, <code>question</code>, <code>choice_a</code>&ndash;<code>choice_f</code>, <code>correct_answer</code>, <code>points</code>, and optional <code>case_sensitive</code> / <code>manual_review</code>.
                         Types are multiple_choice, true_false, identification and fill_blank. Separate several accepted answers with <code>|</code>.
                     </p>
-                    <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/csv-template" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-3">
+                    <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/csv-template" class="btn btn-sm btn-outline-secondary rounded-pill px-3 mb-3">
                         <i class="bi bi-download me-1"></i> Download template
                     </a>
                     <label class="form-label fw-bold text-dark" for="questionsCsvInput">CSV file (max 1 MB, 200 questions)</label>

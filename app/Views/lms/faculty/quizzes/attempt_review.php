@@ -1,7 +1,7 @@
 <?php require_once __DIR__ . '/../layout_header.php'; ?>
 <?php use App\Services\Quiz\QuizQuestionValidator; ?>
 <?php
-$baseUrl = '/sia/lms/faculty/course/' . (int)$course['lms_course_id'] . '/quizzes/' . (int)$quiz['id'];
+$baseUrl = BASE_PATH . '/lms/faculty/course/' . (int)$course['lms_course_id'] . '/quizzes/' . (int)$quiz['id'];
 $studentName = trim(($attempt['first_name'] ?? '') . ' ' . ($attempt['last_name'] ?? ''));
 $totalPoints = array_sum(array_map(fn ($q) => (float)$q['points'], $questions));
 $pending = count(array_filter($answers, fn ($a) => !empty($a['needs_review'])));
@@ -12,7 +12,7 @@ $hasTextQuestions = false;
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 align-items-center">
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="text-decoration-none text-muted">Quizzes</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="text-decoration-none text-muted">Quizzes</a></li>
                 <li class="breadcrumb-item"><a href="<?= esc($baseUrl) ?>/results" class="text-decoration-none text-muted">Quiz Results</a></li>
                 <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Review Attempt</li>
             </ol>

@@ -156,7 +156,7 @@
                                     </td>
                                     <td class="text-end pe-4">
                                         <?php if ($status !== 'in_progress'): ?>
-                                            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/attempts/<?= esc($attempt['id']) ?>/review" class="btn btn-sm <?= $status === 'submitted' ? 'btn-warning' : 'btn-outline-secondary' ?> rounded-pill px-3">
+                                            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/attempts/<?= esc($attempt['id']) ?>/review" class="btn btn-sm <?= $status === 'submitted' ? 'btn-warning' : 'btn-outline-secondary' ?> rounded-pill px-3">
                                                 <?= $status === 'submitted' ? 'Review' : 'View' ?>
                                             </a>
                                         <?php endif; ?>

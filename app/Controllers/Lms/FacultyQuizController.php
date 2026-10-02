@@ -349,7 +349,7 @@ class FacultyQuizController extends BaseController
         $lmsCourseId = (int)$courseId;
         $quizId = (int)$id;
         $this->loadOwnedQuiz($response, $lmsCourseId, $quizId);
-        $questionsUrl = "/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions";
+        $questionsUrl = BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions";
 
         $importer = new QuizCsvImporter();
         $file = $_FILES['questions_csv'] ?? null;
@@ -384,7 +384,7 @@ class FacultyQuizController extends BaseController
             'errors' => $errors,
             'notices' => $parsed['file_errors'],
         ]);
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions/review");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions/review");
     }
 
     public function generateForm(Request $request, Response $response, string $courseId, string $id)
@@ -419,7 +419,7 @@ class FacultyQuizController extends BaseController
         $lmsCourseId = (int)$courseId;
         $quizId = (int)$id;
         $this->loadOwnedQuiz($response, $lmsCourseId, $quizId);
-        $formUrl = "/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions/generate";
+        $formUrl = BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions/generate";
         $data = $request->getBody();
 
         $counts = [];
@@ -504,7 +504,7 @@ class FacultyQuizController extends BaseController
             'errors' => $errors,
             'notices' => $notices,
         ]);
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions/review");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions/review");
     }
 
     public function reviewDraft(Request $request, Response $response, string $courseId, string $id)
@@ -516,7 +516,7 @@ class FacultyQuizController extends BaseController
         $draft = $this->getDraft($quizId, $lmsCourseId);
         if ($draft === null) {
             $this->setFlash('warning', 'There is no imported or generated draft to review.');
-            $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
+            $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
             return;
         }
 
@@ -534,11 +534,11 @@ class FacultyQuizController extends BaseController
         $lmsCourseId = (int)$courseId;
         $quizId = (int)$id;
         $quiz = $this->loadOwnedQuiz($response, $lmsCourseId, $quizId);
-        $reviewUrl = "/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions/review";
+        $reviewUrl = BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions/review";
 
         $draft = $this->getDraft($quizId, $lmsCourseId);
         if ($draft === null) {
-            $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
+            $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
             return;
         }
 
@@ -565,7 +565,7 @@ class FacultyQuizController extends BaseController
         if (empty($clean)) {
             $this->clearDraft($quizId);
             $this->setFlash('warning', 'All draft questions were removed, so nothing was saved.');
-            $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
+            $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
             return;
         }
 
@@ -590,7 +590,7 @@ class FacultyQuizController extends BaseController
 
         $this->clearDraft($quizId);
         $this->setFlash('success', $saved . ' question(s) saved' . ($publish ? ' and the quiz is now published.' : '. The quiz status was not changed.'));
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
     }
 
     public function discardDraft(Request $request, Response $response, string $courseId, string $id)
@@ -601,7 +601,7 @@ class FacultyQuizController extends BaseController
 
         $this->clearDraft($quizId);
         $this->setFlash('success', 'Draft discarded. No questions were added.');
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/questions");
     }
 
     // --- MANUAL REVIEW OF TEXT ANSWERS --- //
@@ -643,7 +643,7 @@ class FacultyQuizController extends BaseController
         $quizId = (int)$id;
         $this->loadOwnedQuiz($response, $lmsCourseId, $quizId);
         $attempt = $this->loadOwnedAttempt($response, $quizId, (int)$attemptId);
-        $reviewUrl = "/sia/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/attempts/{$attempt['id']}/review";
+        $reviewUrl = BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/quizzes/{$quizId}/attempts/{$attempt['id']}/review";
 
         $questions = [];
         foreach ($this->quizService->getQuestions($quizId) as $q) {

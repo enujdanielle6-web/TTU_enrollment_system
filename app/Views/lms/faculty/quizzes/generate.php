@@ -1,13 +1,13 @@
 <?php require_once __DIR__ . '/../layout_header.php'; ?>
 <?php use App\Services\Quiz\QuizQuestionValidator; ?>
-<?php $baseUrl = '/sia/lms/faculty/course/' . (int)$course['lms_course_id'] . '/quizzes/' . (int)$quiz['id']; ?>
+<?php $baseUrl = BASE_PATH . '/lms/faculty/course/' . (int)$course['lms_course_id'] . '/quizzes/' . (int)$quiz['id']; ?>
 
 <div class="container-fluid py-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 align-items-center">
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="text-decoration-none text-muted">Quizzes</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes" class="text-decoration-none text-muted">Quizzes</a></li>
                 <li class="breadcrumb-item"><a href="<?= esc($baseUrl) ?>/questions" class="text-decoration-none text-muted">Question Builder</a></li>
                 <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Generate from Content</li>
             </ol>
