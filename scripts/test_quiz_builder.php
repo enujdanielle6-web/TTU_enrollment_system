@@ -218,6 +218,12 @@ $stamp = bin2hex(random_bytes(4));
 $docxName = "test_quiz_builder_{$stamp}.docx";
 $pptxName = "test_quiz_builder_{$stamp}.pptx";
 $jpgName = "test_quiz_builder_{$stamp}.jpg";
+// Remove the fixture files even if a later step fails (e.g. the database is unreachable).
+register_shutdown_function(function () use ($materialsDir, $docxName, $pptxName, $jpgName) {
+    foreach ([$docxName, $pptxName, $jpgName] as $file) {
+        @unlink($materialsDir . $file);
+    }
+});
 $wordXml = '<?xml version="1.0" encoding="UTF-8"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>';
 foreach (explode("\n", $lectureText) as $line) {
     $wordXml .= '<w:p><w:r><w:t>' . htmlspecialchars($line, ENT_XML1) . '</w:t></w:r></w:p>';
