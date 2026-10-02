@@ -255,6 +255,10 @@
                                                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1">
                                                     <i class="bi bi-check-circle-fill me-1"></i>Graded
                                                 </span>
+                                            <?php elseif ($attempt['status'] === 'submitted'): ?>
+                                                <span class="badge bg-warning text-dark rounded-pill px-2.5 py-1">
+                                                    <i class="bi bi-hourglass-split me-1"></i>Awaiting Review
+                                                </span>
                                             <?php elseif ($attempt['status'] === 'in_progress'): ?>
                                                 <span class="badge bg-warning bg-opacity-15 text-warning-emphasis border border-warning border-opacity-25 rounded-pill px-2.5 py-1">
                                                     <i class="bi bi-clock me-1"></i>In Progress
@@ -276,7 +280,7 @@
                                                     </span>
                                                 </div>
                                             <?php else: ?>
-                                                <span class="text-muted small">&mdash; Pending Submission &mdash;</span>
+                                                <span class="text-muted small">&mdash; <?= $attempt['status'] === 'submitted' ? 'Score pending review' : 'Pending Submission' ?> &mdash;</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-end pe-4 py-3">

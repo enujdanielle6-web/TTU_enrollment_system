@@ -73,7 +73,7 @@
                 <h4 class="h5 fw-bold text-dark mb-1">
                     <i class="bi bi-pencil-square me-2 text-info"></i>Online Quizzes &amp; Assessments
                 </h4>
-                <p class="text-muted small mb-0">Author multiple choice and true/false quizzes, configure timers and review student attempt scores.</p>
+                <p class="text-muted small mb-0">Author mixed-type quizzes (multiple choice, true/false, identification, fill in the blank), import or generate questions, and review student attempts.</p>
             </div>
             <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
                 <i class="bi bi-plus-lg"></i>

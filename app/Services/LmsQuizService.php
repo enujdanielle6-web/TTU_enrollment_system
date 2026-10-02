@@ -2,6 +2,8 @@
 namespace App\Services;
 
 use App\Core\Database;
+use App\Services\Quiz\QuizAnswerGrader;
+use App\Services\Quiz\QuizQuestionValidator;
 use PDO;
 
 class LmsQuizService
@@ -103,17 +105,55 @@ class LmsQuizService
     public function addQuestion(array $data): int
     {
         $stmt = $this->pdo->prepare("
-            INSERT INTO lms_questions (lms_quiz_id, question_text, question_type, points, display_order)
-            VALUES (:qid, :text, :type, :points, :order)
+            INSERT INTO lms_questions (lms_quiz_id, question_text, question_type, points, case_sensitive, requires_manual_review, source_reference, display_order)
+            VALUES (:qid, :text, :type, :points, :cs, :review, :source, :order)
         ");
         $stmt->execute([
             'qid' => $data['lms_quiz_id'],
             'text' => $data['question_text'],
             'type' => $data['question_type'],
             'points' => $data['points'] ?? 1.0,
+            'cs' => !empty($data['case_sensitive']) ? 1 : 0,
+            'review' => !empty($data['requires_manual_review']) ? 1 : 0,
+            'source' => $data['source_reference'] ?? null,
             'order' => $data['display_order'] ?? 0
         ]);
         return (int)$this->pdo->lastInsertId();
+    }
+
+    /**
+     * Saves validated draft questions (see QuizQuestionValidator) after the quiz's
+     * existing questions, all or nothing.
+     *
+     * @return int number of questions saved
+     */
+    public function addValidatedQuestions(int $quizId, array $cleanQuestions, bool $publish = false): int
+    {
+        $this->pdo->beginTransaction();
+        try {
+            $orderStmt = $this->pdo->prepare("SELECT COALESCE(MAX(display_order), 0) FROM lms_questions WHERE lms_quiz_id = :qid");
+            $orderStmt->execute(['qid' => $quizId]);
+            $order = (int)$orderStmt->fetchColumn();
+
+            foreach ($cleanQuestions as $clean) {
+                $rows = QuizQuestionValidator::toStorage($clean);
+                $questionId = $this->addQuestion($rows['question'] + ['lms_quiz_id' => $quizId, 'display_order' => ++$order]);
+                foreach ($rows['choices'] as $choice) {
+                    $this->addChoice($choice + ['lms_question_id' => $questionId]);
+                }
+            }
+
+            if ($publish) {
+                $pub = $this->pdo->prepare("UPDATE lms_quizzes SET status = 'published' WHERE id = :id");
+                $pub->execute(['id' => $quizId]);
+            }
+
+            $this->pdo->commit();
+            return count($cleanQuestions);
+        } catch (\Throwable $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
     }
 
     public function addChoice(array $data): int
@@ -143,6 +183,19 @@ class LmsQuizService
     public function getAttempt(int $attemptId): ?array
     {
         $stmt = $this->pdo->prepare("SELECT * FROM lms_quiz_attempts WHERE id = :id");
+        $stmt->execute(['id' => $attemptId]);
+        $attempt = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $attempt ?: null;
+    }
+
+    public function getAttemptWithStudent(int $attemptId): ?array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT a.*, u.first_name, u.last_name
+            FROM lms_quiz_attempts a
+            JOIN users u ON u.id = a.student_id
+            WHERE a.id = :id
+        ");
         $stmt->execute(['id' => $attemptId]);
         $attempt = $stmt->fetch(PDO::FETCH_ASSOC);
         return $attempt ?: null;
@@ -202,49 +255,41 @@ class LmsQuizService
             }
         }
 
-        $totalScore = 0;
-        
         $questions = $this->getQuestions($attempt['lms_quiz_id'], true);
-        
+        $grader = new QuizAnswerGrader();
+
         $this->pdo->beginTransaction();
         try {
             $ansStmt = $this->pdo->prepare("
-                INSERT INTO lms_quiz_answers (lms_quiz_attempt_id, lms_question_id, lms_question_choice_id, is_correct, points_awarded)
-                VALUES (:att_id, :q_id, :c_id, :correct, :points)
+                INSERT INTO lms_quiz_answers (lms_quiz_attempt_id, lms_question_id, lms_question_choice_id, answer_text, is_correct, points_awarded, needs_review)
+                VALUES (:att_id, :q_id, :c_id, :text, :correct, :points, :review)
             ");
 
+            $totalScore = 0.0;
+            $pendingReview = false;
             foreach ($questions as $q) {
-                $qId = $q['id'];
-                $selectedChoiceId = $studentAnswers[$qId] ?? null;
-                
-                $isCorrect = false;
-                $pointsAwarded = 0.0;
-
-                if ($selectedChoiceId) {
-                    // Verify if this choice is the correct one for this question
-                    foreach ($q['choices'] as $c) {
-                        if ($c['id'] == $selectedChoiceId && $c['is_correct']) {
-                            $isCorrect = true;
-                            $pointsAwarded = $q['points'];
-                            break;
-                        }
-                    }
-                }
-
-                $totalScore += $pointsAwarded;
+                $graded = $grader->grade($q, $studentAnswers[$q['id']] ?? null);
+                $totalScore += $graded['points'];
+                $pendingReview = $pendingReview || $graded['needs_review'];
 
                 $ansStmt->execute([
                     'att_id' => $attemptId,
-                    'q_id' => $qId,
-                    'c_id' => $selectedChoiceId ?: null,
-                    'correct' => $isCorrect ? 1 : 0,
-                    'points' => $pointsAwarded
+                    'q_id' => $q['id'],
+                    'c_id' => $graded['choice_id'],
+                    'text' => $graded['answer_text'],
+                    'correct' => $graded['is_correct'] ? 1 : 0,
+                    'points' => $graded['points'],
+                    'review' => $graded['needs_review'] ? 1 : 0
                 ]);
             }
 
-            // Mark attempt as graded
-            $upd = $this->pdo->prepare("UPDATE lms_quiz_attempts SET submitted_at = CURRENT_TIMESTAMP, score = :score, status = 'graded' WHERE id = :id");
-            $upd->execute(['score' => $totalScore, 'id' => $attemptId]);
+            // Attempts with answers awaiting faculty review stay 'submitted' (provisional score)
+            // and are excluded from the gradebook until every flagged answer is resolved.
+            $upd = $this->pdo->prepare("UPDATE lms_quiz_attempts SET submitted_at = CURRENT_TIMESTAMP, score = :score, status = :status WHERE id = :id AND status = 'in_progress'");
+            $upd->execute(['score' => $totalScore, 'status' => $pendingReview ? 'submitted' : 'graded', 'id' => $attemptId]);
+            if ($upd->rowCount() !== 1) {
+                throw new \RuntimeException('Attempt was already submitted.');
+            }
 
             $this->pdo->commit();
             return true;
@@ -253,6 +298,76 @@ class LmsQuizService
             error_log("Quiz Submission Error: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Applies faculty decisions to an attempt's text answers, then recomputes the score.
+     * The attempt becomes 'graded' once no answer is left awaiting review.
+     *
+     * @param array $decisions question id => ['points' => float] (already range-checked by the caller)
+     */
+    public function reviewAttempt(int $attemptId, array $decisions, int $reviewerId): bool
+    {
+        $attempt = $this->getAttempt($attemptId);
+        if (!$attempt || $attempt['status'] === 'in_progress') {
+            return false;
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $upd = $this->pdo->prepare("
+                UPDATE lms_quiz_answers a
+                JOIN lms_questions q ON q.id = a.lms_question_id
+                SET a.points_awarded = :points, a.is_correct = :correct, a.needs_review = 0,
+                    a.reviewed_by = :reviewer, a.reviewed_at = CURRENT_TIMESTAMP
+                WHERE a.lms_quiz_attempt_id = :aid AND a.lms_question_id = :qid
+                  AND q.question_type IN ('identification', 'fill_blank')
+            ");
+            foreach ($decisions as $questionId => $decision) {
+                $upd->execute([
+                    'points' => $decision['points'],
+                    'correct' => !empty($decision['is_correct']) ? 1 : 0,
+                    'reviewer' => $reviewerId,
+                    'aid' => $attemptId,
+                    'qid' => (int)$questionId
+                ]);
+            }
+
+            $sumStmt = $this->pdo->prepare("SELECT COALESCE(SUM(points_awarded), 0) AS score, COALESCE(SUM(needs_review), 0) AS pending FROM lms_quiz_answers WHERE lms_quiz_attempt_id = :aid");
+            $sumStmt->execute(['aid' => $attemptId]);
+            $totals = $sumStmt->fetch(PDO::FETCH_ASSOC);
+
+            $att = $this->pdo->prepare("UPDATE lms_quiz_attempts SET score = :score, status = :status WHERE id = :id");
+            $att->execute([
+                'score' => (float)$totals['score'],
+                'status' => (int)$totals['pending'] > 0 ? 'submitted' : 'graded',
+                'id' => $attemptId
+            ]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (\Throwable $e) {
+            $this->pdo->rollBack();
+            error_log("Quiz Review Error: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function countAnswersNeedingReview(int $quizId): array
+    {
+        $stmt = $this->pdo->prepare("
+            SELECT a.lms_quiz_attempt_id, COUNT(*) AS pending
+            FROM lms_quiz_answers a
+            JOIN lms_quiz_attempts t ON t.id = a.lms_quiz_attempt_id
+            WHERE t.lms_quiz_id = :qid AND a.needs_review = 1
+            GROUP BY a.lms_quiz_attempt_id
+        ");
+        $stmt->execute(['qid' => $quizId]);
+        $map = [];
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $map[(int)$row['lms_quiz_attempt_id']] = (int)$row['pending'];
+        }
+        return $map;
     }
 
     public function getAttemptDetails(int $attemptId): array

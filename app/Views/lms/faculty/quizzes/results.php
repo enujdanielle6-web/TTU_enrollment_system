@@ -16,6 +16,8 @@
         </a>
     </div>
 
+    <?php require __DIR__ . '/_flash.php'; ?>
+
     <!-- Quiz Context Hero Card -->
     <div class="lms-card p-4 mb-4 border-0 shadow-sm bg-white rounded-4 position-relative overflow-hidden">
         <div class="row align-items-center g-3">
@@ -87,13 +89,14 @@
                             <th class="py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Attempt</th>
                             <th class="py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Status</th>
                             <th class="py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Submitted At</th>
-                            <th class="text-end pe-4 py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Score</th>
+                            <th class="text-end py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Score</th>
+                            <th class="text-end pe-4 py-3 text-muted text-uppercase small" style="letter-spacing: 0.04em;">Answers</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($attempts)): ?>
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-pencil-square fs-1 d-block mb-2 opacity-50"></i>
                                     No student quiz attempts recorded yet.
                                 </td>
@@ -126,6 +129,10 @@
                                             <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
                                                 <i class="bi bi-check-circle me-1"></i>Completed
                                             </span>
+                                        <?php elseif ($status === 'submitted'): ?>
+                                            <span class="badge bg-warning text-dark rounded-pill px-2.5 py-1 fw-bold">
+                                                <i class="bi bi-hourglass-split me-1"></i>Needs Review (<?= (int)($pending_review[(int)$attempt['id']] ?? 0) ?>)
+                                            </span>
                                         <?php elseif ($status === 'in_progress'): ?>
                                             <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 rounded-pill px-2.5 py-1 fw-bold">
                                                 <i class="bi bi-clock me-1"></i>In Progress
@@ -139,12 +146,19 @@
                                             <?= !empty($attempt['submitted_at']) ? '<i class="bi bi-clock me-1"></i>' . date('M d, Y h:i A', strtotime($attempt['submitted_at'])) : '<span class="text-muted">—</span>' ?>
                                         </span>
                                     </td>
-                                    <td class="text-end pe-4">
+                                    <td class="text-end">
                                         <?php if ($attempt['score'] !== null): ?>
                                             <span class="fw-bold fs-6 text-dark"><?= esc($attempt['score']) ?></span>
-                                            <span class="text-muted small">Pts</span>
+                                            <span class="text-muted small">Pts<?= $status === 'submitted' ? ' (provisional)' : '' ?></span>
                                         <?php else: ?>
                                             <span class="text-muted small">—</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <?php if ($status !== 'in_progress'): ?>
+                                            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/attempts/<?= esc($attempt['id']) ?>/review" class="btn btn-sm <?= $status === 'submitted' ? 'btn-warning' : 'btn-outline-secondary' ?> rounded-pill px-3">
+                                                <?= $status === 'submitted' ? 'Review' : 'View' ?>
+                                            </a>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
