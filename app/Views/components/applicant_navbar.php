@@ -152,7 +152,7 @@ $isApprovedOrEnrolled = $hasApplication && in_array($navAppStatus, ['approved', 
 
         <?php if ($navAppStatus === 'enrolled'): ?>
             <li class="nav-item">
-                <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-primary bg-primary bg-opacity-10 fw-semibold" href="/sia/auth/lms_student_login.php">
+                <a class="nav-link rounded-3 px-3 py-2 d-flex align-items-center text-primary bg-primary bg-opacity-10 fw-semibold" href="<?= BASE_PATH ?>/auth/lms_student_login.php">
                   <i class="bi bi-box-arrow-in-right me-2"></i> Student LMS Portal
                 </a>
             </li>

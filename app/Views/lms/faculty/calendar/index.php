@@ -50,7 +50,7 @@ $todayYear = date('Y');
           <span class="badge bg-white border text-secondary px-3 py-2 rounded-pill shadow-xs small fw-semibold">
             <i class="bi bi-clock me-1 text-primary"></i> <?= date('l, F d, Y') ?>
           </span>
-          <a href="/sia/lms/faculty/dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-arrow-left"></i>
             <span>Dashboard</span>
           </a>
@@ -89,13 +89,13 @@ $todayYear = date('Y');
 
                         <!-- Month Nav Controls -->
                         <div class="btn-group btn-group-sm border rounded-pill overflow-hidden bg-white shadow-xs">
-                            <a href="/sia/lms/faculty/calendar?month=<?= esc($prevMonth) ?>&year=<?= esc($prevYear) ?>" class="btn btn-white text-dark px-2.5 py-1.5" title="Previous Month">
+                            <a href="<?= BASE_PATH ?>/lms/faculty/calendar?month=<?= esc($prevMonth) ?>&year=<?= esc($prevYear) ?>" class="btn btn-white text-dark px-2.5 py-1.5" title="Previous Month">
                                 <i class="bi bi-chevron-left"></i>
                             </a>
-                            <a href="/sia/lms/faculty/calendar?month=<?= esc($todayMonth) ?>&year=<?= esc($todayYear) ?>" class="btn btn-white text-dark px-3 py-1.5 fw-bold" title="Current Month">
+                            <a href="<?= BASE_PATH ?>/lms/faculty/calendar?month=<?= esc($todayMonth) ?>&year=<?= esc($todayYear) ?>" class="btn btn-white text-dark px-3 py-1.5 fw-bold" title="Current Month">
                                 Today
                             </a>
-                            <a href="/sia/lms/faculty/calendar?month=<?= esc($nextMonth) ?>&year=<?= esc($nextYear) ?>" class="btn btn-white text-dark px-2.5 py-1.5" title="Next Month">
+                            <a href="<?= BASE_PATH ?>/lms/faculty/calendar?month=<?= esc($nextMonth) ?>&year=<?= esc($nextYear) ?>" class="btn btn-white text-dark px-2.5 py-1.5" title="Next Month">
                                 <i class="bi bi-chevron-right"></i>
                             </a>
                         </div>

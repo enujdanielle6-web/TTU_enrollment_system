@@ -48,6 +48,9 @@ class FacultyController extends BaseController
         }
 
         $course = $lmsService->getCourseDetails($courseId);
+        if (!$course) {
+            $this->notFound($response, '404 Not Found - The requested course does not exist.');
+        }
         $modulesWithMaterials = $lmsService->getModulesWithMaterialsForCourse($courseId);
 
         $pageTitle = 'Course Management - ' . $course['subject_code'];
@@ -73,7 +76,7 @@ class FacultyController extends BaseController
         
         $lmsService->createModule($courseId, $title, $orderIndex);
         
-        $this->redirect('/sia/lms/faculty/course.php?id=' . $courseId);
+        $this->redirect(BASE_PATH . '/lms/faculty/course.php?id=' . $courseId);
     }
 
     public function uploadMaterial(Request $request, Response $response)
@@ -133,7 +136,7 @@ class FacultyController extends BaseController
             }
         }
         
-        $this->redirect('/sia/lms/faculty/course.php?id=' . $courseId);
+        $this->redirect(BASE_PATH . '/lms/faculty/course.php?id=' . $courseId);
     }
 
     public function updateModule(Request $request, Response $response)
@@ -161,7 +164,7 @@ class FacultyController extends BaseController
         $orderIndex = isset($data['order_index']) ? (int)$data['order_index'] : (int)$module['display_order'];
 
         $lmsService->updateModule($moduleId, $title, $orderIndex);
-        $this->redirect('/sia/lms/faculty/course.php?id=' . $courseId);
+        $this->redirect(BASE_PATH . '/lms/faculty/course.php?id=' . $courseId);
     }
 
     public function deleteModule(Request $request, Response $response)
@@ -186,7 +189,7 @@ class FacultyController extends BaseController
         }
 
         $lmsService->deleteModule($moduleId);
-        $this->redirect('/sia/lms/faculty/course.php?id=' . $courseId);
+        $this->redirect(BASE_PATH . '/lms/faculty/course.php?id=' . $courseId);
     }
 
     public function deleteMaterial(Request $request, Response $response)
@@ -211,7 +214,7 @@ class FacultyController extends BaseController
         }
 
         $lmsService->deleteMaterial($materialId);
-        $this->redirect('/sia/lms/faculty/course.php?id=' . $courseId);
+        $this->redirect(BASE_PATH . '/lms/faculty/course.php?id=' . $courseId);
     }
 
     public function roster(Request $request, Response $response, string $courseId)
@@ -312,7 +315,7 @@ class FacultyController extends BaseController
                 $response->setStatusCode(422);
                 return $response->json(['success' => false, 'error' => 'Message content cannot be empty.']);
             }
-            $this->redirect('/sia/lms/faculty/messages.php');
+            $this->redirect(BASE_PATH . '/lms/faculty/messages.php');
             return;
         }
 
@@ -334,17 +337,17 @@ class FacultyController extends BaseController
                 return $response->json([
                     'success' => true,
                     'thread_id' => $threadId,
-                    'redirect_url' => '/sia/lms/faculty/messages.php?thread_id=' . $threadId
+                    'redirect_url' => BASE_PATH . '/lms/faculty/messages.php?thread_id=' . $threadId
                 ]);
             }
 
-            $this->redirect('/sia/lms/faculty/messages.php?thread_id=' . $threadId);
+            $this->redirect(BASE_PATH . '/lms/faculty/messages.php?thread_id=' . $threadId);
         } catch (\Exception $e) {
             if ($request->header('Accept') === 'application/json' || $request->input('ajax')) {
                 $response->setStatusCode(400);
                 return $response->json(['success' => false, 'error' => $e->getMessage()]);
             }
-            $this->redirect('/sia/lms/faculty/messages.php');
+            $this->redirect(BASE_PATH . '/lms/faculty/messages.php');
         }
     }
 
@@ -360,9 +363,9 @@ class FacultyController extends BaseController
     {
         $courseId = (int)$request->input('course_id');
         if ($courseId > 0) {
-            $this->redirect("/sia/lms/faculty/course/{$courseId}/assignments");
+            $this->redirect(BASE_PATH . "/lms/faculty/course/{$courseId}/assignments");
         } else {
-            $this->redirect("/sia/lms/faculty/dashboard.php");
+            $this->redirect(BASE_PATH . "/lms/faculty/dashboard.php");
         }
     }
 
@@ -370,9 +373,9 @@ class FacultyController extends BaseController
     {
         $courseId = (int)$request->input('course_id');
         if ($courseId > 0) {
-            $this->redirect("/sia/lms/faculty/course/{$courseId}/quizzes");
+            $this->redirect(BASE_PATH . "/lms/faculty/course/{$courseId}/quizzes");
         } else {
-            $this->redirect("/sia/lms/faculty/dashboard.php");
+            $this->redirect(BASE_PATH . "/lms/faculty/dashboard.php");
         }
     }
 }

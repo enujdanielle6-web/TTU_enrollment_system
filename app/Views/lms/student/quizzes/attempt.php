@@ -51,7 +51,7 @@
 </div>
 
 <div class="container-fluid px-md-4 pb-5">
-    <form id="quizForm" action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/attempt/<?= esc($attempt['id']) ?>/submit" method="POST">
+    <form id="quizForm" action="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/attempt/<?= esc($attempt['id']) ?>/submit" method="POST">
         <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
 
         <div class="row g-4">
@@ -85,6 +85,23 @@
                             </h5>
                         </div>
 
+                        <?php if (\App\Services\Quiz\QuizQuestionValidator::isTextType($q['question_type'])): ?>
+                        <!-- Typed Answer (identification / fill in the blank) -->
+                        <div class="typed-answer">
+                            <label class="form-label small fw-semibold text-muted" for="answer_<?= esc($q['id']) ?>">
+                                <?= $q['question_type'] === 'fill_blank' ? 'Type the word or phrase that fills the blank' : 'Type your answer' ?>
+                            </label>
+                            <input type="text"
+                                   class="form-control form-control-lg text-answer-input"
+                                   name="answers[<?= esc($q['id']) ?>]"
+                                   id="answer_<?= esc($q['id']) ?>"
+                                   data-qid="<?= esc($q['id']) ?>"
+                                   maxlength="1000"
+                                   autocomplete="off"
+                                   spellcheck="false">
+                            <div class="form-text"><?= !empty($q['case_sensitive']) ? 'Letter case counts for this question.' : 'Letter case does not matter.' ?></div>
+                        </div>
+                        <?php else: ?>
                         <!-- Choice Options Grid -->
                         <div class="choices-list d-flex flex-column gap-2.5">
                             <?php foreach ($q['choices'] as $cIndex => $c): 
@@ -112,6 +129,7 @@
                                 </label>
                             <?php endforeach; ?>
                         </div>
+                        <?php endif; ?>
 
                     </div>
                 <?php endforeach; ?>
@@ -419,6 +437,26 @@
                     if (navBtn) navBtn.classList.add('answered');
 
                     this.updateStats();
+                });
+            });
+
+            // Typed answers count as answered once they contain text
+            document.querySelectorAll('.text-answer-input').forEach(input => {
+                input.addEventListener('input', (e) => {
+                    const qId = parseInt(e.target.dataset.qid);
+                    const navBtn = document.getElementById('nav-btn-' + qId);
+                    if (e.target.value.trim() !== '') {
+                        answeredMap.add(qId);
+                        if (navBtn) navBtn.classList.add('answered');
+                    } else {
+                        answeredMap.delete(qId);
+                        if (navBtn) navBtn.classList.remove('answered');
+                    }
+                    this.updateStats();
+                });
+                // Enter in a text box should not submit the whole quiz
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') e.preventDefault();
                 });
             });
 

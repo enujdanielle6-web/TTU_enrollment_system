@@ -75,7 +75,7 @@
                 </h4>
                 <p class="text-muted small mb-0">Create, manage, and grade student homework, laboratory activities, and project submissions.</p>
             </div>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
                 <i class="bi bi-plus-lg"></i>
                 <span>New Assignment</span>
             </a>
@@ -91,7 +91,7 @@
                         <p class="text-muted mb-4" style="max-width: 450px; margin: 0 auto;">
                             There are currently no assignments authored for this course section. Students will see assignments once published.
                         </p>
-                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
                             <i class="bi bi-plus-lg me-1"></i> Create First Assignment
                         </a>
                     </div>
@@ -123,7 +123,7 @@
                                                 </span>
                                             </div>
                                             <h5 class="fw-bold text-dark mb-1 text-truncate" title="<?= htmlspecialchars($assignment['title']) ?>">
-                                                <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submissions" class="text-decoration-none text-dark hover-primary">
+                                                <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submissions" class="text-decoration-none text-dark hover-primary">
                                                     <?= htmlspecialchars($assignment['title']) ?>
                                                 </a>
                                             </h5>
@@ -144,13 +144,13 @@
                                     </div>
 
                                     <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submissions" class="btn btn-primary rounded-pill px-3.5 py-1.5 fw-bold btn-sm shadow-xs">
+                                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/submissions" class="btn btn-primary rounded-pill px-3.5 py-1.5 fw-bold btn-sm shadow-xs">
                                             <i class="bi bi-people-fill me-1"></i> Submissions
                                         </a>
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/edit" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold btn-sm">
+                                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/edit" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold btn-sm">
                                             <i class="bi bi-pencil me-1"></i> Edit
                                         </a>
-                                        <form method="POST" action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this assignment and all student submissions? This cannot be undone.');">
+                                        <form method="POST" action="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/assignments/<?= esc($assignment['id']) ?>/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this assignment and all student submissions? This cannot be undone.');">
                                             <?= getCsrfInput() ?>
                                             <button type="submit" class="btn btn-outline-danger rounded-pill px-2.5 py-1.5 btn-sm" title="Delete Assignment">
                                                 <i class="bi bi-trash"></i>

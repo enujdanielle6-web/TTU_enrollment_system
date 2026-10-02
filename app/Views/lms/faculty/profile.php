@@ -23,7 +23,7 @@
           </div>
         </div>
         <div class="d-flex align-items-center gap-2">
-          <a href="/sia/lms/faculty/dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-arrow-left"></i>
             <span>Back to Dashboard</span>
           </a>

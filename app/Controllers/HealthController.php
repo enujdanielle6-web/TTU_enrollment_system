@@ -22,13 +22,13 @@ class HealthController extends BaseController
 
         if (!$application) {
             $_SESSION['error_msg'] = 'No active application found.';
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
             return;
         }
 
         if (!in_array($application['status'], ['approved', 'payment_verified', 'enrolled'], true)) {
             $_SESSION['error_msg'] = 'You can only submit health information once your application is approved.';
-            $response->redirect('/sia/applicant/status.php');
+            $response->redirect(BASE_PATH . '/applicant/status.php');
             return;
         }
 
@@ -58,7 +58,7 @@ class HealthController extends BaseController
 
         if (!$application) {
             $_SESSION['error_msg'] = 'No active application found.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
         $appId = (int) $application['id'];
@@ -104,56 +104,56 @@ class HealthController extends BaseController
 
         if (empty($heightRaw) || empty($weightRaw) || empty($bloodType) || empty($emergencyName) || empty($emergencyRelationship) || empty($emergencyContact)) {
             $_SESSION['error_msg'] = 'Please fill out all required physical and emergency contact fields.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
         if ($heightVal < 30 || $heightVal > 300) {
             $_SESSION['error_msg'] = 'Please enter a realistic height between 30 cm and 300 cm.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
         if ($weightVal < 10 || $weightVal > 500) {
             $_SESSION['error_msg'] = 'Please enter a realistic weight between 10 kg and 500 kg.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
         $validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Unknown'];
         if (!in_array($bloodType, $validBloodTypes, true)) {
             $_SESSION['error_msg'] = 'Please select a valid blood type from the list.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
         if ($hasAllergies && empty($allergiesDetails)) {
             $_SESSION['error_msg'] = 'Please specify your allergy details in the Additional Information section.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
         if ($hasExistingCondition && empty($medicalConditions)) {
             $_SESSION['error_msg'] = 'Please specify your existing medical conditions in the Additional Information section.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
         if ($hasMaintenanceMedication && empty($currentMedications)) {
             $_SESSION['error_msg'] = 'Please specify your current maintenance medications in the Additional Information section.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
         if (strlen($emergencyName) < 2) {
             $_SESSION['error_msg'] = 'Please enter a valid emergency contact name.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
         if (!preg_match('/^(09\d{9}|(\+639)\d{9})$/', $emergencyContact)) {
             $_SESSION['error_msg'] = 'Emergency contact number must be a valid 11-digit Philippine mobile number starting with 09 (e.g. 09123456789).';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
             return;
         }
 
@@ -195,14 +195,14 @@ class HealthController extends BaseController
 
             $pdo->commit();
             $_SESSION['success_msg'] = 'Health information submitted successfully. Please proceed to the clinic for medical clearance.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
         } catch (\PDOException $e) {
             if ($pdo->inTransaction()) {
                 $pdo->rollBack();
             }
             error_log('Health Info Submit Failed: ' . $e->getMessage());
             $_SESSION['error_msg'] = 'A database error occurred while saving your health information.';
-            $response->redirect('/sia/applicant/health_info.php');
+            $response->redirect(BASE_PATH . '/applicant/health_info.php');
         }
     }
 }

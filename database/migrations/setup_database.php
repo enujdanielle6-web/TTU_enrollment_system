@@ -15,24 +15,14 @@ declare(strict_types=1);
 ini_set('max_execution_time', '300');
 $isCli = (php_sapi_name() === 'cli');
 
-// 1. Load .env configuration
-$envPath = dirname(__DIR__, 2) . '/.env';
-if (file_exists($envPath)) {
-    $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        $line = trim($line);
-        if ($line === '' || strpos($line, '#') === 0 || strpos($line, ';') === 0) continue;
-        if (strpos($line, '=') !== false) {
-            list($key, $value) = explode('=', $line, 2);
-            $key = trim($key);
-            $value = trim($value, " \t\n\r\0\x0B\"'");
-            if (!array_key_exists($key, $_SERVER) && !array_key_exists($key, $_ENV)) {
-                putenv("$key=$value");
-                $_ENV[$key] = $value;
-                $_SERVER[$key] = $value;
-            }
-        }
-    }
+// 1. Load configuration (config/config.php, then .env)
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
+
+// This tool DROPS and recreates the whole database. Never expose it on a production site.
+if (!$isCli && (getenv('APP_ENV') ?: 'production') === 'production') {
+    http_response_code(404);
+    echo 'Not Found';
+    exit;
 }
 
 $host = getenv('DB_HOST') ?: '127.0.0.1';
@@ -371,8 +361,8 @@ if (!$isCli && !$shouldExecute) {
 
                     <form method="POST" action="setup_database.php?execute=1" class="actions-bar">
                         <div style="display: flex; gap: 0.75rem; align-items: center;">
-                            <a href="/sia/" class="btn btn-outline">🏠 Main Page</a>
-                            <a href="/sia/auth/login.php" class="btn btn-outline">🔑 Portal Login</a>
+                            <a href="<?= BASE_PATH ?>/" class="btn btn-outline">🏠 Main Page</a>
+                            <a href="<?= BASE_PATH ?>/auth/login.php" class="btn btn-outline">🔑 Portal Login</a>
                         </div>
                         <button type="submit" name="execute" value="1" class="btn <?= ($dbExists && $existingTableCount > 0) ? 'btn-danger' : 'btn-primary' ?>">
                             ⚡ <?= ($dbExists && $existingTableCount > 0) ? 'Reset & Reseed Database' : 'Initialize Database Now' ?>
@@ -569,7 +559,7 @@ try {
         echo "<p style='color: #64748b; font-size: 0.85rem; margin-bottom: 1rem;'>Click on any portal route to open the module directly:</p>";
         echo "<table><thead><tr><th>Role</th><th>Email / Identifier</th><th>Password</th><th>Portal Route</th><th>Quick Action</th></tr></thead><tbody>";
         foreach ($defaultAccounts as $acc) {
-            $webLink = '/sia' . $acc['route'];
+            $webLink = BASE_PATH . $acc['route'];
             echo "<tr>";
             echo "<td><span class='badge badge-role'>" . htmlspecialchars($acc['role']) . "</span></td>";
             echo "<td><code>" . htmlspecialchars($acc['identifier']) . "</code></td>";
@@ -580,8 +570,8 @@ try {
         }
         echo "</tbody></table>";
         echo "<div style='margin-top: 1.5rem; display: flex; gap: 0.75rem;'>";
-        echo "<a href='/sia/auth/login.php' class='btn' style='background: #16a34a; padding: 0.6rem 1.25rem; font-size: 0.9rem;'>🔑 Proceed to Portal Login</a>";
-        echo "<a href='/sia/' class='btn' style='background: #475569; padding: 0.6rem 1.25rem; font-size: 0.9rem;'>🏠 University Homepage</a>";
+        echo "<a href='" . BASE_PATH . "/auth/login.php' class='btn' style='background: #16a34a; padding: 0.6rem 1.25rem; font-size: 0.9rem;'>🔑 Proceed to Portal Login</a>";
+        echo "<a href='" . BASE_PATH . "/' class='btn' style='background: #475569; padding: 0.6rem 1.25rem; font-size: 0.9rem;'>🏠 University Homepage</a>";
         echo "</div>";
         echo "</div></body></html>";
     }

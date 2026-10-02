@@ -27,15 +27,15 @@ require_once __DIR__ . '/../layout_header.php';
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <a href="/sia/lms/admin/sync" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/sync" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-arrow-repeat"></i>
             <span>Sync Hub</span>
           </a>
-          <a href="/sia/lms/admin/generator" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/generator" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-plus-circle"></i>
             <span>Course Generator</span>
           </a>
-          <a href="/sia/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>LMS Dashboard</span>
           </a>
@@ -63,7 +63,7 @@ require_once __DIR__ . '/../layout_header.php';
     <!-- Filter Bar Dossier Card -->
     <div class="dossier-card mb-4 fade-in-up" style="animation-delay: 0.1s;">
       <div class="p-3.5 px-4">
-        <form action="/sia/lms/admin/courses" method="GET" class="row g-2.5 align-items-center">
+        <form action="<?= BASE_PATH ?>/lms/admin/courses" method="GET" class="row g-2.5 align-items-center">
           <div class="col-md-4">
             <div class="input-group">
               <span class="input-group-text bg-light border-end-0 text-muted rounded-start-pill ps-3"><i class="bi bi-search"></i></span>
@@ -100,7 +100,7 @@ require_once __DIR__ . '/../layout_header.php';
               <i class="bi bi-funnel"></i>
               <span>Filter</span>
             </button>
-            <a href="/sia/lms/admin/courses" class="btn btn-light border rounded-pill px-3 shadow-xs hover-lift" title="Reset Filters">
+            <a href="<?= BASE_PATH ?>/lms/admin/courses" class="btn btn-light border rounded-pill px-3 shadow-xs hover-lift" title="Reset Filters">
               <i class="bi bi-arrow-counterclockwise"></i>
             </a>
           </div>
@@ -227,7 +227,7 @@ require_once __DIR__ . '/../layout_header.php';
                       <?php endif; ?>
                     </td>
                     <td class="text-end pe-4">
-                      <a href="/sia/lms/admin/courses/<?= (int)$c['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-medium d-inline-flex align-items-center gap-1 hover-lift">
+                      <a href="<?= BASE_PATH ?>/lms/admin/courses/<?= (int)$c['id'] ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-medium d-inline-flex align-items-center gap-1 hover-lift">
                         <i class="bi bi-eye"></i>
                         <span>Inspect</span>
                         <i class="bi bi-chevron-right small"></i>
@@ -247,7 +247,7 @@ require_once __DIR__ . '/../layout_header.php';
             <ul class="pagination pagination-sm mb-0">
               <?php for ($p = 1; $p <= $totalPages; $p++): ?>
                 <li class="page-item <?= $p === $currentPage ? 'active' : '' ?>">
-                  <a class="page-link rounded-pill mx-0.5 px-2.5" href="/sia/lms/admin/courses?page=<?= $p ?>&search=<?= urlencode($filters['search'] ?? '') ?>&academic_level=<?= urlencode($filters['academic_level'] ?? '') ?>&status=<?= urlencode($filters['status'] ?? '') ?>&faculty_filter=<?= urlencode($filters['faculty_filter'] ?? '') ?>"><?= $p ?></a>
+                  <a class="page-link rounded-pill mx-0.5 px-2.5" href="<?= BASE_PATH ?>/lms/admin/courses?page=<?= $p ?>&search=<?= urlencode($filters['search'] ?? '') ?>&academic_level=<?= urlencode($filters['academic_level'] ?? '') ?>&status=<?= urlencode($filters['status'] ?? '') ?>&faculty_filter=<?= urlencode($filters['faculty_filter'] ?? '') ?>"><?= $p ?></a>
                 </li>
               <?php endfor; ?>
             </ul>

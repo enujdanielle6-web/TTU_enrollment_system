@@ -5,13 +5,13 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0 align-items-center">
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
-                <li class="breadcrumb-item"><a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="text-decoration-none text-muted">Attendance</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-grid-1x2 me-1"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="text-decoration-none text-muted">Attendance</a></li>
                 <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">New Session</li>
             </ol>
         </nav>
-        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-2">
+        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold d-inline-flex align-items-center gap-2">
             <i class="bi bi-arrow-left"></i> Back to Attendance
         </a>
     </div>
@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="card-body p-4 p-md-5">
-                    <form action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/store" method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true;">
+                    <form action="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/store" method="POST" onsubmit="this.querySelector('button[type=submit]').disabled=true;">
                         <?= getCsrfInput() ?>
                         
                         <div class="mb-4">
@@ -60,7 +60,7 @@
                         <hr class="my-4">
 
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="btn btn-light rounded-pill px-4">Cancel</a>
+                            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance" class="btn btn-light rounded-pill px-4">Cancel</a>
                             <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm">
                                 <i class="bi bi-check2-circle me-1"></i> Create &amp; Take Roll Call
                             </button>

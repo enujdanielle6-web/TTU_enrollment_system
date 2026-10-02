@@ -17,8 +17,8 @@ require_once __DIR__ . '/../components/header.php';
         <div class="auth-island fade-in-up" style="animation-delay: 0.08s;">
           
           <div class="text-center mb-4">
-            <a href="/sia/" class="d-inline-block text-decoration-none mb-3">
-              <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(13, 110, 253, 0.2));">
+            <a href="<?= BASE_PATH ?>/" class="d-inline-block text-decoration-none mb-3">
+              <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain; filter: drop-shadow(0 4px 10px rgba(13, 110, 253, 0.2));">
             </a>
             <h1 class="h4 mb-1 fw-bold text-dark" style="letter-spacing: -0.02em;">
               <?php if ($portal === 'admin'): ?>
@@ -62,7 +62,7 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php endif; ?>
 
-          <form action="/sia/auth/forgot_password_process.php" method="post" novalidate id="forgotPasswordForm">
+          <form action="<?= BASE_PATH ?>/auth/forgot_password_process.php" method="post" novalidate id="forgotPasswordForm">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             <input type="hidden" name="portal" value="<?= htmlspecialchars($portal, ENT_QUOTES, 'UTF-8'); ?>">
 
@@ -120,19 +120,19 @@ require_once __DIR__ . '/../components/header.php';
 
           <div class="mt-4 text-center border-top pt-3">
             <?php if ($portal === 'admin'): ?>
-              <a href="/sia/auth/lms_admin_login.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1.5 transition-all">
+              <a href="<?= BASE_PATH ?>/auth/lms_admin_login.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1.5 transition-all">
                 <i class="bi bi-arrow-left"></i> Back to LMS Admin Login
               </a>
             <?php elseif ($portal === 'faculty'): ?>
-              <a href="/sia/auth/lms_faculty_login.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1.5 transition-all">
+              <a href="<?= BASE_PATH ?>/auth/lms_faculty_login.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1.5 transition-all">
                 <i class="bi bi-arrow-left"></i> Back to Faculty Login
               </a>
             <?php elseif ($portal === 'student'): ?>
-              <a href="/sia/auth/lms_student_login.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1.5 transition-all">
+              <a href="<?= BASE_PATH ?>/auth/lms_student_login.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1.5 transition-all">
                 <i class="bi bi-arrow-left"></i> Back to Student Login
               </a>
             <?php else: ?>
-              <a href="/sia/auth/login.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1.5 transition-all">
+              <a href="<?= BASE_PATH ?>/auth/login.php" class="text-muted small text-decoration-none btn-link d-inline-flex align-items-center gap-1.5 transition-all">
                 <i class="bi bi-arrow-left"></i> Back to Login
               </a>
             <?php endif; ?>

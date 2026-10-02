@@ -93,7 +93,7 @@ $barcodeSvg = generateCode39Svg($receiptNo, 36);
 ?>
 
 <style>
-@import url('/sia/public/vendor/fonts/fonts.css');
+@import url('<?= BASE_PATH ?>/public/vendor/fonts/fonts.css');
 
 /* Main Canvas Styling */
 body {
@@ -419,7 +419,7 @@ body {
         
         <!-- Header -->
         <div class="thermal-header">
-          <img src="/sia/images/TTU_LOGO.png" alt="TTU" class="thermal-logo">
+          <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU" class="thermal-logo">
           <div class="thermal-title">Triple T University</div>
           <div class="thermal-sub">Office of the Cashier & Finance</div>
           <div style="font-size: 9px; opacity: 0.85;">Institution Code: TTU-NCR-2026</div>
@@ -587,14 +587,14 @@ body {
       <div class="position-absolute top-0 start-0 w-100 bg-primary" style="height: 6px;"></div>
       
       <!-- Background Seal Watermark -->
-      <img src="/sia/images/TTU_LOGO.png" alt="TTU Watermark" class="receipt-watermark">
+      <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Watermark" class="receipt-watermark">
       
       <div class="p-4 p-sm-5 position-relative" style="z-index: 2;">
         
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center receipt-standard-header">
           <div class="d-flex align-items-center">
-            <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 68px; width: auto; object-fit: contain;" class="me-3">
+            <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 68px; width: auto; object-fit: contain;" class="me-3">
             <div>
               <h1 class="h4 fw-black text-dark mb-0" style="letter-spacing: -0.5px; font-family: 'Poppins', sans-serif;">TRIPLE T UNIVERSITY</h1>
               <p class="text-muted mb-0 small fw-medium">Office of the Cashier & Student Financial Accounting</p>

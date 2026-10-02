@@ -23,7 +23,7 @@ class DocumentController extends BaseController
 
         if (!$application) {
             $_SESSION['error_msg'] = 'Please complete the enrollment form first.';
-            $response->redirect('/sia/applicant/dashboard.php');
+            $response->redirect(BASE_PATH . '/applicant/dashboard.php');
             return;
         }
 
@@ -91,7 +91,7 @@ class DocumentController extends BaseController
                 } else {
                     $_SESSION['doc_error'] = $message;
                 }
-                $response->redirect('/sia/applicant/documents.php');
+                $response->redirect(BASE_PATH . '/applicant/documents.php');
             }
             exit;
         };
@@ -219,7 +219,7 @@ class DocumentController extends BaseController
                 } else {
                     $_SESSION['error_msg'] = $message;
                 }
-                $response->redirect('/sia/applicant/documents.php');
+                $response->redirect(BASE_PATH . '/applicant/documents.php');
             }
             exit;
         };

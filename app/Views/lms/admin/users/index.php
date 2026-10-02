@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layout_header.php';
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <a href="/sia/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
+          <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>LMS Dashboard</span>
           </a>
@@ -51,7 +51,7 @@ require_once __DIR__ . '/../layout_header.php';
 
     <!-- Filter Bar Card -->
     <div class="dossier-card mb-4 p-3.5 bg-white shadow-sm border-0 rounded-4">
-      <form action="/sia/lms/admin/users" method="GET" class="row g-2.5 align-items-center">
+      <form action="<?= BASE_PATH ?>/lms/admin/users" method="GET" class="row g-2.5 align-items-center">
         <div class="col-md-5">
           <div class="input-group">
             <span class="input-group-text bg-light border-0 text-muted"><i class="bi bi-search"></i></span>
@@ -81,7 +81,7 @@ require_once __DIR__ . '/../layout_header.php';
           <button type="submit" class="btn btn-primary rounded-pill px-3 w-100 fw-semibold shadow-xs">
             <i class="bi bi-filter me-1"></i> Filter
           </button>
-          <a href="/sia/lms/admin/users" class="btn btn-light border rounded-pill px-3 shadow-xs">Reset</a>
+          <a href="<?= BASE_PATH ?>/lms/admin/users" class="btn btn-light border rounded-pill px-3 shadow-xs">Reset</a>
         </div>
       </form>
     </div>
@@ -199,7 +199,7 @@ require_once __DIR__ . '/../layout_header.php';
                     <div class="modal fade" id="userStatusModal<?= (int)$u['id'] ?>" tabindex="-1" aria-hidden="true" style="text-align: left;">
                       <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-                          <form action="/sia/lms/admin/users/<?= (int)$u['id'] ?>/status" method="POST">
+                          <form action="<?= BASE_PATH ?>/lms/admin/users/<?= (int)$u['id'] ?>/status" method="POST">
                             <?= getCsrfInput() ?>
                             <div class="modal-header bg-light border-bottom p-3.5 px-4">
                               <h5 class="modal-title fw-bold text-dark">
@@ -250,7 +250,7 @@ require_once __DIR__ . '/../layout_header.php';
           <ul class="pagination pagination-sm mb-0">
             <?php for ($p = 1; $p <= $totalPages; $p++): ?>
               <li class="page-item <?= $p === $currentPage ? 'active' : '' ?>">
-                <a class="page-link" href="/sia/lms/admin/users?page=<?= $p ?>&search=<?= urlencode($filters['search'] ?? '') ?>&role=<?= urlencode($filters['role'] ?? '') ?>&lms_status=<?= urlencode($filters['lms_status'] ?? '') ?>"><?= $p ?></a>
+                <a class="page-link" href="<?= BASE_PATH ?>/lms/admin/users?page=<?= $p ?>&search=<?= urlencode($filters['search'] ?? '') ?>&role=<?= urlencode($filters['role'] ?? '') ?>&lms_status=<?= urlencode($filters['lms_status'] ?? '') ?>"><?= $p ?></a>
               </li>
             <?php endfor; ?>
           </ul>

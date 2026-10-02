@@ -67,7 +67,7 @@ class FacultyAttendanceController extends BaseController
 
         $sessionId = $this->attendanceService->createSession($data);
 
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/attendance/{$sessionId}/edit");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/attendance/{$sessionId}/edit");
     }
 
     public function edit(Request $request, Response $response, string $courseId, string $id)
@@ -113,6 +113,6 @@ class FacultyAttendanceController extends BaseController
 
         $this->attendanceService->saveAttendance($sessionId, $attendance);
 
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/attendance");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/attendance");
     }
 }

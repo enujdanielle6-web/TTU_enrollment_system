@@ -4,9 +4,9 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0 py-2 px-3 bg-white rounded-3 border shadow-xs align-items-center" style="font-size: 0.88rem;">
-            <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/my_courses.php" class="text-decoration-none text-muted">My Courses</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-primary fw-medium"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/my_courses.php" class="text-decoration-none text-muted">My Courses</a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-primary fw-medium"><?= htmlspecialchars($course['subject_code']) ?></a></li>
             <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page"><?= htmlspecialchars($quiz['title']) ?></li>
         </ol>
     </nav>
@@ -111,7 +111,7 @@
                                     </h5>
                                     <p class="text-muted small mb-0">Your answers are preserved. You can resume this attempt immediately.</p>
                                 </div>
-                                <form action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/start" method="POST" class="m-0 flex-shrink-0">
+                                <form action="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/start" method="POST" class="m-0 flex-shrink-0">
                                     <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
                                     <button type="submit" class="btn btn-warning btn-lg px-4 py-2.5 rounded-pill shadow-sm fw-bold d-inline-flex align-items-center gap-2">
                                         <i class="bi bi-play-circle-fill fs-5"></i>
@@ -125,7 +125,7 @@
                                     <h5 class="fw-bold text-dark mb-1">Ready to take Attempt #<?= count($attempts) + 1 ?>?</h5>
                                     <p class="text-muted small mb-0">Ensure you have a reliable internet connection before starting.</p>
                                 </div>
-                                <form action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/start" method="POST" class="m-0 flex-shrink-0">
+                                <form action="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/start" method="POST" class="m-0 flex-shrink-0">
                                     <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
                                     <button type="submit" class="btn btn-primary btn-lg px-5 py-2.5 rounded-pill shadow-sm fw-bold d-inline-flex align-items-center gap-2" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
                                         <i class="bi bi-rocket-takeoff-fill fs-5"></i>
@@ -145,7 +145,7 @@
                                     </div>
                                 </div>
                                 <?php if (!empty($attempts)): ?>
-                                    <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/result/<?= esc($attempts[0]['id']) ?>" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                                    <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/result/<?= esc($attempts[0]['id']) ?>" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
                                         <i class="bi bi-eye-fill"></i>
                                         <span>Review Latest Results</span>
                                     </a>
@@ -255,6 +255,10 @@
                                                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1">
                                                     <i class="bi bi-check-circle-fill me-1"></i>Graded
                                                 </span>
+                                            <?php elseif ($attempt['status'] === 'submitted'): ?>
+                                                <span class="badge bg-warning text-dark rounded-pill px-2.5 py-1">
+                                                    <i class="bi bi-hourglass-split me-1"></i>Awaiting Review
+                                                </span>
                                             <?php elseif ($attempt['status'] === 'in_progress'): ?>
                                                 <span class="badge bg-warning bg-opacity-15 text-warning-emphasis border border-warning border-opacity-25 rounded-pill px-2.5 py-1">
                                                     <i class="bi bi-clock me-1"></i>In Progress
@@ -276,17 +280,17 @@
                                                     </span>
                                                 </div>
                                             <?php else: ?>
-                                                <span class="text-muted small">&mdash; Pending Submission &mdash;</span>
+                                                <span class="text-muted small">&mdash; <?= $attempt['status'] === 'submitted' ? 'Score pending review' : 'Pending Submission' ?> &mdash;</span>
                                             <?php endif; ?>
                                         </td>
                                         <td class="text-end pe-4 py-3">
                                             <?php if ($attempt['status'] !== 'in_progress'): ?>
-                                                <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/result/<?= esc($attempt['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs">
+                                                <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/result/<?= esc($attempt['id']) ?>" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs">
                                                     <span>View Results</span>
                                                     <i class="bi bi-arrow-right-short fs-6"></i>
                                                 </a>
                                             <?php else: ?>
-                                                <form action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/start" method="POST" class="d-inline m-0">
+                                                <form action="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/start" method="POST" class="d-inline m-0">
                                                     <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
                                                     <button type="submit" class="btn btn-sm btn-warning rounded-pill px-3 py-1.5 fw-semibold shadow-xs">
                                                         Resume &rarr;

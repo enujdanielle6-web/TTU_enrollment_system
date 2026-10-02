@@ -38,12 +38,12 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= isset($pageTitle) ? htmlspecialchars($pageTitle) : 'LMS Administration & Governance - TTU' ?></title>
     <!-- CSS & Fonts -->
-    <link href="/sia/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/sia/public/vendor/fonts/fonts.css">
-    <link rel="stylesheet" href="/sia/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
-    <link href="/sia/css/main.css?v=<?= esc(file_exists(dirname(__DIR__, 4) . '/css/main.css') ? filemtime(dirname(__DIR__, 4) . '/css/main.css') : '1.0') ?>" rel="stylesheet">
+    <link href="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/vendor/fonts/fonts.css">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/vendor/bootstrap-icons/bootstrap-icons.min.css">
+    <link href="<?= BASE_PATH ?>/css/main.css?v=<?= esc(file_exists(dirname(__DIR__, 4) . '/css/main.css') ? filemtime(dirname(__DIR__, 4) . '/css/main.css') : '1.0') ?>" rel="stylesheet">
     <!-- Custom LMS CSS -->
-    <link rel="stylesheet" href="/sia/public/css/lms.css?v=<?= esc($lmsCssVer) ?>">
+    <link rel="stylesheet" href="<?= BASE_PATH ?>/public/css/lms.css?v=<?= esc($lmsCssVer) ?>">
     <style>
       :root {
         --lms-admin-primary: #0d6efd;
@@ -155,9 +155,9 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
 <aside class="lms-sidebar" id="lmsSidebar">
     <!-- Brand Header -->
     <div class="lms-sidebar-brand d-flex align-items-center justify-content-between px-3 py-3 border-bottom">
-        <a href="/sia/lms/admin/dashboard" class="d-flex align-items-center gap-2 text-decoration-none">
+        <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="d-flex align-items-center gap-2 text-decoration-none">
             <div class="lms-brand-icon shadow-xs">
-                <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 28px; width: auto; object-fit: contain;">
+                <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 28px; width: auto; object-fit: contain;">
             </div>
             <div class="nav-text">
                 <span class="fw-bold text-dark d-block" style="font-size: 1.05rem; line-height: 1.15; letter-spacing: -0.01em;">TTU LMS</span>
@@ -181,35 +181,35 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
     <!-- Navigation Menu Items -->
     <div class="lms-nav-menu flex-grow-1">
         <div class="lms-section-label">Operational Hub</div>
-        <a href="/sia/lms/admin/dashboard" class="lms-nav-link <?= esc($activeTab === 'dashboard' ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="lms-nav-link <?= esc($activeTab === 'dashboard' ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-grid-1x2-fill"></i>
             </div>
             <span class="nav-text">Dashboard</span>
         </a>
 
-        <a href="/sia/lms/admin/courses" class="lms-nav-link <?= esc($activeTab === 'courses' ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/admin/courses" class="lms-nav-link <?= esc($activeTab === 'courses' ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-journal-bookmark-fill"></i>
             </div>
             <span class="nav-text">Course Catalog</span>
         </a>
 
-        <a href="/sia/lms/admin/sync" class="lms-nav-link <?= esc($activeTab === 'sync' ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/admin/sync" class="lms-nav-link <?= esc($activeTab === 'sync' ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-arrow-repeat"></i>
             </div>
             <span class="nav-text">Sync &amp; Conflicts</span>
         </a>
 
-        <a href="/sia/lms/admin/cloner" class="lms-nav-link <?= esc($activeTab === 'cloner' ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/admin/cloner" class="lms-nav-link <?= esc($activeTab === 'cloner' ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-copy"></i>
             </div>
             <span class="nav-text">Content Cloner</span>
         </a>
 
-        <a href="/sia/lms/admin/announcements" class="lms-nav-link <?= esc($activeTab === 'announcements' ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/admin/announcements" class="lms-nav-link <?= esc($activeTab === 'announcements' ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-megaphone-fill"></i>
             </div>
@@ -217,21 +217,21 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
         </a>
 
         <div class="lms-section-label mt-3">Governance &amp; Audit</div>
-        <a href="/sia/lms/admin/users" class="lms-nav-link <?= esc($activeTab === 'users' ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/admin/users" class="lms-nav-link <?= esc($activeTab === 'users' ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-person-badge-fill"></i>
             </div>
             <span class="nav-text">User Access</span>
         </a>
 
-        <a href="/sia/lms/admin/archive" class="lms-nav-link <?= esc($activeTab === 'archive' ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/admin/archive" class="lms-nav-link <?= esc($activeTab === 'archive' ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-archive-fill"></i>
             </div>
             <span class="nav-text">Term Archival</span>
         </a>
 
-        <a href="/sia/lms/admin/audit_logs" class="lms-nav-link <?= esc($activeTab === 'audit_logs' ? 'active' : '') ?>">
+        <a href="<?= BASE_PATH ?>/lms/admin/audit_logs" class="lms-nav-link <?= esc($activeTab === 'audit_logs' ? 'active' : '') ?>">
             <div class="lms-nav-icon">
                 <i class="bi bi-shield-check"></i>
             </div>
@@ -239,7 +239,7 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
         </a>
 
         <div class="lms-section-label mt-3">System Gateways</div>
-        <a href="/sia/lms/faculty/dashboard.php" class="lms-nav-link">
+        <a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="lms-nav-link">
             <div class="lms-nav-icon">
                 <i class="bi bi-person-video3"></i>
             </div>
@@ -247,7 +247,7 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
         </a>
 
         <?php if ($userRole === 'superadmin'): ?>
-        <a href="/sia/admin/dashboard.php" class="lms-nav-link">
+        <a href="<?= BASE_PATH ?>/admin/dashboard.php" class="lms-nav-link">
             <div class="lms-nav-icon">
                 <i class="bi bi-box-arrow-left"></i>
             </div>
@@ -277,7 +277,7 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
             </div>
         </div>
         
-        <a href="/sia/auth/lms_admin_logout.php" class="lms-logout-btn text-decoration-none">
+        <a href="<?= BASE_PATH ?>/auth/lms_admin_logout.php" class="lms-logout-btn text-decoration-none">
             <i class="bi bi-box-arrow-right"></i>
             <span class="nav-text">Sign out</span>
         </a>
@@ -311,7 +311,7 @@ $currentModuleTitle = $moduleLabels[$activeTab] ?? 'Governance';
       <nav aria-label="Breadcrumb">
         <ul class="lms-breadcrumb d-flex align-items-center mb-0">
           <li>
-            <a href="/sia/lms/admin/dashboard">
+            <a href="<?= BASE_PATH ?>/lms/admin/dashboard">
               <i class="bi bi-shield-check text-primary"></i>
               <span>LMS Governance</span>
             </a>
@@ -331,14 +331,14 @@ $currentModuleTitle = $moduleLabels[$activeTab] ?? 'Governance';
       </div>
 
       <!-- Quick Sync Status Link -->
-      <a href="/sia/lms/admin/sync" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Reconciliation & Diagnostics">
+      <a href="<?= BASE_PATH ?>/lms/admin/sync" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Reconciliation & Diagnostics">
         <i class="bi bi-arrow-repeat text-primary"></i>
         <span>Sync Hub</span>
       </a>
 
       <!-- Main SIS Switcher for Superadmin -->
       <?php if ($userRole === 'superadmin'): ?>
-      <a href="/sia/admin/dashboard.php" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Switch to Main SIS">
+      <a href="<?= BASE_PATH ?>/admin/dashboard.php" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Switch to Main SIS">
         <i class="bi bi-box-arrow-left text-primary"></i>
         <span class="d-none d-sm-inline">Main SIS</span>
       </a>
@@ -359,14 +359,14 @@ $currentModuleTitle = $moduleLabels[$activeTab] ?? 'Governance';
             <span class="badge bg-primary bg-opacity-10 text-primary mt-1 px-2 py-0.5" style="font-size: 0.65rem;">LMS Administrator</span>
           </li>
           <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="/sia/lms/faculty/dashboard.php">
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="<?= BASE_PATH ?>/lms/faculty/dashboard.php">
               <i class="bi bi-person-video3 text-primary"></i>
               <span>Faculty Portal View</span>
             </a>
           </li>
           <?php if ($userRole === 'superadmin'): ?>
           <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="/sia/admin/dashboard.php">
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="<?= BASE_PATH ?>/admin/dashboard.php">
               <i class="bi bi-building text-primary"></i>
               <span>University Main SIS</span>
             </a>
@@ -374,7 +374,7 @@ $currentModuleTitle = $moduleLabels[$activeTab] ?? 'Governance';
           <?php endif; ?>
           <li><hr class="dropdown-divider my-1"></li>
           <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-danger" href="/sia/auth/lms_admin_logout.php">
+            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-danger" href="<?= BASE_PATH ?>/auth/lms_admin_logout.php">
               <i class="bi bi-box-arrow-right"></i>
               <span>Sign Out</span>
             </a>

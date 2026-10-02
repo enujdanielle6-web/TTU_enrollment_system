@@ -180,7 +180,7 @@ requirePermission('medical.review');
 
 $id = (int)($_GET['id'] ?? 0);
 if ($id <= 0) {
-    $response->redirect("/sia/admin/clinic/medical_clearance.php");
+    $response->redirect(BASE_PATH . "/admin/clinic/medical_clearance.php");
     return;
 }
 
@@ -199,13 +199,13 @@ try {
 
     if (!$record) {
         $_SESSION['error_msg'] = 'Health record not found.';
-        $response->redirect("/sia/admin/clinic/medical_clearance.php");
+        $response->redirect(BASE_PATH . "/admin/clinic/medical_clearance.php");
         return;
     }
 } catch (PDOException $e) {
     error_log('Medical detail fetch failed: ' . $e->getMessage());
     $_SESSION['error_msg'] = 'A database error occurred.';
-    $response->redirect("/sia/admin/clinic/medical_clearance.php");
+    $response->redirect(BASE_PATH . "/admin/clinic/medical_clearance.php");
     return;
 }
 
@@ -223,7 +223,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         requirePermission('medical.review');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/admin/clinic/medical_clearance.php");
+            $response->redirect(BASE_PATH . "/admin/clinic/medical_clearance.php");
             return;
         }
 
@@ -238,7 +238,7 @@ $validStatuses = ['pending', 'verified', 'correction_required', 'rejected'];
 
 if ($recordId <= 0 || !in_array($status, $validStatuses, true)) {
     $_SESSION['error_msg'] = 'Invalid request parameters.';
-    $response->redirect("/sia/admin/clinic/medical_clearance.php");
+    $response->redirect(BASE_PATH . "/admin/clinic/medical_clearance.php");
     return;
 }
 
@@ -293,7 +293,7 @@ try {
 
     $pdo->commit();
     $_SESSION['success_msg'] = 'Medical clearance successfully updated.';
-    $response->redirect("/sia/admin/clinic/medical_detail.php?id={$recordId}");
+    $response->redirect(BASE_PATH . "/admin/clinic/medical_detail.php?id={$recordId}");
     return;
 
 } catch (\Exception $e) {
@@ -302,7 +302,7 @@ try {
     }
     error_log('Medical Process Failed: ' . $e->getMessage());
     $_SESSION['error_msg'] = 'A database error occurred while updating the record.';
-    $response->redirect("/sia/admin/clinic/medical_detail.php?id={$recordId}");
+    $response->redirect(BASE_PATH . "/admin/clinic/medical_detail.php?id={$recordId}");
     return;
 }
 

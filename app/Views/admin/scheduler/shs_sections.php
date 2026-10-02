@@ -288,7 +288,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
   </div>
 </div>
 
-<script src="/sia/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
 <script>
 const allCurricula = <?= json_encode($curricula ?? []) ?>;
 

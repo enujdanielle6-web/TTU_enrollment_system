@@ -176,7 +176,7 @@ public function detail(Request $request, Response $response)
         $appId = (int) $request->input('id', 0);
         
         if ($appId <= 0) {
-            $response->redirect('/sia/admin/admissions/review.php');
+            $response->redirect(BASE_PATH . '/admin/admissions/review.php');
             return;
         }
         
@@ -196,7 +196,7 @@ public function detail(Request $request, Response $response)
             $app = $stmt->fetch();
         
             if (!$app) {
-                $response->redirect('/sia/admin/admissions/review.php');
+                $response->redirect(BASE_PATH . '/admin/admissions/review.php');
                 return;
             }
         
@@ -339,7 +339,7 @@ public function process(Request $request, Response $response)
 $csrfToken = $_POST['csrf_token'] ?? '';
 if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
     $_SESSION['admin_error'] = 'Security validation failed. Please try again.';
-    $response->redirect("/sia/admin/admissions/review.php");
+    $response->redirect(BASE_PATH . "/admin/admissions/review.php");
     return;
 }
 
@@ -355,7 +355,7 @@ if ($action === 'update_subjects') {
     
     if ($appId <= 0) {
         $_SESSION['admin_error'] = 'Invalid application ID.';
-        $response->redirect("/sia/admin/admissions/review.php");
+        $response->redirect(BASE_PATH . "/admin/admissions/review.php");
         return;
     }
     
@@ -418,7 +418,7 @@ if ($action === 'update_subjects') {
         $_SESSION['admin_error'] = 'Database error while updating subjects.';
     }
     
-    $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+    $response->redirect(BASE_PATH . "/admin/admissions/application_detail.php?id={$appId}");
     return;
 }
 
@@ -428,7 +428,7 @@ $validStatuses = ['pending', 'under_review', 'correction_required', 'approved', 
 
 if ($appId <= 0 || !in_array($status, $validStatuses, true)) {
     $_SESSION['admin_error'] = 'Invalid application ID or status.';
-    $response->redirect("/sia/admin/admissions/review.php");
+    $response->redirect(BASE_PATH . "/admin/admissions/review.php");
     return;
 }
 
@@ -437,7 +437,7 @@ try {
     if ($status === 'enrolled') {
         if (!hasPermission('enrollment.finalize')) {
             $_SESSION['admin_error'] = 'You do not have permission to finalize enrollments.';
-            $response->redirect("/sia/admin/admissions/review.php");
+            $response->redirect(BASE_PATH . "/admin/admissions/review.php");
             return;
         }
 
@@ -447,7 +447,7 @@ try {
         
         if (!$assessment || $assessment['payment_status'] === 'unpaid') {
             $_SESSION['admin_error'] = 'Cannot enroll student. Payment requirements have not been met (must be at least partially paid).';
-            $response->redirect("/sia/admin/admissions/review.php");
+            $response->redirect(BASE_PATH . "/admin/admissions/review.php");
             return;
         }
     }
@@ -461,7 +461,7 @@ try {
         if ($healthStatus !== 'verified') {
             $currStatus = $healthStatus ? ucfirst($healthStatus) : 'Not Submitted';
             $_SESSION['admin_error'] = "Cannot enroll applicant. Medical clearance from the Clinic is required and must be verified (current status: {$currStatus}).";
-            $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+            $response->redirect(BASE_PATH . "/admin/admissions/application_detail.php?id={$appId}");
             return;
         }
     }
@@ -480,7 +480,7 @@ try {
             if (empty($currentDocs)) {
                 $statusText = $status === 'enrolled' ? 'enroll' : 'approve';
                 $_SESSION['admin_error'] = "Cannot {$statusText} applicant. No documents have been uploaded yet.";
-                $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+                $response->redirect(BASE_PATH . "/admin/admissions/application_detail.php?id={$appId}");
                 return;
             }
 
@@ -490,7 +490,7 @@ try {
                 if ($finalStatus !== 'verified') {
                     $statusText = $status === 'enrolled' ? 'enroll' : 'approve';
                     $_SESSION['admin_error'] = "Cannot {$statusText} applicant. All submitted documents must be verified first.";
-                    $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+                    $response->redirect(BASE_PATH . "/admin/admissions/application_detail.php?id={$appId}");
                     return;
                 }
             }
@@ -505,13 +505,13 @@ try {
     // Validate Status Transitions (Prevent reverting from Approved or Enrolled)
     if ($oldApp['status'] === 'enrolled' && $status !== 'enrolled') {
         $_SESSION['admin_error'] = 'Cannot change status. The applicant is already Officially Enrolled.';
-        $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+        $response->redirect(BASE_PATH . "/admin/admissions/application_detail.php?id={$appId}");
         return;
     }
     
     if ($oldApp['status'] === 'approved' && !in_array($status, ['approved', 'enrolled'])) {
         $_SESSION['admin_error'] = 'Cannot revert status. An approved application can only proceed to Officially Enrolled.';
-        $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+        $response->redirect(BASE_PATH . "/admin/admissions/application_detail.php?id={$appId}");
         return;
     }
 
@@ -884,7 +884,7 @@ try {
     $_SESSION['admin_error'] = 'A database error occurred: ' . $e->getMessage();
 }
 
-$response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+$response->redirect(BASE_PATH . "/admin/admissions/application_detail.php?id={$appId}");
 return;
 
 
@@ -902,7 +902,7 @@ $bulkStatus = $_POST['bulk_status'] ?? '';
 // 1. CSRF Verification
 if (empty($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $csrfToken)) {
     $_SESSION['admin_error'] = 'Security validation failed. Please try again.';
-    $response->redirect("/sia/admin/admissions/review.php");
+    $response->redirect(BASE_PATH . "/admin/admissions/review.php");
     return;
 }
 
@@ -910,7 +910,7 @@ $validStatuses = ['pending', 'under_review', 'correction_required', 'approved', 
 
 if (empty($selectedApps) || !in_array($bulkStatus, $validStatuses, true)) {
     $_SESSION['admin_error'] = 'No applications selected or invalid target status.';
-    $response->redirect("/sia/admin/admissions/review.php");
+    $response->redirect(BASE_PATH . "/admin/admissions/review.php");
     return;
 }
 
@@ -986,7 +986,7 @@ try {
     $_SESSION['admin_error'] = 'An error occurred while bulk processing applications.';
 }
 
-$response->redirect("/sia/admin/admissions/review.php");
+$response->redirect(BASE_PATH . "/admin/admissions/review.php");
 return;
 
 
@@ -1018,8 +1018,6 @@ return;
             $possiblePaths = [
                 dirname(__DIR__, 4) . '/uploads/documents/' . $filename,
                 dirname(__DIR__, 4) . '/app/uploads/documents/' . $filename,
-                'C:/xampp/htdocs/sia/uploads/documents/' . $filename,
-                'C:/xampp/htdocs/uploads/documents/' . $filename,
             ];
 
             $filepath = null;
@@ -1105,9 +1103,9 @@ SVG;
                 }
                 $appId = (int)$appId;
                 if ($appId > 0) {
-                    $response->redirect("/sia/admin/admissions/application_detail.php?id={$appId}");
+                    $response->redirect(BASE_PATH . "/admin/admissions/application_detail.php?id={$appId}");
                 } else {
-                    $response->redirect("/sia/admin/admissions/review.php");
+                    $response->redirect(BASE_PATH . "/admin/admissions/review.php");
                 }
             }
             exit;
@@ -1182,11 +1180,6 @@ SVG;
             $targetPath = $uploadDir . $newFilename;
 
             if (move_uploaded_file($file['tmp_name'], $targetPath)) {
-                $altDir = 'C:/xampp/htdocs/sia/uploads/documents/';
-                if (is_dir($altDir) && realpath($uploadDir) !== realpath($altDir)) {
-                    @copy($targetPath, $altDir . $newFilename);
-                }
-
                 $existing = ApplicationDocument::findByDocumentName($appId, $documentName);
                 if ($existing && !empty($existing['file_path'])) {
                     $oldPath = $uploadDir . basename($existing['file_path']);

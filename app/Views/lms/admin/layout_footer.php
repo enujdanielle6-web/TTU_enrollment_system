@@ -4,9 +4,9 @@
 </div> <!-- End lms-main -->
 
 <!-- Bootstrap JS -->
-<script src="/sia/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
-<script src="/sia/public/js/spa-router.js?v=<?= esc(file_exists(dirname(__DIR__, 4) . '/public/js/spa-router.js') ? filemtime(dirname(__DIR__, 4) . '/public/js/spa-router.js') : '1.0') ?>"></script>
-<script src="/sia/public/js/lms-shell.js?v=<?= esc(filemtime(__DIR__ . '/../../../../public/js/lms-shell.js')) ?>"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/js/spa-router.js?v=<?= esc(file_exists(dirname(__DIR__, 4) . '/public/js/spa-router.js') ? filemtime(dirname(__DIR__, 4) . '/public/js/spa-router.js') : '1.0') ?>"></script>
+<script src="<?= BASE_PATH ?>/public/js/lms-shell.js?v=<?= esc(filemtime(__DIR__ . '/../../../../public/js/lms-shell.js')) ?>"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const sidebar = document.getElementById('lmsSidebar');

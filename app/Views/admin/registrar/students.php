@@ -194,7 +194,7 @@ $exportQuery = http_build_query([
       <div class="official-letterhead text-center">
         <div class="d-flex align-items-center justify-content-between mb-2">
           <div style="width: 70px;">
-            <img src="/sia/public/images/logo.png" alt="TTU Logo" class="university-crest" onerror="this.style.display='none'">
+            <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" class="university-crest" onerror="this.style.display='none'">
           </div>
           <div class="flex-grow-1 text-center px-3">
             <div style="font-size: 9pt; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: #475569;">Republic of the Philippines</div>

@@ -8,12 +8,16 @@ use App\Core\Response;
 
 $router->get('/', ['App\Controllers\HomeController', 'index']);
 $router->get('/demo_landing.php', ['App\Controllers\HomeController', 'demo']);
-$router->get('/setup_database.php', function () {
-    require_once dirname(__DIR__, 2) . '/database/migrations/setup_database.php';
-});
-$router->post('/setup_database.php', function () {
-    require_once dirname(__DIR__, 2) . '/database/migrations/setup_database.php';
-});
+// Local database setup tool (not shipped in the production package; refuses to run when APP_ENV=production)
+$setupDatabase = function () {
+    $setupScript = dirname(__DIR__, 2) . '/database/migrations/setup_database.php';
+    if (!is_file($setupScript)) {
+        throw new \App\Core\HttpException(404, 'Route not found');
+    }
+    require_once $setupScript;
+};
+$router->get('/setup_database.php', $setupDatabase);
+$router->post('/setup_database.php', $setupDatabase);
 
 // PayMongo Webhook Endpoints (Public, Session & CSRF Bypassed, Cryptographically Verified)
 $router->post('/api/webhooks/paymongo', ['App\Controllers\WebhookController', 'handlePayMongo']);
@@ -162,49 +166,49 @@ $router->group(['middleware' => ['App\Middleware\SessionSecurityMiddleware', 'Ap
     
     // Legacy Admin LMS redirects (redirect to dedicated LMS side)
     $router->get('/admin/lms/dashboard', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/dashboard');
+        $response->redirect(BASE_PATH . '/lms/admin/dashboard');
     });
     $router->get('/admin/lms/courses', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/courses');
+        $response->redirect(BASE_PATH . '/lms/admin/courses');
     });
     $router->get('/admin/lms/courses/{id}', function (Request $request, Response $response, string $id) {
-        $response->redirect("/sia/lms/admin/courses/{$id}");
+        $response->redirect(BASE_PATH . "/lms/admin/courses/{$id}");
     });
     $router->post('/admin/lms/courses/{id}/reassign', ['App\Controllers\Admin\LmsAdminController', 'reassignFaculty']);
     $router->post('/admin/lms/courses/{id}/status', ['App\Controllers\Admin\LmsAdminController', 'updateCourseStatus']);
     
     $router->get('/admin/lms/generator', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/generator');
+        $response->redirect(BASE_PATH . '/lms/admin/generator');
     });
     $router->post('/admin/lms/generate', ['App\Controllers\Admin\LmsAdminController', 'generateLmsCourse']);
     
     $router->get('/admin/lms/users', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/users');
+        $response->redirect(BASE_PATH . '/lms/admin/users');
     });
     $router->post('/admin/lms/users/{id}/status', ['App\Controllers\Admin\LmsAdminController', 'updateUserStatus']);
     
     $router->get('/admin/lms/sync', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/sync');
+        $response->redirect(BASE_PATH . '/lms/admin/sync');
     });
     $router->post('/admin/lms/sync/reconcile', ['App\Controllers\Admin\LmsAdminController', 'reconcile']);
     $router->post('/admin/lms/conflicts/resolve', ['App\Controllers\Admin\LmsAdminController', 'resolveConflict']);
     
     $router->get('/admin/lms/archive', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/archive');
+        $response->redirect(BASE_PATH . '/lms/admin/archive');
     });
     $router->post('/admin/lms/archive/term', ['App\Controllers\Admin\LmsAdminController', 'processArchiveTerm']);
     
     $router->get('/admin/lms/audit_logs', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/audit_logs');
+        $response->redirect(BASE_PATH . '/lms/admin/audit_logs');
     });
     
     $router->get('/admin/lms/cloner', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/cloner');
+        $response->redirect(BASE_PATH . '/lms/admin/cloner');
     });
     $router->post('/admin/lms/cloner/process', ['App\Controllers\Admin\LmsAdminController', 'processCloneContent']);
     
     $router->get('/admin/lms/announcements', function (Request $request, Response $response) {
-        $response->redirect('/sia/lms/admin/announcements');
+        $response->redirect(BASE_PATH . '/lms/admin/announcements');
     });
     $router->post('/admin/lms/announcements/store', ['App\Controllers\Admin\LmsAdminController', 'storeAnnouncement']);
     $router->post('/admin/lms/announcements/{id}/update', ['App\Controllers\Admin\LmsAdminController', 'updateAnnouncement']);
@@ -326,14 +330,23 @@ $router->group([
 
     $router->get('/lms/faculty/course/{course_id}/quizzes', ['App\Controllers\Lms\FacultyQuizController', 'index']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/create', ['App\Controllers\Lms\FacultyQuizController', 'create']);
+    $router->get('/lms/faculty/course/{course_id}/quizzes/csv-template', ['App\Controllers\Lms\FacultyQuizController', 'csvTemplate']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/store', ['App\Controllers\Lms\FacultyQuizController', 'store']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/edit', ['App\Controllers\Lms\FacultyQuizController', 'edit']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/update', ['App\Controllers\Lms\FacultyQuizController', 'update']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/delete', ['App\Controllers\Lms\FacultyQuizController', 'delete']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/questions', ['App\Controllers\Lms\FacultyQuizController', 'questions']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/store', ['App\Controllers\Lms\FacultyQuizController', 'storeQuestion']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/import', ['App\Controllers\Lms\FacultyQuizController', 'importCsv']);
+    $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/questions/generate', ['App\Controllers\Lms\FacultyQuizController', 'generateForm']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/generate', ['App\Controllers\Lms\FacultyQuizController', 'generate']);
+    $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/questions/review', ['App\Controllers\Lms\FacultyQuizController', 'reviewDraft']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/review/save', ['App\Controllers\Lms\FacultyQuizController', 'saveDraft']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/review/discard', ['App\Controllers\Lms\FacultyQuizController', 'discardDraft']);
     $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/questions/{qid}/delete', ['App\Controllers\Lms\FacultyQuizController', 'deleteQuestion']);
     $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/results', ['App\Controllers\Lms\FacultyQuizController', 'results']);
+    $router->get('/lms/faculty/course/{course_id}/quizzes/{id}/attempts/{attempt_id}/review', ['App\Controllers\Lms\FacultyQuizController', 'reviewAttempt']);
+    $router->post('/lms/faculty/course/{course_id}/quizzes/{id}/attempts/{attempt_id}/review', ['App\Controllers\Lms\FacultyQuizController', 'saveAttemptReview']);
 
     $router->get('/lms/faculty/course/{course_id}/gradebook', ['App\Controllers\Lms\FacultyGradebookController', 'index']);
 

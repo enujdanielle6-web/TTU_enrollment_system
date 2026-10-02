@@ -52,7 +52,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <a href="/sia/#courses" target="_blank" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
+          <a href="<?= BASE_PATH ?>/#courses" target="_blank" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-2 shadow-xs">
             <i class="bi bi-box-arrow-up-right text-primary"></i>
             <span>Preview Landing</span>
           </a>
@@ -236,7 +236,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <form action="/sia/admin/registrar/college_program_process.php" method="POST">
+      <form action="<?= BASE_PATH ?>/admin/registrar/college_program_process.php" method="POST">
         <div class="modal-body p-4">
           <input type="hidden" name="action" value="update_landing_card">
           <?= getCsrfInput() ?>
@@ -329,7 +329,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         </div>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="/sia/admin/registrar/college_program_process.php" method="POST">
+      <form action="<?= BASE_PATH ?>/admin/registrar/college_program_process.php" method="POST">
         <div class="modal-body p-4">
           <input type="hidden" name="action" value="create_program">
           <?= getCsrfInput() ?>
@@ -404,7 +404,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         <h5 class="modal-title fw-bold text-dark mb-0"><i class="bi bi-pencil-square text-primary me-2"></i>Edit Program Information</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="/sia/admin/registrar/college_program_process.php" method="POST">
+      <form action="<?= BASE_PATH ?>/admin/registrar/college_program_process.php" method="POST">
         <div class="modal-body p-4">
           <input type="hidden" name="action" value="update_program">
           <?= getCsrfInput() ?>

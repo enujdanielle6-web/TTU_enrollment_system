@@ -11,7 +11,7 @@
                     <div class="position-absolute" style="top: -50px; right: -50px; width: 160px; height: 160px; background: var(--lms-primary-light); border-radius: 50%; opacity: 0.35; filter: blur(30px);"></div>
                     <div class="d-flex justify-content-between align-items-center mb-3 position-relative z-1">
                         <span class="text-primary fw-bold small text-uppercase"><i class="bi bi-calendar-event me-2"></i>Upcoming Schedule / Event</span>
-                        <a href="/sia/lms/student/calendar" class="text-primary small fw-semibold text-decoration-none">View Calendar &rarr;</a>
+                        <a href="<?= BASE_PATH ?>/lms/student/calendar" class="text-primary small fw-semibold text-decoration-none">View Calendar &rarr;</a>
                     </div>
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 position-relative z-1">
                         <div class="d-flex align-items-center gap-3">
@@ -40,7 +40,7 @@
                                 <p class="text-muted small mb-0">You have <?= count($enrolled_courses) ?> enrolled subjects for the active term. Select a course below to view syllabus and modules.</p>
                             </div>
                         </div>
-                        <a href="/sia/lms/student/my_courses.php" class="btn btn-primary rounded-pill px-4 fw-bold">My Courses &rarr;</a>
+                        <a href="<?= BASE_PATH ?>/lms/student/my_courses.php" class="btn btn-primary rounded-pill px-4 fw-bold">My Courses &rarr;</a>
                     </div>
                 </div>
             <?php endif; ?>
@@ -49,7 +49,7 @@
             <h4 class="fw-bold mb-3 h5 text-dark mt-2">Quick Actions</h4>
             <div class="row g-3 mb-4">
                 <div class="col-12 col-sm-6">
-                    <a href="/sia/lms/student/my_courses.php" class="lms-quick-action lms-qa-blue">
+                    <a href="<?= BASE_PATH ?>/lms/student/my_courses.php" class="lms-quick-action lms-qa-blue">
                         <div class="lms-qa-icon">
                             <i class="bi bi-journal-bookmark-fill"></i>
                         </div>
@@ -63,7 +63,7 @@
                     </a>
                 </div>
                 <div class="col-12 col-sm-6">
-                    <a href="/sia/lms/student/calendar" class="lms-quick-action lms-qa-amber">
+                    <a href="<?= BASE_PATH ?>/lms/student/calendar" class="lms-quick-action lms-qa-amber">
                         <div class="lms-qa-icon">
                             <i class="bi bi-calendar-event-fill"></i>
                         </div>
@@ -77,7 +77,7 @@
                     </a>
                 </div>
                 <div class="col-12 col-sm-6">
-                    <a href="/sia/lms/student/messages.php" class="lms-quick-action lms-qa-cyan">
+                    <a href="<?= BASE_PATH ?>/lms/student/messages.php" class="lms-quick-action lms-qa-cyan">
                         <div class="lms-qa-icon">
                             <i class="bi bi-chat-dots-fill"></i>
                         </div>
@@ -91,7 +91,7 @@
                     </a>
                 </div>
                 <div class="col-12 col-sm-6">
-                    <a href="/sia/lms/student/profile.php" class="lms-quick-action lms-qa-green">
+                    <a href="<?= BASE_PATH ?>/lms/student/profile.php" class="lms-quick-action lms-qa-green">
                         <div class="lms-qa-icon">
                             <i class="bi bi-person-fill"></i>
                         </div>
@@ -123,7 +123,7 @@
                             <p class="text-muted mb-3 small">
                                 Your enrolled subjects will automatically synchronize with your LMS portal once your official enrollment and section assignments are finalized.
                             </p>
-                            <a href="/sia/applicant/dashboard.php" class="btn btn-outline-primary px-4 py-2 rounded-pill shadow-sm fw-bold btn-sm">Check Admissions &rarr;</a>
+                            <a href="<?= BASE_PATH ?>/applicant/dashboard.php" class="btn btn-outline-primary px-4 py-2 rounded-pill shadow-sm fw-bold btn-sm">Check Admissions &rarr;</a>
                         </div>
                     </div>
                 </div>
@@ -141,7 +141,7 @@
                             $grad = $gradients[$idx % count($gradients)];
                     ?>
                         <div class="col-md-6">
-                            <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-dark d-block h-100">
+                            <a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-dark d-block h-100">
                                 <div class="lms-card h-100 transition-all shadow-sm-hover overflow-hidden border bg-white rounded-4" style="border-color: #eef2f6 !important;">
                                     <div class="p-3 text-white d-flex justify-content-between align-items-center" style="background: <?= $grad ?>;">
                                         <span class="badge badge-frosted-solid fw-bold px-3 py-1 rounded-pill small"><?= htmlspecialchars($course['code']) ?></span>
@@ -199,7 +199,7 @@
                         <?php if (!empty($upcoming_deadlines)): ?>
                             <span class="badge bg-warning bg-opacity-10 text-warning text-dark rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.65rem;"><?= count($upcoming_deadlines) ?> Pending</span>
                         <?php endif; ?>
-                        <a href="/sia/lms/student/calendar" class="text-primary small text-decoration-none fw-semibold text-nowrap">View all &rarr;</a>
+                        <a href="<?= BASE_PATH ?>/lms/student/calendar" class="text-primary small text-decoration-none fw-semibold text-nowrap">View all &rarr;</a>
                     </div>
                 </div>
                 <div class="p-3 pt-0">
@@ -272,7 +272,7 @@
                         <?php 
                         $firstCourseId = !empty($enrolled_courses) ? ($enrolled_courses[0]['lms_course_id'] ?? 1) : 1;
                         ?>
-                        <a href="/sia/lms/student/course/<?= $firstCourseId ?>/announcements" class="text-primary small text-decoration-none fw-semibold text-nowrap">View all &rarr;</a>
+                        <a href="<?= BASE_PATH ?>/lms/student/course/<?= $firstCourseId ?>/announcements" class="text-primary small text-decoration-none fw-semibold text-nowrap">View all &rarr;</a>
                     </div>
                 </div>
                 <div class="p-3 pt-0">
@@ -288,7 +288,7 @@
                             if (empty($authorName)) $authorName = 'Course Instructor';
                             $annDate = date('M d, Y', strtotime($ann['created_at']));
                         ?>
-                            <a href="/sia/lms/student/course/<?= $annCourseId ?>/announcements" class="lms-announcement-card text-decoration-none">
+                            <a href="<?= BASE_PATH ?>/lms/student/course/<?= $annCourseId ?>/announcements" class="lms-announcement-card text-decoration-none">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 px-2 py-0.5 fw-bold" style="font-size: 0.65rem;">
                                         <?= htmlspecialchars($ann['subject_code'] ?? 'Course') ?>

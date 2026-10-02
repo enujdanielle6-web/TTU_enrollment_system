@@ -22,7 +22,7 @@ require_once __DIR__ . '/components/navbar.php';
             Start your school application online with a clear, guided enrollment experience built for students and families.
           </p>
           <div class="hero-actions justify-content-center mt-4">
-            <a class="btn btn-primary btn-lg rounded-pill px-4 py-3 fw-bold d-inline-flex align-items-center gap-2 hero-btn-primary shadow-lg" href="/sia/auth/register.php">
+            <a class="btn btn-primary btn-lg rounded-pill px-4 py-3 fw-bold d-inline-flex align-items-center gap-2 hero-btn-primary shadow-lg" href="<?= BASE_PATH ?>/auth/register.php">
               <i class="bi bi-pencil-square"></i>
               <span>Enroll Now</span>
               <i class="bi bi-arrow-right ms-1"></i>
@@ -110,7 +110,7 @@ require_once __DIR__ . '/components/navbar.php';
                 <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-award me-1 text-warning"></i> Grades & Progress</span>
                 <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-chat-dots me-1 text-success"></i> Academic Notices</span>
               </div>
-              <a href="/sia/auth/lms_student_login.php" class="btn btn-primary rounded-pill py-2 px-4 fw-bold mt-auto w-100 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
+              <a href="<?= BASE_PATH ?>/auth/lms_student_login.php" class="btn btn-primary rounded-pill py-2 px-4 fw-bold mt-auto w-100 d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
                 <span>Student Login</span>
                 <i class="bi bi-arrow-right"></i>
               </a>
@@ -131,7 +131,7 @@ require_once __DIR__ . '/components/navbar.php';
                 <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-cloud-arrow-up me-1 text-primary"></i> Module Uploads</span>
                 <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-clipboard2-data me-1 text-warning"></i> Grading Sheets</span>
               </div>
-              <a href="/sia/auth/lms_faculty_login.php" class="btn btn-outline-primary rounded-pill py-2 px-4 fw-bold mt-auto w-100 d-flex align-items-center justify-content-center gap-2">
+              <a href="<?= BASE_PATH ?>/auth/lms_faculty_login.php" class="btn btn-outline-primary rounded-pill py-2 px-4 fw-bold mt-auto w-100 d-flex align-items-center justify-content-center gap-2">
                 <span>Faculty Login</span>
                 <i class="bi bi-arrow-right"></i>
               </a>
@@ -152,7 +152,7 @@ require_once __DIR__ . '/components/navbar.php';
                 <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-arrow-repeat me-1 text-info"></i> Timetable Sync</span>
                 <span class="badge bg-light text-secondary border rounded-pill px-2 py-1" style="font-size: 0.72rem;"><i class="bi bi-shield-check me-1 text-success"></i> Access Control</span>
               </div>
-              <a href="/sia/auth/lms_admin_login.php" class="btn btn-outline-dark rounded-pill py-2 px-4 fw-bold mt-auto w-100 d-flex align-items-center justify-content-center gap-2">
+              <a href="<?= BASE_PATH ?>/auth/lms_admin_login.php" class="btn btn-outline-dark rounded-pill py-2 px-4 fw-bold mt-auto w-100 d-flex align-items-center justify-content-center gap-2">
                 <span>Admin Login</span>
                 <i class="bi bi-arrow-right"></i>
               </a>
@@ -242,7 +242,7 @@ require_once __DIR__ . '/components/navbar.php';
         </div>
         <div class="col-lg-6 fade-in-up" style="animation-delay: 0.2s;">
           <div class="position-relative">
-            <img src="/sia/images/TTU_OUTSIDE.png" alt="TTU Campus Outside" class="img-fluid rounded-4 shadow-lg w-100" style="border: 1px solid rgba(226, 232, 240, 0.8);">
+            <img src="<?= BASE_PATH ?>/images/TTU_OUTSIDE.png" alt="TTU Campus Outside" class="img-fluid rounded-4 shadow-lg w-100" style="border: 1px solid rgba(226, 232, 240, 0.8);">
             <div class="position-absolute bottom-0 start-0 m-3 px-3 py-2 rounded-pill bg-dark bg-opacity-75 backdrop-blur text-white small d-inline-flex align-items-center gap-2 shadow" style="backdrop-filter: blur(8px);">
               <i class="bi bi-geo-alt-fill text-danger"></i>
               <span>Sahur City Campus • 123 Tung Tung Avenue</span>
@@ -694,7 +694,7 @@ require_once __DIR__ . '/components/navbar.php';
                         </div>
                       </div>
 
-                      <a href="/sia/applicant/enroll.php?level=shs&strand=<?= urlencode($strandCode) ?>" class="btn btn-primary rounded-pill w-100 fw-bold py-2 mt-auto d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
+                      <a href="<?= BASE_PATH ?>/applicant/enroll.php?level=shs&strand=<?= urlencode($strandCode) ?>" class="btn btn-primary rounded-pill w-100 fw-bold py-2 mt-auto d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
                         <span>Apply for <?= esc($strandCode) ?></span>
                         <i class="bi bi-arrow-right"></i>
                       </a>
@@ -752,7 +752,7 @@ require_once __DIR__ . '/components/navbar.php';
                         </div>
                       </div>
 
-                      <a href="/sia/applicant/enroll.php?level=college&program=<?= urlencode($programCode) ?>" class="btn btn-primary rounded-pill w-100 fw-bold py-2 mt-auto d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
+                      <a href="<?= BASE_PATH ?>/applicant/enroll.php?level=college&program=<?= urlencode($programCode) ?>" class="btn btn-primary rounded-pill w-100 fw-bold py-2 mt-auto d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
                         <span>Apply for <?= esc($programCode) ?></span>
                         <i class="bi bi-arrow-right"></i>
                       </a>
@@ -889,12 +889,12 @@ require_once __DIR__ . '/components/navbar.php';
 
                   <!-- Action Button -->
                   <?php if (!empty($_SESSION['logged_in']) && ($_SESSION['user_role'] ?? '') === 'applicant'): ?>
-                    <a href="/sia/applicant/scholarships.php" class="btn btn-primary rounded-pill w-100 fw-bold py-2 mt-auto d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
+                    <a href="<?= BASE_PATH ?>/applicant/scholarships.php" class="btn btn-primary rounded-pill w-100 fw-bold py-2 mt-auto d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
                       <span>Apply in Portal</span>
                       <i class="bi bi-arrow-right"></i>
                     </a>
                   <?php else: ?>
-                    <a href="/sia/auth/login.php?redirect=/sia/applicant/scholarships.php" class="btn btn-primary rounded-pill w-100 fw-bold py-2 mt-auto d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
+                    <a href="<?= BASE_PATH ?>/auth/login.php?redirect=<?= BASE_PATH ?>/applicant/scholarships.php" class="btn btn-primary rounded-pill w-100 fw-bold py-2 mt-auto d-flex align-items-center justify-content-center gap-2 shadow-sm" style="background: linear-gradient(135deg, #0d6efd 0%, #1d4ed8 100%); border: none;">
                       <span>Apply Now</span>
                       <i class="bi bi-arrow-right"></i>
                     </a>
@@ -1118,7 +1118,7 @@ require_once __DIR__ . '/components/navbar.php';
       <div class="row g-4 mb-5">
         <div class="col-lg-4 col-md-6">
           <div class="d-flex align-items-center gap-2 mb-3">
-            <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 48px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(13, 110, 253, 0.4));">
+            <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 48px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(13, 110, 253, 0.4));">
             <div>
               <h4 class="fw-bold text-white mb-0" style="font-size: 1.2rem; letter-spacing: -0.2px;">Triple T University</h4>
               <span class="text-white-50 small fw-semibold text-uppercase" style="letter-spacing: 1px; font-size: 0.68rem;">Center of Academic Excellence</span>
@@ -1152,11 +1152,11 @@ require_once __DIR__ . '/components/navbar.php';
         <div class="col-lg-3 col-md-6">
           <h5>Portals & Services</h5>
           <ul class="list-unstyled mb-0 d-flex flex-column gap-2 small">
-            <li><a href="/sia/auth/lms_student_login.php"><i class="bi bi-mortarboard me-1 text-primary"></i> Student LMS Portal</a></li>
-            <li><a href="/sia/auth/lms_faculty_login.php"><i class="bi bi-person-video3 me-1 text-info"></i> Faculty LMS Portal</a></li>
-            <li><a href="/sia/auth/login.php"><i class="bi bi-box-arrow-in-right me-1 text-success"></i> Applicant Portal Login</a></li>
-            <li><a href="/sia/auth/register.php"><i class="bi bi-pencil-square me-1 text-warning"></i> Online Application Form</a></li>
-            <li><a href="/sia/applicant/scholarships.php"><i class="bi bi-award me-1 text-primary"></i> Scholarship Services</a></li>
+            <li><a href="<?= BASE_PATH ?>/auth/lms_student_login.php"><i class="bi bi-mortarboard me-1 text-primary"></i> Student LMS Portal</a></li>
+            <li><a href="<?= BASE_PATH ?>/auth/lms_faculty_login.php"><i class="bi bi-person-video3 me-1 text-info"></i> Faculty LMS Portal</a></li>
+            <li><a href="<?= BASE_PATH ?>/auth/login.php"><i class="bi bi-box-arrow-in-right me-1 text-success"></i> Applicant Portal Login</a></li>
+            <li><a href="<?= BASE_PATH ?>/auth/register.php"><i class="bi bi-pencil-square me-1 text-warning"></i> Online Application Form</a></li>
+            <li><a href="<?= BASE_PATH ?>/applicant/scholarships.php"><i class="bi bi-award me-1 text-primary"></i> Scholarship Services</a></li>
           </ul>
         </div>
 

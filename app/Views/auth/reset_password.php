@@ -17,7 +17,7 @@ require_once __DIR__ . '/../components/header.php';
         <div class="auth-island fade-in-up" style="max-width: 500px; animation-delay: 0.1s;">
           <div class="text-center mb-4">
             <div class="mx-auto mb-3">
-              <img src="/sia/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain;">
+              <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Logo" style="height: 64px; width: auto; object-fit: contain;">
             </div>
             <div class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-2 fw-semibold">
               <i class="bi bi-shield-lock me-1"></i> 
@@ -65,7 +65,7 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php endif; ?>
 
-          <form id="resetForm" class="no-spinner" action="/sia/auth/reset_password_process.php" method="post" novalidate>
+          <form id="resetForm" class="no-spinner" action="<?= BASE_PATH ?>/auth/reset_password_process.php" method="post" novalidate>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             <input type="hidden" name="portal" value="<?= htmlspecialchars($portal ?? 'applicant', ENT_QUOTES, 'UTF-8'); ?>">
             <input type="hidden" name="email" value="<?= htmlspecialchars($email ?? '', ENT_QUOTES, 'UTF-8'); ?>">
@@ -124,7 +124,7 @@ require_once __DIR__ . '/../components/header.php';
 
           <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-4">
             <div>
-              <form action="/sia/auth/resend_reset_otp.php" method="post" id="resendForm" class="d-inline">
+              <form action="<?= BASE_PATH ?>/auth/resend_reset_otp.php" method="post" id="resendForm" class="d-inline">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="portal" value="<?= htmlspecialchars($portal ?? 'applicant', ENT_QUOTES, 'UTF-8'); ?>">
                 <input type="hidden" name="email" value="<?= htmlspecialchars($email ?? '', ENT_QUOTES, 'UTF-8'); ?>">
@@ -136,19 +136,19 @@ require_once __DIR__ . '/../components/header.php';
             </div>
             
             <?php if ($portal === 'admin'): ?>
-              <a href="/sia/auth/lms_admin_login.php" class="small text-muted text-decoration-none">
+              <a href="<?= BASE_PATH ?>/auth/lms_admin_login.php" class="small text-muted text-decoration-none">
                 <i class="bi bi-arrow-left me-1"></i> Back to LMS Admin Login
               </a>
             <?php elseif ($portal === 'faculty'): ?>
-              <a href="/sia/auth/lms_faculty_login.php" class="small text-muted text-decoration-none">
+              <a href="<?= BASE_PATH ?>/auth/lms_faculty_login.php" class="small text-muted text-decoration-none">
                 <i class="bi bi-arrow-left me-1"></i> Back to Faculty Login
               </a>
             <?php elseif ($portal === 'student'): ?>
-              <a href="/sia/auth/lms_student_login.php" class="small text-muted text-decoration-none">
+              <a href="<?= BASE_PATH ?>/auth/lms_student_login.php" class="small text-muted text-decoration-none">
                 <i class="bi bi-arrow-left me-1"></i> Back to Student Login
               </a>
             <?php else: ?>
-              <a href="/sia/auth/login.php" class="small text-muted text-decoration-none">
+              <a href="<?= BASE_PATH ?>/auth/login.php" class="small text-muted text-decoration-none">
                 <i class="bi bi-arrow-left me-1"></i> Back to Login
               </a>
             <?php endif; ?>

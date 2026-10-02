@@ -30,7 +30,7 @@ $todayYear = date('Y');
     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/dashboard.php" class="text-decoration-none">Dashboard</a></li>
                 <li class="breadcrumb-item active" aria-current="page">Calendar</li>
             </ol>
         </nav>
@@ -70,13 +70,13 @@ $todayYear = date('Y');
 
                         <!-- Month Nav Controls -->
                         <div class="btn-group btn-group-sm border rounded-pill overflow-hidden bg-white shadow-xs">
-                            <a href="/sia/lms/student/calendar?month=<?= esc($prevMonth) ?>&year=<?= esc($prevYear) ?>" class="btn btn-white text-dark px-2.5 py-1.5" title="Previous Month">
+                            <a href="<?= BASE_PATH ?>/lms/student/calendar?month=<?= esc($prevMonth) ?>&year=<?= esc($prevYear) ?>" class="btn btn-white text-dark px-2.5 py-1.5" title="Previous Month">
                                 <i class="bi bi-chevron-left"></i>
                             </a>
-                            <a href="/sia/lms/student/calendar?month=<?= esc($todayMonth) ?>&year=<?= esc($todayYear) ?>" class="btn btn-white text-dark px-3 py-1.5 fw-bold" title="Current Month">
+                            <a href="<?= BASE_PATH ?>/lms/student/calendar?month=<?= esc($todayMonth) ?>&year=<?= esc($todayYear) ?>" class="btn btn-white text-dark px-3 py-1.5 fw-bold" title="Current Month">
                                 Today
                             </a>
-                            <a href="/sia/lms/student/calendar?month=<?= esc($nextMonth) ?>&year=<?= esc($nextYear) ?>" class="btn btn-white text-dark px-2.5 py-1.5" title="Next Month">
+                            <a href="<?= BASE_PATH ?>/lms/student/calendar?month=<?= esc($nextMonth) ?>&year=<?= esc($nextYear) ?>" class="btn btn-white text-dark px-2.5 py-1.5" title="Next Month">
                                 <i class="bi bi-chevron-right"></i>
                             </a>
                         </div>

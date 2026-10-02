@@ -357,13 +357,13 @@ assertCheck($isRegistrarBlockedByAuth, "LmsAuthController login logic blocks Reg
 
 // Test 15: Public Navigation Dropdown contains LMS Admin Portal
 $publicNavbarContent = file_get_contents(__DIR__ . '/../app/Views/components/navbar.php');
-$hasAdminPortalLink = (strpos($publicNavbarContent, '/sia/auth/lms_admin_login.php') !== false);
+$hasAdminPortalLink = (strpos($publicNavbarContent, '<?= BASE_PATH ?>/auth/lms_admin_login.php') !== false);
 assertCheck($hasAdminPortalLink, "Public navbar.php LMS dropdown includes LMS Admin Portal gateway",
     "Students, Faculty, and Administrators each have dedicated public entry points");
 
 // Test 16: Faculty layout sidebar contains LMS Governance link for administrators
 $facultyHeaderContent = file_get_contents(__DIR__ . '/../app/Views/lms/faculty/layout_header.php');
-$hasFacultyAdminSwitch = (strpos($facultyHeaderContent, '/sia/lms/admin/dashboard') !== false);
+$hasFacultyAdminSwitch = (strpos($facultyHeaderContent, '<?= BASE_PATH ?>/lms/admin/dashboard') !== false);
 assertCheck($hasFacultyAdminSwitch, "Faculty layout sidebar contains quick-switcher to LMS Governance for admins",
     "Seamless navigation between teaching and platform administration");
 

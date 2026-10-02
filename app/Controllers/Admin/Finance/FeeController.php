@@ -24,7 +24,7 @@ $pageTitle = 'Fee Templates - Administrator';
     {
         $pdo = Database::getConnection();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/admin/finance/fees.php");
+    $response->redirect(BASE_PATH . "/admin/finance/fees.php");
     return;
 }
 
@@ -336,7 +336,7 @@ try {
     $_SESSION['error_msg'] = $e->getMessage();
 }
 
-$response->redirect("/sia/admin/finance/fees.php");
+$response->redirect(BASE_PATH . "/admin/finance/fees.php");
 return;
 
     }

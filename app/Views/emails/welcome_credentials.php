@@ -89,7 +89,7 @@
             <?php endif; ?>
 
             <center>
-                <a href="<?= htmlspecialchars($portalLink ?? 'http://localhost/sia/auth/lms_student_login.php') ?>" class="btn">Login to Student LMS Portal</a>
+                <a href="<?= htmlspecialchars($portalLink ?? app_absolute_url('/auth/lms_student_login.php')) ?>" class="btn">Login to Student LMS Portal</a>
             </center>
         </div>
         <div class="footer">

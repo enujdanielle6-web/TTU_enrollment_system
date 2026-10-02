@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layout_header.php';
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <a href="/sia/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>LMS Dashboard</span>
           </a>
@@ -34,7 +34,7 @@ require_once __DIR__ . '/../layout_header.php';
 
     <!-- Filter & Search Toolbar Card -->
     <div class="dossier-card mb-4 p-3.5 bg-white border-0 shadow-sm fade-in-up">
-      <form action="/sia/lms/admin/audit_logs" method="GET" class="row g-2.5 align-items-center">
+      <form action="<?= BASE_PATH ?>/lms/admin/audit_logs" method="GET" class="row g-2.5 align-items-center">
         <div class="col-md-9 col-lg-10">
           <div class="input-group">
             <span class="input-group-text bg-light border-0 text-muted rounded-start-pill ps-3">
@@ -53,7 +53,7 @@ require_once __DIR__ . '/../layout_header.php';
             <span>Filter</span>
           </button>
           <?php if (!empty($filters['search'])): ?>
-            <a href="/sia/lms/admin/audit_logs" class="btn btn-light border rounded-pill px-3 fw-medium text-dark shadow-xs hover-lift" title="Clear Search">
+            <a href="<?= BASE_PATH ?>/lms/admin/audit_logs" class="btn btn-light border rounded-pill px-3 fw-medium text-dark shadow-xs hover-lift" title="Clear Search">
               <i class="bi bi-x-lg"></i>
             </a>
           <?php endif; ?>
@@ -68,7 +68,7 @@ require_once __DIR__ . '/../layout_header.php';
               "<?= htmlspecialchars($filters['search'], ENT_QUOTES, 'UTF-8') ?>"
             </span>
           </div>
-          <a href="/sia/lms/admin/audit_logs" class="small text-decoration-none text-muted hover-underline">
+          <a href="<?= BASE_PATH ?>/lms/admin/audit_logs" class="small text-decoration-none text-muted hover-underline">
             <i class="bi bi-arrow-counterclockwise me-1"></i>Clear Filter
           </a>
         </div>
@@ -116,7 +116,7 @@ require_once __DIR__ . '/../layout_header.php';
                       <div class="fw-bold text-dark fs-6">No Audit Records Found</div>
                       <p class="small text-muted mb-3" style="max-width: 380px;">No administrative audit entries matched your active search query.</p>
                       <?php if (!empty($filters['search'])): ?>
-                        <a href="/sia/lms/admin/audit_logs" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                        <a href="<?= BASE_PATH ?>/lms/admin/audit_logs" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                           <i class="bi bi-x-circle me-1"></i> Clear Search Query
                         </a>
                       <?php endif; ?>
@@ -251,7 +251,7 @@ require_once __DIR__ . '/../layout_header.php';
             <ul class="pagination pagination-sm mb-0 gap-1">
               <?php if ($currentPage > 1): ?>
                 <li class="page-item">
-                  <a class="page-link rounded-pill px-3 shadow-xs" href="/sia/lms/admin/audit_logs?page=<?= (int)($currentPage - 1) ?>&search=<?= urlencode($filters['search'] ?? '') ?>">
+                  <a class="page-link rounded-pill px-3 shadow-xs" href="<?= BASE_PATH ?>/lms/admin/audit_logs?page=<?= (int)($currentPage - 1) ?>&search=<?= urlencode($filters['search'] ?? '') ?>">
                     <i class="bi bi-chevron-left me-1"></i> Prev
                   </a>
                 </li>
@@ -263,7 +263,7 @@ require_once __DIR__ . '/../layout_header.php';
               ?>
               <?php for ($p = $startP; $p <= $endP; $p++): ?>
                 <li class="page-item <?= $p === $currentPage ? 'active' : '' ?>">
-                  <a class="page-link rounded-2 <?= $p === $currentPage ? 'fw-bold' : '' ?>" href="/sia/lms/admin/audit_logs?page=<?= $p ?>&search=<?= urlencode($filters['search'] ?? '') ?>">
+                  <a class="page-link rounded-2 <?= $p === $currentPage ? 'fw-bold' : '' ?>" href="<?= BASE_PATH ?>/lms/admin/audit_logs?page=<?= $p ?>&search=<?= urlencode($filters['search'] ?? '') ?>">
                     <?= $p ?>
                   </a>
                 </li>
@@ -271,7 +271,7 @@ require_once __DIR__ . '/../layout_header.php';
 
               <?php if ($currentPage < $totalPages): ?>
                 <li class="page-item">
-                  <a class="page-link rounded-pill px-3 shadow-xs" href="/sia/lms/admin/audit_logs?page=<?= (int)($currentPage + 1) ?>&search=<?= urlencode($filters['search'] ?? '') ?>">
+                  <a class="page-link rounded-pill px-3 shadow-xs" href="<?= BASE_PATH ?>/lms/admin/audit_logs?page=<?= (int)($currentPage + 1) ?>&search=<?= urlencode($filters['search'] ?? '') ?>">
                     Next <i class="bi bi-chevron-right ms-1"></i>
                   </a>
                 </li>

@@ -27,11 +27,11 @@
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <a href="/sia/lms/faculty/calendar" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/faculty/calendar" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-calendar-event text-primary"></i>
             <span>Calendar</span>
           </a>
-          <a href="/sia/lms/faculty/messages.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/faculty/messages.php" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-chat-dots text-primary"></i>
             <span>Messages</span>
           </a>
@@ -110,7 +110,7 @@
     <!-- Quick Action Shortcuts Hub -->
     <div class="row g-3 mb-4 fade-in-up">
       <div class="col-sm-6 col-md-3">
-        <a href="/sia/lms/faculty/dashboard.php" class="shortcut-item h-100">
+        <a href="<?= BASE_PATH ?>/lms/faculty/dashboard.php" class="shortcut-item h-100">
           <div class="icon-box">
             <i class="bi bi-journal-bookmark-fill"></i>
           </div>
@@ -121,7 +121,7 @@
         </a>
       </div>
       <div class="col-sm-6 col-md-3">
-        <a href="/sia/lms/faculty/calendar" class="shortcut-item shortcut-item-orange h-100">
+        <a href="<?= BASE_PATH ?>/lms/faculty/calendar" class="shortcut-item shortcut-item-orange h-100">
           <div class="icon-box">
             <i class="bi bi-calendar-event-fill"></i>
           </div>
@@ -132,7 +132,7 @@
         </a>
       </div>
       <div class="col-sm-6 col-md-3">
-        <a href="/sia/lms/faculty/messages.php" class="shortcut-item shortcut-item-cyan h-100">
+        <a href="<?= BASE_PATH ?>/lms/faculty/messages.php" class="shortcut-item shortcut-item-cyan h-100">
           <div class="icon-box">
             <i class="bi bi-chat-dots-fill"></i>
           </div>
@@ -143,7 +143,7 @@
         </a>
       </div>
       <div class="col-sm-6 col-md-3">
-        <a href="/sia/lms/faculty/profile.php" class="shortcut-item shortcut-item-success h-100">
+        <a href="<?= BASE_PATH ?>/lms/faculty/profile.php" class="shortcut-item shortcut-item-success h-100">
           <div class="icon-box">
             <i class="bi bi-person-fill"></i>
           </div>
@@ -185,7 +185,7 @@
             <p class="text-muted small mx-auto mb-3" style="max-width: 480px;">
               You are not currently assigned as an instructor to any active course sections for this academic term. Please coordinate with the Academic Department Chairperson or Registrar Office for course loading.
             </p>
-            <a href="/sia/lms/faculty/profile.php" class="btn btn-outline-primary rounded-pill px-4 py-2 small fw-semibold">
+            <a href="<?= BASE_PATH ?>/lms/faculty/profile.php" class="btn btn-outline-primary rounded-pill px-4 py-2 small fw-semibold">
               <i class="bi bi-person me-1"></i> View Profile &amp; Load
             </a>
           </div>
@@ -206,7 +206,7 @@
                 $levelBadge = ($course['academic_level'] === 'College') ? 'College' : 'SHS';
             ?>
               <div class="col-md-6">
-                <a href="/sia/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-dark d-block h-100">
+                <a href="<?= BASE_PATH ?>/lms/faculty/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-dark d-block h-100">
                   <div class="dossier-card h-100 overflow-hidden border-0 shadow-sm hover-lift bg-white rounded-4 transition-all">
                     
                     <!-- Course Header Ribbon -->
@@ -288,7 +288,7 @@
           </div>
           <div class="p-2.5 px-3.5 bg-light border-top d-flex justify-content-between align-items-center">
             <span class="text-muted small" style="font-size: 0.75rem;">Academic Year: <strong>2026-2027</strong></span>
-            <a href="/sia/lms/faculty/profile.php" class="small fw-semibold text-primary text-decoration-none">
+            <a href="<?= BASE_PATH ?>/lms/faculty/profile.php" class="small fw-semibold text-primary text-decoration-none">
               Profile &rarr;
             </a>
           </div>
@@ -330,7 +330,7 @@
                   if (empty($studentName)) $studentName = 'Student';
                   $subDate = date('M d, h:i A', strtotime($sub['submitted_at']));
                 ?>
-                  <a href="/sia/lms/faculty/course/<?= esc($sub['lms_course_id']) ?>/assignments/<?= esc($sub['assignment_id']) ?>/submissions" class="d-flex align-items-center gap-2.5 p-2.5 border rounded-3 bg-light bg-opacity-50 text-decoration-none hover-lift">
+                  <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($sub['lms_course_id']) ?>/assignments/<?= esc($sub['assignment_id']) ?>/submissions" class="d-flex align-items-center gap-2.5 p-2.5 border rounded-3 bg-light bg-opacity-50 text-decoration-none hover-lift">
                     <div class="d-flex flex-column align-items-center justify-content-center bg-white border rounded-3 p-1 flex-shrink-0" style="width: 42px; height: 42px;">
                       <span class="fw-bold text-primary" style="font-size: 0.78rem; line-height: 1;"><?= date('d', strtotime($sub['submitted_at'])) ?></span>
                       <span class="text-muted text-uppercase" style="font-size: 0.58rem;"><?= date('M', strtotime($sub['submitted_at'])) ?></span>
@@ -366,7 +366,7 @@
               <h3 class="h6 fw-bold text-dark mb-0">Course Notices</h3>
             </div>
             <?php if (!empty($faculty_courses)): ?>
-              <a href="/sia/lms/faculty/course/<?= esc($faculty_courses[0]['lms_course_id']) ?>/announcements" class="text-primary small text-decoration-none fw-semibold">
+              <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($faculty_courses[0]['lms_course_id']) ?>/announcements" class="text-primary small text-decoration-none fw-semibold">
                 Manage &rarr;
               </a>
             <?php endif; ?>
@@ -386,7 +386,7 @@
                 <?php foreach ($recentAnnouncements as $ann): 
                   $annDate = date('M d, Y', strtotime($ann['created_at']));
                 ?>
-                  <a href="/sia/lms/faculty/course/<?= esc($ann['lms_course_id']) ?>/announcements" class="p-2.5 border rounded-3 bg-light bg-opacity-50 text-decoration-none d-block hover-lift">
+                  <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($ann['lms_course_id']) ?>/announcements" class="p-2.5 border rounded-3 bg-light bg-opacity-50 text-decoration-none d-block hover-lift">
                     <div class="d-flex justify-content-between align-items-center mb-1">
                       <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10 px-2 py-0.5 fw-bold" style="font-size: 0.65rem;">
                         <?= htmlspecialchars($ann['subject_code']) ?>

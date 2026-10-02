@@ -67,7 +67,7 @@ class LmsAuthController extends BaseController
 
     public function showLmsLogin(Request $request, Response $response)
     {
-        return $response->redirect('/sia/auth/lms_student_login.php');
+        return $response->redirect(BASE_PATH . '/auth/lms_student_login.php');
     }
 
     public function loginProcess(Request $request, Response $response)
@@ -75,7 +75,7 @@ class LmsAuthController extends BaseController
         $pdo = Database::getConnection();
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/auth/../public/index.php");
+    $response->redirect(BASE_PATH . "/auth/../public/index.php");
     return;
 }
 
@@ -87,7 +87,7 @@ $password = $_POST['password'] ?? '';
 if ($role === 'student') {
     $student_id = trim((string)($_POST['student_id'] ?? ''));
     if (empty($student_id) || empty($password)) {
-        echo "<script>alert('Please provide student ID or email and password.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+        echo "<script>alert('Please provide student ID or email and password.'); window.location.href='" . BASE_PATH . "/auth/lms_student_login.php';</script>";
         return;
     }
 
@@ -111,7 +111,7 @@ if ($role === 'student') {
 
     if ($user && $isPasswordValid) {
         if ($user['lms_status'] === 'suspended') {
-            echo "<script>alert('Your LMS access has been suspended due to an academic or financial hold. Please contact the Registrar.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+            echo "<script>alert('Your LMS access has been suspended due to an academic or financial hold. Please contact the Registrar.'); window.location.href='" . BASE_PATH . "/auth/lms_student_login.php';</script>";
             return;
         }
 
@@ -151,23 +151,23 @@ if ($role === 'student') {
             $_SESSION['lms_role'] = 'student';
             $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
             $_SESSION['lms_email'] = $user['email'];
-            $response->redirect("/sia/lms/student/dashboard.php");
+            $response->redirect(BASE_PATH . "/lms/student/dashboard.php");
             return;
         } elseif ($approvedCount > 0) {
-            echo "<script>alert('Your application is approved, but official enrollment is not finalized. Please complete your cashier payment and registrar finalization to activate your LMS access.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+            echo "<script>alert('Your application is approved, but official enrollment is not finalized. Please complete your cashier payment and registrar finalization to activate your LMS access.'); window.location.href='" . BASE_PATH . "/auth/lms_student_login.php';</script>";
             return;
         } else {
-            echo "<script>alert('You are not officially enrolled yet. Only finalized enrollees can access the LMS. Please complete admissions registration.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+            echo "<script>alert('You are not officially enrolled yet. Only finalized enrollees can access the LMS. Please complete admissions registration.'); window.location.href='" . BASE_PATH . "/auth/lms_student_login.php';</script>";
             return;
         }
     } else {
-        echo "<script>alert('Invalid Student ID / Email or Password.'); window.location.href='/sia/auth/lms_student_login.php';</script>";
+        echo "<script>alert('Invalid Student ID / Email or Password.'); window.location.href='" . BASE_PATH . "/auth/lms_student_login.php';</script>";
         return;
     }
 } elseif ($role === 'faculty') {
     $employee_id = trim((string)($_POST['employee_id'] ?? ''));
     if (empty($employee_id) || empty($password)) {
-        echo "<script>alert('Please provide Employee ID / Email and password.'); window.location.href='/sia/auth/lms_faculty_login.php';</script>";
+        echo "<script>alert('Please provide Employee ID / Email and password.'); window.location.href='" . BASE_PATH . "/auth/lms_faculty_login.php';</script>";
         return;
     }
 
@@ -191,7 +191,7 @@ if ($role === 'student') {
 
     if ($user && password_verify($password, $user['password'])) {
         if ($user['lms_status'] === 'suspended') {
-            echo "<script>alert('Your faculty LMS access is suspended. Please contact Academic Affairs.'); window.location.href='/sia/auth/lms_faculty_login.php';</script>";
+            echo "<script>alert('Your faculty LMS access is suspended. Please contact Academic Affairs.'); window.location.href='" . BASE_PATH . "/auth/lms_faculty_login.php';</script>";
             return;
         }
 
@@ -216,16 +216,16 @@ if ($role === 'student') {
         $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
         $_SESSION['lms_email'] = $user['email'];
 
-        $response->redirect("/sia/lms/faculty/dashboard.php");
+        $response->redirect(BASE_PATH . "/lms/faculty/dashboard.php");
         return;
     } else {
-        echo "<script>alert('Invalid Employee ID / Email or Password.'); window.location.href='/sia/auth/lms_faculty_login.php';</script>";
+        echo "<script>alert('Invalid Employee ID / Email or Password.'); window.location.href='" . BASE_PATH . "/auth/lms_faculty_login.php';</script>";
         return;
     }
 } elseif ($role === 'admin') {
     $employee_id = trim((string)($_POST['employee_id'] ?? ''));
     if (empty($employee_id) || empty($password)) {
-        echo "<script>alert('Please provide Admin Email or ID and password.'); window.location.href='/sia/auth/lms_admin_login.php';</script>";
+        echo "<script>alert('Please provide Admin Email or ID and password.'); window.location.href='" . BASE_PATH . "/auth/lms_admin_login.php';</script>";
         return;
     }
 
@@ -246,7 +246,7 @@ if ($role === 'student') {
     if ($user && password_verify($password, $user['password'])) {
         // Enforce: The Registrar account must NOT handle LMS Administration
         if (($user['department'] ?? '') === 'Registrar Office') {
-            echo "<script>alert('Registrar accounts do not handle LMS Administration. LMS is governed by the LMS Administrator on the LMS side. Please log in via the University SIS portal.'); window.location.href='/sia/auth/lms_admin_login.php';</script>";
+            echo "<script>alert('Registrar accounts do not handle LMS Administration. LMS is governed by the LMS Administrator on the LMS side. Please log in via the University SIS portal.'); window.location.href='" . BASE_PATH . "/auth/lms_admin_login.php';</script>";
             return;
         }
 
@@ -254,7 +254,7 @@ if ($role === 'student') {
         $isLmsAdmin = ($user['role'] === 'superadmin' || $user['role'] === 'lms_admin' || in_array('*', $perms, true) || in_array('lms.admin', $perms, true) || in_array('lms.manage', $perms, true));
 
         if (!$isLmsAdmin) {
-            echo "<script>alert('Access Denied: This account does not possess LMS Administrative privileges.'); window.location.href='/sia/auth/lms_admin_login.php';</script>";
+            echo "<script>alert('Access Denied: This account does not possess LMS Administrative privileges.'); window.location.href='" . BASE_PATH . "/auth/lms_admin_login.php';</script>";
             return;
         }
 
@@ -277,16 +277,16 @@ if ($role === 'student') {
         $_SESSION['lms_name'] = $user['first_name'] . ' ' . $user['last_name'];
         $_SESSION['lms_email'] = $user['email'];
 
-        $response->redirect("/sia/lms/admin/dashboard");
+        $response->redirect(BASE_PATH . "/lms/admin/dashboard");
         return;
     } else {
-        echo "<script>alert('Invalid LMS Administrator credentials.'); window.location.href='/sia/auth/lms_admin_login.php';</script>";
+        echo "<script>alert('Invalid LMS Administrator credentials.'); window.location.href='" . BASE_PATH . "/auth/lms_admin_login.php';</script>";
         return;
     }
 }
 
 // Fallback
-$response->redirect("/sia/auth/lms_student_login.php");
+$response->redirect(BASE_PATH . "/auth/lms_student_login.php");
 return;
     }
 
@@ -300,7 +300,7 @@ return;
             }
             session_destroy();
         }
-        $response->redirect('/sia/auth/lms_student_login.php');
+        $response->redirect(BASE_PATH . '/auth/lms_student_login.php');
     }
 
     public function logoutFaculty(Request $request, Response $response)
@@ -313,7 +313,7 @@ return;
             }
             session_destroy();
         }
-        $response->redirect('/sia/auth/lms_faculty_login.php');
+        $response->redirect(BASE_PATH . '/auth/lms_faculty_login.php');
     }
 
     public function logoutAdmin(Request $request, Response $response)
@@ -326,7 +326,7 @@ return;
             }
             session_destroy();
         }
-        $response->redirect('/sia/auth/lms_admin_login.php');
+        $response->redirect(BASE_PATH . '/auth/lms_admin_login.php');
     }
 }
 
