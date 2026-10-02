@@ -184,17 +184,19 @@ class DownloadController extends BaseController
         exit;
     }
 
-    private function forbidden(Response $response)
+    protected function forbidden(?Response $response = null, string $message = '403 Forbidden - You are not authorized to access this file.'): void
     {
-        $response->setStatusCode(403);
-        echo "403 Forbidden - You are not authorized to access this file.";
+        $res = $response ?? new Response();
+        $res->setStatusCode(403);
+        echo $message;
         exit;
     }
 
-    private function notFound(Response $response)
+    protected function notFound(?Response $response = null, string $message = '404 Not Found - The requested file does not exist.'): void
     {
-        $response->setStatusCode(404);
-        echo "404 Not Found - The requested file does not exist.";
+        $res = $response ?? new Response();
+        $res->setStatusCode(404);
+        echo $message;
         exit;
     }
 }
