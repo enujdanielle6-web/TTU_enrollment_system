@@ -246,4 +246,30 @@ class StudentController extends BaseController
         $contacts = $messageService->getStudentContacts($studentUserId);
         return $response->json(['success' => true, 'contacts' => $contacts]);
     }
+
+    public function legacyAssignments(Request $request, Response $response)
+    {
+        $courseId = (int)$request->input('course_id');
+        $id = (int)$request->input('id');
+        if ($courseId > 0 && $id > 0) {
+            $this->redirect("/sia/lms/student/course/{$courseId}/assignments/{$id}");
+        } elseif ($courseId > 0) {
+            $this->redirect("/sia/lms/student/course/{$courseId}/assignments");
+        } else {
+            $this->redirect("/sia/lms/student/dashboard.php");
+        }
+    }
+
+    public function legacyQuizzes(Request $request, Response $response)
+    {
+        $courseId = (int)$request->input('course_id');
+        $id = (int)$request->input('id');
+        if ($courseId > 0 && $id > 0) {
+            $this->redirect("/sia/lms/student/course/{$courseId}/quizzes/{$id}");
+        } elseif ($courseId > 0) {
+            $this->redirect("/sia/lms/student/course/{$courseId}/quizzes");
+        } else {
+            $this->redirect("/sia/lms/student/dashboard.php");
+        }
+    }
 }

@@ -283,6 +283,8 @@ $router->group([
     $router->get('/lms/student/messages/thread/{id}', ['App\Controllers\Lms\StudentController', 'getThreadMessages']);
     $router->post('/lms/student/messages/send', ['App\Controllers\Lms\StudentController', 'sendMessage']);
     $router->get('/lms/student/messages/contacts', ['App\Controllers\Lms\StudentController', 'getContacts']);
+    $router->get('/lms/student/assignments.php', ['App\Controllers\Lms\StudentController', 'legacyAssignments']);
+    $router->get('/lms/student/quizzes.php', ['App\Controllers\Lms\StudentController', 'legacyQuizzes']);
 });
 
 // LMS Faculty Portal - Requires Faculty Role
@@ -308,6 +310,8 @@ $router->group([
     $router->get('/lms/faculty/messages/thread/{id}', ['App\Controllers\Lms\FacultyController', 'getThreadMessages']);
     $router->post('/lms/faculty/messages/send', ['App\Controllers\Lms\FacultyController', 'sendMessage']);
     $router->get('/lms/faculty/messages/contacts', ['App\Controllers\Lms\FacultyController', 'getContacts']);
+    $router->get('/lms/faculty/assignments.php', ['App\Controllers\Lms\FacultyController', 'legacyAssignments']);
+    $router->get('/lms/faculty/quizzes.php', ['App\Controllers\Lms\FacultyController', 'legacyQuizzes']);
     $router->get('/lms/faculty/calendar', ['App\Controllers\Lms\FacultyCalendarController', 'index']);
     
     $router->get('/lms/faculty/course/{course_id}/assignments', ['App\Controllers\Lms\FacultyAssignmentController', 'index']);

@@ -675,7 +675,7 @@ class LmsService
                 'type' => 'Assignment',
                 'course_code' => $asg['subject_code'],
                 'course_name' => $asg['subject_name'],
-                'url' => "/sia/lms/student/assignments.php?course_id=" . $asg['lms_course_id']
+                'url' => "/sia/lms/student/course/" . $asg['lms_course_id'] . "/assignments/" . $asg['id']
             ];
         }
 
@@ -708,7 +708,7 @@ class LmsService
                 'type' => 'Quiz',
                 'course_code' => $qz['subject_code'],
                 'course_name' => $qz['subject_name'],
-                'url' => "/sia/lms/student/quizzes.php?course_id=" . $qz['lms_course_id']
+                'url' => "/sia/lms/student/course/" . $qz['lms_course_id'] . "/quizzes/" . $qz['id']
             ];
         }
 

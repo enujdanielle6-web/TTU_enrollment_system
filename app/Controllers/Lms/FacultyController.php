@@ -355,4 +355,24 @@ class FacultyController extends BaseController
         $contacts = $messageService->getFacultyContacts($facultyUserId);
         return $response->json(['success' => true, 'contacts' => $contacts]);
     }
+
+    public function legacyAssignments(Request $request, Response $response)
+    {
+        $courseId = (int)$request->input('course_id');
+        if ($courseId > 0) {
+            $this->redirect("/sia/lms/faculty/course/{$courseId}/assignments");
+        } else {
+            $this->redirect("/sia/lms/faculty/dashboard.php");
+        }
+    }
+
+    public function legacyQuizzes(Request $request, Response $response)
+    {
+        $courseId = (int)$request->input('course_id');
+        if ($courseId > 0) {
+            $this->redirect("/sia/lms/faculty/course/{$courseId}/quizzes");
+        } else {
+            $this->redirect("/sia/lms/faculty/dashboard.php");
+        }
+    }
 }
