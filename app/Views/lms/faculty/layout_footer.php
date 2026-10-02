@@ -1,8 +1,8 @@
 </div> <!-- End lms-main -->
 
 <!-- Bootstrap JS -->
-<script src="/sia/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
-<script src="/sia/public/js/spa-router.js?v=<?= esc(filemtime(__DIR__ . '/../../../../public/js/spa-router.js')) ?>"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.bundle.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/js/spa-router.js?v=<?= esc(filemtime(__DIR__ . '/../../../../public/js/spa-router.js')) ?>"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         const sidebar = document.getElementById('lmsSidebar');

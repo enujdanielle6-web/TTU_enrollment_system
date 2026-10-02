@@ -24,7 +24,7 @@ require_once __DIR__ . '/../layout_header.php';
           </div>
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
-          <a href="/sia/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
+          <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>LMS Dashboard</span>
           </a>
@@ -66,7 +66,7 @@ require_once __DIR__ . '/../layout_header.php';
         <strong>Historical Learning Record Protection:</strong> Archival sets <code>status = 'archived'</code>. It will <em>never</em> delete student submissions, grades, quiz attempts, attendance records, or instructor materials.
       </div>
 
-      <form action="/sia/lms/admin/archive/term" method="POST" class="row g-3 align-items-end" onsubmit="return confirm('Archive all active course shells for this term? Courses will become read-only while preserving all student submissions.');">
+      <form action="<?= BASE_PATH ?>/lms/admin/archive/term" method="POST" class="row g-3 align-items-end" onsubmit="return confirm('Archive all active course shells for this term? Courses will become read-only while preserving all student submissions.');">
         <?= getCsrfInput() ?>
 
         <div class="col-md-3">
@@ -184,8 +184,8 @@ require_once __DIR__ . '/../layout_header.php';
                   </td>
                   <td class="text-end pe-4">
                     <div class="d-inline-flex gap-2">
-                      <a href="/sia/lms/admin/courses/<?= (int)$c['id'] ?>" class="btn btn-sm btn-light border rounded-pill px-3 shadow-xs">Inspect</a>
-                      <form action="/sia/lms/admin/courses/<?= (int)$c['id'] ?>/status" method="POST" class="m-0" onsubmit="return confirm('Restore this course shell to active status?');">
+                      <a href="<?= BASE_PATH ?>/lms/admin/courses/<?= (int)$c['id'] ?>" class="btn btn-sm btn-light border rounded-pill px-3 shadow-xs">Inspect</a>
+                      <form action="<?= BASE_PATH ?>/lms/admin/courses/<?= (int)$c['id'] ?>/status" method="POST" class="m-0" onsubmit="return confirm('Restore this course shell to active status?');">
                         <?= getCsrfInput() ?>
                         <input type="hidden" name="status" value="active">
                         <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3 shadow-xs">Restore</button>
@@ -206,7 +206,7 @@ require_once __DIR__ . '/../layout_header.php';
           <ul class="pagination pagination-sm mb-0">
             <?php for ($p = 1; $p <= $totalPages; $p++): ?>
               <li class="page-item <?= $p === $currentPage ? 'active' : '' ?>">
-                <a class="page-link rounded-2 mx-0.5" href="/sia/lms/admin/archive?page=<?= $p ?>"><?= $p ?></a>
+                <a class="page-link rounded-2 mx-0.5" href="<?= BASE_PATH ?>/lms/admin/archive?page=<?= $p ?>"><?= $p ?></a>
               </li>
             <?php endfor; ?>
           </ul>

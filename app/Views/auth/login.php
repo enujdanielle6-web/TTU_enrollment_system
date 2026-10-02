@@ -15,7 +15,7 @@ require_once __DIR__ . '/../components/header.php';
               <span class="badge bg-primary text-white rounded-pill px-2 py-0.5 fw-semibold">
                 <i class="bi bi-shield-check me-1"></i> SIS Portal
               </span>
-              <a href="/sia/auth/lms_student_login.php" class="text-decoration-none text-muted fw-semibold hover-text-primary d-inline-flex align-items-center gap-1 transition-all">
+              <a href="<?= BASE_PATH ?>/auth/lms_student_login.php" class="text-decoration-none text-muted fw-semibold hover-text-primary d-inline-flex align-items-center gap-1 transition-all">
                 <span>Switch to LMS Portal</span>
                 <i class="bi bi-arrow-right-short fs-6"></i>
               </a>
@@ -24,8 +24,8 @@ require_once __DIR__ . '/../components/header.php';
 
           <!-- Brand & Header -->
           <div class="text-center mb-4">
-            <a href="/sia/" class="auth-brand-badge text-decoration-none" title="Triple T University Home">
-              <img src="/sia/images/TTU_LOGO.png" alt="TTU Seal">
+            <a href="<?= BASE_PATH ?>/" class="auth-brand-badge text-decoration-none" title="Triple T University Home">
+              <img src="<?= BASE_PATH ?>/images/TTU_LOGO.png" alt="TTU Seal">
             </a>
             <h1 class="h4 fw-bold text-dark mb-1" style="letter-spacing: -0.025em; font-family: 'Poppins', var(--font-family-sans, sans-serif);">Triple T University</h1>
             <div class="d-inline-flex align-items-center gap-1.5 px-3 py-1 rounded-pill mb-2 bg-primary bg-opacity-10 text-primary border border-primary border-opacity-20 fw-bold text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">
@@ -54,7 +54,7 @@ require_once __DIR__ . '/../components/header.php';
           <?php endif; ?>
 
           <!-- Main Login Form -->
-          <form id="sisLoginForm" action="/sia/auth/login_process.php" method="post" novalidate>
+          <form id="sisLoginForm" action="<?= BASE_PATH ?>/auth/login_process.php" method="post" novalidate>
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'); ?>">
             
             <div class="mb-3 text-start">
@@ -68,7 +68,7 @@ require_once __DIR__ . '/../components/header.php';
             <div class="mb-3 text-start">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <label class="form-label text-dark small fw-bold text-uppercase mb-0" for="password" style="font-size: 0.72rem; letter-spacing: 0.04em;">Password</label>
-                <a href="/sia/auth/forgot_password.php?portal=applicant" class="small text-decoration-none text-primary fw-semibold" style="font-size: 0.78rem;">Forgot Password?</a>
+                <a href="<?= BASE_PATH ?>/auth/forgot_password.php?portal=applicant" class="small text-decoration-none text-primary fw-semibold" style="font-size: 0.78rem;">Forgot Password?</a>
               </div>
               <div class="auth-input-group">
                 <span class="input-group-text"><i class="bi bi-lock"></i></span>
@@ -137,14 +137,14 @@ require_once __DIR__ . '/../components/header.php';
             <!-- Registration & Home links -->
             <div class="text-center mt-3 pt-1">
               <p class="mb-2 text-muted small" style="font-size: 0.82rem;">
-                New student applicant? <a href="/sia/auth/register.php" class="fw-bold text-decoration-none text-primary hover-underline">Start registration here &rarr;</a>
+                New student applicant? <a href="<?= BASE_PATH ?>/auth/register.php" class="fw-bold text-decoration-none text-primary hover-underline">Start registration here &rarr;</a>
               </p>
               <div class="d-flex justify-content-center align-items-center gap-3 mt-2 flex-wrap" style="font-size: 0.8rem;">
-                <a href="/sia/auth/lms_student_login.php" class="text-decoration-none text-primary fw-semibold d-inline-flex align-items-center gap-1.5">
+                <a href="<?= BASE_PATH ?>/auth/lms_student_login.php" class="text-decoration-none text-primary fw-semibold d-inline-flex align-items-center gap-1.5">
                   <i class="bi bi-mortarboard-fill"></i> Access TTU LMS Portal
                 </a>
                 <span class="text-muted opacity-50">&bull;</span>
-                <a href="/sia/" class="text-muted text-decoration-none d-inline-flex align-items-center gap-1.5 hover-text-dark transition-all">
+                <a href="<?= BASE_PATH ?>/" class="text-muted text-decoration-none d-inline-flex align-items-center gap-1.5 hover-text-dark transition-all">
                   <i class="bi bi-arrow-left"></i> Back to Homepage
                 </a>
               </div>

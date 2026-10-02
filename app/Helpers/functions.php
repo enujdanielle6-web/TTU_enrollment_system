@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+// Configuration, BASE_PATH and URL helpers (app_url, app_absolute_url)
+require_once __DIR__ . '/../../config/bootstrap.php';
+
 /**
  * Escapes HTML characters in a string to prevent XSS.
  * 
@@ -1027,23 +1030,8 @@ function sendVerificationCodeEmail(string $recipientEmail, string $recipientName
         return false;
     }
 
-    // Ensure .env is loaded if not already in environment
-    if (!getenv('SMTP_USERNAME')) {
-        $envFile = __DIR__ . '/../../.env';
-        if (file_exists($envFile)) {
-            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                if (strpos(trim($line), '#') === 0) continue;
-                if (strpos($line, '=') === false) continue;
-                list($name, $value) = explode('=', $line, 2);
-                $name = trim($name);
-                $value = trim(trim($value), '"\'');
-                putenv(sprintf('%s=%s', $name, $value));
-                $_ENV[$name] = $value;
-                $_SERVER[$name] = $value;
-            }
-        }
-    }
+    // Ensure configuration (config/config.php or .env) is loaded
+    require_once __DIR__ . '/../../config/bootstrap.php';
 
     try {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -1139,23 +1127,8 @@ function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, 
         return false;
     }
 
-    // Ensure .env is loaded
-    if (!getenv('SMTP_USERNAME')) {
-        $envFile = __DIR__ . '/../../.env';
-        if (file_exists($envFile)) {
-            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                if (strpos(trim($line), '#') === 0) continue;
-                if (strpos($line, '=') === false) continue;
-                list($name, $value) = explode('=', $line, 2);
-                $name = trim($name);
-                $value = trim(trim($value), '"\'');
-                putenv(sprintf('%s=%s', $name, $value));
-                $_ENV[$name] = $value;
-                $_SERVER[$name] = $value;
-            }
-        }
-    }
+    // Ensure configuration (config/config.php or .env) is loaded
+    require_once __DIR__ . '/../../config/bootstrap.php';
 
     try {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -1207,7 +1180,7 @@ function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, 
         $mail->isHTML(true);
         $mail->Subject = 'Welcome to Triple T University - Official Student & LMS Credentials';
 
-        $portalLink = 'http://localhost/sia/auth/lms_student_login.php';
+        $portalLink = app_absolute_url('/auth/lms_student_login.php');
         ob_start();
         require __DIR__ . '/../Views/emails/welcome_credentials.php';
         $mail->Body = ob_get_clean();
@@ -1265,23 +1238,8 @@ function sendPasswordResetOtpEmail(
         return false;
     }
 
-    // Ensure .env is loaded
-    if (!getenv('SMTP_USERNAME')) {
-        $envFile = __DIR__ . '/../../.env';
-        if (file_exists($envFile)) {
-            $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-            foreach ($lines as $line) {
-                if (strpos(trim($line), '#') === 0) continue;
-                if (strpos($line, '=') === false) continue;
-                list($name, $value) = explode('=', $line, 2);
-                $name = trim($name);
-                $value = trim(trim($value), '"\'');
-                putenv(sprintf('%s=%s', $name, $value));
-                $_ENV[$name] = $value;
-                $_SERVER[$name] = $value;
-            }
-        }
-    }
+    // Ensure configuration (config/config.php or .env) is loaded
+    require_once __DIR__ . '/../../config/bootstrap.php';
 
     try {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
@@ -1368,6 +1326,7 @@ function showErrorPage(string $title, string $message, int $statusCode = 500): v
     
     $safeTitle = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
     $safeMessage = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+    $homeUrl = htmlspecialchars(app_url('/'), ENT_QUOTES, 'UTF-8');
     
     while (ob_get_level() > 0) {
         ob_end_clean();
@@ -1429,7 +1388,7 @@ function showErrorPage(string $title, string $message, int $statusCode = 500): v
             <button onclick="window.history.back()" class="btn btn-outline-secondary px-4 rounded-pill">
                 <i class="bi bi-arrow-left me-1"></i> Go Back
             </button>
-            <a href="/sia/" class="btn btn-primary px-4 rounded-pill">
+            <a href="{$homeUrl}" class="btn btn-primary px-4 rounded-pill">
                 <i class="bi bi-house-door me-1"></i> Home
             </a>
         </div>

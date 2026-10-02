@@ -34,20 +34,20 @@ class StudentController extends BaseController
 
         $lms_course_id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
         if (!$lms_course_id) {
-            $response->redirect("/sia/lms/student/dashboard.php");
+            $response->redirect(BASE_PATH . "/lms/student/dashboard.php");
             return;
         }
 
         // 1. Verify Enrollment via Service
         if (!$lmsService->isStudentAuthorizedForCourse($userId, $lms_course_id)) {
-            $response->redirect("/sia/lms/student/dashboard.php");
+            $response->redirect(BASE_PATH . "/lms/student/dashboard.php");
             return;
         }
 
         // 2. Fetch Course Details
         $course = $lmsService->getCourseDetails($lms_course_id);
         if (!$course) {
-            $response->redirect("/sia/lms/student/dashboard.php");
+            $response->redirect(BASE_PATH . "/lms/student/dashboard.php");
             return;
         }
 
@@ -203,7 +203,7 @@ class StudentController extends BaseController
                 $response->setStatusCode(422);
                 return $response->json(['success' => false, 'error' => 'Message content cannot be empty.']);
             }
-            $this->redirect('/sia/lms/student/messages.php');
+            $this->redirect(BASE_PATH . '/lms/student/messages.php');
             return;
         }
 
@@ -225,17 +225,17 @@ class StudentController extends BaseController
                 return $response->json([
                     'success' => true,
                     'thread_id' => $threadId,
-                    'redirect_url' => '/sia/lms/student/messages.php?thread_id=' . $threadId
+                    'redirect_url' => BASE_PATH . '/lms/student/messages.php?thread_id=' . $threadId
                 ]);
             }
 
-            $this->redirect('/sia/lms/student/messages.php?thread_id=' . $threadId);
+            $this->redirect(BASE_PATH . '/lms/student/messages.php?thread_id=' . $threadId);
         } catch (\Exception $e) {
             if ($request->header('Accept') === 'application/json' || $request->input('ajax')) {
                 $response->setStatusCode(400);
                 return $response->json(['success' => false, 'error' => $e->getMessage()]);
             }
-            $this->redirect('/sia/lms/student/messages.php');
+            $this->redirect(BASE_PATH . '/lms/student/messages.php');
         }
     }
 
@@ -252,11 +252,11 @@ class StudentController extends BaseController
         $courseId = (int)$request->input('course_id');
         $id = (int)$request->input('id');
         if ($courseId > 0 && $id > 0) {
-            $this->redirect("/sia/lms/student/course/{$courseId}/assignments/{$id}");
+            $this->redirect(BASE_PATH . "/lms/student/course/{$courseId}/assignments/{$id}");
         } elseif ($courseId > 0) {
-            $this->redirect("/sia/lms/student/course/{$courseId}/assignments");
+            $this->redirect(BASE_PATH . "/lms/student/course/{$courseId}/assignments");
         } else {
-            $this->redirect("/sia/lms/student/dashboard.php");
+            $this->redirect(BASE_PATH . "/lms/student/dashboard.php");
         }
     }
 
@@ -265,11 +265,11 @@ class StudentController extends BaseController
         $courseId = (int)$request->input('course_id');
         $id = (int)$request->input('id');
         if ($courseId > 0 && $id > 0) {
-            $this->redirect("/sia/lms/student/course/{$courseId}/quizzes/{$id}");
+            $this->redirect(BASE_PATH . "/lms/student/course/{$courseId}/quizzes/{$id}");
         } elseif ($courseId > 0) {
-            $this->redirect("/sia/lms/student/course/{$courseId}/quizzes");
+            $this->redirect(BASE_PATH . "/lms/student/course/{$courseId}/quizzes");
         } else {
-            $this->redirect("/sia/lms/student/dashboard.php");
+            $this->redirect(BASE_PATH . "/lms/student/dashboard.php");
         }
     }
 }

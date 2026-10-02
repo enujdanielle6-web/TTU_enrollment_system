@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['sec
             }
         }
     }
-    $response->redirect("/sia/admin/scheduler/college_sections.php");
+    $response->redirect(BASE_PATH . "/admin/scheduler/college_sections.php");
     return;
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_section') {
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
@@ -206,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['sec
             $_SESSION['admin_error'] = 'Please fill in all required fields.';
         }
     }
-    $response->redirect("/sia/admin/scheduler/college_sections.php");
+    $response->redirect(BASE_PATH . "/admin/scheduler/college_sections.php");
     return;
 }
 
@@ -308,7 +308,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['sec
             }
         }
     }
-    $response->redirect("/sia/admin/scheduler/shs_sections.php");
+    $response->redirect(BASE_PATH . "/admin/scheduler/shs_sections.php");
     return;
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'add_section') {
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
@@ -357,7 +357,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['sec
             $_SESSION['admin_error'] = 'Please fill in all required fields.';
         }
     }
-    $response->redirect("/sia/admin/scheduler/shs_sections.php");
+    $response->redirect(BASE_PATH . "/admin/scheduler/shs_sections.php");
     return;
 }
 
@@ -441,7 +441,7 @@ try {
 
         if (!$section) {
             $_SESSION['admin_error'] = 'Section not found.';
-            $response->redirect("/sia/admin/scheduler/shs_sections.php");
+            $response->redirect(BASE_PATH . "/admin/scheduler/shs_sections.php");
             return;
         }
 
@@ -495,7 +495,7 @@ try {
 
         if (!$section) {
             $_SESSION['admin_error'] = 'Section not found.';
-            $response->redirect("/sia/admin/scheduler/college_sections.php");
+            $response->redirect(BASE_PATH . "/admin/scheduler/college_sections.php");
             return;
         }
 

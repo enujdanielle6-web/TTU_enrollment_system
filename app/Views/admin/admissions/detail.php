@@ -531,7 +531,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
                       'rejected' => 'bg-danger text-white',
                       default => 'bg-warning text-dark'
                     };
-                    $viewUrl = "/sia/admin/admissions/document_view.php?id=" . (int)$doc['id'];
+                    $viewUrl = BASE_PATH . "/admin/admissions/document_view.php?id=" . (int)$doc['id'];
                     $docNameEsc = htmlspecialchars($doc['document_name'], ENT_QUOTES, 'UTF-8');
                  ?>
                    <li class="list-group-item py-3">
@@ -997,7 +997,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <h5 class="modal-title fw-bold text-white mb-0" id="adminUploadDocModalLabel"><i class="bi bi-cloud-arrow-up me-2"></i>Upload Student Document</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      <form action="/sia/admin/admissions/document_upload.php" method="POST" enctype="multipart/form-data" id="adminDocUploadForm">
+      <form action="<?= BASE_PATH ?>/admin/admissions/document_upload.php" method="POST" enctype="multipart/form-data" id="adminDocUploadForm">
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="application_id" value="<?= esc($app['id']) ?>">
         <div class="modal-body p-4">

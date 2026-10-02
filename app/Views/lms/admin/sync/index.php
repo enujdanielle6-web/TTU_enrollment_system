@@ -39,7 +39,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
         </div>
         <div class="d-flex flex-wrap align-items-center gap-2">
           <?php if ($missingCount > 0 || $mismatchCount > 0): ?>
-            <form action="/sia/lms/admin/sync/reconcile" method="POST" class="m-0" onsubmit="return confirm('Execute deterministic reconciliation? This will provision missing shells and align faculty assignments to the official timetable.');">
+            <form action="<?= BASE_PATH ?>/lms/admin/sync/reconcile" method="POST" class="m-0" onsubmit="return confirm('Execute deterministic reconciliation? This will provision missing shells and align faculty assignments to the official timetable.');">
               <?= getCsrfInput() ?>
               <button type="submit" class="btn btn-primary rounded-pill px-3.5 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-sm hover-lift">
                 <i class="bi bi-magic"></i>
@@ -47,11 +47,11 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
               </button>
             </form>
           <?php endif; ?>
-          <a href="/sia/lms/admin/cloner" class="btn btn-outline-primary border rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/cloner" class="btn btn-outline-primary border rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-copy"></i>
             <span>Template Cloner</span>
           </a>
-          <a href="/sia/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/dashboard" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>LMS Dashboard</span>
           </a>
@@ -247,7 +247,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
               <i class="bi bi-plus-square text-danger me-2"></i> Missing LMS Course Shells (<?= $missingCount ?>)
             </h6>
             <?php if ($missingCount > 0): ?>
-              <form action="/sia/lms/admin/sync/reconcile" method="POST" class="m-0" onsubmit="return confirm('Auto-provision missing course shells from official timetable?');">
+              <form action="<?= BASE_PATH ?>/lms/admin/sync/reconcile" method="POST" class="m-0" onsubmit="return confirm('Auto-provision missing course shells from official timetable?');">
                 <?= getCsrfInput() ?>
                 <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">Auto-Provision All</button>
               </form>
@@ -315,7 +315,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
                   <?php foreach ($syncReport['faculty_mismatches'] as $f): ?>
                     <tr>
                       <td class="ps-4 fw-bold">
-                        <a href="/sia/lms/admin/courses/<?= (int)$f['lms_course_id'] ?>" class="text-decoration-none">
+                        <a href="<?= BASE_PATH ?>/lms/admin/courses/<?= (int)$f['lms_course_id'] ?>" class="text-decoration-none">
                           #<?= (int)$f['lms_course_id'] ?>
                         </a>
                       </td>
@@ -555,7 +555,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
                     <tr>
                       <td class="ps-4">
                         <strong class="text-dark d-block">
-                          <a href="/sia/lms/admin/courses/<?= (int)$orphan['id'] ?>" class="text-decoration-none">
+                          <a href="<?= BASE_PATH ?>/lms/admin/courses/<?= (int)$orphan['id'] ?>" class="text-decoration-none">
                             #<?= (int)$orphan['id'] ?>: <?= htmlspecialchars($orphan['subject_code'] ?? 'Unknown') ?>
                           </a>
                         </strong>
@@ -665,7 +665,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
               </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="/sia/lms/admin/conflicts/resolve" method="POST">
+            <form action="<?= BASE_PATH ?>/lms/admin/conflicts/resolve" method="POST">
               <?= getCsrfInput() ?>
               <input type="hidden" name="resolution_action" value="archive_shell">
               <input type="hidden" name="course_id" value="<?= (int)$cid ?>">
@@ -702,7 +702,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
               </h5>
               <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="/sia/lms/admin/conflicts/resolve" method="POST">
+            <form action="<?= BASE_PATH ?>/lms/admin/conflicts/resolve" method="POST">
               <?= getCsrfInput() ?>
               <input type="hidden" name="resolution_action" value="flag_quarantine">
               <input type="hidden" name="course_id" value="<?= (int)$cid ?>">
@@ -736,7 +736,7 @@ $isFullySynced = ($missingCount === 0 && $mismatchCount === 0 && $duplicateGroup
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
-              <form action="/sia/lms/admin/conflicts/resolve" method="POST">
+              <form action="<?= BASE_PATH ?>/lms/admin/conflicts/resolve" method="POST">
                 <?= getCsrfInput() ?>
                 <input type="hidden" name="resolution_action" value="delete_empty_shell">
                 <input type="hidden" name="course_id" value="<?= (int)$cid ?>">

@@ -41,7 +41,7 @@ require_once __DIR__ . '/../layout_header.php';
           </button>
           
           <!-- Status Toggle Form -->
-          <form action="/sia/lms/admin/courses/<?= (int)$courseId ?>/status" method="POST" class="m-0" onsubmit="return confirm('Change status of this course shell?');">
+          <form action="<?= BASE_PATH ?>/lms/admin/courses/<?= (int)$courseId ?>/status" method="POST" class="m-0" onsubmit="return confirm('Change status of this course shell?');">
             <?= getCsrfInput() ?>
             <?php if ($course['status'] === 'active'): ?>
               <input type="hidden" name="status" value="archived">
@@ -59,12 +59,12 @@ require_once __DIR__ . '/../layout_header.php';
           </form>
 
           <!-- Cloner Shortcut: Clone Content into this Shell -->
-          <a href="/sia/lms/admin/cloner?target_id=<?= (int)$courseId ?>" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs" title="Clone content into this course shell">
+          <a href="<?= BASE_PATH ?>/lms/admin/cloner?target_id=<?= (int)$courseId ?>" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium d-inline-flex align-items-center gap-1.5 shadow-xs" title="Clone content into this course shell">
             <i class="bi bi-copy"></i>
             <span>Clone Content</span>
           </a>
 
-          <a href="/sia/lms/admin/courses" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
+          <a href="<?= BASE_PATH ?>/lms/admin/courses" class="btn btn-light border rounded-pill px-3 py-2 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-xs">
             <i class="bi bi-arrow-left text-primary"></i>
             <span>All Courses</span>
           </a>
@@ -333,7 +333,7 @@ require_once __DIR__ . '/../layout_header.php';
 <div class="modal fade" id="reassignFacultyModal" tabindex="-1" aria-labelledby="reassignModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-      <form action="/sia/lms/admin/courses/<?= (int)$courseId ?>/reassign" method="POST">
+      <form action="<?= BASE_PATH ?>/lms/admin/courses/<?= (int)$courseId ?>/reassign" method="POST">
         <?= getCsrfInput() ?>
         <div class="modal-header bg-light border-bottom p-3.5 px-4">
           <h5 class="modal-title fw-bold text-dark" id="reassignModalLabel">

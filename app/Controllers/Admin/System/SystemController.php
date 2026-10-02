@@ -312,7 +312,7 @@ class SystemController extends BaseController
 
         $userId = (int)($_GET['id'] ?? 0);
         if ($userId <= 0) {
-            $response->redirect("/sia/admin/system/users.php");
+            $response->redirect(BASE_PATH . "/admin/system/users.php");
             return;
         }
 
@@ -322,7 +322,7 @@ class SystemController extends BaseController
         $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
 
         if (!$user) {
-            $response->redirect("/sia/admin/system/users.php");
+            $response->redirect(BASE_PATH . "/admin/system/users.php");
             return;
         }
 
@@ -473,7 +473,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
         requirePermission('users.manage');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/admin/system/users.php");
+            $response->redirect(BASE_PATH . "/admin/system/users.php");
             return;
         }
 
@@ -701,7 +701,7 @@ unset($_SESSION['success_msg'], $_SESSION['error_msg']);
     $_SESSION['error_msg'] = $e->getMessage();
 }
 
-$response->redirect("/sia/admin/system/users.php");
+$response->redirect(BASE_PATH . "/admin/system/users.php");
 return;
 
     }
@@ -709,7 +709,7 @@ return;
     {
         $pdo = Database::getConnection();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/admin/system/backup.php");
+    $response->redirect(BASE_PATH . "/admin/system/backup.php");
     return;
 }
 
@@ -787,7 +787,7 @@ if ($action === 'export') {
     } catch (PDOException $e) {
         error_log('Export failed: ' . $e->getMessage());
         $_SESSION['error_msg'] = 'Failed to generate database backup. Please try again.';
-        $response->redirect("/sia/admin/system/backup.php");
+        $response->redirect(BASE_PATH . "/admin/system/backup.php");
         return;
     }
 } elseif ($action === 'import') {
@@ -821,11 +821,11 @@ if ($action === 'export') {
         $_SESSION['error_msg'] = $e->getMessage();
     }
 
-    $response->redirect("/sia/admin/system/backup.php");
+    $response->redirect(BASE_PATH . "/admin/system/backup.php");
     return;
 } else {
     $_SESSION['error_msg'] = 'Invalid action requested.';
-    $response->redirect("/sia/admin/system/backup.php");
+    $response->redirect(BASE_PATH . "/admin/system/backup.php");
     return;
 }
 
@@ -834,7 +834,7 @@ if ($action === 'export') {
     {
         $pdo = Database::getConnection();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/admin/system/settings.php");
+    $response->redirect(BASE_PATH . "/admin/system/settings.php");
     return;
 }
 
@@ -926,7 +926,7 @@ try {
     $_SESSION['error_msg'] = $e->getMessage();
 }
 
-$response->redirect("/sia/admin/system/settings.php");
+$response->redirect(BASE_PATH . "/admin/system/settings.php");
 return;
 
     }

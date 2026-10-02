@@ -450,7 +450,7 @@ require_once __DIR__ . '/../../components/admin_navbar.php';
 
 <?php if (hasPermission('applications.view_queue')): ?>
 <!-- Load Chart.js from local vendor -->
-<script src="/sia/public/vendor/chartjs/chart.umd.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/chartjs/chart.umd.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // 1. Trend Chart Data

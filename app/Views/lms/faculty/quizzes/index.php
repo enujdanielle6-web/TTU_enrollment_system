@@ -75,7 +75,7 @@
                 </h4>
                 <p class="text-muted small mb-0">Author multiple choice and true/false quizzes, configure timers and review student attempt scores.</p>
             </div>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
                 <i class="bi bi-plus-lg"></i>
                 <span>Create Quiz</span>
             </a>
@@ -91,7 +91,7 @@
                         <p class="text-muted mb-4" style="max-width: 450px; margin: 0 auto;">
                             Prepare timed assessments and tests with automated scoring and comprehensive attempt diagnostics.
                         </p>
-                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
                             <i class="bi bi-plus-lg me-1"></i> Create First Quiz
                         </a>
                     </div>
@@ -127,7 +127,7 @@
                                                 <?php endif; ?>
                                             </div>
                                             <h5 class="fw-bold text-dark mb-1 text-truncate" title="<?= htmlspecialchars($quiz['title']) ?>">
-                                                <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions" class="text-decoration-none text-dark hover-primary">
+                                                <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions" class="text-decoration-none text-dark hover-primary">
                                                     <?= htmlspecialchars($quiz['title']) ?>
                                                 </a>
                                             </h5>
@@ -147,16 +147,16 @@
                                     </div>
 
                                     <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions" class="btn btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold btn-sm shadow-xs">
+                                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/questions" class="btn btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold btn-sm shadow-xs">
                                             <i class="bi bi-list-check me-1"></i> Questions
                                         </a>
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/results" class="btn btn-outline-info rounded-pill px-3 py-1.5 fw-semibold btn-sm">
+                                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/results" class="btn btn-outline-info rounded-pill px-3 py-1.5 fw-semibold btn-sm">
                                             <i class="bi bi-bar-chart me-1"></i> Results
                                         </a>
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/edit" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold btn-sm" title="Edit Quiz Settings">
+                                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/edit" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold btn-sm" title="Edit Quiz Settings">
                                             <i class="bi bi-gear me-1"></i> Settings
                                         </a>
-                                        <form method="POST" action="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this quiz, its questions, and all student attempts?');">
+                                        <form method="POST" action="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/delete" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this quiz, its questions, and all student attempts?');">
                                             <?= getCsrfInput() ?>
                                             <button type="submit" class="btn btn-outline-danger rounded-pill px-2.5 py-1.5 btn-sm" title="Delete Quiz">
                                                 <i class="bi bi-trash"></i>

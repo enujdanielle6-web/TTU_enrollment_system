@@ -6,6 +6,9 @@ use PDO;
 use PDOException;
 use RuntimeException;
 
+// Configuration (config/config.php or .env) for scripts that use this class directly
+require_once dirname(__DIR__, 2) . '/config/bootstrap.php';
+
 class Database
 {
     private static ?PDO $connection = null;

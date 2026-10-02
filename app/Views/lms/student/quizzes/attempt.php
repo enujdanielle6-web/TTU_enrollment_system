@@ -51,7 +51,7 @@
 </div>
 
 <div class="container-fluid px-md-4 pb-5">
-    <form id="quizForm" action="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/attempt/<?= esc($attempt['id']) ?>/submit" method="POST">
+    <form id="quizForm" action="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>/attempt/<?= esc($attempt['id']) ?>/submit" method="POST">
         <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
 
         <div class="row g-4">

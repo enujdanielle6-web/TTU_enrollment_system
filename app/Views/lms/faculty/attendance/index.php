@@ -73,7 +73,7 @@
                 </h4>
                 <p class="text-muted small mb-0">Record daily roll calls, track student presence, tardiness, and verified absences.</p>
             </div>
-            <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
+            <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/create" class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm d-inline-flex align-items-center gap-2">
                 <i class="bi bi-plus-lg"></i>
                 <span>New Session</span>
             </a>
@@ -89,7 +89,7 @@
                         <p class="text-muted mb-4" style="max-width: 450px; margin: 0 auto;">
                             Create a class session to begin taking roll call for enrolled students in Section <?= htmlspecialchars($course['section_code']) ?>.
                         </p>
-                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/create" class="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
                             <i class="bi bi-plus-lg me-1"></i> Create First Session
                         </a>
                     </div>
@@ -134,7 +134,7 @@
                                     </div>
 
                                     <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                        <a href="/sia/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/<?= esc($session['id']) ?>/edit" class="btn btn-primary rounded-pill px-4 py-1.5 fw-bold btn-sm shadow-xs d-inline-flex align-items-center gap-1.5">
+                                        <a href="<?= BASE_PATH ?>/lms/faculty/course/<?= esc($course['lms_course_id']) ?>/attendance/<?= esc($session['id']) ?>/edit" class="btn btn-primary rounded-pill px-4 py-1.5 fw-bold btn-sm shadow-xs d-inline-flex align-items-center gap-1.5">
                                             <i class="bi bi-check2-square"></i>
                                             <span>Mark / Review Attendance</span>
                                         </a>

@@ -127,14 +127,14 @@ class FinanceController extends BaseController
         $assessmentId = (int) ($_GET['id'] ?? 0);
 
         if ($assessmentId <= 0) {
-            $response->redirect("/sia/admin/finance/cashier_dashboard.php");
+            $response->redirect(BASE_PATH . "/admin/finance/cashier_dashboard.php");
             return;
         }
 
         try {
             $breakdown = \App\Services\AssessmentService::getAssessmentBreakdown($pdo, $assessmentId);
             if (!$breakdown) {
-                $response->redirect("/sia/admin/finance/cashier_dashboard.php");
+                $response->redirect(BASE_PATH . "/admin/finance/cashier_dashboard.php");
                 return;
             }
 
@@ -157,7 +157,7 @@ class FinanceController extends BaseController
         } catch (PDOException $e) {
             error_log('Admin assessment fetch failed: ' . $e->getMessage());
             $_SESSION['error_msg'] = 'A database error occurred while querying details for this assessment.';
-            $response->redirect("/sia/admin/finance/cashier_dashboard.php");
+            $response->redirect(BASE_PATH . "/admin/finance/cashier_dashboard.php");
             return;
         }
 
@@ -229,7 +229,7 @@ class FinanceController extends BaseController
         $paymentId = (int)($_GET['id'] ?? 0);
         if ($paymentId <= 0) {
             $_SESSION['admin_error'] = 'Invalid Payment ID for receipt.';
-            $response->redirect('/sia/admin/finance/cashier_payments.php');
+            $response->redirect(BASE_PATH . '/admin/finance/cashier_payments.php');
             return;
         }
 
@@ -238,7 +238,7 @@ class FinanceController extends BaseController
 
         if (!$payment) {
             $_SESSION['admin_error'] = 'Payment record not found.';
-            $response->redirect('/sia/admin/finance/cashier_payments.php');
+            $response->redirect(BASE_PATH . '/admin/finance/cashier_payments.php');
             return;
         }
 
@@ -284,7 +284,7 @@ class FinanceController extends BaseController
     {
         $pdo = Database::getConnection();
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    $response->redirect("/sia/admin/finance/cashier_dashboard.php");
+    $response->redirect(BASE_PATH . "/admin/finance/cashier_dashboard.php");
     return;
 }
 
@@ -313,14 +313,14 @@ try {
         ], $cashierId);
 
         $_SESSION['success_msg'] = $result['message'];
-        $response->redirect("/sia/admin/finance/cashier_receipt.php?id=" . $result['payment_id']);
+        $response->redirect(BASE_PATH . "/admin/finance/cashier_receipt.php?id=" . $result['payment_id']);
         return;
     } elseif ($action === 'verify_online_payment') {
         $paymentId = (int)($_POST['payment_id'] ?? 0);
         $decision = $_POST['decision'] ?? 'approve';
         $remarks = trim($_POST['remarks'] ?? '');
         $cashierId = (int)$_SESSION['user_id'];
-        $redirectUrl = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : "/sia/admin/finance/cashier_payments.php";
+        $redirectUrl = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : BASE_PATH . "/admin/finance/cashier_payments.php";
 
         try {
             if ($decision === 'reject') {
@@ -342,7 +342,7 @@ try {
     } elseif ($action === 'reconcile_paymongo') {
         $sessionId = trim((string)($_POST['session_id'] ?? ''));
         $paymentId = (int)($_POST['payment_id'] ?? 0);
-        $redirectUrl = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : "/sia/admin/finance/cashier_payments.php";
+        $redirectUrl = !empty($_POST['redirect_to']) ? $_POST['redirect_to'] : BASE_PATH . "/admin/finance/cashier_payments.php";
 
         try {
             if ($sessionId === '' && $paymentId > 0) {
@@ -376,9 +376,9 @@ try {
     $_SESSION['error_msg'] = $e->getMessage();
     $id = $_POST['assessment_id'] ?? 0;
     if ($id > 0) {
-        $response->redirect("/sia/admin/finance/cashier_assessment.php?id=$id");
+        $response->redirect(BASE_PATH . "/admin/finance/cashier_assessment.php?id=$id");
     } else {
-        $response->redirect("/sia/admin/finance/cashier_dashboard.php");
+        $response->redirect(BASE_PATH . "/admin/finance/cashier_dashboard.php");
     }
     return;
 }
@@ -459,7 +459,7 @@ try {
                 return;
             }
             $_SESSION['error_msg'] = 'Access Denied: You do not have permission to modify payment queue configuration.';
-            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            $response->redirect(BASE_PATH . '/admin/finance/payment_monitoring.php');
             return;
         }
 
@@ -511,7 +511,7 @@ try {
             }
 
             $_SESSION['success_msg'] = $msg;
-            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            $response->redirect(BASE_PATH . '/admin/finance/payment_monitoring.php');
             return;
 
         } catch (Exception $e) {
@@ -520,7 +520,7 @@ try {
                 return;
             }
             $_SESSION['error_msg'] = $e->getMessage();
-            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            $response->redirect(BASE_PATH . '/admin/finance/payment_monitoring.php');
             return;
         }
     }
@@ -539,7 +539,7 @@ try {
                 return;
             }
             $_SESSION['error_msg'] = 'Access Denied: Insufficient administrative permissions.';
-            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            $response->redirect(BASE_PATH . '/admin/finance/payment_monitoring.php');
             return;
         }
 
@@ -560,7 +560,7 @@ try {
                     return;
                 }
                 $_SESSION['success_msg'] = $msg;
-                $response->redirect('/sia/admin/finance/payment_monitoring.php');
+                $response->redirect(BASE_PATH . '/admin/finance/payment_monitoring.php');
                 return;
 
             } elseif ($action === 'force_release') {
@@ -580,7 +580,7 @@ try {
                     return;
                 }
                 $_SESSION['success_msg'] = $msg;
-                $response->redirect('/sia/admin/finance/payment_monitoring.php');
+                $response->redirect(BASE_PATH . '/admin/finance/payment_monitoring.php');
                 return;
 
             } else {
@@ -592,7 +592,7 @@ try {
                 return;
             }
             $_SESSION['error_msg'] = $e->getMessage();
-            $response->redirect('/sia/admin/finance/payment_monitoring.php');
+            $response->redirect(BASE_PATH . '/admin/finance/payment_monitoring.php');
             return;
         }
     }

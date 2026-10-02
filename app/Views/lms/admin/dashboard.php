@@ -53,11 +53,11 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
           </div>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-          <a href="/sia/lms/admin/sync" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium shadow-xs d-inline-flex align-items-center gap-1.5 hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/sync" class="btn btn-outline-primary rounded-pill px-3 py-2 fw-medium shadow-xs d-inline-flex align-items-center gap-1.5 hover-lift">
             <i class="bi bi-arrow-repeat"></i>
             <span>Sync Hub</span>
           </a>
-          <a href="/sia/lms/admin/courses" class="btn btn-primary rounded-pill px-3.5 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-2 hover-lift">
+          <a href="<?= BASE_PATH ?>/lms/admin/courses" class="btn btn-primary rounded-pill px-3.5 py-2 fw-medium shadow-sm d-inline-flex align-items-center gap-2 hover-lift">
             <i class="bi bi-collection-fill"></i>
             <span>Course Catalog</span>
             <i class="bi bi-arrow-right small"></i>
@@ -71,7 +71,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
       
       <!-- Card 1: Active Course Shells -->
       <div class="col-sm-6 col-xl-3">
-        <a href="/sia/lms/admin/courses" class="stat-card-kpi fade-in-up" style="animation-delay: 0.1s;">
+        <a href="<?= BASE_PATH ?>/lms/admin/courses" class="stat-card-kpi fade-in-up" style="animation-delay: 0.1s;">
           <div class="stat-card-glow bg-primary"></div>
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
@@ -93,7 +93,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
 
       <!-- Card 2: Enrolled Students -->
       <div class="col-sm-6 col-xl-3">
-        <a href="/sia/lms/admin/users?role=student" class="stat-card-kpi fade-in-up" style="animation-delay: 0.15s;">
+        <a href="<?= BASE_PATH ?>/lms/admin/users?role=student" class="stat-card-kpi fade-in-up" style="animation-delay: 0.15s;">
           <div class="stat-card-glow bg-success"></div>
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
@@ -115,7 +115,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
 
       <!-- Card 3: TBA Shells / Faculty Allocation -->
       <div class="col-sm-6 col-xl-3">
-        <a href="/sia/lms/admin/courses?faculty_filter=unassigned" class="stat-card-kpi fade-in-up" style="animation-delay: 0.2s;">
+        <a href="<?= BASE_PATH ?>/lms/admin/courses?faculty_filter=unassigned" class="stat-card-kpi fade-in-up" style="animation-delay: 0.2s;">
           <div class="stat-card-glow <?= $unassignedCount > 0 ? 'bg-warning' : 'bg-info' ?>"></div>
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="stat-icon-wrapper <?= $unassignedCount > 0 ? 'bg-warning bg-opacity-10 text-warning' : 'bg-info bg-opacity-10 text-info' ?>">
@@ -143,7 +143,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
 
       <!-- Card 4: Timetable Sync Health -->
       <div class="col-sm-6 col-xl-3">
-        <a href="/sia/lms/admin/sync" class="stat-card-kpi fade-in-up" style="animation-delay: 0.25s;">
+        <a href="<?= BASE_PATH ?>/lms/admin/sync" class="stat-card-kpi fade-in-up" style="animation-delay: 0.25s;">
           <div class="stat-card-glow <?= $hasConflicts ? 'bg-danger' : 'bg-info' ?>"></div>
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div class="stat-icon-wrapper <?= $hasConflicts ? 'bg-danger bg-opacity-10 text-danger' : 'bg-info bg-opacity-10 text-info' ?>">
@@ -193,7 +193,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
           
           <div class="p-4 pt-3">
             <div class="d-flex flex-column gap-3">
-              <a href="/sia/lms/admin/courses" class="shortcut-item">
+              <a href="<?= BASE_PATH ?>/lms/admin/courses" class="shortcut-item">
                 <div class="icon-box"><i class="bi bi-collection-fill"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">Course Catalog</span>
@@ -202,7 +202,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <i class="bi bi-chevron-right text-muted small"></i>
               </a>
 
-              <a href="/sia/lms/admin/cloner" class="shortcut-item">
+              <a href="<?= BASE_PATH ?>/lms/admin/cloner" class="shortcut-item">
                 <div class="icon-box"><i class="bi bi-copy"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">Content &amp; Syllabus Cloner</span>
@@ -211,7 +211,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <i class="bi bi-chevron-right text-muted small"></i>
               </a>
 
-              <a href="/sia/lms/admin/announcements" class="shortcut-item">
+              <a href="<?= BASE_PATH ?>/lms/admin/announcements" class="shortcut-item">
                 <div class="icon-box"><i class="bi bi-megaphone-fill"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">Platform Announcements</span>
@@ -220,7 +220,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <i class="bi bi-chevron-right text-muted small"></i>
               </a>
 
-              <a href="/sia/lms/admin/generator" class="shortcut-item">
+              <a href="<?= BASE_PATH ?>/lms/admin/generator" class="shortcut-item">
                 <div class="icon-box"><i class="bi bi-cpu-fill"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">Course Shell Generator</span>
@@ -252,7 +252,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
           
           <div class="p-4 pt-3">
             <div class="d-flex flex-column gap-3">
-              <a href="/sia/lms/admin/sync" class="shortcut-item shortcut-item-cyan">
+              <a href="<?= BASE_PATH ?>/lms/admin/sync" class="shortcut-item shortcut-item-cyan">
                 <div class="icon-box"><i class="bi bi-arrow-repeat"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">Timetable Sync &amp; Conflicts</span>
@@ -265,7 +265,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <?php endif; ?>
               </a>
 
-              <a href="/sia/lms/admin/users" class="shortcut-item shortcut-item-cyan">
+              <a href="<?= BASE_PATH ?>/lms/admin/users" class="shortcut-item shortcut-item-cyan">
                 <div class="icon-box"><i class="bi bi-person-badge-fill"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">User Access Governance</span>
@@ -274,7 +274,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <i class="bi bi-chevron-right text-muted small"></i>
               </a>
 
-              <a href="/sia/lms/admin/archive" class="shortcut-item shortcut-item-cyan">
+              <a href="<?= BASE_PATH ?>/lms/admin/archive" class="shortcut-item shortcut-item-cyan">
                 <div class="icon-box"><i class="bi bi-archive-fill"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">Term Archival Console</span>
@@ -283,7 +283,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <i class="bi bi-chevron-right text-muted small"></i>
               </a>
 
-              <a href="/sia/lms/admin/audit_logs" class="shortcut-item shortcut-item-cyan">
+              <a href="<?= BASE_PATH ?>/lms/admin/audit_logs" class="shortcut-item shortcut-item-cyan">
                 <div class="icon-box"><i class="bi bi-shield-check"></i></div>
                 <div class="flex-grow-1">
                   <span class="fw-bold text-dark d-block">LMS Audit Logs</span>
@@ -320,7 +320,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
               </div>
             </div>
             <div>
-              <a href="/sia/lms/admin/courses" class="btn btn-sm btn-light border rounded-pill px-3 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-none">
+              <a href="<?= BASE_PATH ?>/lms/admin/courses" class="btn btn-sm btn-light border rounded-pill px-3 fw-medium text-dark d-inline-flex align-items-center gap-1.5 shadow-none">
                 <i class="bi bi-list-ul me-1"></i>
                 <span>Full Catalog</span>
                 <i class="bi bi-chevron-right small text-muted"></i>
@@ -340,7 +340,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                     No instructional shells have been provisioned for the current academic term yet. Run timetable reconciliation to automatically sync offerings.
                   </p>
                   <div>
-                    <a href="/sia/lms/admin/sync" class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm hover-lift">
+                    <a href="<?= BASE_PATH ?>/lms/admin/sync" class="btn btn-primary rounded-pill px-4 fw-medium shadow-sm hover-lift">
                       <i class="bi bi-arrow-repeat me-1.5"></i> Run Reconciliation
                     </a>
                   </div>
@@ -418,7 +418,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                             <span class="pulse-dot <?= $course['status'] === 'active' ? 'pulse-dot-emerald' : '' ?>"></span>
                             <?= ucfirst(htmlspecialchars($course['status'])) ?> Term
                           </span>
-                          <a href="/sia/lms/admin/courses/<?= (int)$course['lms_course_id'] ?>" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs hover-lift">
+                          <a href="<?= BASE_PATH ?>/lms/admin/courses/<?= (int)$course['lms_course_id'] ?>" class="btn btn-sm btn-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs hover-lift">
                             <span>Inspect Shell</span>
                             <i class="bi bi-arrow-right-short fs-6"></i>
                           </a>
@@ -444,7 +444,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <p class="text-muted small mb-0">Use the manual course generator to deploy isolated shells for unmapped section-subject offerings.</p>
               </div>
             </div>
-            <a href="/sia/lms/admin/generator" class="btn btn-outline-primary rounded-pill px-3.5 py-2 fw-semibold small shadow-xs hover-lift">
+            <a href="<?= BASE_PATH ?>/lms/admin/generator" class="btn btn-outline-primary rounded-pill px-3.5 py-2 fw-semibold small shadow-xs hover-lift">
               <i class="bi bi-plus-circle me-1"></i> Open Generator &rarr;
             </a>
           </div>
@@ -491,7 +491,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
               </div>
             </div>
 
-            <a href="/sia/lms/admin/sync" class="btn btn-primary rounded-pill w-100 py-2 small fw-semibold shadow-xs d-flex align-items-center justify-content-center gap-1.5 hover-lift">
+            <a href="<?= BASE_PATH ?>/lms/admin/sync" class="btn btn-primary rounded-pill w-100 py-2 small fw-semibold shadow-xs d-flex align-items-center justify-content-center gap-1.5 hover-lift">
               <i class="bi bi-arrow-repeat"></i>
               <span>Run Timetable Reconciliation</span>
             </a>
@@ -509,7 +509,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <h3 class="h6 fw-bold text-dark mb-0">Active Platform Notices</h3>
               </div>
             </div>
-            <a href="/sia/lms/admin/announcements" class="small fw-semibold text-primary text-decoration-none">Manage &rarr;</a>
+            <a href="<?= BASE_PATH ?>/lms/admin/announcements" class="small fw-semibold text-primary text-decoration-none">Manage &rarr;</a>
           </div>
 
           <div class="p-4 pt-3">
@@ -541,7 +541,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
               </div>
             <?php endif; ?>
 
-            <a href="/sia/lms/admin/announcements" class="btn btn-outline-danger rounded-pill w-100 py-1.5 small fw-semibold mt-2 hover-lift">
+            <a href="<?= BASE_PATH ?>/lms/admin/announcements" class="btn btn-outline-danger rounded-pill w-100 py-1.5 small fw-semibold mt-2 hover-lift">
               <i class="bi bi-plus-circle me-1"></i> Broadcast New Notice
             </a>
           </div>
@@ -558,7 +558,7 @@ $activeStudentsCount = (int)($stats['active_students'] ?? 0);
                 <h6 class="fw-bold text-dark mb-0">LMS Audit Stream</h6>
               </div>
             </div>
-            <a href="/sia/lms/admin/audit_logs" class="small fw-semibold text-primary text-decoration-none">Full Log &rarr;</a>
+            <a href="<?= BASE_PATH ?>/lms/admin/audit_logs" class="small fw-semibold text-primary text-decoration-none">Full Log &rarr;</a>
           </div>
 
           <div class="p-4 pt-3">

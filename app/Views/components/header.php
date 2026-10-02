@@ -14,10 +14,10 @@ $pageTitle = $pageTitle ?? 'Triple T University';
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title><?= htmlspecialchars($pageTitle, ENT_QUOTES, 'UTF-8'); ?></title>
 
-  <link rel="stylesheet" href="/sia/public/vendor/fonts/fonts.css">
-  <link href="/sia/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
-  <link href="/sia/public/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
-  <link href="/sia/css/main.css?v=<?= esc(filemtime(__DIR__ . '/../../../css/main.css')) ?>" rel="stylesheet">
+  <link rel="stylesheet" href="<?= BASE_PATH ?>/public/vendor/fonts/fonts.css">
+  <link href="<?= BASE_PATH ?>/public/vendor/bootstrap/bootstrap.min.css" rel="stylesheet">
+  <link href="<?= BASE_PATH ?>/public/vendor/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="<?= BASE_PATH ?>/css/main.css?v=<?= esc(filemtime(__DIR__ . '/../../../css/main.css')) ?>" rel="stylesheet">
 </head>
 <body>
 

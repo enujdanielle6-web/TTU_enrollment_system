@@ -218,7 +218,7 @@ require_once __DIR__ . '/../components/applicant_navbar.php';
 
   </div>
 
-<script src="/sia/public/vendor/jquery/jquery.min.js"></script>
+<script src="<?= BASE_PATH ?>/public/vendor/jquery/jquery.min.js"></script>
 <script>
 function initHealthInfoValidations() {
     var forms = document.querySelectorAll('.needs-validation');

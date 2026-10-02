@@ -246,7 +246,7 @@ class ScholarshipController extends BaseController
         $appId = (int) ($_GET['id'] ?? 0);
 
         if ($appId <= 0) {
-            $response->redirect("/sia/admin/scholarship/scholarship_review.php");
+            $response->redirect(BASE_PATH . "/admin/scholarship/scholarship_review.php");
             return;
         }
 
@@ -265,7 +265,7 @@ class ScholarshipController extends BaseController
             $app = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if (!$app) {
-                $response->redirect("/sia/admin/scholarship/scholarship_review.php");
+                $response->redirect(BASE_PATH . "/admin/scholarship/scholarship_review.php");
                 return;
             }
 
@@ -297,7 +297,7 @@ class ScholarshipController extends BaseController
     {
         $pdo = Database::getConnection();
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            $response->redirect("/sia/admin/scholarship/scholarships.php");
+            $response->redirect(BASE_PATH . "/admin/scholarship/scholarships.php");
             return;
         }
 
@@ -367,7 +367,7 @@ class ScholarshipController extends BaseController
                     $_SESSION['success_msg'] = 'Scholarship updated successfully.';
                 }
 
-                $response->redirect("/sia/admin/scholarship/scholarships.php");
+                $response->redirect(BASE_PATH . "/admin/scholarship/scholarships.php");
                 return;
             }
             elseif ($action === 'process_application') {
@@ -448,7 +448,7 @@ class ScholarshipController extends BaseController
                     throw $e;
                 }
 
-                $response->redirect("/sia/admin/scholarship/scholarship_detail.php?id=" . $appId);
+                $response->redirect(BASE_PATH . "/admin/scholarship/scholarship_detail.php?id=" . $appId);
                 return;
             }
             elseif ($action === 'update_recipient_status') {
@@ -475,7 +475,7 @@ class ScholarshipController extends BaseController
                 }
 
                 $_SESSION['success_msg'] = 'Scholar status updated successfully.';
-                $response->redirect("/sia/admin/scholarship/scholars.php");
+                $response->redirect(BASE_PATH . "/admin/scholarship/scholars.php");
                 return;
             }
             else {
@@ -483,7 +483,7 @@ class ScholarshipController extends BaseController
             }
         } catch (Exception $e) {
             $_SESSION['error_msg'] = $e->getMessage();
-            $response->redirect("/sia/admin/scholarship/scholarships.php");
+            $response->redirect(BASE_PATH . "/admin/scholarship/scholarships.php");
             return;
         }
     }

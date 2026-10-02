@@ -4,10 +4,10 @@
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb mb-0 py-2 px-3 bg-white rounded-3 border shadow-xs align-items-center" style="font-size: 0.88rem;">
-            <li class="breadcrumb-item"><a href="/sia/lms/student/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Dashboard</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/my_courses.php" class="text-decoration-none text-muted">My Courses</a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-primary fw-medium"><?= htmlspecialchars($course['subject_code']) ?></a></li>
-            <li class="breadcrumb-item"><a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($quiz['title']) ?></a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/dashboard.php" class="text-decoration-none text-muted"><i class="bi bi-house-door me-1"></i>Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/my_courses.php" class="text-decoration-none text-muted">My Courses</a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="text-decoration-none text-primary fw-medium"><?= htmlspecialchars($course['subject_code']) ?></a></li>
+            <li class="breadcrumb-item"><a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="text-decoration-none text-muted"><?= htmlspecialchars($quiz['title']) ?></a></li>
             <li class="breadcrumb-item active text-dark fw-semibold" aria-current="page">Attempt #<?= esc($attempt['attempt_number']) ?> Result</li>
         </ol>
     </nav>
@@ -95,11 +95,11 @@
 
                     <!-- Actions -->
                     <div class="d-flex flex-wrap justify-content-center gap-3 mt-4">
-                        <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                        <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
                             <i class="bi bi-arrow-left"></i>
                             <span>Quiz Overview</span>
                         </a>
-                        <a href="/sia/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
+                        <a href="<?= BASE_PATH ?>/lms/student/course.php?id=<?= esc($course['lms_course_id']) ?>" class="btn btn-primary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2">
                             <i class="bi bi-journal-bookmark-fill"></i>
                             <span>Return to Course</span>
                         </a>
@@ -203,7 +203,7 @@
 
             <!-- Bottom Action Navigation -->
             <div class="text-center py-4 mb-5">
-                <a href="/sia/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="btn btn-outline-primary btn-lg rounded-pill px-5 fw-bold shadow-xs">
+                <a href="<?= BASE_PATH ?>/lms/student/course/<?= esc($course['lms_course_id']) ?>/quizzes/<?= esc($quiz['id']) ?>" class="btn btn-outline-primary btn-lg rounded-pill px-5 fw-bold shadow-xs">
                     <i class="bi bi-arrow-left me-1"></i> Back to Quiz Overview
                 </a>
             </div>

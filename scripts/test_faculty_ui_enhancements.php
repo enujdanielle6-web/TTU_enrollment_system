@@ -34,9 +34,9 @@ echo "====================================================================\n\n";
 $facultyViewsDir = dirname(__DIR__) . '/app/Views/lms/faculty';
 
 // 1. Check layout_header.php
-runTest("Faculty layout header links /sia/css/main.css and applies lms-faculty-layout", function () use ($facultyViewsDir) {
+runTest("Faculty layout header links <?= BASE_PATH ?>/css/main.css and applies lms-faculty-layout", function () use ($facultyViewsDir) {
     $content = file_get_contents($facultyViewsDir . '/layout_header.php');
-    return strpos($content, '/sia/css/main.css') !== false 
+    return strpos($content, '<?= BASE_PATH ?>/css/main.css') !== false 
         && strpos($content, 'lms-faculty-layout') !== false
         && strpos($content, 'lms-admin-topbar') !== false;
 });
@@ -45,7 +45,7 @@ runTest("Faculty layout header links /sia/css/main.css and applies lms-faculty-l
 runTest("Faculty layout header includes term indicator badge, schedule link, and profile dropdown", function () use ($facultyViewsDir) {
     $content = file_get_contents($facultyViewsDir . '/layout_header.php');
     return strpos($content, 'pulse-dot-green') !== false
-        && strpos($content, '/sia/lms/faculty/calendar') !== false
+        && strpos($content, '<?= BASE_PATH ?>/lms/faculty/calendar') !== false
         && strpos($content, 'facultyUserDropdown') !== false;
 });
 

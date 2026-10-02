@@ -65,7 +65,7 @@ class FacultyAnnouncementController extends BaseController
         $data['author_user_id'] = $_SESSION['user_id'];
 
         $this->announcementService->createAnnouncement($data);
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/announcements");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/announcements");
     }
 
     public function edit(Request $request, Response $response, string $courseId, string $id)
@@ -103,7 +103,7 @@ class FacultyAnnouncementController extends BaseController
         $data = $request->getBody();
         $this->announcementService->updateAnnouncement($announcementId, $data);
         
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/announcements");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/announcements");
     }
 
     public function delete(Request $request, Response $response, string $courseId, string $id)
@@ -119,6 +119,6 @@ class FacultyAnnouncementController extends BaseController
         }
 
         $this->announcementService->deleteAnnouncement($announcementId);
-        $this->redirect("/sia/lms/faculty/course/{$lmsCourseId}/announcements");
+        $this->redirect(BASE_PATH . "/lms/faculty/course/{$lmsCourseId}/announcements");
     }
 }

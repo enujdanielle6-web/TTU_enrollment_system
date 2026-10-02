@@ -176,7 +176,7 @@ require_once __DIR__ . '/../components/header.php';
                   </div>
                 </div>
                 <div class="flex-shrink-0 align-self-end align-self-md-center">
-                  <a href="/sia/auth/lms_student_login.php" class="btn btn-primary btn-sm rounded-pill px-3.5 py-2 fw-semibold shadow-sm text-nowrap">
+                  <a href="<?= BASE_PATH ?>/auth/lms_student_login.php" class="btn btn-primary btn-sm rounded-pill px-3.5 py-2 fw-semibold shadow-sm text-nowrap">
                     <i class="bi bi-box-arrow-in-right me-1"></i> Student LMS Portal
                   </a>
                 </div>

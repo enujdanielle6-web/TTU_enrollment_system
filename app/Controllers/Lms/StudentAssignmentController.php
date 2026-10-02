@@ -143,7 +143,7 @@ class StudentAssignmentController extends BaseController
 
             $this->lmsService->submitAssignment($assignmentId, $userId, $fileData, $status);
             
-            $this->redirect("/sia/lms/student/course/{$lmsCourseId}/assignments/{$assignmentId}");
+            $this->redirect(BASE_PATH . "/lms/student/course/{$lmsCourseId}/assignments/{$assignmentId}");
         } else {
             $response->setStatusCode(500);
             echo "Failed to save uploaded submission file.";
