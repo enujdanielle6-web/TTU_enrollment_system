@@ -1036,19 +1036,19 @@ function sendVerificationCodeEmail(string $recipientEmail, string $recipientName
     try {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        $mail->Host       = app_env('SMTP_HOST') ?: 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = getenv('SMTP_USERNAME') ?: '';
-        $mail->Password   = getenv('SMTP_PASSWORD') ?: '';
+        $mail->Username   = app_env('SMTP_USERNAME') ?: '';
+        $mail->Password   = app_env('SMTP_PASSWORD') ?: '';
 
-        $enc = getenv('SMTP_ENCRYPTION') ?: 'tls';
+        $enc = app_env('SMTP_ENCRYPTION') ?: 'tls';
         if (strtolower((string)$enc) === 'ssl') {
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         } else {
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         }
 
-        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
+        $mail->Port = (int)(app_env('SMTP_PORT') ?: 587);
         $mail->Timeout = 10;
 
         $mail->SMTPOptions = [
@@ -1059,8 +1059,8 @@ function sendVerificationCodeEmail(string $recipientEmail, string $recipientName
             ]
         ];
 
-        $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
-        $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
+        $fromAddress = app_env('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
+        $fromName = app_env('MAIL_FROM_NAME') ?: 'Triple T University';
         $mail->setFrom($fromAddress, $fromName);
         $mail->addAddress($recipientEmail, $recipientName);
 
@@ -1133,19 +1133,19 @@ function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, 
     try {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        $mail->Host       = app_env('SMTP_HOST') ?: 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = getenv('SMTP_USERNAME') ?: '';
-        $mail->Password   = getenv('SMTP_PASSWORD') ?: '';
+        $mail->Username   = app_env('SMTP_USERNAME') ?: '';
+        $mail->Password   = app_env('SMTP_PASSWORD') ?: '';
 
-        $enc = getenv('SMTP_ENCRYPTION') ?: 'tls';
+        $enc = app_env('SMTP_ENCRYPTION') ?: 'tls';
         if (strtolower((string)$enc) === 'ssl') {
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         } else {
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         }
 
-        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
+        $mail->Port = (int)(app_env('SMTP_PORT') ?: 587);
         $mail->Timeout = 10;
 
         $mail->SMTPOptions = [
@@ -1156,8 +1156,8 @@ function sendStudentCredentialsEmail(string $recipientEmail, string $firstName, 
             ]
         ];
 
-        $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
-        $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
+        $fromAddress = app_env('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
+        $fromName = app_env('MAIL_FROM_NAME') ?: 'Triple T University';
         $mail->setFrom($fromAddress, $fromName);
         $mail->addAddress($recipientEmail, $firstName);
 
@@ -1244,19 +1244,19 @@ function sendPasswordResetOtpEmail(
     try {
         $mail = new \PHPMailer\PHPMailer\PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host       = getenv('SMTP_HOST') ?: 'smtp.gmail.com';
+        $mail->Host       = app_env('SMTP_HOST') ?: 'smtp.gmail.com';
         $mail->SMTPAuth   = true;
-        $mail->Username   = getenv('SMTP_USERNAME') ?: '';
-        $mail->Password   = getenv('SMTP_PASSWORD') ?: '';
+        $mail->Username   = app_env('SMTP_USERNAME') ?: '';
+        $mail->Password   = app_env('SMTP_PASSWORD') ?: '';
 
-        $enc = getenv('SMTP_ENCRYPTION') ?: 'tls';
+        $enc = app_env('SMTP_ENCRYPTION') ?: 'tls';
         if (strtolower((string)$enc) === 'ssl') {
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
         } else {
             $mail->SMTPSecure = \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS;
         }
 
-        $mail->Port = (int)(getenv('SMTP_PORT') ?: 587);
+        $mail->Port = (int)(app_env('SMTP_PORT') ?: 587);
         $mail->Timeout = 10;
 
         $mail->SMTPOptions = [
@@ -1267,8 +1267,8 @@ function sendPasswordResetOtpEmail(
             ]
         ];
 
-        $fromAddress = getenv('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
-        $fromName = getenv('MAIL_FROM_NAME') ?: 'Triple T University';
+        $fromAddress = app_env('MAIL_FROM_ADDRESS') ?: 'no-reply@ttu.edu.ph';
+        $fromName = app_env('MAIL_FROM_NAME') ?: 'Triple T University';
         $mail->setFrom($fromAddress, $fromName);
         $mail->addAddress($recipientEmail, $recipientName);
 
