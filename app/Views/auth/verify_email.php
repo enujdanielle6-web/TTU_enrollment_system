@@ -36,6 +36,8 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php endif; ?>
 
+          <div id="timeoutAlertContainer"></div>
+
           <?php if (!empty($errors)): ?>
             <div class="alert alert-danger rounded-3 border-0 bg-danger text-white py-2 px-3 small shadow-sm mb-4 d-flex align-items-center">
               <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i>
@@ -64,8 +66,8 @@ require_once __DIR__ . '/../components/header.php';
                 <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="form-control text-center fs-3 fw-bold otp-digit" style="height: 58px; border-radius: 12px; border: 2px solid #dee2e6;" required>
                 <input type="text" maxlength="1" pattern="[0-9]" inputmode="numeric" class="form-control text-center fs-3 fw-bold otp-digit" style="height: 58px; border-radius: 12px; border: 2px solid #dee2e6;" required>
               </div>
-              <div class="text-center text-muted small mt-2" style="font-size: 0.78rem;">
-                <i class="bi bi-clock-history me-1"></i> Code expires in 15 minutes
+              <div class="text-center text-muted small mt-2" id="expiryNotice" style="font-size: 0.78rem;">
+                <i class="bi bi-clock-history me-1"></i> Code expires in <span id="codeExpiryTimer" class="fw-bold text-primary">15:00</span>
               </div>
             </div>
 
@@ -104,6 +106,114 @@ document.addEventListener('DOMContentLoaded', function () {
   const fullCodeInput = document.getElementById('fullCodeInput');
   const verifyForm = document.getElementById('verifyForm');
   const verifyBtn = document.getElementById('verifyBtn');
+  const resendBtn = document.getElementById('resendBtn');
+  const countdownTimer = document.getElementById('countdownTimer');
+  const codeExpiryTimer = document.getElementById('codeExpiryTimer');
+  const expiryNotice = document.getElementById('expiryNotice');
+  const timeoutAlertContainer = document.getElementById('timeoutAlertContainer');
+
+  let remainingSeconds = <?= (int)($remainingSeconds ?? 900) ?>;
+  let isExpired = remainingSeconds <= 0;
+  let resendInterval = null;
+  let cooldown = 60;
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+  }
+
+  function stopCooldown() {
+    if (resendInterval) {
+      clearInterval(resendInterval);
+      resendInterval = null;
+    }
+    if (resendBtn) {
+      resendBtn.classList.remove('disabled', 'text-muted');
+      resendBtn.style.pointerEvents = 'auto';
+    }
+    if (countdownTimer) {
+      countdownTimer.classList.add('d-none');
+    }
+  }
+
+  function startCooldown() {
+    if (isExpired) {
+      stopCooldown();
+      return;
+    }
+    if (!resendBtn || !countdownTimer) return;
+    resendBtn.classList.add('disabled', 'text-muted');
+    resendBtn.style.pointerEvents = 'none';
+    countdownTimer.classList.remove('d-none');
+    countdownTimer.textContent = `(${cooldown}s)`;
+
+    resendInterval = setInterval(() => {
+      cooldown--;
+      countdownTimer.textContent = `(${cooldown}s)`;
+      if (cooldown <= 0) {
+        stopCooldown();
+        cooldown = 60;
+      }
+    }, 1000);
+  }
+
+  function handleTimeout() {
+    isExpired = true;
+    if (codeExpiryTimer) {
+      codeExpiryTimer.textContent = '00:00';
+    }
+    if (expiryNotice) {
+      expiryNotice.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-clock-history me-1"></i> Code expired (15 minutes elapsed)</span>';
+    }
+    if (timeoutAlertContainer && !document.getElementById('timeoutAlertBanner')) {
+      timeoutAlertContainer.innerHTML = `
+        <div class="alert alert-danger rounded-3 border-0 bg-danger text-white py-2 px-3 small shadow-sm mb-4 d-flex align-items-center" id="timeoutAlertBanner">
+          <i class="bi bi-hourglass-bottom me-2 fs-5 flex-shrink-0"></i>
+          <div>
+            <strong>Verification code timed out.</strong> Your code expired because it was not entered within 15 minutes. Please click &ldquo;Resend Code&rdquo; to receive a new code.
+          </div>
+        </div>
+      `;
+    }
+    digits.forEach(d => {
+      d.disabled = true;
+      d.style.backgroundColor = '#e9ecef';
+      d.style.cursor = 'not-allowed';
+    });
+    if (verifyBtn) {
+      verifyBtn.disabled = true;
+      verifyBtn.classList.add('opacity-50');
+      verifyBtn.style.cursor = 'not-allowed';
+    }
+    stopCooldown();
+  }
+
+  // Expiry timer initialization
+  if (isExpired) {
+    handleTimeout();
+  } else {
+    if (codeExpiryTimer) {
+      codeExpiryTimer.textContent = formatTime(remainingSeconds);
+    }
+    startCooldown();
+
+    const expiryInterval = setInterval(() => {
+      remainingSeconds--;
+      if (remainingSeconds <= 0) {
+        clearInterval(expiryInterval);
+        handleTimeout();
+      } else {
+        if (codeExpiryTimer) {
+          codeExpiryTimer.textContent = formatTime(remainingSeconds);
+          if (remainingSeconds <= 30) {
+            codeExpiryTimer.classList.remove('text-primary');
+            codeExpiryTimer.classList.add('text-danger');
+          }
+        }
+      }
+    }, 1000);
+  }
 
   function updateFullCode() {
     const code = digits.map(d => d.value).join('');
@@ -114,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
   digits.forEach((input, index) => {
     // Focus effect
     input.addEventListener('focus', function () {
+      if (isExpired) return;
       this.select();
       this.style.borderColor = '#0d6efd';
       this.style.boxShadow = '0 0 0 0.25rem rgba(13, 110, 253, 0.15)';
@@ -126,6 +237,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Handle Input
     input.addEventListener('input', function (e) {
+      if (isExpired) return;
       const val = this.value.replace(/[^0-9]/g, '');
       this.value = val ? val[val.length - 1] : '';
 
@@ -135,13 +247,13 @@ document.addEventListener('DOMContentLoaded', function () {
       
       const currentCode = updateFullCode();
       if (currentCode.length === 6) {
-        // Auto submit if all 6 digits are typed
         verifyBtn.focus();
       }
     });
 
     // Handle Backspace & Navigation
     input.addEventListener('keydown', function (e) {
+      if (isExpired) return;
       if (e.key === 'Backspace') {
         if (!this.value && index > 0) {
           digits[index - 1].focus();
@@ -157,8 +269,9 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Handle Paste (e.g. user pastes 6-digit code)
+    // Handle Paste
     input.addEventListener('paste', function (e) {
+      if (isExpired) return;
       e.preventDefault();
       const pasteData = (e.clipboardData || window.clipboardData).getData('text').trim();
       const numbersOnly = pasteData.replace(/[^0-9]/g, '').slice(0, 6);
@@ -177,6 +290,11 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   verifyForm.addEventListener('submit', function (e) {
+    if (isExpired) {
+      e.preventDefault();
+      alert('Verification code timed out. Your code expired because it was not entered within 15 minutes. Please click "Resend Code" to receive a new code.');
+      return false;
+    }
     const code = updateFullCode();
     if (code.length !== 6) {
       e.preventDefault();
@@ -184,33 +302,6 @@ document.addEventListener('DOMContentLoaded', function () {
       digits.find(d => !d.value)?.focus();
     }
   });
-
-  // Resend cooldown timer
-  const resendBtn = document.getElementById('resendBtn');
-  const countdownTimer = document.getElementById('countdownTimer');
-  let cooldown = 60;
-  
-  function startCooldown() {
-    resendBtn.classList.add('disabled', 'text-muted');
-    resendBtn.style.pointerEvents = 'none';
-    countdownTimer.classList.remove('d-none');
-    countdownTimer.textContent = `(${cooldown}s)`;
-
-    const timer = setInterval(() => {
-      cooldown--;
-      countdownTimer.textContent = `(${cooldown}s)`;
-      if (cooldown <= 0) {
-        clearInterval(timer);
-        resendBtn.classList.remove('disabled', 'text-muted');
-        resendBtn.style.pointerEvents = 'auto';
-        countdownTimer.classList.add('d-none');
-        cooldown = 60;
-      }
-    }, 1000);
-  }
-
-  // Start cooldown on page load
-  startCooldown();
 });
 </script>
 

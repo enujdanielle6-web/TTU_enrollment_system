@@ -215,7 +215,7 @@ class AuthController extends BaseController
             'password' => $hashedPassword,
             'role' => 'applicant',
             'code' => $code,
-            'expires_at' => time() + (15 * 60)
+            'expires_at' => time() + (15 * 60) // 15 minutes expiration
         ];
 
         $_SESSION['pending_verification_email'] = $email;
@@ -227,7 +227,7 @@ class AuthController extends BaseController
         $emailSent = sendVerificationCodeEmail($email, $firstName, $code, $mailError);
 
         if ($emailSent) {
-            $_SESSION['verification_success'] = "A 6-digit verification code has been successfully sent to {$email}. Please check your inbox or spam folder.";
+            $_SESSION['verification_success'] = "A 6-digit verification code has been successfully sent to {$email}. Please enter it within 15 minutes.";
         } else {
             $_SESSION['verification_warning'] = "We attempted to send a verification code to {$email}, but encountered a temporary delivery issue. Please click 'Resend Code' if not received.";
             error_log("Email delivery warning for {$email}: {$mailError}");
@@ -261,11 +261,29 @@ class AuthController extends BaseController
         $warning = $_SESSION['verification_warning'] ?? null;
         unset($_SESSION['verify_errors'], $_SESSION['verification_success'], $_SESSION['verification_warning']);
 
+        $remainingSeconds = 900;
+        if (!empty($_SESSION['pending_registration']['expires_at'])) {
+            $remainingSeconds = max(0, (int)$_SESSION['pending_registration']['expires_at'] - time());
+        } elseif (!empty($_SESSION['pending_verification_user_id'])) {
+            $pdo = \App\Core\Database::getConnection();
+            $stmt = $pdo->prepare("SELECT TIMESTAMPDIFF(SECOND, NOW(), verification_code_expires_at) AS rem_sec, verification_code_expires_at FROM users WHERE id = ?");
+            $stmt->execute([(int)$_SESSION['pending_verification_user_id']]);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($row) {
+                if ($row['rem_sec'] !== null) {
+                    $remainingSeconds = max(0, (int)$row['rem_sec']);
+                } elseif (!empty($row['verification_code_expires_at'])) {
+                    $remainingSeconds = max(0, strtotime($row['verification_code_expires_at']) - time());
+                }
+            }
+        }
+
         return $this->render('auth/verify_email', [
             'email' => $email,
             'errors' => $errors,
             'success' => $success,
-            'warning' => $warning
+            'warning' => $warning,
+            'remainingSeconds' => $remainingSeconds
         ]);
     }
 
@@ -295,8 +313,16 @@ class AuthController extends BaseController
             $storedCode = (string)($pending['code'] ?? '');
             $expiresAt = (int)($pending['expires_at'] ?? 0);
 
-            if ($storedCode !== $code || time() > $expiresAt) {
-                $_SESSION['verify_errors'] = ['The verification code is incorrect or has expired. Please try again or click Resend Code.'];
+            // Timeout error: check if expired (not entered within 15 minutes)
+            if ($expiresAt > 0 && time() > $expiresAt) {
+                $_SESSION['verify_errors'] = ['Verification code timed out. Your code expired because it was not entered within 15 minutes. Please click "Resend Code" to receive a new code.'];
+                $response->redirect(BASE_PATH . '/auth/verify_email.php');
+                return;
+            }
+
+            // Incorrect code check
+            if ($storedCode !== $code) {
+                $_SESSION['verify_errors'] = ['The verification code you entered is incorrect. Please check the 6-digit code sent to your email or click "Resend Code".'];
                 $response->redirect(BASE_PATH . '/auth/verify_email.php');
                 return;
             }
@@ -361,7 +387,7 @@ class AuthController extends BaseController
         }
 
         $pdo = \App\Core\Database::getConnection();
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = :id LIMIT 1");
+        $stmt = $pdo->prepare("SELECT *, (verification_code_expires_at IS NOT NULL AND verification_code_expires_at < NOW()) AS is_expired FROM users WHERE id = :id LIMIT 1");
         $stmt->execute(['id' => $userId]);
         $user = $stmt->fetch(\PDO::FETCH_ASSOC);
 
@@ -375,8 +401,16 @@ class AuthController extends BaseController
         $storedCode = (string)($user['verification_code'] ?? '');
         $expiresAt = (string)($user['verification_code_expires_at'] ?? '');
 
-        if ($storedCode !== $code || ($expiresAt !== '' && $expiresAt < $now)) {
-            $_SESSION['verify_errors'] = ['The verification code is incorrect or has expired. Please try again or click Resend Code.'];
+        // Timeout error: check if expired (not entered within 15 minutes)
+        if (!empty($user['is_expired']) || ($expiresAt !== '' && $expiresAt < $now)) {
+            $_SESSION['verify_errors'] = ['Verification code timed out. Your code expired because it was not entered within 15 minutes. Please click "Resend Code" to receive a new code.'];
+            $response->redirect(BASE_PATH . '/auth/verify_email.php');
+            return;
+        }
+
+        // Incorrect code check
+        if ($storedCode !== $code) {
+            $_SESSION['verify_errors'] = ['The verification code you entered is incorrect. Please check the 6-digit code sent to your email or click "Resend Code".'];
             $response->redirect(BASE_PATH . '/auth/verify_email.php');
             return;
         }
@@ -418,7 +452,7 @@ class AuthController extends BaseController
         if (!empty($_SESSION['pending_registration'])) {
             $newCode = sprintf('%06d', random_int(100000, 999999));
             $_SESSION['pending_registration']['code'] = $newCode;
-            $_SESSION['pending_registration']['expires_at'] = time() + (15 * 60);
+            $_SESSION['pending_registration']['expires_at'] = time() + (15 * 60); // 15 minutes
 
             $email = $_SESSION['pending_registration']['email'];
             $firstName = $_SESSION['pending_registration']['first_name'];
@@ -427,7 +461,7 @@ class AuthController extends BaseController
             $emailSent = sendVerificationCodeEmail($email, $firstName, $newCode, $mailError);
 
             if ($emailSent) {
-                $_SESSION['verification_success'] = "A new 6-digit verification code has been successfully sent to {$email}.";
+                $_SESSION['verification_success'] = "A new 6-digit verification code has been successfully sent to {$email}. It is valid for 15 minutes.";
             } else {
                 $_SESSION['verify_errors'] = ["Failed to send email to {$email}. " . ($mailError ?: 'Please try again in a few moments.')];
             }
@@ -464,7 +498,7 @@ class AuthController extends BaseController
         $emailSent = sendVerificationCodeEmail($user['email'], $user['first_name'], $newCode, $mailError);
 
         if ($emailSent) {
-            $_SESSION['verification_success'] = "A new 6-digit verification code has been successfully sent to {$user['email']}.";
+            $_SESSION['verification_success'] = "A new 6-digit verification code has been successfully sent to {$user['email']}. It is valid for 15 minutes.";
         } else {
             $_SESSION['verify_errors'] = ["Failed to send email to {$user['email']}. " . ($mailError ?: 'Please try again in a few moments.')];
         }
@@ -658,7 +692,7 @@ class AuthController extends BaseController
             }
         }
 
-        // Generate 6-digit OTP
+        // Generate 6-digit OTP (valid for 15 minutes)
         $code = sprintf('%06d', random_int(100000, 999999));
         $upd = $pdo->prepare("
             UPDATE users 
@@ -716,13 +750,29 @@ class AuthController extends BaseController
         $warning = $_SESSION['reset_warning'] ?? null;
         unset($_SESSION['reset_errors'], $_SESSION['reset_success'], $_SESSION['reset_warning']);
 
+        $remainingSeconds = 900;
+        if (!empty($email)) {
+            $pdo = \App\Core\Database::getConnection();
+            $stmt = $pdo->prepare("SELECT TIMESTAMPDIFF(SECOND, NOW(), reset_token_expires_at) AS rem_sec, reset_token_expires_at FROM users WHERE email = ? AND reset_token IS NOT NULL LIMIT 1");
+            $stmt->execute([$email]);
+            $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+            if ($row) {
+                if ($row['rem_sec'] !== null) {
+                    $remainingSeconds = max(0, (int)$row['rem_sec']);
+                } elseif (!empty($row['reset_token_expires_at'])) {
+                    $remainingSeconds = max(0, strtotime($row['reset_token_expires_at']) - time());
+                }
+            }
+        }
+
         return $this->render('auth/reset_password', [
             'portal' => $portal,
             'email' => $email,
             'code' => $code,
             'errors' => $errors,
             'success' => $success,
-            'warning' => $warning
+            'warning' => $warning,
+            'remainingSeconds' => $remainingSeconds
         ]);
     }
 
@@ -780,11 +830,11 @@ class AuthController extends BaseController
 
         $pdo = \App\Core\Database::getConnection();
         if ($portal === 'faculty') {
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND role = 'faculty' AND is_active = 1 LIMIT 1");
+            $stmt = $pdo->prepare("SELECT *, (reset_token_expires_at IS NOT NULL AND reset_token_expires_at < NOW()) AS is_expired FROM users WHERE email = :email AND role = 'faculty' AND is_active = 1 LIMIT 1");
         } elseif ($portal === 'student') {
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND is_active = 1 LIMIT 1");
+            $stmt = $pdo->prepare("SELECT *, (reset_token_expires_at IS NOT NULL AND reset_token_expires_at < NOW()) AS is_expired FROM users WHERE email = :email AND is_active = 1 LIMIT 1");
         } else {
-            $stmt = $pdo->prepare("SELECT * FROM users WHERE email = :email AND role = 'applicant' AND is_active = 1 LIMIT 1");
+            $stmt = $pdo->prepare("SELECT *, (reset_token_expires_at IS NOT NULL AND reset_token_expires_at < NOW()) AS is_expired FROM users WHERE email = :email AND role = 'applicant' AND is_active = 1 LIMIT 1");
         }
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -799,8 +849,16 @@ class AuthController extends BaseController
         $expiresAt = (string)($user['reset_token_expires_at'] ?? '');
         $now = date('Y-m-d H:i:s');
 
-        if ($storedCode === '' || $storedCode !== $code || ($expiresAt !== '' && $expiresAt < $now)) {
-            $_SESSION['reset_errors'] = ['The 6-digit verification code is invalid or has expired. Please try again or click Resend Code.'];
+        // Timeout error: check if expired (not entered within 15 minutes)
+        if (!empty($user['is_expired']) || ($expiresAt !== '' && $expiresAt < $now)) {
+            $_SESSION['reset_errors'] = ['Verification code timed out. Your code expired because it was not entered within 15 minutes. Please click "Resend Code" to receive a new code.'];
+            $response->redirect(BASE_PATH . "/auth/reset_password.php?portal={$portal}&email=" . urlencode($email));
+            return;
+        }
+
+        // Incorrect code check
+        if ($storedCode === '' || $storedCode !== $code) {
+            $_SESSION['reset_errors'] = ['The 6-digit verification code you entered is incorrect. Please try again or click "Resend Code".'];
             $response->redirect(BASE_PATH . "/auth/reset_password.php?portal={$portal}&email=" . urlencode($email));
             return;
         }

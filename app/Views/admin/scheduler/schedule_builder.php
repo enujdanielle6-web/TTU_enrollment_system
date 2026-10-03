@@ -381,6 +381,60 @@ const CAL_PIXELS_PER_HOUR = 60;
 
 let editModal = null;
 
+const DAY_LABELS = {
+    'M': 'Monday',
+    'T': 'Tuesday',
+    'W': 'Wednesday',
+    'TH': 'Thursday',
+    'F': 'Friday',
+    'S': 'Saturday',
+    'SU': 'Sunday'
+};
+
+function decomposeDays(dayString) {
+    if (!dayString) return [];
+    let cleaned = dayString.trim().toUpperCase();
+    if (cleaned === 'TBA' || !cleaned) return [];
+    
+    const map = {
+        'MONDAY': ['M'], 'MON': ['M'], 'M': ['M'],
+        'TUESDAY': ['T'], 'TUE': ['T'], 'T': ['T'],
+        'WEDNESDAY': ['W'], 'WED': ['W'], 'W': ['W'],
+        'THURSDAY': ['TH'], 'THU': ['TH'], 'TH': ['TH'],
+        'FRIDAY': ['F'], 'FRI': ['F'], 'F': ['F'],
+        'SATURDAY': ['S'], 'SAT': ['S'], 'S': ['S'],
+        'SUNDAY': ['SU'], 'SUN': ['SU'], 'SU': ['SU']
+    };
+    if (map[cleaned]) return map[cleaned];
+
+    let days = [];
+    if (cleaned.includes('TH')) {
+        days.push('TH');
+        cleaned = cleaned.replace(/TH/g, '');
+    }
+    if (cleaned.includes('SU')) {
+        days.push('SU');
+        cleaned = cleaned.replace(/SU/g, '');
+    }
+    for (let i = 0; i < cleaned.length; i++) {
+        let char = cleaned[i];
+        if (['M', 'T', 'W', 'F', 'S'].includes(char)) {
+            days.push(char);
+        }
+    }
+    return [...new Set(days)];
+}
+
+function haveCommonDays(day1, day2) {
+    const d1 = decomposeDays(day1);
+    const d2 = decomposeDays(day2);
+    return d1.filter(d => d2.includes(d));
+}
+
+function formatDays(daysArray) {
+    return daysArray.map(d => DAY_LABELS[d] || d).join(', ');
+}
+
 function normalizeDay(day) {
     if (!day) return null;
     const d = day.trim().toLowerCase();
@@ -417,6 +471,11 @@ function render() {
 
         if (isScheduled) {
             el.className = 'sched-block' + (sub.conflict ? ' conflict' : '');
+            if (sub.conflict && sub.conflictReasons && sub.conflictReasons.length > 0) {
+                el.title = sub.conflictReasons.join('\n');
+            } else {
+                el.title = `${sub.subject_code} - Click to edit`;
+            }
             
             const startStr = sub.start_time.substring(0,5);
             const endStr = sub.end_time.substring(0,5);
@@ -434,6 +493,9 @@ function render() {
             const roomText = sub.room ? sub.room : 'TBA';
             const instText = sub.instructor ? sub.instructor : 'TBA';
             const modeBadge = sub.delivery_mode === 'Online' ? '<span class="badge bg-info bg-opacity-10 text-info border border-info ms-auto py-0 px-1" style="font-size: 0.6rem;">Online</span>' : '';
+            const conflictBadge = sub.conflict 
+                ? `<div class="badge bg-danger text-white py-0 px-1 mt-1 d-flex align-items-center gap-1" style="font-size: 0.65rem; width: fit-content;"><i class="bi bi-exclamation-triangle-fill"></i> Conflict</div>` 
+                : '';
 
             el.innerHTML = `
                 <div class="d-flex justify-content-between align-items-start">
@@ -443,6 +505,7 @@ function render() {
                 <div class="sub-meta"><i class="bi bi-clock"></i> ${startStr}-${endStr}</div>
                 <div class="sub-meta"><i class="bi bi-door-open"></i> ${roomText}</div>
                 <div class="sub-meta text-truncate"><i class="bi bi-person"></i> ${instText}</div>
+                ${conflictBadge}
             `;
             col.appendChild(el);
         } else {
@@ -491,6 +554,45 @@ function dragStart(ev) {
     ev.dataTransfer.setData("id", ev.target.id.replace('sub_', ''));
 }
 
+function updateConflictAlertBanner() {
+    const alertBox = document.getElementById('alertContainer');
+    if (!alertBox) return;
+
+    const hasConflict = subjects.some(s => s.conflict && s.day && s.day !== 'TBA' && s.start_time && s.start_time !== '00:00:00');
+    if (hasConflict) {
+        // Collect reasons
+        const reasons = [];
+        subjects.forEach(s => {
+            if (s.conflict && s.conflictReasons) {
+                s.conflictReasons.forEach(r => {
+                    if (!reasons.includes(r)) reasons.push(r);
+                });
+            }
+        });
+        const listHtml = reasons.length > 0
+            ? `<ul class="mb-0 small ps-3 mt-1">${reasons.map(r => `<li>${r}</li>`).join('')}</ul>`
+            : '';
+
+        alertBox.innerHTML = `
+            <div class="alert alert-warning alert-dismissible fade show shadow-xs rounded-12 mb-3 py-2.5 px-3 small" role="alert">
+                <div class="d-flex align-items-start">
+                    <i class="bi bi-exclamation-triangle-fill text-warning me-2 fs-6 mt-0.5 flex-shrink-0"></i>
+                    <div class="w-100">
+                        <strong>Schedule Conflict Detected:</strong> Overlapping classes are highlighted in red. You must resolve these conflicts before you can save the schedule.
+                        ${listHtml}
+                    </div>
+                    <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        `;
+    } else {
+        const warn = alertBox.querySelector('.alert-warning');
+        if (warn) {
+            alertBox.innerHTML = '';
+        }
+    }
+}
+
 function dropToUnscheduled(ev, sem) {
     ev.preventDefault();
     const id = parseInt(ev.dataTransfer.getData("id"));
@@ -499,7 +601,9 @@ function dropToUnscheduled(ev, sem) {
         sub.day = 'TBA';
         sub.start_time = '00:00:00';
         sub.end_time = '00:00:00';
+        detectLocalConflicts();
         render();
+        updateConflictAlertBanner();
     }
 }
 
@@ -567,6 +671,7 @@ function dropToCalendar(ev, day) {
     
     detectLocalConflicts();
     render();
+    updateConflictAlertBanner();
 }
 
 function openEdit(id) {
@@ -613,10 +718,12 @@ function splitSession() {
     newSub.start_time = '00:00:00';
     newSub.end_time = '00:00:00';
     newSub.conflict = false;
+    newSub.conflictReasons = [];
     
     subjects.push(newSub);
     detectLocalConflicts();
     render();
+    updateConflictAlertBanner();
     editModal.hide();
 }
 
@@ -637,6 +744,7 @@ function deleteSession() {
         subjects = subjects.filter(s => s.id !== id);
         detectLocalConflicts();
         render();
+        updateConflictAlertBanner();
         editModal.hide();
     }
 }
@@ -698,6 +806,54 @@ function saveEdit() {
             return;
         }
 
+        // Check for immediate conflicts with other scheduled subjects in section
+        let proposedConflicts = [];
+        const newStart = st + ':00';
+        const newEnd = et + ':00';
+        const newRoom = document.getElementById('edit_room').value.trim();
+        const facSelVal = document.getElementById('edit_faculty_user_id').value;
+        const newFacId = facSelVal ? parseInt(facSelVal) : null;
+        const newMode = document.getElementById('edit_mode').value;
+
+        subjects.forEach(other => {
+            if (other.id === sub.id) return;
+            if (!other.day || other.day === 'TBA' || !other.start_time || other.start_time === '00:00:00') return;
+
+            const common = haveCommonDays(d, other.day);
+            if (common.length === 0) return;
+
+            const overlap = (newStart < other.end_time && newEnd > other.start_time);
+            if (!overlap) return;
+
+            const daysLabel = formatDays(common);
+
+            // Timetable check
+            if (type !== 'shs' || other.semester === sub.semester) {
+                proposedConflicts.push(`Timetable overlap with ${other.subject_code} (${other.start_time.substring(0,5)}-${other.end_time.substring(0,5)}) on ${daysLabel}`);
+            }
+
+            // Room check
+            if (newRoom && other.room && newRoom.toUpperCase() !== 'TBA' && other.room.toUpperCase() !== 'TBA' && newMode !== 'Online' && other.delivery_mode !== 'Online') {
+                if (newRoom.toLowerCase() === other.room.toLowerCase().trim()) {
+                    proposedConflicts.push(`Room collision: Room '${newRoom}' is also used by ${other.subject_code} on ${daysLabel}`);
+                }
+            }
+
+            // Faculty check
+            if (newFacId && other.faculty_user_id && newFacId === other.faculty_user_id) {
+                proposedConflicts.push(`Instructor collision: Assigned faculty also teaches ${other.subject_code} on ${daysLabel}`);
+            }
+        });
+
+        if (proposedConflicts.length > 0) {
+            const confirmMsg = "Warning: The proposed schedule conflicts with other subjects in this section:\n\n• " +
+                proposedConflicts.join("\n• ") +
+                "\n\nIf applied, this block will be marked as a conflict in red. You will NOT be able to save the schedule until all conflicts are resolved.\n\nDo you want to apply these times anyway?";
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+        }
+
         sub.day = d;
         sub.start_time = st + ':00';
         sub.end_time = et + ':00';
@@ -716,6 +872,7 @@ function saveEdit() {
     
     detectLocalConflicts();
     render();
+    updateConflictAlertBanner();
     editModal.hide();
 }
 
@@ -728,23 +885,81 @@ function unassignSubject() {
         sub.end_time = '00:00:00';
         detectLocalConflicts();
         render();
+        updateConflictAlertBanner();
     }
     editModal.hide();
 }
 
 function detectLocalConflicts() {
-    subjects.forEach(s => s.conflict = false);
-    for (let i=0; i<subjects.length; i++) {
-        for (let j=i+1; j<subjects.length; j++) {
-            let s1 = subjects[i];
-            let s2 = subjects[j];
-            if (s1.semester !== s2.semester && type === 'shs') continue;
-            
-            if (s1.day && s1.day !== 'TBA' && s1.day === s2.day) {
-                if (s1.start_time < s2.end_time && s1.end_time > s2.start_time) {
-                    s1.conflict = true;
-                    s2.conflict = true;
-                }
+    subjects.forEach(s => {
+        s.conflict = false;
+        s.conflictReasons = [];
+    });
+
+    const active = subjects.filter(s => s.day && s.day !== 'TBA' && s.start_time && s.end_time && s.start_time !== '00:00:00' && s.end_time !== '00:00:00');
+
+    for (let i = 0; i < active.length; i++) {
+        for (let j = i + 1; j < active.length; j++) {
+            let s1 = active[i];
+            let s2 = active[j];
+
+            const commonDays = haveCommonDays(s1.day, s2.day);
+            if (commonDays.length === 0) continue;
+
+            const timesOverlap = (s1.start_time < s2.end_time && s1.end_time > s2.start_time);
+            if (!timesOverlap) continue;
+
+            const daysText = formatDays(commonDays);
+
+            // 1. Student Timetable Conflict (Same Section Cohort)
+            // For SHS, only conflict if in same semester
+            const sameSem = (type !== 'shs') || (s1.semester === s2.semester);
+            if (sameSem) {
+                s1.conflict = true;
+                s2.conflict = true;
+                const reason1 = `Timetable Conflict: Overlaps with ${s2.subject_code} (${s2.start_time.substring(0,5)}-${s2.end_time.substring(0,5)}) on ${daysText}`;
+                const reason2 = `Timetable Conflict: Overlaps with ${s1.subject_code} (${s1.start_time.substring(0,5)}-${s1.end_time.substring(0,5)}) on ${daysText}`;
+                if (!s1.conflictReasons.includes(reason1)) s1.conflictReasons.push(reason1);
+                if (!s2.conflictReasons.includes(reason2)) s2.conflictReasons.push(reason2);
+            }
+
+            // 2. Room Conflict (Physical room collision)
+            const r1 = (s1.room || '').trim();
+            const r2 = (s2.room || '').trim();
+            const isR1Valid = r1 && r1.toUpperCase() !== 'TBA' && s1.delivery_mode !== 'Online';
+            const isR2Valid = r2 && r2.toUpperCase() !== 'TBA' && s2.delivery_mode !== 'Online';
+            if (isR1Valid && isR2Valid && r1.toLowerCase() === r2.toLowerCase()) {
+                s1.conflict = true;
+                s2.conflict = true;
+                const roomReason1 = `Room Conflict: Room '${r1}' also assigned to ${s2.subject_code} on ${daysText}`;
+                const roomReason2 = `Room Conflict: Room '${r2}' also assigned to ${s1.subject_code} on ${daysText}`;
+                if (!s1.conflictReasons.includes(roomReason1)) s1.conflictReasons.push(roomReason1);
+                if (!s2.conflictReasons.includes(roomReason2)) s2.conflictReasons.push(roomReason2);
+            }
+
+            // 3. Faculty / Instructor Conflict
+            const f1 = s1.faculty_user_id;
+            const f2 = s2.faculty_user_id;
+            const inst1 = (s1.instructor || '').trim();
+            const inst2 = (s2.instructor || '').trim();
+            let sameFac = false;
+            let facName = '';
+
+            if (f1 && f2 && f1 === f2) {
+                sameFac = true;
+                facName = inst1 || `Faculty #${f1}`;
+            } else if (inst1 && inst2 && inst1.toUpperCase() !== 'TBA' && inst2.toUpperCase() !== 'TBA' && inst1.toLowerCase() === inst2.toLowerCase()) {
+                sameFac = true;
+                facName = inst1;
+            }
+
+            if (sameFac) {
+                s1.conflict = true;
+                s2.conflict = true;
+                const facReason1 = `Instructor Conflict: ${facName} also assigned to ${s2.subject_code} on ${daysText}`;
+                const facReason2 = `Instructor Conflict: ${facName} also assigned to ${s1.subject_code} on ${daysText}`;
+                if (!s1.conflictReasons.includes(facReason1)) s1.conflictReasons.push(facReason1);
+                if (!s2.conflictReasons.includes(facReason2)) s2.conflictReasons.push(facReason2);
             }
         }
     }
@@ -808,9 +1023,55 @@ function autoGenerate() {
     
     detectLocalConflicts();
     render();
+    updateConflictAlertBanner();
 }
 
 function saveSchedule() {
+    detectLocalConflicts();
+    
+    // Find all scheduled subjects that have conflicts
+    const conflicting = subjects.filter(s => s.conflict && s.day && s.day !== 'TBA' && s.start_time && s.start_time !== '00:00:00');
+    if (conflicting.length > 0) {
+        const uniqueReasons = [];
+        conflicting.forEach(s => {
+            (s.conflictReasons || []).forEach(r => {
+                if (!uniqueReasons.includes(r)) uniqueReasons.push(r);
+            });
+        });
+
+        const listItems = uniqueReasons.length > 0 
+            ? uniqueReasons.map(r => `<li>${r}</li>`).join('') 
+            : '<li>Overlapping class schedules detected on the timetable.</li>';
+
+        const c = document.getElementById('alertContainer');
+        c.innerHTML = `
+            <div class="alert alert-danger shadow-sm rounded-12 fade-in-up mb-4">
+                <div class="d-flex align-items-start gap-2">
+                    <i class="bi bi-exclamation-octagon-fill fs-5 mt-0.5 text-danger flex-shrink-0"></i>
+                    <div class="w-100">
+                        <h6 class="fw-bold mb-1">Cannot Save Schedule: Conflicts Detected</h6>
+                        <p class="small mb-2">Please resolve the following schedule collision(s) before saving:</p>
+                        <ul class="mb-0 small ps-3">
+                            ${listItems}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        `;
+        c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        if (typeof Swal !== 'undefined') {
+            Swal.fire({
+                icon: 'error',
+                title: 'Schedule Conflicts Detected',
+                html: `<div class="text-start small"><p class="mb-2">The schedule cannot be saved because the following conflicts exist:</p><ul class="mb-0 ps-3">${listItems}</ul></div>`,
+                confirmButtonColor: '#dc3545',
+                confirmButtonText: 'Review and Fix'
+            });
+        }
+        return;
+    }
+
     const btn = document.querySelector('button[onclick="saveSchedule()"]');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
@@ -833,11 +1094,29 @@ function saveSchedule() {
         const c = document.getElementById('alertContainer');
         if (data.success) {
             c.innerHTML = `<div class="alert alert-success shadow-sm rounded-12"><i class="bi bi-check-circle-fill me-2"></i> ${data.message}</div>`;
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Saved Successfully',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
         } else {
             c.innerHTML = `<div class="alert alert-danger shadow-sm rounded-12"><i class="bi bi-exclamation-triangle-fill me-2"></i> ${data.message}</div>`;
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Schedule Conflict / Error',
+                    text: data.message,
+                    confirmButtonColor: '#dc3545'
+                });
+            }
         }
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-save me-1"></i> Save Schedule';
+        c.scrollIntoView({ behavior: 'smooth', block: 'start' });
     })
     .catch(e => {
         alert('An error occurred while saving.');
@@ -853,6 +1132,7 @@ function initScheduleBuilder() {
     }
     detectLocalConflicts();
     render();
+    updateConflictAlertBanner();
 }
 
 // Expose handlers globally for inline event attributes

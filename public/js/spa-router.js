@@ -172,7 +172,7 @@ async function navigateTo(url, pushHistory = true) {
 
         completeProgressBar();
 
-        // Swap Sidebar if present (LMS or Admin)
+        // Swap Sidebar if present (LMS, Admin, or Applicant)
         const currentSidebar = document.getElementById('lmsSidebar');
         const newSidebar = doc.getElementById('lmsSidebar');
         if (currentSidebar && newSidebar) {
@@ -184,6 +184,12 @@ async function navigateTo(url, pushHistory = true) {
         if (currentAdminSidebar && newAdminSidebar) {
             currentAdminSidebar.innerHTML = newAdminSidebar.innerHTML;
         }
+
+        const currentApplicantSidebar = document.getElementById('applicantSidebar');
+        const newApplicantSidebar = doc.getElementById('applicantSidebar');
+        if (currentApplicantSidebar && newApplicantSidebar) {
+            currentApplicantSidebar.innerHTML = newApplicantSidebar.innerHTML;
+        }
         
         // Update URL
         if (pushHistory) {
@@ -192,7 +198,7 @@ async function navigateTo(url, pushHistory = true) {
         document.title = doc.title;
 
         // Update sidebar active states
-        document.querySelectorAll('.lms-nav-link, .admin-sidebar .nav-link').forEach(link => {
+        document.querySelectorAll('.lms-nav-link, .admin-sidebar .nav-link, .app-sidebar .nav-link').forEach(link => {
             if (link.href) {
                 const linkBase = link.href.split('?')[0];
                 const currentBase = window.location.href.split('?')[0];
