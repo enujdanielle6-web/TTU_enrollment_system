@@ -20,6 +20,9 @@ return [
     // URL folder the app lives in: '' when uploaded directly into htdocs (domain root),
     // '/subfolder' if you uploaded it into htdocs/subfolder.
     'APP_BASE_PATH' => '',
+    // One-click "Fast Demo Access" buttons on the login pages. Keep false on a real site; set true
+    // only for a demo where you imported optional_demo_data.sql (it shows the demo passwords).
+    'DEMO_LOGINS'   => false,
 
     // --- Database (InfinityFree control panel > MySQL Databases) -----------
     // InfinityFree does NOT use "localhost". Copy the "MySQL Hostname" shown in the panel.

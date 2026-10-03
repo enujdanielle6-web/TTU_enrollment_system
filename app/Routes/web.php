@@ -416,22 +416,3 @@ $router->group([
     $router->post('/lms/admin/announcements/{id}/status', ['App\Controllers\Admin\LmsAdminController', 'toggleAnnouncementStatus']);
     $router->post('/lms/admin/announcements/{id}/delete', ['App\Controllers\Admin\LmsAdminController', 'deleteAnnouncement']);
 });
-
-// Grouped routes with Middleware and Prefix
-$router->group(['prefix' => '/api', 'middleware' => 'App\Middleware\TestMiddleware'], function (Router $router) {
-    
-    // Test basic grouped route
-    $router->get('/status', function (Request $request, Response $response) {
-        $response->json(['status' => 'success', 'message' => 'API is working']);
-    });
-
-    // Test dynamic parameters
-    $router->get('/users/{id}', function (Request $request, Response $response, string $id) {
-        $response->json([
-            'status' => 'success', 
-            'user_id' => $id, 
-            'message' => "Fetched user $id successfully"
-        ]);
-    });
-
-});

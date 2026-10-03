@@ -28,12 +28,31 @@ function app_env_is_set(string $name): bool
     return getenv($name) !== false || array_key_exists($name, $_ENV);
 }
 
+/**
+ * Reads a setting loaded by this file (or a real server environment variable).
+ * Use this instead of getenv(): shared hosts such as InfinityFree disable putenv(),
+ * so values from config/config.php and .env only live in $_ENV there.
+ */
+function app_env(string $name, ?string $default = null): ?string
+{
+    $value = getenv($name);
+    if ($value !== false) {
+        return $value;
+    }
+    if (array_key_exists($name, $_ENV)) {
+        return (string) $_ENV[$name];
+    }
+    return $default;
+}
+
 function app_set_env(string $name, string $value): void
 {
     if ($name === '' || app_env_is_set($name)) {
         return;
     }
-    putenv(sprintf('%s=%s', $name, $value));
+    if (function_exists('putenv')) {
+        putenv(sprintf('%s=%s', $name, $value));
+    }
     $_ENV[$name] = $value;
     $_SERVER[$name] = $value;
 }
@@ -76,11 +95,11 @@ unset($__appConfigFile, $__appConfig, $__key, $__value, $__appEnvFile, $__line, 
  */
 function app_debug(): bool
 {
-    $debug = getenv('APP_DEBUG');
-    if ($debug !== false && $debug !== '') {
+    $debug = app_env('APP_DEBUG');
+    if ($debug !== null && $debug !== '') {
         return in_array(strtolower($debug), ['1', 'true', 'on', 'yes'], true);
     }
-    return (getenv('APP_ENV') ?: 'production') !== 'production';
+    return (app_env('APP_ENV') ?: 'production') !== 'production';
 }
 
 if (app_debug()) {
@@ -96,6 +115,19 @@ if (app_debug()) {
         ini_set('error_log', $__logDir . '/php-error.log');
     }
     unset($__logDir);
+}
+
+/**
+ * Whether login pages show the one-click "Fast Demo Access" buttons (they publish demo passwords).
+ * DEMO_LOGINS wins when set; otherwise they only show in debug/local mode.
+ */
+function app_show_demo_logins(): bool
+{
+    $flag = app_env('DEMO_LOGINS');
+    if ($flag !== null && $flag !== '') {
+        return in_array(strtolower($flag), ['1', 'true', 'on', 'yes'], true);
+    }
+    return app_debug();
 }
 
 function app_is_https(): bool
@@ -130,7 +162,7 @@ function app_normalize_base_path(string $path): string
 function app_detect_base_path(): string
 {
     if (app_env_is_set('APP_BASE_PATH')) {
-        return app_normalize_base_path((string) getenv('APP_BASE_PATH'));
+        return app_normalize_base_path((string) app_env('APP_BASE_PATH'));
     }
 
     if (PHP_SAPI !== 'cli' && !empty($_SERVER['SCRIPT_NAME'])) {
@@ -142,7 +174,7 @@ function app_detect_base_path(): string
         return app_normalize_base_path($dir === '/' || $dir === '.' ? '' : $dir);
     }
 
-    $appUrl = (string) (getenv('APP_URL') ?: '');
+    $appUrl = (string) (app_env('APP_URL') ?: '');
     if ($appUrl !== '') {
         return app_normalize_base_path((string) (parse_url($appUrl, PHP_URL_PATH) ?? ''));
     }
@@ -166,7 +198,7 @@ function app_url(string $path = '/'): string
  */
 function app_absolute_url(string $path = '/'): string
 {
-    $appUrl = rtrim(trim((string) (getenv('APP_URL') ?: '')), '/');
+    $appUrl = rtrim(trim((string) (app_env('APP_URL') ?: '')), '/');
     if ($appUrl === '') {
         $scheme = app_is_https() ? 'https' : 'http';
         $host = $_SERVER['HTTP_HOST'] ?? 'localhost';

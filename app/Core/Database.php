@@ -27,12 +27,12 @@ class Database
     {
         if (self::$connection === null) {
             $dbConfig = [
-                'host' => getenv('DB_HOST') ?: 'localhost',
-                'port' => getenv('DB_PORT') ?: '3306',
-                'database' => getenv('DB_DATABASE') ?: 'sia',
-                'username' => getenv('DB_USERNAME') ?: 'root',
-                'password' => getenv('DB_PASSWORD') ?: '',
-                'charset' => getenv('DB_CHARSET') ?: 'utf8mb4',
+                'host' => app_env('DB_HOST') ?: 'localhost',
+                'port' => app_env('DB_PORT') ?: '3306',
+                'database' => app_env('DB_DATABASE') ?: 'sia',
+                'username' => app_env('DB_USERNAME') ?: 'root',
+                'password' => app_env('DB_PASSWORD') ?: '',
+                'charset' => app_env('DB_CHARSET') ?: 'utf8mb4',
             ];
 
             $dsn = sprintf(

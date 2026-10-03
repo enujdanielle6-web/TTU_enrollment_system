@@ -21,6 +21,7 @@ InfinityFree's free plan. Follow the sections in order. Nothing here needs SSH o
 | SQL views (`faculty_workloads_view`, `student_academic_records_view`) | ❌ Not allowed | Not used by the app; they are left out of the import files. |
 | Cron jobs / background workers | ❌ Disabled | Not needed — session expiry and clean-ups run during normal page requests. |
 | `setup_database.php` (drops & rebuilds the DB) | 🚫 Intentionally disabled | Not uploaded, and refuses to run when `APP_ENV=production`. |
+| Disabled PHP functions (`putenv`, `exec`, `shell_exec`, …) | ✅ Not needed | Settings from `config/config.php` are read with `app_env()`, which does not depend on `putenv()`. |
 | Hit limits | ⚠️ Watch | The *Payment Monitoring* page and the *Payment Queue* page poll the server every 3 s. Leaving them open for hours uses up the free plan's daily hit allowance — close them when not needed. |
 
 ---
@@ -64,7 +65,7 @@ In the Control Panel open **phpMyAdmin** for your database, then use **Import** 
 
 | Order | File | Required? | What it does |
 |---|---|---|---|
-| 1 | `01_schema.sql` | ✅ Yes | Creates all 51 tables (utf8mb4). Contains **no** `DROP` statements: if tables already exist it stops with *"Table … already exists"* instead of overwriting data. |
+| 1 | `01_schema.sql` | ✅ Yes | Creates all 51 tables (utf8mb4), including the quiz builder columns, so `lms_phase11_quiz_builder_schema.sql` is **not** needed on a fresh import. Contains **no** `DROP` statements: if tables already exist it stops with *"Table … already exists"* instead of overwriting data. |
 | 2 | `02_reference_data.sql` | ✅ Yes | Programs, SHS strands, subjects, curricula, fee templates, scholarships, system settings, public announcements. No people/personal data. |
 | 2b | `optional_demo_data.sql` | ❌ Optional | Fictional demo staff/students/applications for a **demo only**. All demo accounts share published passwords (`admin123` / `password123`). Never use on a real site; if you do import it, import it **before** step 3 and change/deactivate the demo accounts immediately. |
 | 3 | `03_first_superadmin.sql` | ✅ Yes | Creates **your** administrator account (no default password). Edit it first — see below. |
@@ -83,6 +84,7 @@ In the Control Panel open **phpMyAdmin** for your database, then use **Import** 
 
 **Already have data on another server?** Export it from that phpMyAdmin (*Export → Custom → Structure and data*,
 uncheck "Add DROP TABLE", **exclude the two `_view` objects**) and import that instead of files 1–3.
+Make sure that database already has the quiz builder migration (`database/migrations/lms_phase11_quiz_builder_schema.sql`); if `lms_questions` has no `source_reference` column, run that file in phpMyAdmin after the import.
 
 ---
 
@@ -98,6 +100,7 @@ Edit **`dist\infinityfree\htdocs\config\config.php`** (created from `config/conf
 | `APP_BASE_PATH` | `''` when the files go directly into `htdocs` (recommended). `'/folder'` only if you upload into `htdocs/folder` |
 | `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | the four values from §2 |
 | `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM_ADDRESS` | your Gmail address and a **Google App Password** (Google Account → Security → 2-Step Verification → App passwords). Keep port `587` / `tls`. |
+| `DEMO_LOGINS` | keep `false`. Set `true` only for a presentation where you imported `optional_demo_data.sql`: it shows the one-click *Fast Demo Access* buttons (and their passwords) on the login pages. |
 | `PAYMONGO_*` | optional; your PayMongo keys (start with test keys `sk_test_…`) |
 
 `config/config.php` is a PHP file, so even if someone requests it in a browser its contents are never shown,
@@ -176,6 +179,9 @@ Use a private/incognito window. Tick each item:
 ---
 
 ## 9. Troubleshooting
+
+Before debugging your own site, check **https://status.infinityfree.com/**: InfinityFree regularly has multi-hour outages of single server IPs, phpMyAdmin or SSL issuance, and those look exactly like a broken deployment.
+
 
 | Symptom | Likely cause → fix |
 |---|---|

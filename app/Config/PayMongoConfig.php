@@ -24,7 +24,7 @@ class PayMongoConfig
     public static function getSecretKey(): string
     {
         self::ensureEnvLoaded();
-        $key = getenv('PAYMONGO_SECRET_KEY') ?: ($_ENV['PAYMONGO_SECRET_KEY'] ?? ($_SERVER['PAYMONGO_SECRET_KEY'] ?? ''));
+        $key = \app_env('PAYMONGO_SECRET_KEY') ?: '';
         $key = trim((string) $key);
 
         if (empty($key)) {
@@ -40,7 +40,7 @@ class PayMongoConfig
     public static function getPublicKey(): ?string
     {
         self::ensureEnvLoaded();
-        $key = getenv('PAYMONGO_PUBLIC_KEY') ?: ($_ENV['PAYMONGO_PUBLIC_KEY'] ?? ($_SERVER['PAYMONGO_PUBLIC_KEY'] ?? ''));
+        $key = \app_env('PAYMONGO_PUBLIC_KEY') ?: '';
         $key = trim((string) $key);
 
         return $key !== '' ? $key : null;
@@ -52,7 +52,7 @@ class PayMongoConfig
     public static function getBaseUrl(): string
     {
         self::ensureEnvLoaded();
-        $url = getenv('PAYMONGO_BASE_URL') ?: ($_ENV['PAYMONGO_BASE_URL'] ?? ($_SERVER['PAYMONGO_BASE_URL'] ?? 'https://api.paymongo.com/v1'));
+        $url = \app_env('PAYMONGO_BASE_URL') ?: 'https://api.paymongo.com/v1';
         return rtrim(trim((string) $url), '/');
     }
 
@@ -62,7 +62,7 @@ class PayMongoConfig
     public static function getWebhookSecret(): ?string
     {
         self::ensureEnvLoaded();
-        $secret = getenv('PAYMONGO_WEBHOOK_SECRET') ?: ($_ENV['PAYMONGO_WEBHOOK_SECRET'] ?? ($_SERVER['PAYMONGO_WEBHOOK_SECRET'] ?? ''));
+        $secret = \app_env('PAYMONGO_WEBHOOK_SECRET') ?: '';
         $secret = trim((string) $secret);
 
         return $secret !== '' ? $secret : null;
@@ -74,7 +74,7 @@ class PayMongoConfig
     public static function getAppUrl(): string
     {
         self::ensureEnvLoaded();
-        $appUrl = getenv('APP_URL') ?: ($_ENV['APP_URL'] ?? ($_SERVER['APP_URL'] ?? ''));
+        $appUrl = \app_env('APP_URL') ?: '';
         $appUrl = trim((string) $appUrl);
 
         if ($appUrl !== '') {

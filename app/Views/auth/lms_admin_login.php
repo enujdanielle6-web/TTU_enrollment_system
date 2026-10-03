@@ -96,6 +96,7 @@ require_once __DIR__ . '/../components/header.php';
 
           <!-- Quick Test Credentials Section -->
           <div class="mt-4 pt-3 border-top">
+            <?php if (app_show_demo_logins()): ?>
             <div class="test-access-panel">
               <div class="d-flex align-items-center justify-content-between mb-2.5">
                 <span class="small fw-bold text-uppercase d-flex align-items-center gap-1.5" style="font-size: 0.68rem; letter-spacing: 0.05em; color: #475569;">
@@ -124,6 +125,7 @@ require_once __DIR__ . '/../components/header.php';
                 <span>Registrar and admissions accounts manage enrollment via the SIS portal. Platform system operations are governed here by the LMS Administrator.</span>
               </div>
             </div>
+            <?php endif; ?>
 
             <!-- Footer Navigation Links -->
             <div class="text-center mt-3 pt-1">
