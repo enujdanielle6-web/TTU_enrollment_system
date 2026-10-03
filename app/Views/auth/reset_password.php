@@ -52,6 +52,8 @@ require_once __DIR__ . '/../components/header.php';
             </div>
           <?php endif; ?>
 
+          <div id="timeoutAlertContainer"></div>
+
           <?php if (!empty($errors)): ?>
             <div class="alert alert-danger rounded-3 border-0 bg-danger text-white py-2 px-3 small shadow-sm mb-4 d-flex align-items-center">
               <i class="bi bi-exclamation-circle-fill me-2 fs-5"></i>
@@ -88,8 +90,8 @@ require_once __DIR__ . '/../components/header.php';
                          <?= ($i === 0 && empty($val)) ? 'autofocus' : '' ?> required>
                 <?php endfor; ?>
               </div>
-              <div class="text-center text-muted small mt-2" style="font-size: 0.78rem;">
-                <i class="bi bi-clock-history me-1"></i> Code expires in 15 minutes
+              <div class="text-center text-muted small mt-2" id="expiryNotice" style="font-size: 0.78rem;">
+                <i class="bi bi-clock-history me-1"></i> Code expires in <span id="codeExpiryTimer" class="fw-bold text-primary">02:00</span>
               </div>
             </div>
 
@@ -165,6 +167,129 @@ document.addEventListener("DOMContentLoaded", function() {
   const digits = document.querySelectorAll(".otp-digit");
   const fullCodeInput = document.getElementById("fullCodeInput");
   const resetForm = document.getElementById("resetForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const resendBtn = document.getElementById("resendBtn");
+  const countdownTimer = document.getElementById("countdownTimer");
+  const codeExpiryTimer = document.getElementById("codeExpiryTimer");
+  const expiryNotice = document.getElementById("expiryNotice");
+  const timeoutAlertContainer = document.getElementById("timeoutAlertContainer");
+
+  let remainingSeconds = <?= (int)($remainingSeconds ?? 120) ?>;
+  let isExpired = remainingSeconds <= 0;
+  let resendTimer = null;
+
+  function formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+  }
+
+  function stopCooldown() {
+    if (resendTimer) {
+      clearInterval(resendTimer);
+      resendTimer = null;
+    }
+    if (resendBtn) {
+      resendBtn.classList.remove("disabled", "text-muted");
+      resendBtn.style.pointerEvents = "auto";
+    }
+    if (countdownTimer) {
+      countdownTimer.classList.add("d-none");
+    }
+    sessionStorage.removeItem("ttu_reset_otp_sent");
+  }
+
+  function startCooldown(seconds) {
+    if (isExpired) {
+      stopCooldown();
+      return;
+    }
+    if (!resendBtn || !countdownTimer) return;
+    resendBtn.classList.add("disabled", "text-muted");
+    resendBtn.style.pointerEvents = "none";
+    countdownTimer.classList.remove("d-none");
+    
+    let remaining = seconds;
+    countdownTimer.textContent = "(" + remaining + "s)";
+    
+    resendTimer = setInterval(function() {
+      remaining--;
+      if (remaining <= 0) {
+        stopCooldown();
+      } else {
+        countdownTimer.textContent = "(" + remaining + "s)";
+      }
+    }, 1000);
+  }
+
+  function handleTimeout() {
+    isExpired = true;
+    if (codeExpiryTimer) {
+      codeExpiryTimer.textContent = '00:00';
+    }
+    if (expiryNotice) {
+      expiryNotice.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-clock-history me-1"></i> Code expired (2 minutes elapsed)</span>';
+    }
+    if (timeoutAlertContainer && !document.getElementById('timeoutAlertBanner')) {
+      timeoutAlertContainer.innerHTML = `
+        <div class="alert alert-danger rounded-3 border-0 bg-danger text-white py-2 px-3 small shadow-sm mb-4 d-flex align-items-center" id="timeoutAlertBanner">
+          <i class="bi bi-hourglass-bottom me-2 fs-5 flex-shrink-0"></i>
+          <div>
+            <strong>Verification code timed out.</strong> Your code expired because it was not entered within 2 minutes. Please click &ldquo;Resend Code&rdquo; to receive a new code.
+          </div>
+        </div>
+      `;
+    }
+    digits.forEach(d => {
+      d.disabled = true;
+      d.style.backgroundColor = '#e9ecef';
+      d.style.cursor = 'not-allowed';
+    });
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50');
+      submitBtn.style.cursor = 'not-allowed';
+    }
+    stopCooldown();
+  }
+
+  // Expiry timer initialization
+  if (isExpired) {
+    handleTimeout();
+  } else {
+    if (codeExpiryTimer) {
+      codeExpiryTimer.textContent = formatTime(remainingSeconds);
+    }
+
+    // Initialize resend cooldown if recently clicked
+    let lastSentTime = sessionStorage.getItem("ttu_reset_otp_sent");
+    let now = Math.floor(Date.now() / 1000);
+    if (lastSentTime && (now - parseInt(lastSentTime, 10)) < 60) {
+      startCooldown(60 - (now - parseInt(lastSentTime, 10)));
+    }
+
+    const expiryInterval = setInterval(() => {
+      remainingSeconds--;
+      if (remainingSeconds <= 0) {
+        clearInterval(expiryInterval);
+        handleTimeout();
+      } else {
+        if (codeExpiryTimer) {
+          codeExpiryTimer.textContent = formatTime(remainingSeconds);
+          if (remainingSeconds <= 30) {
+            codeExpiryTimer.classList.remove('text-primary');
+            codeExpiryTimer.classList.add('text-danger');
+          }
+        }
+      }
+    }, 1000);
+  }
+
+  if (resendBtn) {
+    resendBtn.addEventListener("click", function() {
+      sessionStorage.setItem("ttu_reset_otp_sent", Math.floor(Date.now() / 1000));
+    });
+  }
 
   function updateFullCode() {
     let code = "";
@@ -175,6 +300,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // Handle OTP Inputs
   digits.forEach((digit, index) => {
     digit.addEventListener("input", function(e) {
+      if (isExpired) return;
       this.value = this.value.replace(/\D/g, "");
       if (this.value.length >= 1) {
         this.value = this.value.charAt(0);
@@ -189,6 +315,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     digit.addEventListener("keydown", function(e) {
+      if (isExpired) return;
       if (e.key === "Backspace") {
         if (this.value === "" && index > 0) {
           digits[index - 1].focus();
@@ -207,6 +334,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
     digit.addEventListener("paste", function(e) {
+      if (isExpired) return;
       e.preventDefault();
       const pasteData = (e.clipboardData || window.clipboardData).getData("text").trim();
       const cleanData = pasteData.replace(/\D/g, "").slice(0, 6);
@@ -244,6 +372,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Form submission check
   resetForm.addEventListener("submit", function(e) {
+    if (isExpired) {
+      e.preventDefault();
+      alert('Verification code timed out. Your code expired because it was not entered within 2 minutes. Please click "Resend Code" to receive a new code.');
+      return false;
+    }
     updateFullCode();
     if (fullCodeInput.value.length !== 6) {
       e.preventDefault();
@@ -255,45 +388,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
   // Initialize full code if digits pre-filled
   updateFullCode();
-
-  // Resend Countdown Timer (60 seconds)
-  const resendBtn = document.getElementById("resendBtn");
-  const countdownTimer = document.getElementById("countdownTimer");
-  
-  if (resendBtn && countdownTimer) {
-    let lastSentTime = sessionStorage.getItem("ttu_reset_otp_sent");
-    let now = Math.floor(Date.now() / 1000);
-    
-    if (lastSentTime && (now - parseInt(lastSentTime, 10)) < 60) {
-      startCooldown(60 - (now - parseInt(lastSentTime, 10)));
-    }
-
-    resendBtn.addEventListener("click", function() {
-      sessionStorage.setItem("ttu_reset_otp_sent", Math.floor(Date.now() / 1000));
-    });
-
-    function startCooldown(seconds) {
-      resendBtn.classList.add("disabled", "text-muted");
-      resendBtn.style.pointerEvents = "none";
-      countdownTimer.classList.remove("d-none");
-      
-      let remaining = seconds;
-      countdownTimer.textContent = "(" + remaining + "s)";
-      
-      let timer = setInterval(function() {
-        remaining--;
-        if (remaining <= 0) {
-          clearInterval(timer);
-          resendBtn.classList.remove("disabled", "text-muted");
-          resendBtn.style.pointerEvents = "auto";
-          countdownTimer.classList.add("d-none");
-          sessionStorage.removeItem("ttu_reset_otp_sent");
-        } else {
-          countdownTimer.textContent = "(" + remaining + "s)";
-        }
-      }, 1000);
-    }
-  }
 });
 </script>
 
