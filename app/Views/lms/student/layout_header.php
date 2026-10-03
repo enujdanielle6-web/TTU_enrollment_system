@@ -111,27 +111,38 @@ try {
     $initials = strtoupper(substr($nameParts[0] ?? 'S', 0, 1) . (isset($nameParts[1]) ? substr($nameParts[1], 0, 1) : ''));
     $studentEmail = $_SESSION['lms_email'] ?? $_SESSION['user_email'] ?? 'student@ttu.edu.ph';
     ?>
-    <div class="p-3 border-top bg-light mt-auto flex-shrink-0">
-      <div class="d-flex align-items-center gap-3 mb-3">
-        <div class="bg-primary-light text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0 shadow-xs" style="width: 42px; height: 42px; background: rgba(13, 110, 253, 0.1); color: #0d6efd; font-size: 0.95rem;">
-          <?= esc($initials) ?>
+    <div class="lms-sidebar-footer">
+        <div class="lms-user-card mb-2">
+            <div class="d-flex align-items-center">
+                <div class="position-relative flex-shrink-0" style="width: 36px; height: 36px;">
+                    <div class="lms-avatar">
+                        <?= esc($initials) ?>
+                    </div>
+                    <span class="lms-status-dot" title="Online"></span>
+                </div>
+                <div class="nav-text user-profile-text flex-grow-1 min-w-0 overflow-hidden" style="line-height: 1.25;">
+                    <div class="fw-bold text-dark text-truncate small" title="<?= htmlspecialchars($studentFullName, ENT_QUOTES, 'UTF-8'); ?>">
+                        <?= htmlspecialchars($studentFullName, ENT_QUOTES, 'UTF-8'); ?>
+                    </div>
+                    <div class="text-muted text-truncate" style="font-size: 0.7rem;" title="<?= htmlspecialchars($studentEmail, ENT_QUOTES, 'UTF-8'); ?>">
+                        <?= htmlspecialchars($studentEmail, ENT_QUOTES, 'UTF-8'); ?>
+                    </div>
+                </div>
+                <div class="position-relative flex-shrink-0">
+                    <button type="button" id="sidebarNotificationBtn" class="lms-bell-btn text-muted border-0 bg-transparent" title="Recent Updates" aria-expanded="false">
+                        <i class="bi bi-bell"></i>
+                        <?php if ($updateCount > 0): ?>
+                            <span class="lms-notification-dot"></span>
+                        <?php endif; ?>
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="overflow-hidden nav-text user-profile-text flex-grow-1 min-w-0">
-          <span class="d-block fw-bold text-dark text-truncate" style="font-size: 0.9rem;" title="<?= htmlspecialchars($studentFullName, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($studentFullName, ENT_QUOTES, 'UTF-8'); ?></span>
-          <span class="text-muted text-truncate d-block" style="font-size: 0.75rem;" title="<?= htmlspecialchars($studentEmail, ENT_QUOTES, 'UTF-8'); ?>"><?= htmlspecialchars($studentEmail, ENT_QUOTES, 'UTF-8'); ?></span>
-        </div>
-        <div class="flex-shrink-0 nav-text">
-          <button type="button" id="sidebarNotificationBtn" class="btn btn-sm btn-white border shadow-xs rounded-circle text-muted p-0 d-flex align-items-center justify-content-center position-relative" style="width: 32px; height: 32px; background: #ffffff;" title="Recent Updates" aria-expanded="false">
-            <i class="bi bi-bell"></i>
-            <?php if ($updateCount > 0): ?>
-              <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-            <?php endif; ?>
-          </button>
-        </div>
-      </div>
-      <a class="btn btn-outline-danger w-100 btn-sm rounded-pill fw-medium shadow-sm py-1.5 d-flex align-items-center justify-content-center gap-1.5" href="<?= BASE_PATH ?>/auth/lms_student_logout.php">
-        <i class="bi bi-box-arrow-right"></i> <span class="nav-text">Sign Out</span>
-      </a>
+
+        <a href="<?= BASE_PATH ?>/auth/lms_student_logout.php" class="lms-logout-btn text-decoration-none">
+            <i class="bi bi-box-arrow-right"></i>
+            <span class="nav-text">Sign out</span>
+        </a>
     </div>
   </aside>
 
