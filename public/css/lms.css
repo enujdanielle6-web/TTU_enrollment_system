@@ -2593,3 +2593,20 @@ body.lms-layout > .lms-wrapper {
         padding-right: 0.85rem;
     }
 }
+
+/* Sidebar: the link list scrolls on its own so the profile card and Sign out
+   button stay pinned to the bottom, even on course pages with many links */
+.lms-sidebar > .lms-sidebar-brand,
+.lms-sidebar > .lms-search-container,
+.lms-sidebar > .lms-sidebar-footer {
+    flex-shrink: 0;
+}
+
+.lms-sidebar > .lms-nav-menu {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}

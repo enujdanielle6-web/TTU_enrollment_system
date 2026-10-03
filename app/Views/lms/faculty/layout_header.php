@@ -303,19 +303,13 @@ if (strpos($request_uri, '/calendar') !== false) {
       </nav>
     </div>
 
-    <!-- Right: Context Indicators & Profile Dropdown -->
+    <!-- Right: Context Indicators (profile and sign out live in the sidebar footer) -->
     <div class="d-flex align-items-center gap-2.5">
       <!-- Active Term Badge -->
       <div class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-1.5 small fw-semibold d-none d-md-inline-flex align-items-center gap-1.5 shadow-xs">
         <span class="pulse-dot-green"></span>
         <span>2026-2027 First Sem</span>
       </div>
-
-      <!-- Quick Calendar Link -->
-      <a href="<?= BASE_PATH ?>/lms/faculty/calendar" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Academic Schedule & Calendar">
-        <i class="bi bi-calendar-event text-primary"></i>
-        <span>Schedule</span>
-      </a>
 
       <!-- LMS Governance Switcher for Admins/Superadmin -->
       <?php if (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) && ($_SESSION['user_department'] ?? '') !== 'Registrar Office'): ?>
@@ -324,51 +318,6 @@ if (strpos($request_uri, '/calendar') !== false) {
         <span class="d-none d-sm-inline">LMS Governance</span>
       </a>
       <?php endif; ?>
-
-      <!-- User Profile Dropdown Pill -->
-      <div class="dropdown">
-        <button class="btn btn-sm btn-white border rounded-pill px-2.5 py-1 d-flex align-items-center gap-2 shadow-xs dropdown-toggle" type="button" id="facultyUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-          <div class="lms-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 26px; height: 26px; font-size: 0.75rem;">
-            <?= esc($facultyInitial) ?>
-          </div>
-          <span class="fw-semibold small text-dark d-none d-md-inline"><?= esc($facultyName) ?></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 py-2 mt-1" aria-labelledby="facultyUserDropdown" style="min-width: 220px;">
-          <li class="px-3 py-1.5 border-bottom mb-1">
-            <div class="fw-bold text-dark small text-truncate"><?= esc($facultyName) ?></div>
-            <div class="text-muted small text-truncate" style="font-size: 0.72rem;"><?= esc($facultyEmail) ?></div>
-            <span class="badge bg-primary bg-opacity-10 text-primary mt-1 px-2 py-0.5" style="font-size: 0.65rem;">Faculty Instructor</span>
-          </li>
-          <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="<?= BASE_PATH ?>/lms/faculty/profile.php">
-              <i class="bi bi-person-fill text-primary"></i>
-              <span>My Profile &amp; Settings</span>
-            </a>
-          </li>
-          <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="<?= BASE_PATH ?>/lms/faculty/messages.php">
-              <i class="bi bi-chat-dots-fill text-primary"></i>
-              <span>Messages &amp; Inquiries</span>
-            </a>
-          </li>
-          <?php if (in_array($_SESSION['user_role'] ?? '', ['superadmin', 'admin'], true) && ($_SESSION['user_department'] ?? '') !== 'Registrar Office'): ?>
-          <li class="border-top my-1"></li>
-          <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-primary fw-semibold" href="<?= BASE_PATH ?>/lms/admin/dashboard">
-              <i class="bi bi-shield-lock-fill"></i>
-              <span>LMS Governance Hub</span>
-            </a>
-          </li>
-          <?php endif; ?>
-          <li class="border-top my-1"></li>
-          <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-danger" href="<?= BASE_PATH ?>/auth/lms_faculty_logout.php">
-              <i class="bi bi-box-arrow-right"></i>
-              <span>Sign Out</span>
-            </a>
-          </li>
-        </ul>
-      </div>
     </div>
   </div>
 </header>

@@ -261,17 +261,17 @@ $lmsCssVer = file_exists($lmsCssFile) ? filemtime($lmsCssFile) : '1.0';
         <div class="lms-user-card mb-2">
             <div class="d-flex align-items-center">
                 <div class="position-relative flex-shrink-0" style="width: 36px; height: 36px;">
-                    <div class="lms-avatar bg-primary text-white d-flex align-items-center justify-content-center rounded-circle fw-bold">
+                    <div class="lms-avatar">
                         <?= esc($adminInitial) ?>
                     </div>
                     <span class="lms-status-dot" title="Online"></span>
                 </div>
-                <div class="nav-text flex-grow-1 min-w-0 overflow-hidden ps-2" style="line-height: 1.25;">
+                <div class="nav-text flex-grow-1 min-w-0 overflow-hidden" style="line-height: 1.25;">
                     <div class="fw-bold text-dark text-truncate small" title="<?= htmlspecialchars($adminName) ?>">
                         <?= htmlspecialchars($adminName) ?>
                     </div>
                     <div class="text-muted text-truncate" style="font-size: 0.7rem;" title="<?= htmlspecialchars($adminEmail) ?>">
-                        <span class="badge bg-primary bg-opacity-10 text-primary px-1.5 py-0 small fw-semibold">LMS Admin</span>
+                        <?= htmlspecialchars($adminEmail) ?>
                     </div>
                 </div>
             </div>
@@ -322,64 +322,12 @@ $currentModuleTitle = $moduleLabels[$activeTab] ?? 'Governance';
       </nav>
     </div>
 
-    <!-- Right: Context Indicators & Profile Dropdown -->
+    <!-- Right: Context Indicators (profile and sign out live in the sidebar footer) -->
     <div class="d-flex align-items-center gap-2.5">
       <!-- Active Term Badge -->
       <div class="badge badge-emerald-subtle rounded-pill px-3 py-1.5 small fw-semibold d-none d-md-inline-flex align-items-center gap-1.5 shadow-xs">
         <span class="pulse-dot pulse-dot-emerald"></span>
         <span>2026-2027 First Sem</span>
-      </div>
-
-      <!-- Quick Sync Status Link -->
-      <a href="<?= BASE_PATH ?>/lms/admin/sync" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-none d-sm-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Reconciliation & Diagnostics">
-        <i class="bi bi-arrow-repeat text-primary"></i>
-        <span>Sync Hub</span>
-      </a>
-
-      <!-- Main SIS Switcher for Superadmin -->
-      <?php if ($userRole === 'superadmin'): ?>
-      <a href="<?= BASE_PATH ?>/admin/dashboard.php" class="btn btn-sm btn-light border rounded-pill px-3 py-1.5 small fw-semibold text-secondary d-inline-flex align-items-center gap-1.5 shadow-xs hover-lift" title="Switch to Main SIS">
-        <i class="bi bi-box-arrow-left text-primary"></i>
-        <span class="d-none d-sm-inline">Main SIS</span>
-      </a>
-      <?php endif; ?>
-
-      <!-- User Profile Dropdown Pill -->
-      <div class="dropdown">
-        <button class="btn btn-sm btn-white border rounded-pill px-2.5 py-1 d-flex align-items-center gap-2 shadow-xs dropdown-toggle" type="button" id="adminUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-          <div class="lms-avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width: 26px; height: 26px; font-size: 0.75rem;">
-            <?= esc($adminInitial) ?>
-          </div>
-          <span class="fw-semibold small text-dark d-none d-md-inline"><?= esc($adminName) ?></span>
-        </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow-sm border rounded-3 py-2 mt-1" aria-labelledby="adminUserDropdown" style="min-width: 220px;">
-          <li class="px-3 py-1.5 border-bottom mb-1">
-            <div class="fw-bold text-dark small text-truncate"><?= esc($adminName) ?></div>
-            <div class="text-muted small text-truncate" style="font-size: 0.72rem;"><?= esc($adminEmail) ?></div>
-            <span class="badge bg-primary bg-opacity-10 text-primary mt-1 px-2 py-0.5" style="font-size: 0.65rem;">LMS Administrator</span>
-          </li>
-          <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="<?= BASE_PATH ?>/lms/faculty/dashboard.php">
-              <i class="bi bi-person-video3 text-primary"></i>
-              <span>Faculty Portal View</span>
-            </a>
-          </li>
-          <?php if ($userRole === 'superadmin'): ?>
-          <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2" href="<?= BASE_PATH ?>/admin/dashboard.php">
-              <i class="bi bi-building text-primary"></i>
-              <span>University Main SIS</span>
-            </a>
-          </li>
-          <?php endif; ?>
-          <li><hr class="dropdown-divider my-1"></li>
-          <li>
-            <a class="dropdown-item py-1.5 small d-flex align-items-center gap-2 text-danger" href="<?= BASE_PATH ?>/auth/lms_admin_logout.php">
-              <i class="bi bi-box-arrow-right"></i>
-              <span>Sign Out</span>
-            </a>
-          </li>
-        </ul>
       </div>
     </div>
   </div>
