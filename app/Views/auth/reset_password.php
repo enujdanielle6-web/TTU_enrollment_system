@@ -91,7 +91,7 @@ require_once __DIR__ . '/../components/header.php';
                 <?php endfor; ?>
               </div>
               <div class="text-center text-muted small mt-2" id="expiryNotice" style="font-size: 0.78rem;">
-                <i class="bi bi-clock-history me-1"></i> Code expires in <span id="codeExpiryTimer" class="fw-bold text-primary">02:00</span>
+                <i class="bi bi-clock-history me-1"></i> Code expires in <span id="codeExpiryTimer" class="fw-bold text-primary">15:00</span>
               </div>
             </div>
 
@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function() {
   const expiryNotice = document.getElementById("expiryNotice");
   const timeoutAlertContainer = document.getElementById("timeoutAlertContainer");
 
-  let remainingSeconds = <?= (int)($remainingSeconds ?? 120) ?>;
+  let remainingSeconds = <?= (int)($remainingSeconds ?? 900) ?>;
   let isExpired = remainingSeconds <= 0;
   let resendTimer = null;
 
@@ -228,14 +228,14 @@ document.addEventListener("DOMContentLoaded", function() {
       codeExpiryTimer.textContent = '00:00';
     }
     if (expiryNotice) {
-      expiryNotice.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-clock-history me-1"></i> Code expired (2 minutes elapsed)</span>';
+      expiryNotice.innerHTML = '<span class="text-danger fw-semibold"><i class="bi bi-clock-history me-1"></i> Code expired (15 minutes elapsed)</span>';
     }
     if (timeoutAlertContainer && !document.getElementById('timeoutAlertBanner')) {
       timeoutAlertContainer.innerHTML = `
         <div class="alert alert-danger rounded-3 border-0 bg-danger text-white py-2 px-3 small shadow-sm mb-4 d-flex align-items-center" id="timeoutAlertBanner">
           <i class="bi bi-hourglass-bottom me-2 fs-5 flex-shrink-0"></i>
           <div>
-            <strong>Verification code timed out.</strong> Your code expired because it was not entered within 2 minutes. Please click &ldquo;Resend Code&rdquo; to receive a new code.
+            <strong>Verification code timed out.</strong> Your code expired because it was not entered within 15 minutes. Please click &ldquo;Resend Code&rdquo; to receive a new code.
           </div>
         </div>
       `;
@@ -374,7 +374,7 @@ document.addEventListener("DOMContentLoaded", function() {
   resetForm.addEventListener("submit", function(e) {
     if (isExpired) {
       e.preventDefault();
-      alert('Verification code timed out. Your code expired because it was not entered within 2 minutes. Please click "Resend Code" to receive a new code.');
+      alert('Verification code timed out. Your code expired because it was not entered within 15 minutes. Please click "Resend Code" to receive a new code.');
       return false;
     }
     updateFullCode();

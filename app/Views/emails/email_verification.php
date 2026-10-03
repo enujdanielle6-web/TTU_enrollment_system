@@ -109,7 +109,7 @@
             <div class="code-box">
                 <div class="otp-code"><?= htmlspecialchars($code ?? '000000') ?></div>
                 <p class="expiry-text">
-                    <span style="color: #ef4444; font-weight: 600;">&#9201;</span> This code will expire in <strong>2 minutes</strong>.
+                    <span style="color: #ef4444; font-weight: 600;">&#9201;</span> This code will expire in <strong>15 minutes</strong>.
                 </p>
             </div>
 
