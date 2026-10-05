@@ -192,7 +192,7 @@ All administrative operations are permanently recorded in the institutional `act
 
 ## 8. VERIFICATION & TEST MATRIX
 
-### 8.1 Automated Verification Suite (`scripts/test_phase5_verification.php`)
+### 8.1 Automated Verification Suite (`scripts/tests/test_phase5_verification.php`)
 All 20 test scenarios passed with 100% success rate:
 - **Test 1**: LMS Admin dashboard KPIs retrieved (Total Courses: 18, Active Students: 21, Term: 2026-2027) $\to$ **PASS**
 - **Test 2**: LMS Admin courses catalog retrieved (Retrieved 18 courses across 1 page) $\to$ **PASS**

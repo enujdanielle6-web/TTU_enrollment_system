@@ -75,11 +75,11 @@ Irregular students customize their academic schedule by submitting specific subj
 ## Verification & Automated Test Suites
 
 The isolation and subject preservation workflows are verified via automated end-to-end test bots:
-1. **`scripts/test_two_sections_lms.php`**:
+1. **`scripts/tests/test_two_sections_lms.php`**:
    - Creates Student A in `BSIT 1-A` and Student B in `BSIT 1-B`, enrolling both in `CC101`, `CC102`, and `ENG101`.
    - Verifies that Student A accesses Course IDs `1, 2, 3` and Student B accesses Course IDs `11, 12, 13`.
    - Confirms 0% course ID overlap and 0 duplicate cards.
-2. **`scripts/test_irregular_scholarship_bot.php`**:
+2. **`scripts/tests/test_irregular_scholarship_bot.php`**:
    - Enrolls an irregular student with 3 custom subjects (9 units) and a 100% Academic Excellence Scholarship.
    - Verifies ₱4,500.00 tuition discount deduction, net fee cashier verification, and enrollment finalization into exactly the 3 custom subjects without section subject overwrite.
 

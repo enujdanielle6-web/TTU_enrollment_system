@@ -857,7 +857,7 @@ graph TD
 * **Tasks**:
   1. Run automated regression suite validating Scenarios A through H and Phase 1-6 integration.
   2. Verify activity log auditing for sensitive LMS operations.
-* **Files**: New verification script `scripts/test_lms_integration_full.php`.
+* **Files**: New verification script `scripts/tests/test_lms_integration_full.php`.
 * **Database**: None.
 
 ---

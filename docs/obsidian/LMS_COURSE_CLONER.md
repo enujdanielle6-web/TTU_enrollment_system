@@ -175,13 +175,13 @@ All clone events automatically appear in the LMS Audit Logs view (`/sia/admin/lm
 | `app/Views/admin/lms/cloner/index.php` | Created | Modern, responsive Bootstrap 5 interface featuring source/target selector, live preview, warnings, mode options, and confirmation modal. |
 | `app/Views/admin/lms/dashboard.php` | Modified | Added "Course Templates & Content Cloner" quick action card in LMS Admin dashboard. |
 | `app/Views/admin/lms/courses/detail.php` | Modified | Added "Clone Content" shortcut button in header dossier strip. |
-| `scripts/test_lms_admin_cloner.php` | Created | Comprehensive automated verification suite testing 10 distinct failure/success scenarios (59/59 assertions passed). |
+| `scripts/tests/test_lms_admin_cloner.php` | Created | Comprehensive automated verification suite testing 10 distinct failure/success scenarios (59/59 assertions passed). |
 
 ---
 
 ## 8. Verification & Test Matrix
 
-Executed via `scripts/test_lms_admin_cloner.php`:
+Executed via `scripts/tests/test_lms_admin_cloner.php`:
 
 | Test Category | Scenario | Expected Behavior | Result |
 | :--- | :--- | :--- | :--- |

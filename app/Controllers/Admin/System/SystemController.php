@@ -317,7 +317,7 @@ class SystemController extends BaseController
         }
 
         // Fetch user details
-        $stmtUser = $pdo->prepare('SELECT id, first_name, last_name, email, role, department, status, created_at FROM users WHERE id = :id');
+        $stmtUser = $pdo->prepare('SELECT id, first_name, last_name, email, role, department, IF(is_active = 1, \'active\', \'inactive\') AS status, created_at FROM users WHERE id = :id');
         $stmtUser->execute(['id' => $userId]);
         $user = $stmtUser->fetch(PDO::FETCH_ASSOC);
 

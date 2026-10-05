@@ -104,33 +104,36 @@ The seed includes the demo accounts plus one sample enrolled student (John Doe) 
 
 See **[DEPLOYMENT_INFINITYFREE.md](DEPLOYMENT_INFINITYFREE.md)** for the step-by-step guide: build the upload package with `php scripts/build_infinityfree_package.php`, import `database/infinityfree/*.sql` in phpMyAdmin, and configure `config/config.php` (copied from `config/config.example.php`). Never deploy `setup_database.php`, `.env`, or the demo seed data to a public site.
 
-## Standard Test Credentials
+## Standard Test Accounts
 
-| Role | Identifier / Email | Password | Access Route |
-|---|---|---|---|
-| **Superadmin** | `admin@ttu.edu.ph` | `admin123` | `/admin/dashboard.php` |
-| **Admissions Officer** | `admissions@ttu.edu.ph` | `admin123` | `/admin/admissions/admissions_dashboard.php` |
-| **Registrar Officer** | `registrar@ttu.edu.ph` | `admin123` | `/admin/registrar/registrar_dashboard.php` |
-| **Cashier / Finance** | `cashier@ttu.edu.ph` | `admin123` | `/admin/finance/cashier_dashboard.php` |
-| **Clinic Officer** | `clinic@ttu.edu.ph` | `admin123` | `/admin/clinic/clinic_dashboard.php` |
-| **Scheduler** | `scheduler@ttu.edu.ph` | `admin123` | `/admin/scheduler/scheduler_dashboard.php` |
-| **Scholarship Officer** | `scholarship@ttu.edu.ph` | `admin123` | `/admin/scholarship/scholarship_dashboard.php` |
-| **Faculty Instructor** | `FAC-2026-001` *(or `alan.turing@ttu.edu.ph`)* | `password123` | `/lms/faculty/dashboard.php` |
-| **Enrolled College Student** | `2026-000001` *(or `john.doe@example.com`)* | `password123` | `/lms/student/dashboard.php` |
-| **Enrolled SHS Student** | `2026-000002` *(or `mary.smith@example.com`)* | `password123` | `/lms/student/dashboard.php` |
-| **Applicant User** | `jane.applicant@example.com` | `password123` | `/applicant/dashboard.php` |
+The seed data includes one demo account per role (superadmin, admissions, registrar, cashier, clinic, scheduler, scholarship, faculty, enrolled student, applicant). Their passwords are not kept in this repository: see `demo_files/demo-account-credentials.md` on your own computer (that file is ignored by git). Change every demo password before a public launch.
 
 ---
 
 ## Documentation Vault
 
-The complete technical and architectural documentation is maintained in the [`docs/obsidian/`](file:///c:/xampp/htdocs/sia/docs/obsidian/) vault:
-- **[Master Hub](file:///c:/xampp/htdocs/sia/docs/obsidian/00%20-%20Home/TTU%20Enrollment%20System%20Home.md)**: Central launchpad for all 17 documentation domains.
-- **[System Architecture](file:///c:/xampp/htdocs/sia/docs/obsidian/01%20-%20Architecture/System%20Architecture.md)**: Monolithic Hybrid MVC structure, routing, and request lifecycle.
-- **[Entity Relationship Architecture](file:///c:/xampp/htdocs/sia/docs/obsidian/04%20-%20Database/Entity%20Relationship%20Architecture.md)**: High-level and domain-level Mermaid ER diagrams, cardinality, and foreign key topology.
-- **[Data Dictionary](file:///c:/xampp/htdocs/sia/docs/obsidian/04%20-%20Database/Data%20Dictionary.md)**: Complete column specifications for all 42 tables and views.
-- **[Page Relationships & Dependency Maps](file:///c:/xampp/htdocs/sia/docs/obsidian/16%20-%20Page%20Relationships/00%20-%20Master%20Relationship%20Index%20&%20Matrix.md)**: End-to-end trace from View $\rightarrow$ Route $\rightarrow$ Controller $\rightarrow$ Service $\rightarrow$ Database.
-- **[Troubleshooting Runbook](file:///c:/xampp/htdocs/sia/docs/obsidian/15%20-%20Operations/Troubleshooting%20Runbook.md)**: Common runtime error fixes and SMTP debugging guide.
+The complete technical and architectural documentation is maintained in the [`docs/obsidian/`](docs/obsidian/) vault:
+- **[Master Hub](docs/obsidian/00%20-%20Home/TTU%20Enrollment%20System%20Home.md)**: Central launchpad for all 17 documentation domains.
+- **[System Architecture](docs/obsidian/01%20-%20Architecture/System%20Architecture.md)**: Monolithic Hybrid MVC structure, routing, and request lifecycle.
+- **[Entity Relationship Architecture](docs/obsidian/04%20-%20Database/Entity%20Relationship%20Architecture.md)**: High-level and domain-level Mermaid ER diagrams, cardinality, and foreign key topology.
+- **[Data Dictionary](docs/obsidian/04%20-%20Database/Data%20Dictionary.md)**: Complete column specifications for all 42 tables and views.
+- **[Page Relationships & Dependency Maps](docs/obsidian/16%20-%20Page%20Relationships/00%20-%20Master%20Relationship%20Index%20&%20Matrix.md)**: End-to-end trace from View $\rightarrow$ Route $\rightarrow$ Controller $\rightarrow$ Service $\rightarrow$ Database.
+- **[Troubleshooting Runbook](docs/obsidian/15%20-%20Operations/Troubleshooting%20Runbook.md)**: Common runtime error fixes and SMTP debugging guide.
+
+## Project Layout
+
+| Folder | What it holds |
+|---|---|
+| `app/` | PHP code: `Routes/web.php`, `Controllers/`, `Services/`, `Repositories/`, `Models/`, `Middleware/`, `Core/` and the page templates in `Views/` |
+| `public/` | Front controller `index.php` plus LMS CSS/JS and third-party browser libraries (`public/vendor/`) |
+| `css/`, `js/`, `images/` | Shared styles, scripts and logos used by the enrollment portal |
+| `config/` | `bootstrap.php`, `database.php`, and the `config.example.php` template (`config.php` is never committed) |
+| `vendor/` | Composer libraries (PHPMailer, PDF parser); committed on purpose so hosting needs no Composer |
+| `database/` | `schema.sql` + `seed.sql` (fresh install), `migrations/` (upgrades for existing databases), `infinityfree/` (hosting import scripts) |
+| `scripts/` | Build scripts for InfinityFree, LMS course tools, `migrations/`, and `tests/` (manual test scripts run against a local database) |
+| `demo_files/` | Sample documents for the demo student, faculty, applicant and registrar |
+| `docs/` | Documentation vault (`obsidian/`, `codebase/`), developer handoff, and past audit/phase reports in `reports/` |
+| `uploads/`, `storage/` | Runtime upload and log folders; their contents are private and ignored by git |
 
 ---
 

@@ -118,7 +118,7 @@ All events are immediately visible in the LMS Governance Audit Logs (`/admin/lms
 
 ## 7. Automated Test Matrix
 
-Executed via `scripts/test_lms_admin_conflict_resolution.php`:
+Executed via `scripts/tests/test_lms_admin_conflict_resolution.php`:
 
 | Test Category | Test Case | Expected Behavior | Result |
 | :--- | :--- | :--- | :--- |

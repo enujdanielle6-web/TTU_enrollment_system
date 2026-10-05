@@ -60,7 +60,7 @@ To support multiple cohort sections taking identical curriculum subjects (e.g. `
 - **Anti-Duplication & Crosstalk Protection:**
   - Zero duplicate course cards appear on the student dashboard.
   - Faculty assignments, announcements, grades, and attendance remain strictly scoped to the student's assigned section.
-  - Verified with 100% pass via `scripts/test_two_sections_lms.php`.
+  - Verified with 100% pass via `scripts/tests/test_two_sections_lms.php`.
 
 ---
 **Related:**

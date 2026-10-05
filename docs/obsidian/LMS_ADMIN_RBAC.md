@@ -152,4 +152,4 @@ A critical boundary exists between **Scheduler** and **LMS Admin**. The Schedule
 - Controller Gate: [`App\Controllers\Admin\LmsAdminController::enforceAdminAccess()`](file:///c:/xampp/htdocs/sia/app/Controllers/Admin/LmsAdminController.php)
 - Helper Functions: [`hasPermission()`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php#L672) & [`requirePermission()`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php#L715)
 - Role Definitions: `ROLE_PERMISSIONS` in [`functions.php`](file:///c:/xampp/htdocs/sia/app/Helpers/functions.php#L642) and [`RoleMiddleware.php`](file:///c:/xampp/htdocs/sia/app/Middleware/RoleMiddleware.php#L12)
-- Automated Verification: [`scripts/test_lms_admin_rbac_hardening.php`](file:///c:/xampp/htdocs/sia/scripts/test_lms_admin_rbac_hardening.php)
+- Automated Verification: [`scripts/tests/test_lms_admin_rbac_hardening.php`](file:///c:/xampp/htdocs/sia/scripts/tests/test_lms_admin_rbac_hardening.php)

@@ -206,7 +206,7 @@ Implement automated regression suites validating the full lifecycle from applica
 
 ### Technical Tasks
 1. **Automated Test Matrix Suite**:
-   - Create `scripts/test_lms_integration_full.php` executing automated assertions for Scenarios A through H:
+   - Create `scripts/tests/test_lms_integration_full.php` executing automated assertions for Scenarios A through H:
      - Scenario A: New student enrollment $\rightarrow$ LMS availability.
      - Scenario B: Subject enrollment $\rightarrow$ LMS course authorization.
      - Scenario C: Multi-section course instance isolation.
@@ -219,7 +219,7 @@ Implement automated regression suites validating the full lifecycle from applica
    - Validate that sensitive LMS operations record entries in `activity_logs`.
 
 ### Files Affected
-* New Script: `scripts/test_lms_integration_full.php`
+* New Script: `scripts/tests/test_lms_integration_full.php`
 * `docs/obsidian/13 - Reports/LMS_INTEGRATION_VERIFICATION_REPORT.md`
 
 ### Expected Result

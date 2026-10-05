@@ -120,7 +120,7 @@ Use **FileZilla** (recommended; FTP details are in the Control Panel → *FTP De
    ├── storage/         (logs + LMS files; blocked from the web)
    └── uploads/         (documents/, payments/, scholarships/)
    ```
-3. Do **not** upload: `.env`, `database/`, `docs/`, `scripts/`, `*.md`, `schema_dump.sql`, `setup_database.php`,
+3. Do **not** upload: `.env`, `database/`, `docs/`, `scripts/`, `*.md`, `setup_database.php`,
    `storage/backups/`, or your local `uploads/` contents (they contain applicants' private documents).
    A single `.zip` of the package would exceed InfinityFree's 10 MB per-file limit, so upload the folder itself.
 
