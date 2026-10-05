@@ -100,7 +100,6 @@ Edit **`dist\infinityfree\htdocs\config\config.php`** (created from `config/conf
 | `APP_BASE_PATH` | `''` when the files go directly into `htdocs` (recommended). `'/folder'` only if you upload into `htdocs/folder` |
 | `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | the four values from §2 |
 | `SMTP_USERNAME`, `SMTP_PASSWORD`, `MAIL_FROM_ADDRESS` | your Gmail address and a **Google App Password** (Google Account → Security → 2-Step Verification → App passwords). Keep port `587` / `tls`. |
-| `DEMO_LOGINS` | keep `false`. Set `true` only for a presentation where you imported `optional_demo_data.sql`: it shows the one-click *Fast Demo Access* buttons (and their passwords) on the login pages. |
 | `PAYMONGO_*` | optional; your PayMongo keys (start with test keys `sk_test_…`) |
 
 `config/config.php` is a PHP file, so even if someone requests it in a browser its contents are never shown,

@@ -117,19 +117,6 @@ if (app_debug()) {
     unset($__logDir);
 }
 
-/**
- * Whether login pages show the one-click "Fast Demo Access" buttons (they publish demo passwords).
- * DEMO_LOGINS wins when set; otherwise they only show in debug/local mode.
- */
-function app_show_demo_logins(): bool
-{
-    $flag = app_env('DEMO_LOGINS');
-    if ($flag !== null && $flag !== '') {
-        return in_array(strtolower($flag), ['1', 'true', 'on', 'yes'], true);
-    }
-    return app_debug();
-}
-
 function app_is_https(): bool
 {
     if (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off') {

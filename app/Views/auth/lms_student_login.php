@@ -94,53 +94,8 @@ require_once __DIR__ . '/../components/header.php';
             </button>
           </form>
 
-          <!-- Quick Test Credentials Section -->
+          <!-- Footer Links -->
           <div class="mt-4 pt-3 border-top">
-            <?php if (app_show_demo_logins()): ?>
-            <div class="test-access-panel">
-              <div class="d-flex align-items-center justify-content-between mb-2.5">
-                <span class="small fw-bold text-uppercase d-flex align-items-center gap-1.5" style="font-size: 0.68rem; letter-spacing: 0.05em; color: #475569;">
-                  <i class="bi bi-lightning-charge-fill text-warning"></i> Fast Demo Access
-                </span>
-                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">1-Click Auto-Login</span>
-              </div>
-
-              <div class="row g-2">
-                <div class="col-12 col-sm-6">
-                  <div class="p-2.5 bg-white rounded-3 border test-cred-card h-100" 
-                       onclick="quickStudentLogin('2026-000001', 'password123')"
-                       role="button"
-                       tabindex="0"
-                       title="Click to log in as College Student">
-                    <div class="d-flex align-items-center justify-content-between mb-1">
-                      <span class="fw-bold text-primary small d-inline-flex align-items-center gap-1" style="font-size: 0.78rem;">
-                        <i class="bi bi-mortarboard"></i> College (BSIT)
-                      </span>
-                      <span class="badge bg-primary bg-opacity-10 text-primary px-1.5 py-0.5 rounded-pill" style="font-size: 0.62rem;">Auto-Login</span>
-                    </div>
-                    <div style="font-size: 0.74rem;"><span class="text-muted">ID:</span> <code class="fw-bold text-dark">2026-000001</code></div>
-                    <div style="font-size: 0.74rem;"><span class="text-muted">Pass:</span> <code class="text-secondary">password123</code></div>
-                  </div>
-                </div>
-                <div class="col-12 col-sm-6">
-                  <div class="p-2.5 bg-white rounded-3 border test-cred-card h-100" 
-                       onclick="quickStudentLogin('2026-000020', 'Student@TTU2026!')"
-                       role="button"
-                       tabindex="0"
-                       title="Click to log in as Senior High Student">
-                    <div class="d-flex align-items-center justify-content-between mb-1">
-                      <span class="fw-bold text-success small d-inline-flex align-items-center gap-1" style="font-size: 0.78rem;">
-                        <i class="bi bi-backpack"></i> SHS (STEM)
-                      </span>
-                      <span class="badge bg-success bg-opacity-10 text-success px-1.5 py-0.5 rounded-pill" style="font-size: 0.62rem;">Auto-Login</span>
-                    </div>
-                    <div style="font-size: 0.74rem;"><span class="text-muted">ID:</span> <code class="fw-bold text-dark">2026-000020</code></div>
-                    <div style="font-size: 0.74rem;"><span class="text-muted">Pass:</span> <code class="text-secondary">Student@TTU2026!</code></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <?php endif; ?>
 
             <!-- Footer Navigation Links -->
             <div class="text-center mt-3 pt-1">
@@ -190,35 +145,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     });
   }
-
-  // Support keyboard accessibility (Enter/Space) on test credential cards
-  document.querySelectorAll('.test-cred-card').forEach(function(card) {
-    card.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        this.click();
-      }
-    });
-  });
 });
-
-function quickStudentLogin(studentId, password) {
-  const idField = document.getElementById('student_id');
-  const passField = document.getElementById('password');
-  const form = document.getElementById('studentLoginForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const btnText = document.getElementById('btnText');
-
-  if (idField && passField && form) {
-    idField.value = studentId;
-    passField.value = password;
-    if (submitBtn && btnText) {
-      submitBtn.disabled = true;
-      btnText.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5" role="status" aria-hidden="true"></span> Authenticating...';
-    }
-    form.submit();
-  }
-}
 </script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>

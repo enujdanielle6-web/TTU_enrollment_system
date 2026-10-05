@@ -86,55 +86,8 @@ require_once __DIR__ . '/../components/header.php';
             </button>
           </form>
 
-          <!-- Quick Test Accounts Panel -->
+          <!-- Footer Links -->
           <div class="mt-4 pt-3 border-top">
-            <?php if (app_show_demo_logins()): ?>
-            <div class="test-access-panel">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="small fw-bold text-uppercase d-flex align-items-center gap-1.5" style="font-size: 0.68rem; letter-spacing: 0.05em; color: #475569;">
-                  <i class="bi bi-lightning-charge-fill text-warning"></i> Fast Demo Access
-                </span>
-                <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">1-Click Auto-Login</span>
-              </div>
-              
-              <div class="mb-2.5">
-                <div class="text-muted mb-1.5 d-flex align-items-center gap-1" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">
-                  <i class="bi bi-building text-secondary"></i> Institutional Staff
-                </div>
-                <div class="d-flex flex-wrap gap-1.5">
-                  <button type="button" class="btn-test-chip chip-registrar" onclick="fillLogin('registrar@ttu.edu.ph', 'admin123', 'Registrar')" title="Registrar Officer (Marcus Aurelius)">
-                    <i class="bi bi-journal-check"></i>Registrar
-                  </button>
-                  <button type="button" class="btn-test-chip chip-admissions" onclick="fillLogin('admissions@ttu.edu.ph', 'admin123', 'Admissions')" title="Admissions Officer (Eleanor Vance)">
-                    <i class="bi bi-person-check"></i>Admissions
-                  </button>
-                  <button type="button" class="btn-test-chip chip-cashier" onclick="fillLogin('cashier@ttu.edu.ph', 'admin123', 'Cashier')" title="Cashier / Finance (Clara Oswald)">
-                    <i class="bi bi-cash-coin"></i>Cashier
-                  </button>
-                  <button type="button" class="btn-test-chip chip-scheduler" onclick="fillLogin('scheduler@ttu.edu.ph', 'admin123', 'Scheduler')" title="Academic Scheduler (Theodore Nott)">
-                    <i class="bi bi-calendar3"></i>Scheduler
-                  </button>
-                  <button type="button" class="btn-test-chip chip-scholarship" onclick="fillLogin('scholarship@ttu.edu.ph', 'admin123', 'Scholarship')" title="Scholarship Officer (Gwendolyn Stacy)">
-                    <i class="bi bi-award"></i>Scholarship
-                  </button>
-                  <button type="button" class="btn-test-chip chip-superadmin" onclick="fillLogin('admin@ttu.edu.ph', 'admin123', 'Superadmin')" title="System Administrator">
-                    <i class="bi bi-shield-check"></i>Superadmin
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <div class="text-muted mb-1.5 d-flex align-items-center gap-1" style="font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;">
-                  <i class="bi bi-mortarboard text-secondary"></i> Applicant Portal
-                </div>
-                <div class="d-flex flex-wrap gap-1.5">
-                  <button type="button" class="btn-test-chip chip-applicant" onclick="fillLogin('jane.applicant@example.com', 'password123', 'Jane Applicant')" title="Enrolled Student / Applicant (Jane Applicant)">
-                    <i class="bi bi-person-lines-fill"></i>Jane Applicant (Applicant / Enrollee)
-                  </button>
-                </div>
-              </div>
-            </div>
-            <?php endif; ?>
 
             <!-- Registration & Home links -->
             <div class="text-center mt-3 pt-1">
@@ -187,25 +140,6 @@ document.addEventListener("DOMContentLoaded", function() {
     });
   }
 });
-
-function fillLogin(email, password, roleName = '') {
-  const emailInput = document.getElementById('email');
-  const passwordInput = document.getElementById('password');
-  const form = document.getElementById('sisLoginForm');
-  const submitBtn = document.getElementById('submitBtn');
-  const btnText = document.getElementById('btnText');
-
-  if (emailInput && passwordInput && form) {
-    emailInput.value = email;
-    passwordInput.value = password;
-    if (submitBtn && btnText) {
-      submitBtn.disabled = true;
-      const label = roleName ? `Logging in as ${roleName}...` : 'Authenticating...';
-      btnText.innerHTML = `<span class="spinner-border spinner-border-sm me-1.5" role="status" aria-hidden="true"></span> ${label}`;
-    }
-    form.submit();
-  }
-}
 </script>
 
 <?php require_once __DIR__ . '/../components/footer.php'; ?>
