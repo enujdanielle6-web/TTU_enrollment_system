@@ -96,7 +96,7 @@ mysql -u root sia < database/seed.sql
 ```
 **Warning:** `schema.sql` replaces every table it defines (`DROP TABLE IF EXISTS`), so importing it into an existing database erases those tables' data.
 
-The seed includes demo accounts with sample applications, documents, payments and LMS content. Their placeholder files (`uploads/documents/sample_*`, `uploads/payments/proof_mary_downpayment.jpg`, `storage/uploads/lms/materials/*.pdf`) ship with the repo; all other uploads are ignored by git.
+The seed includes the demo accounts plus one sample enrolled student (John Doe) and one LMS class (CC101). Their sample files are kept in `demo_files/` (see `demo_files/README.md`), not in `uploads/` or `storage/`; all real uploads are ignored by git. `database/infinityfree/reset_to_sample_data.sql` resets an existing database to that sample set, and `remove_demo_data.sql` removes everything except accounts and school setup.
 
 ---
 

@@ -10,6 +10,9 @@
  *   02_reference_data.sql    catalog data the app needs: settings, programs, strands, subjects,
  *                            curricula, fee templates, scholarships, public announcements
  *   optional_demo_data.sql   fictional demo people/records from seed.sql (shared demo passwords!)
+ *   reset_to_sample_data.sql remove_demo_data.sql followed by the demo records from seed.sql,
+ *                            minus the accounts: resets a database that already has the demo
+ *                            accounts to exactly one sample enrolled student and one LMS class
  *
  * The source files are never modified. Re-run this after changing schema.sql or seed.sql.
  */
@@ -134,11 +137,36 @@ file_put_contents(
     ]) . "\n" . implode("\n", $demo) . $footer
 );
 
+// Reset script for a database that already holds the demo accounts: wipe every demo/transactional
+// record (remove_demo_data.sql, hand-written) and re-insert seed.sql's sample records, minus the accounts.
+$accountTables = ['users', 'faculty_profiles', 'faculty_availability', 'faculty_specializations'];
+$sampleRecords = [];
+foreach ($statements as $st) {
+    if (!in_array($st['table'], $skipTables, true)
+        && !in_array($st['table'], $referenceTables, true)
+        && !in_array($st['table'], $accountTables, true)) {
+        $sampleRecords[] = $st['sql'];
+    }
+}
+$removeSql = str_replace("\r\n", "\n", (string) file_get_contents($outDir . '/remove_demo_data.sql'));
+$removeBody = trim((string) preg_replace('/^.*?SET FOREIGN_KEY_CHECKS = 0;\n|SET FOREIGN_KEY_CHECKS = 1;\s*$/s', '', $removeSql));
+file_put_contents(
+    $outDir . '/reset_to_sample_data.sql',
+    $header('Reset to ONE sample enrolled student and ONE LMS class', [
+        'For a database that already has the demo accounts (optional_demo_data.sql was imported).',
+        'Deletes ALL applications, enrollments, payments and LMS content (same as remove_demo_data.sql),',
+        'keeps every user account, then adds: John Doe (2026-000001) enrolled in BSIT 1-A, and the CC101',
+        'class taught by Alan Turing with a syllabus, a lesson, an assignment, a quiz and an announcement.',
+        'Upload the matching files from demo_files/ (see demo_files/README.md). Export a backup first.',
+    ]) . "\n" . $removeBody . "\n\n" . implode("\n", $sampleRecords) . $footer
+);
+
 printf(
-    "Wrote %s\n  01_schema.sql           %d tables (%d views omitted)\n  02_reference_data.sql   %d INSERT statements\n  optional_demo_data.sql  %d INSERT statements\n",
+    "Wrote %s\n  01_schema.sql           %d tables (%d views omitted)\n  02_reference_data.sql   %d INSERT statements\n  optional_demo_data.sql  %d INSERT statements\n  reset_to_sample_data.sql %d INSERT statements\n",
     $outDir,
     count($tables),
     $viewCount,
     count($reference),
-    count($demo)
+    count($demo),
+    count($sampleRecords)
 );
