@@ -63,19 +63,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 3. Sidebar Minimize Toggle, Mobile Drawer & Tooltips
     const sidebar = document.getElementById('adminSidebar');
-    const minimizeBtn = document.getElementById('sidebarMinimize');
-    const mobileToggleBtn = document.getElementById('sidebarToggle');
     const sidebarCloseBtn = document.getElementById('sidebarClose');
     const sidebarBackdrop = document.getElementById('sidebarBackdrop');
     
-    // Initialize tooltips for sidebar
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('#adminSidebar [data-sidebar-tooltip="true"]'));
-    const tooltips = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl, {
-            trigger: 'hover',
-            boundary: document.body
+    // Initialize tooltips for sidebar. The SPA router replaces the sidebar's contents on
+    // every page change, so the tooltips are rebuilt after each navigation.
+    let tooltips = [];
+    function initTooltips() {
+        tooltips.forEach(t => t.dispose());
+        tooltips = [].slice.call(document.querySelectorAll('#adminSidebar [data-sidebar-tooltip="true"]')).map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                trigger: 'hover',
+                boundary: document.body
+            });
         });
-    });
+    }
+    initTooltips();
 
     function updateTooltips() {
         if (!sidebar) return;
@@ -96,8 +99,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Set initial tooltip state
     updateTooltips();
 
-    if (minimizeBtn && sidebar) {
-        minimizeBtn.addEventListener('click', function(e) {
+    // Listen on the document, not the button: the SPA router swaps the sidebar's contents
+    // (including this button) on every page change, which would drop a direct listener.
+    if (sidebar) {
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#sidebarMinimize')) return;
             e.preventDefault();
             sidebar.classList.toggle('minimized');
             
@@ -113,8 +119,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Mobile sidebar toggle
-    if (mobileToggleBtn && sidebar) {
-        mobileToggleBtn.addEventListener('click', function(e) {
+    // This button sits in the page content, which the SPA router replaces, so listen on the document.
+    if (sidebar) {
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('#sidebarToggle')) return;
             e.preventDefault();
             sidebar.classList.toggle('show');
             if (sidebarBackdrop) {
@@ -143,14 +151,24 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Auto close drawer when navigating on mobile
-    const sidebarNavLinks = document.querySelectorAll('#adminSidebar .nav-link:not(.sidebar-toggle)');
-    sidebarNavLinks.forEach(link => {
-        link.addEventListener('click', function() {
-            if (window.innerWidth < 992 && sidebar) {
-                sidebar.classList.remove('show');
-                if (sidebarBackdrop) sidebarBackdrop.classList.add('d-none');
-            }
-        });
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('#adminSidebar .nav-link:not(.sidebar-toggle)')) return;
+        if (window.innerWidth < 992 && sidebar) {
+            sidebar.classList.remove('show');
+            if (sidebarBackdrop) sidebarBackdrop.classList.add('d-none');
+        }
+    });
+
+    document.addEventListener('spa:navigated', function() {
+        initTooltips();
+        updateTooltips();
+
+        // Applicant portal (phone): hide the menu drawer once a link in it has opened a page.
+        const applicantSidebar = document.getElementById('applicantSidebar');
+        const drawer = applicantSidebar && window.bootstrap ? bootstrap.Offcanvas.getInstance(applicantSidebar) : null;
+        if (drawer && window.innerWidth < 992) {
+            drawer.hide();
+        }
     });
 
     // Handle viewport resize: clean up mobile drawer state on desktop
