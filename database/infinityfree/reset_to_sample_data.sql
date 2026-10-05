@@ -14,6 +14,7 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 
 
 -- LMS content
+DELETE FROM `lms_material_progress`;     ALTER TABLE `lms_material_progress` AUTO_INCREMENT = 1;
 DELETE FROM `lms_quiz_answers`;          ALTER TABLE `lms_quiz_answers` AUTO_INCREMENT = 1;
 DELETE FROM `lms_quiz_attempts`;         ALTER TABLE `lms_quiz_attempts` AUTO_INCREMENT = 1;
 DELETE FROM `lms_question_choices`;      ALTER TABLE `lms_question_choices` AUTO_INCREMENT = 1;

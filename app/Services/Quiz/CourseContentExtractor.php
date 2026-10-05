@@ -132,15 +132,67 @@ class CourseContentExtractor
     }
 
     /**
+     * Text of a lesson file for the student preview window, split into sections
+     * (one per slide for .pptx, one for a .docx or plain-text file).
+     *
+     * @return array<int, array{label: string, paragraphs: string[]}>
+     */
+    public function previewSections(string $path, string $ext): array
+    {
+        $ext = strtolower($ext);
+        if (!is_file($path) || filesize($path) > self::MAX_FILE_BYTES) {
+            return [];
+        }
+        if (in_array($ext, self::TEXT_EXTENSIONS, true)) {
+            $text = (string)file_get_contents($path);
+            if (str_contains($text, "\0")) {
+                return [];
+            }
+            $lines = array_values(array_filter(array_map('trim', preg_split('/\R/', $text) ?: []), 'strlen'));
+            return $lines ? [['label' => 'Document', 'paragraphs' => $lines]] : [];
+        }
+        if (!class_exists('ZipArchive')) {
+            return [];
+        }
+        if ($ext === 'docx') {
+            $parts = $this->officeParagraphsByPart($path, ['word/document.xml'], 'p', 't');
+            $paragraphs = $parts['word/document.xml'] ?? [];
+            return $paragraphs ? [['label' => 'Document', 'paragraphs' => $paragraphs]] : [];
+        }
+        if ($ext === 'pptx') {
+            $sections = [];
+            $number = 0;
+            foreach ($this->officeParagraphsByPart($path, null, 'p', 't') as $paragraphs) {
+                $number++;
+                $sections[] = ['label' => 'Slide ' . $number, 'paragraphs' => $paragraphs];
+            }
+            return $sections;
+        }
+        return [];
+    }
+
+    /**
      * Pulls paragraph text out of an Office Open XML package.
      *
      * @param string[]|null $parts exact entry names, or null for every ppt/slides/slideN.xml in slide order
      */
     private function readOfficeXml(string $path, ?array $parts, string $paragraphTag, string $textTag): string
     {
+        $paragraphs = array_merge([], ...array_values($this->officeParagraphsByPart($path, $parts, $paragraphTag, $textTag)));
+        return QuizQuestionValidator::cleanText(implode("\n", $paragraphs));
+    }
+
+    /**
+     * Paragraph text of each part of an Office Open XML package, in order.
+     *
+     * @param string[]|null $parts exact entry names, or null for every ppt/slides/slideN.xml in slide order
+     * @return array<string, string[]> part name => non-empty paragraphs
+     */
+    private function officeParagraphsByPart(string $path, ?array $parts, string $paragraphTag, string $textTag): array
+    {
         $zip = new \ZipArchive();
         if ($zip->open($path, \ZipArchive::RDONLY) !== true) {
-            return '';
+            return [];
         }
         if ($parts === null) {
             $parts = [];
@@ -153,7 +205,7 @@ class CourseContentExtractor
             ksort($parts);
         }
 
-        $paragraphs = [];
+        $result = [];
         foreach ($parts as $part) {
             $stat = $zip->statName($part);
             if ($stat === false || $stat['size'] > self::MAX_XML_BYTES) {
@@ -168,6 +220,7 @@ class CourseContentExtractor
             if (!@$dom->loadXML($xml, LIBXML_NONET | LIBXML_COMPACT)) {
                 continue;
             }
+            $paragraphs = [];
             foreach ($dom->getElementsByTagNameNS('*', $paragraphTag) as $p) {
                 $line = '';
                 foreach ($p->getElementsByTagNameNS('*', $textTag) as $t) {
@@ -178,8 +231,9 @@ class CourseContentExtractor
                     $paragraphs[] = $line;
                 }
             }
+            $result[$part] = $paragraphs;
         }
         $zip->close();
-        return QuizQuestionValidator::cleanText(implode("\n", $paragraphs));
+        return $result;
     }
 }

@@ -71,6 +71,29 @@ class StudentController extends BaseController
             $modules = [];
         }
 
+        // 3b. Lesson preview kinds and the student's progress (lessons, assignments, quizzes)
+        $progressService = new \App\Services\LmsProgressService();
+        try {
+            $lesson_progress = $progressService->getLessonProgressForCourse((int)$userId, (int)$lms_course_id);
+            $course_progress = $progressService->getCourseProgress((int)$userId, (int)$lms_course_id);
+        } catch (\Throwable $e) {
+            // The lms_material_progress table is missing until the phase 12 migration is run
+            error_log("LMS Course Progress Error: " . $e->getMessage());
+            $lesson_progress = [];
+            $course_progress = null;
+        }
+        $course_materials = [];
+        foreach ($modules as &$module) {
+            $module['materials'] = $module['materials'] ?? [];
+            foreach ($module['materials'] as &$material) {
+                $material['kind'] = \App\Services\LmsService::lessonKind($material);
+                $material['progress'] = $lesson_progress[(int)$material['id']] ?? null;
+                $course_materials[] = $material;
+            }
+            unset($material);
+        }
+        unset($module);
+
         // 4. Badge Counts for Course Navigation Tabs
         $announcementService = new \App\Services\LmsAnnouncementService();
         $quizService = new \App\Services\LmsQuizService();
@@ -97,6 +120,84 @@ class StudentController extends BaseController
         $current_page = 'my_courses.php'; // Highlight "My Courses" in sidebar
 
         return $this->render('lms/student/course', get_defined_vars());
+    }
+
+    /**
+     * JSON for the lesson preview window: how to show the file, plus its text for
+     * Word/PowerPoint/plain-text lessons. Opening a lesson records it as started.
+     */
+    public function lessonPreview(Request $request, Response $response, string $id)
+    {
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $lmsService = new \App\Services\LmsService();
+        $material = $lmsService->getMaterial((int)$id);
+
+        if (!$material || !$lmsService->isStudentAuthorizedForCourse($userId, (int)$material['lms_course_id'])) {
+            return $response->json(['success' => false, 'error' => 'Lesson not found.'], 404);
+        }
+
+        $kind = \App\Services\LmsService::lessonKind($material);
+        $path = $lmsService->resolveMaterialPath($material);
+        $sections = [];
+        if ($path && in_array($kind, ['office', 'text'], true)) {
+            try {
+                $extractor = new \App\Services\Quiz\CourseContentExtractor();
+                $sections = $extractor->previewSections($path, (string)pathinfo($material['file_path'], PATHINFO_EXTENSION));
+            } catch (\Throwable $e) {
+                error_log('Lesson preview text extraction failed for material ' . $material['id'] . ': ' . $e->getMessage());
+            }
+        }
+
+        $progress = null;
+        try {
+            $progress = (new \App\Services\LmsProgressService())->recordLessonProgress($userId, (int)$material['id'], 0);
+        } catch (\Throwable $e) {
+            error_log('Lesson progress unavailable: ' . $e->getMessage());
+        }
+
+        return $response->json([
+            'success' => true,
+            'id' => (int)$material['id'],
+            'title' => $material['file_name'],
+            'kind' => $kind,
+            'file_available' => $path !== null,
+            'file_size' => (int)($material['file_size'] ?? 0),
+            'view_url' => BASE_PATH . '/lms/view/material/' . (int)$material['id'],
+            'download_url' => BASE_PATH . '/lms/download/material/' . (int)$material['id'],
+            'sections' => $sections,
+            'progress' => $progress,
+        ]);
+    }
+
+    /**
+     * Saves how far the student has scrolled through a lesson (0-100) and returns the
+     * lesson's and the course's updated progress.
+     */
+    public function lessonProgress(Request $request, Response $response, string $id)
+    {
+        $userId = (int)($_SESSION['user_id'] ?? 0);
+        $lmsService = new \App\Services\LmsService();
+        $material = $lmsService->getMaterial((int)$id);
+
+        if (!$material || !$lmsService->isStudentAuthorizedForCourse($userId, (int)$material['lms_course_id'])) {
+            return $response->json(['success' => false, 'error' => 'Lesson not found.'], 404);
+        }
+
+        $percent = filter_var($request->input('percent'), FILTER_VALIDATE_FLOAT);
+        if ($percent === false || $percent === null) {
+            return $response->json(['success' => false, 'error' => 'A scroll percentage is required.'], 422);
+        }
+
+        try {
+            $progressService = new \App\Services\LmsProgressService();
+            $lesson = $progressService->recordLessonProgress($userId, (int)$material['id'], (float)$percent);
+            $course = $progressService->getCourseProgress($userId, (int)$material['lms_course_id']);
+        } catch (\Throwable $e) {
+            error_log('Lesson progress save failed: ' . $e->getMessage());
+            return $response->json(['success' => false, 'error' => 'Progress could not be saved.'], 500);
+        }
+
+        return $response->json(['success' => true, 'lesson' => $lesson, 'course' => $course]);
     }
 
     public function myCourses(Request $request, Response $response)

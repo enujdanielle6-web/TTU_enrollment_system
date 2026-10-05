@@ -401,7 +401,7 @@ class LmsService
     /**
      * Resolves a material row to its file on disk for quiz generation, checking the
      * canonical storage directory first and then the legacy locations (same order as
-     * DownloadController). Returns null when missing.
+     * DownloadController and the lesson preview). Returns null when missing.
      */
     public function resolveMaterialPath(array $material): ?string
     {
@@ -494,6 +494,32 @@ class LmsService
         $material = $stmt->fetch(PDO::FETCH_ASSOC);
         
         return $material ?: null;
+    }
+
+    /**
+     * How the lesson preview window shows a material, judged by the stored file's extension:
+     * 'pdf' (rendered page by page), 'image', 'media' (audio/video player),
+     * 'office' (.docx/.pptx text), 'text' (.txt/.md) or 'other' (download only).
+     */
+    public static function lessonKind(array $material): string
+    {
+        $ext = strtolower(pathinfo((string)($material['file_path'] ?? ''), PATHINFO_EXTENSION));
+        if ($ext === 'pdf') {
+            return 'pdf';
+        }
+        if (in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'webp'], true)) {
+            return 'image';
+        }
+        if (in_array($ext, ['mp4', 'webm', 'mp3', 'ogg', 'wav', 'm4a'], true)) {
+            return 'media';
+        }
+        if (in_array($ext, ['docx', 'pptx'], true)) {
+            return 'office';
+        }
+        if (in_array($ext, ['txt', 'md'], true)) {
+            return 'text';
+        }
+        return 'other';
     }
 
     public function deleteMaterial(int $materialId): bool
