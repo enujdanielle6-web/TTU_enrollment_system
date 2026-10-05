@@ -246,7 +246,7 @@ If any query within the transaction fails (e.g. invalid target section, foreign 
 
 ## 10. VERIFICATION TEST MATRIX RESULTS
 
-All 8 scenarios specified in the Phase 2 prompt were executed and verified via [`scripts/test_phase2_verification.php`](file:///c:/xampp/htdocs/sia/scripts/test_phase2_verification.php):
+All 8 scenarios specified in the Phase 2 prompt were executed and verified via [`scripts/tests/test_phase2_verification.php`](file:///c:/xampp/htdocs/sia/scripts/tests/test_phase2_verification.php):
 
 | Scenario | Objective | Validation Method | Result |
 | :--- | :--- | :--- | :--- |

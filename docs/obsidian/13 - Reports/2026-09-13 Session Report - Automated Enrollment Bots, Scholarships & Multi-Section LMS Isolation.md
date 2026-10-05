@@ -9,10 +9,10 @@
 ## 1. Executive Summary
 
 This session successfully achieved complete automation, verification, and UI modernization of the TTU Enrollment System across all primary student personas:
-1. **Regular College Student Lifecycle Automation:** Built and executed `scripts/test_enrollment_bot.php` covering the full enrollment pipeline through to LMS access with 100% pass.
-2. **Senior High School Grade 12 STEM Lifecycle Automation:** Built and executed `scripts/test_shs_enrollment_bot.php` for Grade 12 STEM students, validating curriculum selection, SHS fee assessments, and SHS LMS courses.
-3. **Irregular College Student with Scholarship Automation:** Built and executed `scripts/test_irregular_scholarship_bot.php`, resolving custom subject preservation during matriculation and verifying 100% academic scholarship deductions.
-4. **Multi-Section LMS Course Instance Isolation:** Built and executed `scripts/test_two_sections_lms.php`, proving that identical courses across different sections (`BSIT 1-A` and `BSIT 1-B`) maintain distinct `lms_courses` instances with zero duplication, isolated content, and strict authorization boundaries.
+1. **Regular College Student Lifecycle Automation:** Built and executed `scripts/tests/test_enrollment_bot.php` covering the full enrollment pipeline through to LMS access with 100% pass.
+2. **Senior High School Grade 12 STEM Lifecycle Automation:** Built and executed `scripts/tests/test_shs_enrollment_bot.php` for Grade 12 STEM students, validating curriculum selection, SHS fee assessments, and SHS LMS courses.
+3. **Irregular College Student with Scholarship Automation:** Built and executed `scripts/tests/test_irregular_scholarship_bot.php`, resolving custom subject preservation during matriculation and verifying 100% academic scholarship deductions.
+4. **Multi-Section LMS Course Instance Isolation:** Built and executed `scripts/tests/test_two_sections_lms.php`, proving that identical courses across different sections (`BSIT 1-A` and `BSIT 1-B`) maintain distinct `lms_courses` instances with zero duplication, isolated content, and strict authorization boundaries.
 5. **Admissions & Registrar UI/UX Upgrades:** Modernized the Admissions dashboard, review table, and application detail views with responsive glassmorphic cards and interactive SweetAlert2 confirmation modals in Subjects management.
 6. **Public Scholarship Showcase:** Added dynamic scholarship program cards on the university landing page (`home.php`) and navbar integration.
 
@@ -64,10 +64,10 @@ This session successfully achieved complete automation, verification, and UI mod
 
 | Suite / Script | Target Lifecycle Scenario | Key Assertions Verified | Status |
 |---|---|---|---|
-| **`scripts/test_enrollment_bot.php`** | College Regular BSIT | OTP, Documents, Clinic clearance, ₱13,350 assessment, Cashier receipt, Student ID `2026-000005`, 6 LMS courses. | **100% PASS** |
-| **`scripts/test_shs_enrollment_bot.php`** | SHS Regular Grade 12 STEM | Grade 12 curriculum mapping, Clinic clearance, SHS tuition assessment, Cashier receipt, Student ID `2026-000006`, Grade 12 LMS courses. | **100% PASS** |
-| **`scripts/test_irregular_scholarship_bot.php`** | Irregular College + 100% Scholarship | 3 custom requested subjects (9 units), 100% tuition waiver (₱4,500 discount), ₱3,850 net cashier payment, non-overwritten subjects in `college_enrollments`, Student ID `2026-000007`, LMS courses match requested subjects. | **100% PASS** |
-| **`scripts/test_two_sections_lms.php`** | LMS Multi-Section Isolation (`BSIT 1-A` vs `BSIT 1-B`) | Student A (`2026-000010`) $\rightarrow$ Course IDs `1, 2, 3`; Student B (`2026-000011`) $\rightarrow$ Course IDs `11, 12, 13`; 0 duplicate cards, strict cross-section course access blocking, isolated module content. | **100% PASS** |
+| **`scripts/tests/test_enrollment_bot.php`** | College Regular BSIT | OTP, Documents, Clinic clearance, ₱13,350 assessment, Cashier receipt, Student ID `2026-000005`, 6 LMS courses. | **100% PASS** |
+| **`scripts/tests/test_shs_enrollment_bot.php`** | SHS Regular Grade 12 STEM | Grade 12 curriculum mapping, Clinic clearance, SHS tuition assessment, Cashier receipt, Student ID `2026-000006`, Grade 12 LMS courses. | **100% PASS** |
+| **`scripts/tests/test_irregular_scholarship_bot.php`** | Irregular College + 100% Scholarship | 3 custom requested subjects (9 units), 100% tuition waiver (₱4,500 discount), ₱3,850 net cashier payment, non-overwritten subjects in `college_enrollments`, Student ID `2026-000007`, LMS courses match requested subjects. | **100% PASS** |
+| **`scripts/tests/test_two_sections_lms.php`** | LMS Multi-Section Isolation (`BSIT 1-A` vs `BSIT 1-B`) | Student A (`2026-000010`) $\rightarrow$ Course IDs `1, 2, 3`; Student B (`2026-000011`) $\rightarrow$ Course IDs `11, 12, 13`; 0 duplicate cards, strict cross-section course access blocking, isolated module content. | **100% PASS** |
 
 ---
 

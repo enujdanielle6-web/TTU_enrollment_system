@@ -214,7 +214,7 @@ The foreign key constraint `fk_lms_course_faculty` is preserved, allowing `NULL`
 
 ## 8. AUTOMATED VERIFICATION RESULTS (14/14 PASSED)
 
-The automated verification suite in [scripts/test_phase1_verification.php](file:///c:/xampp/htdocs/sia/scripts/test_phase1_verification.php) executed with 100% success:
+The automated verification suite in [scripts/tests/test_phase1_verification.php](file:///c:/xampp/htdocs/sia/scripts/tests/test_phase1_verification.php) executed with 100% success:
 
 | # | Verification Scenario | Tested Condition | Result |
 | :--- | :--- | :--- | :---: |

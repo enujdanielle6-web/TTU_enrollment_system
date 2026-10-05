@@ -23,7 +23,7 @@ This index serves as the single source of truth for repository orientation, subs
 | **Manage scholarships and tuition discount awards** | `[[Scholarship]]`, `[[10 - Scholarship Admin Relationship Map]]` | `app/Controllers/Admin/Scholarship/ScholarshipController.php` | `scholarships`<br>`scholarship_applications`<br>`scholarship_recipients` |
 | **Modify system users, RBAC roles, audit logs, or settings** | `[[System Administration]]`, `[[11 - System Admin & Reports Relationship Map]]` | `app/Controllers/Admin/System/SystemController.php`<br>`app/Views/admin/system/users.php` | `users`<br>`activity_logs`<br>`system_settings` |
 | **Work on the LMS (Courses, Modules, Assignments, Quizzes, Grades)** | `[[LMS]]`, `[[ADR-003 Hybrid SPA Navigation Design]]`, `[[12 - LMS Student Portal Relationship Map]]`, `[[13 - LMS Faculty Portal Relationship Map]]` | `app/Controllers/Lms/*`<br>`app/Services/Lms*`<br>`app/Views/lms/*` | `lms_courses`<br>`lms_modules`<br>`lms_assignments`<br>`lms_quizzes` |
-| **Inspect database table definitions and foreign keys** | `[[Data Dictionary]]`, `[[Entity Relationship Architecture]]` | `database/schema.sql`<br>`schema_dump.sql` | All 45 tables/views |
+| **Inspect database table definitions and foreign keys** | `[[Data Dictionary]]`, `[[Entity Relationship Architecture]]` | `database/schema.sql` | All 45 tables/views |
 
 ---
 

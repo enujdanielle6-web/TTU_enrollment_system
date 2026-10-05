@@ -298,7 +298,7 @@ When a course has no assigned instructor (`faculty_user_id = NULL`):
 
 ## 12. COMPREHENSIVE AUTOMATED VERIFICATION RESULTS
 
-The 24-point regression suite in [`scripts/test_phase4_verification.php`](file:///c:/xampp/htdocs/sia/scripts/test_phase4_verification.php) passed completely:
+The 24-point regression suite in [`scripts/tests/test_phase4_verification.php`](file:///c:/xampp/htdocs/sia/scripts/tests/test_phase4_verification.php) passed completely:
 
 ```text
 ====================================================================

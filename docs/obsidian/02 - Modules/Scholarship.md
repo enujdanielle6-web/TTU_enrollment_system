@@ -14,7 +14,7 @@ The Scholarship module governs financial aid programs, student grant application
 3. **Application Processing:** Reviews student scholarship submissions in `scholarship_applications` across `pending`, `under_review`, `approved`, and `rejected` states.
 4. **Active Scholars Registry:** Maintains the roster of awarded students in `scholarship_recipients`.
 5. **Automated Assessment Discounting:** When an applicant or student has an approved scholarship in `scholarship_recipients`, `App\Services\AssessmentService::calculate()` automatically factors the discount into the assessment calculation, deducting percentage or fixed-amount discounts from assessed tuition fees and freezing the net amount into `assessment_items`.
-6. **Automated Verification:** End-to-end lifecycle verified by `scripts/test_irregular_scholarship_bot.php` (verifying 100% tuition deduction, net fee cashiering, and matriculation).
+6. **Automated Verification:** End-to-end lifecycle verified by `scripts/tests/test_irregular_scholarship_bot.php` (verifying 100% tuition deduction, net fee cashiering, and matriculation).
 
 ---
 

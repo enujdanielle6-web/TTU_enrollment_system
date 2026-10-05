@@ -254,7 +254,7 @@ Rather than creating an artificial `lms_student_enrollments` table that could dr
 ## 12. AUTOMATED VERIFICATION RESULTS
 
 An automated verification test script was created to comprehensively validate the student LMS:
-- **Test File**: [`scripts/test_phase3_verification.php`](file:///c:/xampp/htdocs/sia/scripts/test_phase3_verification.php)
+- **Test File**: [`scripts/tests/test_phase3_verification.php`](file:///c:/xampp/htdocs/sia/scripts/tests/test_phase3_verification.php)
 
 ```text
 ====================================================================
@@ -288,5 +288,5 @@ SUCCESS: ALL 20 PHASE 3 VERIFICATION TESTS PASSED!
 ```
 
 ### Regression Verification:
-- **Phase 1 Verification**: 14 / 14 Scenarios Passed (`php scripts/test_phase1_verification.php`).
-- **Phase 2 Verification**: 8 / 8 Scenarios Passed (`php scripts/test_phase2_verification.php`).
+- **Phase 1 Verification**: 14 / 14 Scenarios Passed (`php scripts/tests/test_phase1_verification.php`).
+- **Phase 2 Verification**: 8 / 8 Scenarios Passed (`php scripts/tests/test_phase2_verification.php`).
