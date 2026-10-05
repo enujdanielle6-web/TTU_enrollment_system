@@ -94,27 +94,15 @@ class StudentController extends BaseController
         }
         unset($module);
 
-        // 4. Badge Counts for Course Navigation Tabs
-        $announcementService = new \App\Services\LmsAnnouncementService();
-        $quizService = new \App\Services\LmsQuizService();
-
+        // 4. Badge Counts for Course Navigation Tabs (unread / still to do)
         try {
-            $assignment_count = count($lmsService->getAssignmentsByCourse($lms_course_id, true));
+            $badges = (new \App\Services\LmsNotificationService())->getStudentCourseBadges((int)$userId, (int)$lms_course_id);
         } catch (\Throwable $e) {
-            $assignment_count = 0;
+            $badges = ['announcements' => 0, 'assignments' => 0, 'quizzes' => 0];
         }
-
-        try {
-            $quiz_count = count($quizService->getQuizzesByCourse($lms_course_id, true));
-        } catch (\Throwable $e) {
-            $quiz_count = 0;
-        }
-
-        try {
-            $announcement_count = count($announcementService->getCourseAnnouncements($lms_course_id, true));
-        } catch (\Throwable $e) {
-            $announcement_count = 0;
-        }
+        $assignment_count = $badges['assignments'];
+        $quiz_count = $badges['quizzes'];
+        $announcement_count = $badges['announcements'];
 
         $pageTitle = $course['subject_code'] . ' - TTU LMS';
         $current_page = 'my_courses.php'; // Highlight "My Courses" in sidebar

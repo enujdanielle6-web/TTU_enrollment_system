@@ -2610,3 +2610,32 @@ body.lms-layout > .lms-wrapper {
     scrollbar-width: thin;
     scrollbar-color: #cbd5e1 transparent;
 }
+
+/* Unread notifications */
+.lms-notification-item.is-unread {
+    background-color: #f0f6ff;
+}
+
+.lms-notification-item.is-unread:hover {
+    background-color: #e6f0ff;
+}
+
+.lms-notification-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--lms-primary, #0d6efd);
+    flex-shrink: 0;
+    margin-top: 0.4rem;
+}
+
+.lms-notification-item:not(.is-unread) .lms-notification-unread-dot {
+    visibility: hidden;
+}
+
+/* Full notification window */
+#lmsNotificationModal .lms-notification-body {
+    white-space: pre-line;
+    word-break: break-word;
+    line-height: 1.6;
+}

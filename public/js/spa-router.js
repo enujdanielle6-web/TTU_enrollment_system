@@ -179,6 +179,13 @@ async function navigateTo(url, pushHistory = true) {
             currentSidebar.innerHTML = newSidebar.innerHTML;
         }
 
+        // Refresh the LMS bell list too (it sits outside the sidebar)
+        const currentNotifPanel = document.getElementById('sidebarNotificationPanel');
+        const newNotifPanel = doc.getElementById('sidebarNotificationPanel');
+        if (currentNotifPanel && newNotifPanel) {
+            currentNotifPanel.innerHTML = newNotifPanel.innerHTML;
+        }
+
         const currentAdminSidebar = document.getElementById('adminSidebar');
         const newAdminSidebar = doc.getElementById('adminSidebar');
         if (currentAdminSidebar && newAdminSidebar) {

@@ -266,6 +266,8 @@ $router->group([
     $router->get('/lms/student/my_courses.php', ['App\Controllers\Lms\StudentController', 'myCourses']);
     $router->get('/lms/student/material/{id}/preview', ['App\Controllers\Lms\StudentController', 'lessonPreview']);
     $router->post('/lms/student/material/{id}/progress', ['App\Controllers\Lms\StudentController', 'lessonProgress']);
+    $router->post('/lms/student/notifications/read', ['App\Controllers\Lms\LmsNotificationController', 'studentRead']);
+    $router->post('/lms/student/notifications/read-all', ['App\Controllers\Lms\LmsNotificationController', 'studentReadAll']);
     
     $router->get('/lms/student/course/{course_id}/assignments', ['App\Controllers\Lms\StudentAssignmentController', 'index']);
     $router->get('/lms/student/course/{course_id}/assignments/{id}', ['App\Controllers\Lms\StudentAssignmentController', 'show']);
@@ -303,6 +305,8 @@ $router->group([
 ], function (Router $router) {
     $router->get('/lms/faculty/dashboard.php', ['App\Controllers\Lms\FacultyController', 'dashboard']);
     $router->get('/lms/faculty/course.php', ['App\Controllers\Lms\FacultyController', 'course']);
+    $router->post('/lms/faculty/notifications/read', ['App\Controllers\Lms\LmsNotificationController', 'facultyRead']);
+    $router->post('/lms/faculty/notifications/read-all', ['App\Controllers\Lms\LmsNotificationController', 'facultyReadAll']);
     $router->get('/lms/faculty/course/{course_id}/roster', ['App\Controllers\Lms\FacultyController', 'roster']);
     $router->post('/lms/faculty/module_create.php', ['App\Controllers\Lms\FacultyController', 'createModule']);
     $router->post('/lms/faculty/module_update.php', ['App\Controllers\Lms\FacultyController', 'updateModule']);

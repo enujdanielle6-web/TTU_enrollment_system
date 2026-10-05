@@ -688,6 +688,10 @@ class LmsService
         ]);
     }
 
+    /**
+     * Assignments and quizzes the student still has to do, soonest first. Items already
+     * submitted or taken, and deadlines that have passed, are left out.
+     */
     public function getStudentUpcomingDeadlines(int $userId, int $limit = 5): array
     {
         $courses = $this->getStudentCourses($userId);
@@ -714,10 +718,15 @@ class LmsService
             WHERE a.lms_course_id IN ($placeholders)
               AND a.status = 'published'
               AND a.due_date IS NOT NULL
+              AND a.due_date >= NOW()
+              AND NOT EXISTS (
+                  SELECT 1 FROM lms_submissions sub
+                  WHERE sub.assignment_id = a.id AND sub.student_id = ?
+              )
             ORDER BY a.due_date ASC
             LIMIT $limit
         ");
-        $assignStmt->execute($courseIds);
+        $assignStmt->execute(array_merge($courseIds, [$userId]));
         $assigns = $assignStmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($assigns as $asg) {
             $deadlines[] = [
@@ -747,10 +756,16 @@ class LmsService
             WHERE q.lms_course_id IN ($placeholders)
               AND q.status = 'published'
               AND q.end_date IS NOT NULL
+              AND q.end_date >= NOW()
+              AND NOT EXISTS (
+                  SELECT 1 FROM lms_quiz_attempts att
+                  WHERE att.lms_quiz_id = q.id AND att.student_id = ?
+                    AND att.status IN ('submitted', 'graded')
+              )
             ORDER BY q.end_date ASC
             LIMIT $limit
         ");
-        $quizStmt->execute($courseIds);
+        $quizStmt->execute(array_merge($courseIds, [$userId]));
         $quizzes = $quizStmt->fetchAll(PDO::FETCH_ASSOC);
         foreach ($quizzes as $qz) {
             $deadlines[] = [
@@ -1045,7 +1060,11 @@ class LmsService
                 COALESCE(CONCAT(u.first_name, ' ', u.last_name), 'Student') as student_name,
                 'submission' as type,
                 CONCAT('" . BASE_PATH . "/lms/faculty/course/', a.lms_course_id, '/assignments/', a.id, '/submissions') as url,
-                sub.status
+                sub.status,
+                sub.submission_text as content,
+                sub.file_name,
+                a.title as assignment_title,
+                a.due_date
             FROM lms_submissions sub
             JOIN lms_assignments a ON sub.assignment_id = a.id
             JOIN lms_courses lc ON a.lms_course_id = lc.id
@@ -1073,7 +1092,8 @@ class LmsService
                 'You' as student_name,
                 'announcement' as type,
                 CONCAT('" . BASE_PATH . "/lms/faculty/course/', ann.lms_course_id, '/announcements') as url,
-                ann.status
+                ann.status,
+                ann.content
             FROM lms_announcements ann
             JOIN lms_courses lc ON ann.lms_course_id = lc.id
             JOIN subjects s ON lc.subject_id = s.id

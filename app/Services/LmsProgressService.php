@@ -39,8 +39,8 @@ class LmsProgressService
     {
         $percent = round(max(0.0, min(100.0, $percent)), 2);
 
-        // Decided here rather than in SQL: emulated prepares bind numbers as strings,
-        // and MySQL can then compare them as text ('100.00' < '95').
+        // Decided here rather than in SQL: PDO sends these values as strings, and
+        // MySQL can then compare them as text ('100.00' < '95').
         $done = $percent >= self::COMPLETE_AT_PERCENT ? 1 : 0;
 
         $stmt = $this->pdo->prepare("
