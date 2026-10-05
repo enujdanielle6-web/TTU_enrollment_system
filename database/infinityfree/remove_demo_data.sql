@@ -14,6 +14,9 @@
 -- scholarship programs, homepage announcements, system settings) and the
 -- student-number / receipt counters.
 --
+-- Needs the lms_material_progress table: run
+-- database/migrations/lms_phase12_lesson_progress_schema.sql first on older databases.
+--
 -- This cannot be undone. Export a backup in phpMyAdmin first.
 -- Run in phpMyAdmin: select your database, open the SQL tab, paste, click Go.
 -- ============================================================================
@@ -21,6 +24,7 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- LMS content
+DELETE FROM `lms_material_progress`;     ALTER TABLE `lms_material_progress` AUTO_INCREMENT = 1;
 DELETE FROM `lms_quiz_answers`;          ALTER TABLE `lms_quiz_answers` AUTO_INCREMENT = 1;
 DELETE FROM `lms_quiz_attempts`;         ALTER TABLE `lms_quiz_attempts` AUTO_INCREMENT = 1;
 DELETE FROM `lms_question_choices`;      ALTER TABLE `lms_question_choices` AUTO_INCREMENT = 1;

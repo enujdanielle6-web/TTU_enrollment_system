@@ -1435,3 +1435,18 @@ function isPasswordStrong(string $password, array &$errors = []): bool
 }
 
 
+
+/**
+ * Bootstrap Icons class for a lesson file, by its preview kind
+ * (see App\Services\LmsService::lessonKind()).
+ */
+function lesson_icon(string $kind): string
+{
+    return [
+        'pdf' => 'bi-file-earmark-pdf',
+        'image' => 'bi-file-earmark-image',
+        'media' => 'bi-file-earmark-play',
+        'office' => 'bi-file-earmark-slides',
+        'text' => 'bi-file-earmark-text',
+    ][$kind] ?? 'bi-file-earmark-arrow-down';
+}

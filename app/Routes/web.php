@@ -264,6 +264,8 @@ $router->group([
     $router->get('/lms/student/dashboard.php', ['App\Controllers\Lms\StudentController', 'dashboard']);
     $router->get('/lms/student/course.php', ['App\Controllers\Lms\StudentController', 'course']);
     $router->get('/lms/student/my_courses.php', ['App\Controllers\Lms\StudentController', 'myCourses']);
+    $router->get('/lms/student/material/{id}/preview', ['App\Controllers\Lms\StudentController', 'lessonPreview']);
+    $router->post('/lms/student/material/{id}/progress', ['App\Controllers\Lms\StudentController', 'lessonProgress']);
     
     $router->get('/lms/student/course/{course_id}/assignments', ['App\Controllers\Lms\StudentAssignmentController', 'index']);
     $router->get('/lms/student/course/{course_id}/assignments/{id}', ['App\Controllers\Lms\StudentAssignmentController', 'show']);
@@ -372,6 +374,7 @@ $router->group([
     ]
 ], function (Router $router) {
     $router->get('/lms/download/material/{id}', ['App\Controllers\Lms\DownloadController', 'downloadMaterial']);
+    $router->get('/lms/view/material/{id}', ['App\Controllers\Lms\DownloadController', 'viewMaterial']);
     $router->get('/lms/download/submission/{id}', ['App\Controllers\Lms\DownloadController', 'downloadSubmission']);
 });
 

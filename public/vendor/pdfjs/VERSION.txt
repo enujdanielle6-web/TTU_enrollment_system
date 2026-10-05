@@ -1,0 +1,2 @@
+PDF.js 3.11.174 (pdfjs-dist build/pdf.min.js and build/pdf.worker.min.js), Apache-2.0, https://github.com/mozilla/pdf.js
+Used by public/js/lms-lesson-viewer.js. Loaded with isEvalSupported:false.

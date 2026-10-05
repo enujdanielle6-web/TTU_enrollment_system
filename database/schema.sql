@@ -618,6 +618,29 @@ CREATE TABLE `lms_courses` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `lms_material_progress`
+--
+
+DROP TABLE IF EXISTS `lms_material_progress`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lms_material_progress` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `lms_material_id` int(10) unsigned NOT NULL,
+  `student_id` int(10) unsigned NOT NULL,
+  `max_scroll_percent` decimal(5,2) NOT NULL DEFAULT 0.00,
+  `first_opened_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `last_opened_at` datetime NOT NULL DEFAULT current_timestamp(),
+  `completed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_lms_matprog_material_student` (`lms_material_id`,`student_id`),
+  KEY `idx_lms_matprog_student` (`student_id`),
+  CONSTRAINT `fk_lms_matprog_material` FOREIGN KEY (`lms_material_id`) REFERENCES `lms_materials` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_lms_matprog_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `lms_materials`
 --
 

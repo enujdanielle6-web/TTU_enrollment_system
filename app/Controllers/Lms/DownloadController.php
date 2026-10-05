@@ -9,7 +9,7 @@ use App\Core\Database;
 
 class DownloadController extends BaseController
 {
-    public function downloadMaterial(Request $request, Response $response, string $id)
+    public function downloadMaterial(Request $request, Response $response, string $id, bool $inline = false)
     {
         $materialId = filter_var($id, FILTER_VALIDATE_INT);
         if (!$materialId) {
@@ -50,33 +50,34 @@ class DownloadController extends BaseController
             return;
         }
 
-        // Canonical & fallback material storage directories
-        $candidatePaths = [
-            dirname(__DIR__, 3) . '/storage/uploads/lms/materials/' . basename($material['file_path']),
-            dirname(__DIR__, 3) . '/storage/uploads/lms/' . ltrim($material['file_path'], '/\\'),
-            dirname(__DIR__, 3) . '/app/uploads/lms/' . basename($material['file_path']),
-            dirname(__DIR__, 3) . '/app/uploads/lms/' . ltrim($material['file_path'], '/\\')
-        ];
-
-        $resolvedPath = null;
-        foreach ($candidatePaths as $candidate) {
-            if (file_exists($candidate)) {
-                $real = realpath($candidate);
-                if ($real && file_exists($real)) {
-                    $resolvedPath = $real;
-                    break;
-                }
-            }
-        }
-
+        $resolvedPath = $lmsService->resolveMaterialPath($material);
         if (!$resolvedPath) {
             error_log("LMS Material file not found on disk for material ID: {$materialId}");
             $this->notFound($response);
             return;
         }
 
-        // File is safe to stream
-        $this->streamFile($resolvedPath, $material['file_name'], $material['mime_type']);
+        // A lesson type the preview window cannot show is finished once the student downloads it
+        if ($role === 'student' && !$inline && LmsService::lessonKind($material) === 'other') {
+            try {
+                (new \App\Services\LmsProgressService())->recordLessonProgress($userId, $materialId, 100);
+            } catch (\Throwable $e) {
+                error_log('Lesson progress unavailable: ' . $e->getMessage());
+            }
+        }
+
+        // PDFs, images and audio/video open inside the lesson preview window; everything else downloads
+        $showInline = $inline && in_array(LmsService::lessonKind($material), ['pdf', 'image', 'media'], true);
+        $this->streamFile($resolvedPath, $material['file_name'], $material['mime_type'], $showInline);
+    }
+
+    /**
+     * Same file and access rules as downloadMaterial, but served for display in the
+     * lesson preview window (Content-Disposition: inline) where the type allows it.
+     */
+    public function viewMaterial(Request $request, Response $response, string $id)
+    {
+        $this->downloadMaterial($request, $response, $id, true);
     }
 
     public function downloadSubmission(Request $request, Response $response, string $id)
@@ -181,7 +182,7 @@ class DownloadController extends BaseController
         'mp3'  => 'audio/mpeg',
     ];
 
-    private function streamFile(string $filePath, string $originalName, ?string $mimeType)
+    private function streamFile(string $filePath, string $originalName, ?string $mimeType, bool $inline = false)
     {
         $ext = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
@@ -215,7 +216,7 @@ class DownloadController extends BaseController
 
         header('Content-Description: File Transfer');
         header('Content-Type: ' . $mimeType);
-        header('Content-Disposition: attachment; filename="' . $asciiName . '"; filename*=UTF-8\'\'' . rawurlencode($downloadName));
+        header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment') . '; filename="' . $asciiName . '"; filename*=UTF-8\'\'' . rawurlencode($downloadName));
         header('X-Content-Type-Options: nosniff');
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
