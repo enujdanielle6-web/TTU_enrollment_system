@@ -15,51 +15,42 @@ $sidebarCounts = [
     'cashier_pending' => 0,
     'scholarship_pending' => 0
 ];
+// Each count uses the same rule as the page the badge links to. Each query runs on
+// its own, so one failing query cannot zero the others or break the sidebar.
+$sidebarCountQueries = [
+    // Applications waiting for the admissions team
+    'admissions_pending' => "SELECT COUNT(*) FROM applications WHERE status IN ('pending', 'under_review')",
+    // Medical records waiting for the clinic (same as the clinic dashboard's Pending card)
+    'clinic_pending' => "SELECT COUNT(*) FROM health_records WHERE status = 'pending'",
+    // Same filter as RegistrarController::collegeQueue / shsQueue
+    'college_enrollment_ready' => "
+        SELECT COUNT(a.id)
+        FROM applications a
+        INNER JOIN student_assessments sa ON sa.application_id = a.id
+        WHERE (a.status = 'payment_verified' OR (a.status = 'approved' AND sa.payment_status IN ('partial', 'paid')))
+          AND a.academic_level = 'College'",
+    'shs_enrollment_ready' => "
+        SELECT COUNT(a.id)
+        FROM applications a
+        INNER JOIN student_assessments sa ON sa.application_id = a.id
+        WHERE (a.status = 'payment_verified' OR (a.status = 'approved' AND sa.payment_status IN ('partial', 'paid')))
+          AND a.academic_level = 'Senior High School'",
+    // Payments waiting for cashier verification (same as the cashier dashboard)
+    'cashier_pending' => "SELECT COUNT(*) FROM payment_records WHERE status = 'pending'",
+    // Scholarship applications not yet decided
+    'scholarship_pending' => "SELECT COUNT(*) FROM scholarship_applications WHERE status IN ('pending', 'under_review')",
+];
 try {
     $db = \App\Core\Database::getConnection();
-    // 1. Admissions pending applications
-    $stmt = $db->query("SELECT COUNT(*) FROM applications WHERE status IN ('submitted', 'under_review')");
-    $sidebarCounts['admissions_pending'] = (int)$stmt->fetchColumn();
-
-    // 2. Clinic pending medical clearance
-    $stmt = $db->query("SELECT COUNT(*) FROM student_medical_clearances WHERE clearance_status IN ('pending', 'under_review')");
-    $sidebarCounts['clinic_pending'] = (int)$stmt->fetchColumn();
-
-    // 3. College ready to matriculate
-    $stmt = $db->query("
-        SELECT COUNT(*) 
-        FROM applications a
-        JOIN programs p ON a.program_id = p.id
-        WHERE p.level = 'college'
-          AND a.status = 'approved'
-          AND a.payment_status IN ('paid', 'partial')
-          AND a.medical_status = 'verified'
-          AND a.id NOT IN (SELECT application_id FROM students WHERE application_id IS NOT NULL)
-    ");
-    $sidebarCounts['college_enrollment_ready'] = (int)$stmt->fetchColumn();
-
-    // 4. SHS ready to matriculate
-    $stmt = $db->query("
-        SELECT COUNT(*) 
-        FROM applications a
-        JOIN programs p ON a.program_id = p.id
-        WHERE p.level = 'shs'
-          AND a.status = 'approved'
-          AND a.payment_status IN ('paid', 'partial')
-          AND a.medical_status = 'verified'
-          AND a.id NOT IN (SELECT application_id FROM students WHERE application_id IS NOT NULL)
-    ");
-    $sidebarCounts['shs_enrollment_ready'] = (int)$stmt->fetchColumn();
-
-    // 5. Cashier pending payments / unverified transactions
-    $stmt = $db->query("SELECT COUNT(*) FROM payment_transactions WHERE status = 'pending'");
-    $sidebarCounts['cashier_pending'] = (int)$stmt->fetchColumn();
-
-    // 6. Scholarship pending applications
-    $stmt = $db->query("SELECT COUNT(*) FROM scholarship_applications WHERE status IN ('submitted', 'under_review')");
-    $sidebarCounts['scholarship_pending'] = (int)$stmt->fetchColumn();
+    foreach ($sidebarCountQueries as $countKey => $countSql) {
+        try {
+            $sidebarCounts[$countKey] = (int)$db->query($countSql)->fetchColumn();
+        } catch (\Throwable $e) {
+            error_log('Sidebar count ' . $countKey . ' failed: ' . $e->getMessage());
+        }
+    }
 } catch (\Throwable $e) {
-    // Fail silently with 0 counts so sidebar navigation never crashes
+    // No database: keep 0 counts so sidebar navigation never crashes
 }
 
 $uri = $_SERVER['REQUEST_URI'];
