@@ -161,34 +161,18 @@ INSERT INTO `shs_curriculum_subjects` (`id`, `curriculum_id`, `subject_id`, `gra
 (5, 2, 11, 'Grade 11', 'First', NOW(), NOW());
 
 -- ----------------------------------------------------------------------------
--- 7. CLASS SECTIONS & SCHEDULED SUBJECT OFFERINGS
+-- 7. CLASS SECTIONS & SCHEDULED SUBJECT OFFERINGS (one sample section, one class)
 -- ----------------------------------------------------------------------------
 DELETE FROM `college_sections`;
 INSERT INTO `college_sections` (`id`, `section_code`, `program_id`, `curriculum_id`, `academic_year`, `year_level`, `semester`, `capacity`, `schedule_type`, `adviser`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'BSIT 1-A', 1, 1, '2026-2027', '1st Year', 'First', 40, 'Morning', 'Ada Lovelace', 1, NOW(), NOW()),
-(2, 'BSCS 1-A', 2, 2, '2026-2027', '1st Year', 'First', 40, 'Morning', 'Alan Turing', 1, NOW(), NOW());
+(1, 'BSIT 1-A', 1, 1, '2026-2027', '1st Year', 'First', 40, 'Morning', 'Alan Turing', 1, NOW(), NOW());
 
 DELETE FROM `college_section_subjects`;
 INSERT INTO `college_section_subjects` (`id`, `college_section_id`, `subject_id`, `capacity`, `day`, `start_time`, `end_time`, `room`, `faculty_user_id`, `instructor`, `delivery_mode`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 40, 'MWF', '08:00:00', '09:00:00', 'Lab 101', 9, 'Ada Lovelace', 'Face-to-Face', NOW(), NOW()),
-(2, 1, 2, 40, 'MWF', '09:00:00', '10:00:00', 'Lab 102', 8, 'Alan Turing', 'Face-to-Face', NOW(), NOW()),
-(3, 1, 4, 40, 'TTH', '10:30:00', '12:00:00', 'Room 305', 10, 'Dr. Grace Hopper', 'Face-to-Face', NOW(), NOW()),
-(4, 2, 1, 40, 'MWF', '08:00:00', '09:00:00', 'Lab 101', 8, 'Alan Turing', 'Face-to-Face', NOW(), NOW()),
-(5, 2, 2, 40, 'MWF', '09:00:00', '10:00:00', 'Lab 102', 8, 'Alan Turing', 'Face-to-Face', NOW(), NOW()),
-(6, 2, 3, 40, 'TTH', '13:00:00', '14:30:00', 'Room 401', 10, 'Dr. Grace Hopper', 'Face-to-Face', NOW(), NOW());
+(1, 1, 1, 40, 'MWF', '08:00:00', '09:00:00', 'Lab 101', 8, 'Alan Turing', 'Face-to-Face', NOW(), NOW());
 
 DELETE FROM `shs_sections`;
-INSERT INTO `shs_sections` (`id`, `section_code`, `strand_id`, `curriculum_id`, `grade_level`, `academic_year`, `capacity`, `schedule_type`, `adviser`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'STEM 11-A', 1, 1, 'Grade 11', '2026-2027', 40, 'Morning', 'Dr. Grace Hopper', 1, NOW(), NOW()),
-(2, 'TVL 11-A', 4, 2, 'Grade 11', '2026-2027', 40, 'Morning', 'Ada Lovelace', 1, NOW(), NOW());
-
 DELETE FROM `shs_section_subjects`;
-INSERT INTO `shs_section_subjects` (`id`, `shs_section_id`, `subject_id`, `capacity`, `day`, `start_time`, `end_time`, `room`, `faculty_user_id`, `instructor`, `delivery_mode`, `created_at`, `updated_at`) VALUES
-(1, 1, 8, 40, 'MWF', '08:00:00', '09:30:00', 'SHS Room 1', 10, 'Dr. Grace Hopper', 'Face-to-Face', NOW(), NOW()),
-(2, 1, 9, 40, 'MWF', '09:30:00', '11:00:00', 'Bio Lab', 10, 'Dr. Grace Hopper', 'Face-to-Face', NOW(), NOW()),
-(3, 1, 10, 40, 'TTH', '08:00:00', '09:30:00', 'SHS Room 1', 9, 'Ada Lovelace', 'Face-to-Face', NOW(), NOW()),
-(4, 2, 10, 40, 'TTH', '08:00:00', '09:30:00', 'SHS Room 2', 9, 'Ada Lovelace', 'Face-to-Face', NOW(), NOW()),
-(5, 2, 11, 40, 'MWF', '10:00:00', '11:30:00', 'Comp Lab 3', 9, 'Ada Lovelace', 'Face-to-Face', NOW(), NOW());
 
 -- ----------------------------------------------------------------------------
 -- 8. FEE TEMPLATES & SCHOLARSHIPS
@@ -207,55 +191,45 @@ INSERT INTO `scholarships` (`id`, `name`, `code`, `category`, `provider`, `progr
 (3, 'CHED Tulong Dunong Program', 'CHED-TDP', 'Government', 'Commission on Higher Education (CHED)', NULL, 'All', 2.75, 300000.00, 100, 'fixed', 7500.00, 'fixed', 0.00, 0.00, 0.00, 'Government financial grant providing PHP 7,500 assistance per semester.', '1. Certificate of Indigency\n2. Parents ITR or Certificate of Low Income\n3. Grade 12 Report Card', '2026-06-01', '2026-10-31', 'Active', NOW(), NOW());
 
 -- ----------------------------------------------------------------------------
--- 9. SAMPLE APPLICATIONS & STUDENT RECORDS
+-- 9. SAMPLE APPLICATION & STUDENT RECORD (one fully enrolled student: John Doe)
+-- Matching sample files are in demo_files/applicant/ (copy them to uploads/documents/
+-- and uploads/payments/ so the records can open them).
 -- ----------------------------------------------------------------------------
 DELETE FROM `applications`;
 INSERT INTO `applications` (`id`, `user_id`, `reference_number`, `academic_level`, `grade_level`, `school_year`, `semester`, `student_type`, `strand`, `nstp`, `section_id`, `college_curriculum_id`, `status`, `document_submission_method`, `admin_feedback`, `internal_notes`, `contact_number`, `telephone_number`, `birth_date`, `gender`, `civil_status`, `nationality`, `religion`, `place_of_birth`, `address_house_number`, `address_street`, `address_barangay`, `address_city`, `address_province`, `address_zip`, `address`, `guardian_name`, `guardian_relationship`, `guardian_contact`, `previous_school`, `previous_school_year`, `previous_school_type`, `lrn`, `emergency_name`, `emergency_relationship`, `emergency_contact`, `created_at`, `updated_at`) VALUES
-(1, 11, 'APP-2026-000001', 'College', '1st Year', '2026-2027', 'First', 'Regular', 'BSIT', 'CWTS', 1, 1, 'enrolled', 'online', 'Application verified and enrollment confirmed.', 'Honors graduate from Manila Science HS.', '09171234567', '0281234567', '2007-05-15', 'Male', 'Single', 'Filipino', 'Roman Catholic', 'Manila', '123', 'Mabini Street', 'Barangay 659', 'Manila', 'Metro Manila', '1000', '123 Mabini Street, Barangay 659, Manila, Metro Manila', 'Robert Doe', 'Father', '09179876543', 'Manila Science High School', '2025-2026', 'Public', '123456789012', 'Robert Doe', 'Father', '09179876543', NOW(), NOW()),
-(2, 12, 'APP-2026-000002', 'Senior High School', 'Grade 11', '2026-2027', 'First', 'Regular', 'STEM', NULL, 1, NULL, 'enrolled', 'online', 'Enrolled in STEM 11-A section block.', 'Transferee with complete Form 137.', '09181234567', '0289876543', '2009-08-20', 'Female', 'Single', 'Filipino', 'Christian', 'Quezon City', '456', 'Katipunan Avenue', 'Loyola Heights', 'Quezon City', 'Metro Manila', '1108', '456 Katipunan Avenue, Loyola Heights, Quezon City', 'Elizabeth Smith', 'Mother', '09187654321', 'Quezon City High School', '2025-2026', 'Public', '987654321098', 'Elizabeth Smith', 'Mother', '09187654321', NOW(), NOW()),
-(3, 13, 'APP-2026-000003', 'College', '1st Year', '2026-2027', 'First', 'Regular', 'BSCS', 'ROTC', NULL, 2, 'pending', 'online', NULL, NULL, '09191234567', NULL, '2008-01-10', 'Female', 'Single', 'Filipino', 'Roman Catholic', 'Pasig City', '789', 'Ortigas Avenue', 'San Antonio', 'Pasig City', 'Metro Manila', '1600', '789 Ortigas Avenue, San Antonio, Pasig City', 'James Applicant', 'Father', '09198765432', 'Pasig City Science High School', '2025-2026', 'Public', '555666777888', 'James Applicant', 'Father', '09198765432', NOW(), NOW());
+(1, 11, 'APP-2026-000001', 'College', '1st Year', '2026-2027', 'First', 'Regular', 'BSIT', 'CWTS', 1, 1, 'enrolled', 'online', 'Application verified and enrollment confirmed.', 'Honors graduate from Manila Science HS.', '09171234567', '0281234567', '2007-05-15', 'Male', 'Single', 'Filipino', 'Roman Catholic', 'Manila', '123', 'Mabini Street', 'Barangay 659', 'Manila', 'Metro Manila', '1000', '123 Mabini Street, Barangay 659, Manila, Metro Manila', 'Robert Doe', 'Father', '09179876543', 'Manila Science High School', '2025-2026', 'Public', '123456789012', 'Robert Doe', 'Father', '09179876543', NOW(), NOW());
 
 DELETE FROM `health_records`;
 INSERT INTO `health_records` (`id`, `user_id`, `application_id`, `height`, `weight`, `blood_type`, `has_allergies`, `has_asthma`, `has_diabetes`, `has_hypertension`, `has_heart_disease`, `has_physical_disability`, `has_existing_condition`, `has_previous_surgery`, `has_maintenance_medication`, `has_hospitalized`, `medical_conditions`, `allergies_details`, `current_medications`, `other_notes`, `emergency_name`, `emergency_relationship`, `emergency_contact`, `status`, `admin_remarks`, `created_at`, `updated_at`) VALUES
-(1, 11, 1, '175 cm', '68 kg', 'O+', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'None', 'None', 'None', 'Fit for all university and physical education activities.', 'Robert Doe', 'Father', '09179876543', 'verified', 'Medically cleared for academic term.', NOW(), NOW()),
-(2, 12, 2, '162 cm', '52 kg', 'A+', 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Mild allergic rhinitis', 'Dust and pollen', 'Antihistamine as needed', 'Carries personal inhaler.', 'Elizabeth Smith', 'Mother', '09187654321', 'verified', 'Cleared with allergy note on file.', NOW(), NOW());
+(1, 11, 1, '175 cm', '68 kg', 'O+', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'None', 'None', 'None', 'Fit for all university and physical education activities.', 'Robert Doe', 'Father', '09179876543', 'verified', 'Medically cleared for academic term.', NOW(), NOW());
 
 DELETE FROM `application_documents`;
 INSERT INTO `application_documents` (`id`, `application_id`, `document_name`, `file_path`, `status`, `feedback`, `created_at`, `updated_at`) VALUES
-(1, 1, 'PSA Birth Certificate', 'sample_psa_11.pdf', 'verified', 'Original PSA verified.', NOW(), NOW()),
-(2, 1, 'Form 138 (Report Card)', 'sample_f138_11.pdf', 'verified', 'GWA 94.5% verified.', NOW(), NOW()),
-(3, 1, 'Certificate of Good Moral Character', 'sample_moral_11.pdf', 'verified', 'Verified.', NOW(), NOW()),
-(4, 1, '2x2 ID Picture', 'sample_photo_11.jpg', 'verified', 'Compliant university ID photo.', NOW(), NOW()),
-(5, 2, 'PSA Birth Certificate', 'sample_psa_12.pdf', 'verified', 'Verified.', NOW(), NOW()),
-(6, 2, 'Form 138 (Report Card)', 'sample_f138_12.pdf', 'verified', 'Verified.', NOW(), NOW());
+(1, 1, 'PSA Birth Certificate', 'john_doe_psa_birth_certificate.pdf', 'verified', 'Original PSA verified.', NOW(), NOW()),
+(2, 1, 'Form 138', 'john_doe_form_138.pdf', 'verified', 'General average 94.8 verified.', NOW(), NOW()),
+(3, 1, 'Good Moral Certificate', 'john_doe_good_moral_certificate.pdf', 'verified', 'Verified.', NOW(), NOW()),
+(4, 1, '2x2 Picture', 'john_doe_2x2_picture.jpg', 'verified', 'Compliant ID photo.', NOW(), NOW());
 
 DELETE FROM `college_enrollments`;
 INSERT INTO `college_enrollments` (`id`, `application_id`, `subject_id`, `college_section_id`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 1, NOW(), NOW()),
-(2, 1, 2, 1, NOW(), NOW()),
-(3, 1, 4, 1, NOW(), NOW());
+(1, 1, 1, 1, NOW(), NOW());
 
 DELETE FROM `shs_enrollments`;
-INSERT INTO `shs_enrollments` (`id`, `application_id`, `subject_id`, `shs_section_id`, `created_at`, `updated_at`) VALUES
-(1, 2, 8, 1, NOW(), NOW()),
-(2, 2, 9, 1, NOW(), NOW()),
-(3, 2, 10, 1, NOW(), NOW());
 
 DELETE FROM `student_assessments`;
 INSERT INTO `student_assessments` (`id`, `user_id`, `application_id`, `fee_template_id`, `scholarship_id`, `tuition_fee`, `miscellaneous_fee`, `registration_fee`, `laboratory_fee`, `other_fees`, `total_amount`, `discount_amount`, `net_amount`, `total_paid`, `payment_status`, `created_at`, `updated_at`) VALUES
-(1, 11, 1, 1, 1, 4500.00, 2500.00, 500.00, 2000.00, 1000.00, 10500.00, 10500.00, 0.00, 0.00, 'paid', NOW(), NOW()),
-(2, 12, 2, 3, NULL, 12000.00, 2000.00, 500.00, 1500.00, 500.00, 16500.00, 0.00, 16500.00, 5000.00, 'partial', NOW(), NOW());
+(1, 11, 1, 1, NULL, 1500.00, 2500.00, 500.00, 2000.00, 1000.00, 7500.00, 0.00, 7500.00, 7500.00, 'paid', NOW(), NOW());
 
 DELETE FROM `payment_records`;
 INSERT INTO `payment_records` (`id`, `assessment_id`, `user_id`, `cashier_id`, `amount`, `payment_date`, `payment_method`, `receipt_number`, `reference_number`, `proof_image`, `status`, `remarks`, `created_at`, `updated_at`) VALUES
-(1, 2, 12, 4, 5000.00, CURDATE(), 'GCash', 'REC-20260825-0001', 'GCASH-987123654', 'proof_mary_downpayment.jpg', 'verified', 'Initial downpayment verified for enrollment finalization.', NOW(), NOW());
+(1, 1, 11, 4, 7500.00, CURDATE(), 'GCash', 'REC-20260825-0001', 'GCASH-SAMPLE-0001', 'john_doe_payment_proof.jpg', 'verified', 'Full payment verified for enrollment finalization.', NOW(), NOW());
 
 DELETE FROM `scholarship_recipients`;
-INSERT INTO `scholarship_recipients` (`id`, `user_id`, `scholarship_id`, `academic_year_id`, `semester`, `status`, `created_at`, `updated_at`) VALUES
-(1, 11, 1, '2026-2027', 'First', 'Active', NOW(), NOW());
 
 -- ----------------------------------------------------------------------------
--- 10. SAMPLE LMS COURSES, MODULES, ASSIGNMENTS & QUIZZES
+-- 10. SAMPLE LMS COURSE (one class: CC101 taught by Alan Turing)
+-- Lesson and syllabus files are in demo_files/faculty/ (copy them to
+-- storage/uploads/lms/materials/ so students can download them).
 -- ----------------------------------------------------------------------------
 DELETE FROM `lms_announcements`;
 DELETE FROM `lms_attendance_records`;
@@ -272,51 +246,35 @@ DELETE FROM `lms_modules`;
 DELETE FROM `lms_courses`;
 
 INSERT INTO `lms_courses` (`id`, `academic_level`, `academic_section_id`, `subject_id`, `faculty_user_id`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'College', 1, 1, 9, 'active', NOW(), NOW()),
-(2, 'College', 1, 2, 8, 'active', NOW(), NOW()),
-(3, 'College', 1, 4, 10, 'active', NOW(), NOW()),
-(4, 'SHS', 1, 8, 10, 'active', NOW(), NOW());
+(1, 'College', 1, 1, 8, 'active', NOW(), NOW());
 
 INSERT INTO `lms_modules` (`id`, `lms_course_id`, `title`, `description`, `display_order`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Module 1: Architecture of Modern Computers', 'Binary representations, CPU microarchitecture, and memory hierarchies.', 1, 'published', NOW(), NOW()),
-(2, 1, 'Module 2: Operating Systems & Virtualization', 'Process scheduling, file systems, and hypervisor concepts.', 2, 'published', NOW(), NOW()),
-(3, 2, 'Module 1: Structured Control Flow & Logic', 'Conditionals, nested iterations, and functional decomposition.', 1, 'published', NOW(), NOW());
+(1, 1, 'Module 1: Introduction to Computers', 'What a computer is, its basic operations, and number systems.', 1, 'published', NOW(), NOW());
 
 INSERT INTO `lms_materials` (`id`, `lms_module_id`, `file_name`, `file_path`, `mime_type`, `file_size`, `created_at`) VALUES
-(1, 1, 'Lecture 1: Digital Logic & Binary Systems (PDF)', 'materials/cc101_lec1.pdf', 'application/pdf', 1048576, NOW()),
-(2, 1, 'Syllabus & Course Outline 2026-2027', 'materials/cc101_syllabus.pdf', 'application/pdf', 524288, NOW()),
-(3, 3, 'Lecture 1: Algorithmic Thinking in C / Python', 'materials/cc102_lec1.pdf', 'application/pdf', 2097152, NOW());
+(1, 1, 'CC101 Course Syllabus 2026-2027', 'materials/cc101_syllabus.pdf', 'application/pdf', 3186, NOW()),
+(2, 1, 'Lesson 1 - What Is a Computer (slides)', 'materials/cc101_lesson1_what_is_a_computer.pptx', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 32204, NOW());
 
 INSERT INTO `lms_assignments` (`id`, `lms_course_id`, `lms_module_id`, `title`, `description`, `due_date`, `max_score`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'Assignment 1: Number Systems Conversion Exercise', 'Convert the provided decimal numbers to binary, octal, and hexadecimal representation. Submit your PDF solution sheet.', DATE_ADD(NOW(), INTERVAL 7 DAY), 100, 'published', NOW(), NOW()),
-(2, 2, 3, 'Lab Exercise 1: Conditional Flow Implementation', 'Implement the quadratic formula solver with input edge-case handling in standard C or PHP.', DATE_ADD(NOW(), INTERVAL 5 DAY), 50, 'published', NOW(), NOW());
+(1, 1, 1, 'Assignment 1: Number Systems Conversion', 'Convert 13, 45, 100 and 255 to binary, octal and hexadecimal. Show your solution for 45 and submit one PDF.', DATE_ADD(NOW(), INTERVAL 7 DAY), 100, 'published', NOW(), NOW());
 
 INSERT INTO `lms_quizzes` (`id`, `lms_course_id`, `title`, `description`, `time_limit`, `max_attempts`, `passing_score`, `start_date`, `end_date`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Quiz 1: Computer Hardware & Logic Fundamentals', 'Evaluates knowledge in CPU architecture and logic gates.', 20, 1, 75.00, NOW(), DATE_ADD(NOW(), INTERVAL 10 DAY), 'published', NOW(), NOW());
+(1, 1, 'Quiz 1: Computer Basics', 'Checks Lesson 1: computer operations, memory and binary.', 20, 1, 75.00, NOW(), DATE_ADD(NOW(), INTERVAL 10 DAY), 'published', NOW(), NOW());
 
 INSERT INTO `lms_questions` (`id`, `lms_quiz_id`, `question_text`, `question_type`, `points`, `display_order`, `created_at`) VALUES
-(1, 1, 'What is the primary function of the Arithmetic Logic Unit (ALU) in a CPU?', 'multiple_choice', 5.00, 1, NOW()),
-(2, 1, 'Which memory type is volatile and loses its contents when power is turned off?', 'multiple_choice', 5.00, 2, NOW()),
-(3, 1, 'A gigabyte is equivalent to exactly 1,024 megabytes in binary prefix notation.', 'true_false', 5.00, 3, NOW());
+(1, 1, 'Which part of the computer performs calculations and logical decisions?', 'multiple_choice', 5.00, 1, NOW()),
+(2, 1, 'RAM keeps its contents when the computer is turned off.', 'true_false', 5.00, 2, NOW());
 
 INSERT INTO `lms_question_choices` (`id`, `lms_question_id`, `choice_text`, `is_correct`, `display_order`) VALUES
-(1, 1, 'Performs arithmetic calculations and logical decisions', 1, 1),
-(2, 1, 'Stores persistent files on solid-state media', 0, 2),
-(3, 1, 'Manages cooling fan speeds across thermal zones', 0, 3),
-(4, 2, 'Random Access Memory (RAM)', 1, 1),
-(5, 2, 'Read-Only Memory (ROM)', 0, 2),
-(6, 2, 'Solid State Flash Storage', 0, 3),
-(7, 3, 'True', 1, 1),
-(8, 3, 'False', 0, 2);
-
-INSERT INTO `lms_attendance_sessions` (`id`, `lms_course_id`, `session_date`, `start_time`, `end_time`, `notes`, `created_at`, `updated_at`) VALUES
-(1, 1, CURDATE(), '08:00:00', '10:00:00', 'Class Orientation & Syllabus Review', NOW(), NOW());
-
-INSERT INTO `lms_attendance_records` (`id`, `lms_attendance_session_id`, `student_id`, `status`, `remarks`, `recorded_at`) VALUES
-(1, 1, 11, 'present', 'Attended on time.', NOW());
+(1, 1, 'CPU', 1, 1),
+(2, 1, 'Monitor', 0, 2),
+(3, 1, 'Keyboard', 0, 3),
+(4, 1, 'Printer', 0, 4),
+(5, 2, 'True', 0, 1),
+(6, 2, 'False', 1, 2);
 
 INSERT INTO `lms_announcements` (`id`, `lms_course_id`, `author_user_id`, `title`, `content`, `status`, `published_at`, `expires_at`, `created_at`, `updated_at`) VALUES
-(1, 1, 9, 'Welcome to CC101 Introduction to Computing!', 'Please download the course syllabus from Module 1 and review the lecture slides before our next lab meeting on Wednesday.', 'published', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW());
+(1, 1, 8, 'Welcome to CC101 Introduction to Computing!', 'Please download the syllabus and the Lesson 1 slides from Module 1 before our next meeting.', 'published', NOW(), DATE_ADD(NOW(), INTERVAL 30 DAY), NOW(), NOW());
 
 -- ----------------------------------------------------------------------------
 -- 15. ATOMIC SYSTEM SEQUENCES
