@@ -9,7 +9,6 @@ This document provides a complete, exhaustive inventory of all **104 PHP view te
 | View Template Path | Rendering Controller & Action | Layout Wrapper | Functional Purpose |
 |---|---|---|---|
 | `app/Views/home.php` | `HomeController@index` | `components/header.php`, `navbar.php`, `footer.php` | University public landing page, active announcements carousel, degree programs showcase. |
-| `app/Views/demo_landing.php` | `HomeController@demo` | `components/header.php`, `navbar.php`, `footer.php` | Marketing demonstration landing page. |
 
 ---
 
