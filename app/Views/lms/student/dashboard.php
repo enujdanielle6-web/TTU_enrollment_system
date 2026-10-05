@@ -197,7 +197,7 @@
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <?php if (!empty($upcoming_deadlines)): ?>
-                            <span class="badge bg-warning bg-opacity-10 text-warning text-dark rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.65rem;"><?= count($upcoming_deadlines) ?> Pending</span>
+                            <span class="badge bg-warning bg-opacity-10 text-warning text-dark rounded-pill px-2 py-0.5 fw-bold text-nowrap" style="font-size: 0.65rem;"><?= count($upcoming_deadlines) ?> Pending</span>
                         <?php endif; ?>
                         <a href="<?= BASE_PATH ?>/lms/student/calendar" class="text-primary small text-decoration-none fw-semibold text-nowrap">View all &rarr;</a>
                     </div>
@@ -267,7 +267,7 @@
                     </div>
                     <div class="d-flex align-items-center gap-2">
                         <?php if (!empty($recent_announcements)): ?>
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-0.5 fw-bold" style="font-size: 0.65rem;"><?= count($recent_announcements) ?> Latest</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-0.5 fw-bold text-nowrap" style="font-size: 0.65rem;"><?= count($recent_announcements) ?> Latest</span>
                         <?php endif; ?>
                         <?php 
                         $firstCourseId = !empty($enrolled_courses) ? ($enrolled_courses[0]['lms_course_id'] ?? 1) : 1;

@@ -684,6 +684,25 @@ CREATE TABLE `lms_modules` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `lms_notification_reads`
+--
+
+DROP TABLE IF EXISTS `lms_notification_reads`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `lms_notification_reads` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) unsigned NOT NULL,
+  `item_type` varchar(20) NOT NULL,
+  `item_id` int(10) unsigned NOT NULL,
+  `read_at` datetime NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_lms_notifread_user_item` (`user_id`,`item_type`,`item_id`),
+  CONSTRAINT `fk_lms_notifread_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `lms_question_choices`
 --
 

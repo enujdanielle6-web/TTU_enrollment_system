@@ -36,6 +36,13 @@ class StudentAnnouncementController extends BaseController
         $course = $this->lmsService->getCourseDetails($lmsCourseId);
         $announcements = $this->announcementService->getCourseAnnouncements($lmsCourseId, true); // true = published only
 
+        // Opening this tab counts as reading the course's announcements.
+        try {
+            (new \App\Services\LmsNotificationService())->markCourseAnnouncementsRead((int)($_SESSION['user_id'] ?? 0), $lmsCourseId);
+        } catch (\Throwable $e) {
+            error_log('Could not mark announcements read: ' . $e->getMessage());
+        }
+
         return $this->render('lms/student/announcements/index', [
             'course' => $course,
             'announcements' => $announcements

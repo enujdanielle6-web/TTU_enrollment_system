@@ -24,32 +24,16 @@ $instructorEmail = $course['instructor_email'] ?? ($instructor_email ?? 'N/A');
 
 $activeTab = $active_tab ?? 'modules';
 
-// Fetch badge counts if not already provided
-if (!isset($assignment_count)) {
+// Badge counts if the page did not provide them: what is unread or still to do
+if (!isset($assignment_count, $quiz_count, $announcement_count)) {
     try {
-        $svc = new \App\Services\LmsService();
-        $assignment_count = count($svc->getAssignmentsByCourse($courseId, true));
+        $courseBadges = (new \App\Services\LmsNotificationService())->getStudentCourseBadges((int)($_SESSION['user_id'] ?? 0), $courseId);
     } catch (\Throwable $e) {
-        $assignment_count = 0;
+        $courseBadges = ['announcements' => 0, 'assignments' => 0, 'quizzes' => 0];
     }
-}
-
-if (!isset($quiz_count)) {
-    try {
-        $qSvc = new \App\Services\LmsQuizService();
-        $quiz_count = count($qSvc->getQuizzesByCourse($courseId, true));
-    } catch (\Throwable $e) {
-        $quiz_count = 0;
-    }
-}
-
-if (!isset($announcement_count)) {
-    try {
-        $aSvc = new \App\Services\LmsAnnouncementService();
-        $announcement_count = count($aSvc->getCourseAnnouncements($courseId, true));
-    } catch (\Throwable $e) {
-        $announcement_count = 0;
-    }
+    $assignment_count = $assignment_count ?? $courseBadges['assignments'];
+    $quiz_count = $quiz_count ?? $courseBadges['quizzes'];
+    $announcement_count = $announcement_count ?? $courseBadges['announcements'];
 }
 
 $assignCount = (int)$assignment_count;

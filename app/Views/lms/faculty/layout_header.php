@@ -4,15 +4,15 @@ $current_page = isset($current_page) ? $current_page : basename($_SERVER['PHP_SE
 $request_uri = $_SERVER['REQUEST_URI'] ?? '';
 
 $facultyUserId = (int)($_SESSION['user_id'] ?? $_SESSION['lms_user_id'] ?? 0);
-$facultyActivity = [];
+$notifFeed = ['items' => [], 'unread' => 0];
 if ($facultyUserId > 0) {
     try {
-        $facultyActivity = (new \App\Services\LmsService())->getFacultyRecentActivity($facultyUserId, 6);
+        $notifFeed = (new \App\Services\LmsNotificationService())->getFacultyFeed($facultyUserId, 8);
     } catch (\Throwable $e) {
-        $facultyActivity = [];
+        $notifFeed = ['items' => [], 'unread' => 0];
     }
 }
-$activityCount = count($facultyActivity);
+$activityCount = (int)$notifFeed['unread'];
 
 $platformAnnouncements = [];
 try {
@@ -179,9 +179,7 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
                 <div class="position-relative flex-shrink-0">
                     <button type="button" id="sidebarNotificationBtn" class="lms-bell-btn text-muted border-0 bg-transparent" title="Recent Activity &amp; Submissions" aria-expanded="false">
                         <i class="bi bi-bell"></i>
-                        <?php if ($activityCount > 0): ?>
-                            <span class="lms-notification-dot"></span>
-                        <?php endif; ?>
+                        <span class="lms-notification-dot <?= $activityCount > 0 ? '' : 'd-none' ?>" data-notif-dot></span>
                     </button>
                 </div>
             </div>
@@ -195,75 +193,13 @@ $facultyInitial = strtoupper(substr($facultyName, 0, 1));
 </aside>
 
 <!-- Faculty Activity Dropup Panel -->
-<div class="lms-notification-panel shadow-lg" id="sidebarNotificationPanel">
-    <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white">
-        <div class="d-flex align-items-center gap-2">
-            <div class="icon-box-sm bg-primary bg-opacity-10 text-primary" style="width: 32px; height: 32px; font-size: 0.95rem; border-radius: 0.5rem;">
-                <i class="bi bi-bell-fill"></i>
-            </div>
-            <div>
-                <h6 class="fw-bold mb-0 text-dark" style="font-size: 0.88rem;">Faculty Activity</h6>
-                <small class="text-muted" style="font-size: 0.7rem;">Student submissions &amp; notices</small>
-            </div>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-1 fw-bold" style="font-size: 0.65rem;"><?= $activityCount ?> New</span>
-            <button type="button" class="btn btn-sm btn-light border-0 text-muted p-1 rounded-2" id="closeNotificationPanel" title="Close">
-                <i class="bi bi-x-lg" style="font-size: 0.75rem;"></i>
-            </button>
-        </div>
-    </div>
-
-    <div class="lms-notification-list">
-        <?php if (empty($facultyActivity)): ?>
-            <div class="p-4 text-center text-muted">
-                <i class="bi bi-check-circle-fill text-success fs-3 d-block mb-2"></i>
-                <p class="mb-0 small fw-medium">All caught up!</p>
-                <small class="text-muted" style="font-size: 0.72rem;">No pending student submissions or alerts.</small>
-            </div>
-        <?php else: ?>
-            <?php foreach ($facultyActivity as $act): 
-                $type = $act['type'] ?? 'submission';
-                $iconClass = 'bi-journal-check';
-                $badgeBg = 'bg-success bg-opacity-10 text-success';
-                if ($type === 'announcement') {
-                    $iconClass = 'bi-megaphone-fill';
-                    $badgeBg = 'bg-primary bg-opacity-10 text-primary';
-                }
-                $timeAgo = date('M d, h:i A', strtotime($act['created_at']));
-            ?>
-                <a href="<?= htmlspecialchars($act['url']) ?>" class="lms-notification-item d-flex gap-2 p-3 border-bottom text-decoration-none">
-                    <div class="icon-box-sm <?= esc($badgeBg) ?>" style="width: 34px; height: 34px; font-size: 0.95rem; border-radius: 0.55rem; flex-shrink: 0;">
-                        <i class="bi <?= esc($iconClass) ?>"></i>
-                    </div>
-                    <div class="flex-grow-1 min-w-0" style="overflow: hidden;">
-                        <div class="d-flex justify-content-between align-items-center mb-1 gap-1">
-                            <span class="badge bg-light text-secondary border px-2 py-0 small flex-shrink-0" style="font-size: 0.65rem;">
-                                <?= htmlspecialchars($act['subject_code']) ?>
-                            </span>
-                            <span class="text-muted small text-nowrap flex-shrink-0" style="font-size: 0.68rem;"><?= esc($timeAgo) ?></span>
-                        </div>
-                        <div class="fw-bold text-dark small text-truncate" title="<?= htmlspecialchars($act['title']) ?>">
-                            <?= htmlspecialchars($act['title']) ?>
-                        </div>
-                        <div class="text-muted text-truncate small mt-1" style="font-size: 0.72rem;">
-                            <i class="bi bi-person me-1"></i><?= htmlspecialchars($act['student_name']) ?>
-                            <?php if (!empty($act['status'])): ?>
-                                <span class="badge bg-warning bg-opacity-10 text-dark ms-1"><?= htmlspecialchars($act['status']) ?></span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </a>
-            <?php endforeach; ?>
-        <?php endif; ?>
-    </div>
-
-    <div class="p-2 bg-light border-top text-center">
-        <a href="<?= BASE_PATH ?>/lms/faculty/calendar" class="small fw-semibold text-primary text-decoration-none">
-            View Academic Calendar &rarr;
-        </a>
-    </div>
-</div>
+<?php
+$notifPortal = 'faculty';
+$notifTitle = 'Faculty Activity';
+$notifSubtitle = 'Student submissions & notices';
+$notifEmptyText = 'No pending student submissions or alerts.';
+require __DIR__ . '/../components/notification_panel.php';
+?>
 
 <!-- Main Content Area -->
 <div class="lms-main" id="spa-main">
