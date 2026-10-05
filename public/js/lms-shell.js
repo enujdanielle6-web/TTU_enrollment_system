@@ -4,7 +4,7 @@
  * - Sidebar quick search: filters the sidebar links; Enter opens the first match;
  *   Ctrl+K / Cmd+K focuses it.
  * - Mobile sidebar: keeps a backdrop in sync with the sidebar's `.show` state,
- *   and closes the sidebar on backdrop click or Escape.
+ *   and closes the sidebar on backdrop click, Escape, or after a page change.
  *
  * Presentation only: it does not change any route or request.
  */
@@ -40,6 +40,12 @@
 
         new MutationObserver(syncBackdrop).observe(sidebar, { attributes: true, attributeFilter: ['class'] });
         backdrop.addEventListener('click', closeSidebar);
+        // After a link in the drawer opens a new page, hide the drawer so the page is visible.
+        document.addEventListener('spa:navigated', function () {
+            if (isMobile()) {
+                closeSidebar();
+            }
+        });
 
         // ---- Quick search ----------------------------------------------------
         var input = sidebar.querySelector('.lms-sidebar-search');

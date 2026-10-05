@@ -25,9 +25,11 @@
                 mainContent.classList.add('minimized', 'collapsed');
             }
 
-            // Desktop Floating Minimize Toggle
+            // Desktop Floating Minimize Toggle. Listen on the document: the SPA router
+            // replaces the sidebar's contents (including this button) on every page change.
             if (minimizeBtn) {
-                minimizeBtn.addEventListener('click', function(e) {
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('#sidebarMinimize')) return;
                     e.preventDefault();
                     sidebar.classList.toggle('minimized');
                     sidebar.classList.toggle('collapsed');
@@ -41,7 +43,8 @@
 
             // Mobile Hamburger Toggle
             if (mobileToggleBtn) {
-                mobileToggleBtn.addEventListener('click', function(e) {
+                document.addEventListener('click', function(e) {
+                    if (!e.target.closest('#sidebarToggle')) return;
                     e.preventDefault();
                     sidebar.classList.toggle('show');
                     if (sidebarBackdrop) {
