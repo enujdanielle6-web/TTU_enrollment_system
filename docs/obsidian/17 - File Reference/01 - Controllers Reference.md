@@ -15,15 +15,14 @@ This document provides complete, verified file-level documentation for all **38 
 - **Responsibilities:**
   - Loads active announcements and broadcast alerts from MariaDB.
   - Queries active College degree programs and SHS academic strands for prospective student browsing.
-  - Renders the public landing view (`home.php`) and marketing demo (`demo_landing.php`).
+  - Renders the public landing view (`home.php`).
 - **Key Methods:**
   - `index(Request $request, Response $response): string` — Fetches announcements and programs; renders `home.php`.
-  - `demo(Request $request, Response $response): string` — Renders `demo_landing.php`.
 - **Dependencies & Imports:** `App\Core\BaseController`, `App\Core\Database`, `App\Core\Request`, `App\Core\Response`
 - **Database Interaction:** Reads `announcements`, `college_programs`, `shs_strands`.
 - **Authorized Roles:** Public / Unauthenticated
-- **Used By:** `GET /`, `GET /demo_landing.php`
-- **Related Files:** `app/Views/home.php`, `app/Views/demo_landing.php`
+- **Used By:** `GET /`
+- **Related Files:** `app/Views/home.php`
 - **Related Documentation:** [[Landing Page & Program Card Customization]], [[System Architecture]]
 
 ---

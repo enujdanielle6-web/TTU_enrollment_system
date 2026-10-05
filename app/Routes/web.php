@@ -7,7 +7,6 @@ use App\Core\Response;
 /** @var Router $router */
 
 $router->get('/', ['App\Controllers\HomeController', 'index']);
-$router->get('/demo_landing.php', ['App\Controllers\HomeController', 'demo']);
 // Local database setup tool (not shipped in the production package; refuses to run when APP_ENV=production)
 $setupDatabase = function () {
     $setupScript = dirname(__DIR__, 2) . '/database/migrations/setup_database.php';

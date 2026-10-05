@@ -1046,11 +1046,13 @@ return;
                 exit;
             }
 
-            // Fallback for seed records: output verified document record SVG
+            // File is missing on the server (e.g. demo records whose uploads were never shipped):
+            // show a clearly marked placeholder instead of an error page, without implying it was verified.
             while (ob_get_level()) {
                 ob_end_clean();
             }
-            $docName = htmlspecialchars($document['document_name'] ?? 'Official Document', ENT_QUOTES, 'UTF-8');
+            $docName = htmlspecialchars($document['document_name'] ?? 'Document', ENT_QUOTES, 'UTF-8');
+            $safeFilename = htmlspecialchars($filename, ENT_QUOTES, 'UTF-8');
             header('Content-Type: image/svg+xml');
             echo <<<SVG
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="1050" viewBox="0 0 800 1050">
@@ -1059,7 +1061,7 @@ return;
   <circle cx="400" cy="120" r="45" fill="#e0e7ff"/>
   <text x="400" y="128" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="bold" fill="#3b82f6" text-anchor="middle">TTU</text>
   <text x="400" y="200" font-family="system-ui, -apple-system, sans-serif" font-size="22" font-weight="bold" fill="#1e293b" text-anchor="middle">TRIPLE T UNIVERSITY</text>
-  <text x="400" y="228" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#64748b" text-anchor="middle">Official Student Admission Document Record</text>
+  <text x="400" y="228" font-family="system-ui, -apple-system, sans-serif" font-size="14" fill="#64748b" text-anchor="middle">Admission Document Placeholder</text>
   <line x1="80" y1="260" x2="720" y2="260" stroke="#e2e8f0" stroke-width="2"/>
   
   <rect x="80" y="290" width="640" height="80" rx="8" fill="#f1f5f9"/>
@@ -1067,16 +1069,16 @@ return;
   <text x="100" y="352" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="bold" fill="#0f172a">{$docName}</text>
   
   <rect x="80" y="390" width="640" height="280" rx="8" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
-  <text x="110" y="435" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="bold" fill="#334155">Official Electronic Copy / Record</text>
+  <text x="110" y="435" font-family="system-ui, -apple-system, sans-serif" font-size="15" font-weight="bold" fill="#334155">Uploaded file not available</text>
   <text x="110" y="470" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#64748b">Document ID: #{$docId}</text>
-  <text x="110" y="498" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#64748b">Filename: {$filename}</text>
-  <text x="110" y="526" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#64748b">Status: Verified Official Electronic Copy</text>
-  <text x="110" y="554" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#64748b">Triple T University Office of Admissions</text>
+  <text x="110" y="498" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#64748b">Filename: {$safeFilename}</text>
+  <text x="110" y="526" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#64748b">The file for this record was not found on the server.</text>
+  <text x="110" y="554" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#64748b">Ask the applicant to upload it again before verifying.</text>
   
-  <circle cx="400" cy="760" r="50" fill="#ecfdf5" stroke="#10b981" stroke-width="3"/>
-  <text x="400" y="768" font-family="system-ui, -apple-system, sans-serif" font-size="28" fill="#10b981" text-anchor="middle">&#x2713;</text>
-  <text x="400" y="840" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="bold" fill="#059669" text-anchor="middle">VERIFIED DOCUMENT RECORD</text>
-  <text x="400" y="865" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#6b7280" text-anchor="middle">Submitted for university admission and evaluation.</text>
+  <circle cx="400" cy="760" r="50" fill="#fffbeb" stroke="#f59e0b" stroke-width="3"/>
+  <text x="400" y="768" font-family="system-ui, -apple-system, sans-serif" font-size="32" font-weight="bold" fill="#d97706" text-anchor="middle">!</text>
+  <text x="400" y="840" font-family="system-ui, -apple-system, sans-serif" font-size="16" font-weight="bold" fill="#b45309" text-anchor="middle">FILE NOT FOUND</text>
+  <text x="400" y="865" font-family="system-ui, -apple-system, sans-serif" font-size="13" fill="#6b7280" text-anchor="middle">This placeholder is not the applicant's document.</text>
 </svg>
 SVG;
             exit;
