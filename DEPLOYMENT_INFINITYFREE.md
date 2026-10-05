@@ -35,7 +35,7 @@ If you add or update a Composer package, run `composer install` locally and comm
    ```bash
    C:\xampp\php\php.exe scripts/build_infinityfree_package.php
    ```
-   This creates the clean upload folder **`dist\infinityfree\htdocs\`** (about 415 files / 16 MB).
+   This creates the clean upload folder **`dist\infinityfree\htdocs\`** (about 410 files / 17 MB).
    It contains only what the server needs — **no** `.env`, SQL dumps, docs, test scripts, or anyone's uploaded documents.
 2. If you changed `database/schema.sql` or `database/seed.sql`, also run:
    ```bash
@@ -65,7 +65,7 @@ In the Control Panel open **phpMyAdmin** for your database, then use **Import** 
 
 | Order | File | Required? | What it does |
 |---|---|---|---|
-| 1 | `01_schema.sql` | ✅ Yes | Creates all 51 tables (utf8mb4), including the quiz builder columns, so `lms_phase11_quiz_builder_schema.sql` is **not** needed on a fresh import. Contains **no** `DROP` statements: if tables already exist it stops with *"Table … already exists"* instead of overwriting data. |
+| 1 | `01_schema.sql` | ✅ Yes | Creates all 53 tables (utf8mb4), including the quiz builder columns, so `lms_phase11_quiz_builder_schema.sql` is **not** needed on a fresh import. Contains **no** `DROP` statements: if tables already exist it stops with *"Table … already exists"* instead of overwriting data. |
 | 2 | `02_reference_data.sql` | ✅ Yes | Programs, SHS strands, subjects, curricula, fee templates, scholarships, system settings, public announcements. No people/personal data. |
 | 2b | `optional_demo_data.sql` | ❌ Optional | Fictional demo staff/students/applications for a **demo only**. All demo accounts share published passwords (`admin123` / `password123`). Never use on a real site; if you do import it, import it **before** step 3 and change/deactivate the demo accounts immediately. |
 | 3 | `03_first_superadmin.sql` | ✅ Yes | Creates **your** administrator account (no default password). Edit it first — see below. |
